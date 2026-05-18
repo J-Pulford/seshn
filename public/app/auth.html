@@ -94,6 +94,8 @@
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/seshn-supabase.js"></script>
 
   <script type="text/babel">
     // ── Visuals ──────────────────────────────────────────────────
@@ -195,6 +197,41 @@
 
     // ── App ──────────────────────────────────────────────────────
     function AuthPage() {
+      const [email, setEmail] = React.useState("");
+      const [status, setStatus] = React.useState("idle"); // idle | sending | sent | error | checking
+      const [errMsg, setErrMsg] = React.useState("");
+
+      React.useEffect(() => {
+        // If we returned from a magic-link click, Supabase JS auto-exchanges
+        // the token. Subscribe to auth state and route appropriately.
+        if (!window.seshn) return;
+        setStatus("checking");
+        // Honor existing session immediately
+        window.seshn.getUser().then(u => {
+          if (u) window.seshn.routeAfterAuth();
+          else setStatus("idle");
+        });
+        const { data } = window.sb.auth.onAuthStateChange((event, session) => {
+          if (event === "SIGNED_IN" && session) window.seshn.routeAfterAuth();
+        });
+        return () => { data && data.subscription && data.subscription.unsubscribe(); };
+      }, []);
+
+      async function onSendMagic(e) {
+        e && e.preventDefault();
+        if (!email || !email.includes("@")) {
+          setErrMsg("Please enter a valid email."); setStatus("error"); return;
+        }
+        setStatus("sending"); setErrMsg("");
+        try {
+          const { error } = await window.seshn.sendMagicLink(email);
+          if (error) throw error;
+          setStatus("sent");
+        } catch (err) {
+          setErrMsg(err.message || "Couldn't send the link."); setStatus("error");
+        }
+      }
+
       return (
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg)" }}>
           {/* Nav */}
@@ -213,21 +250,50 @@
               <h1>Make your first<br />session.</h1>
               <p className="sub">Create a profile, post a brief, find your collaborators. Free forever — no follower counts, no noise.</p>
 
-              <div className="form-stack">
-                <button className="btn-oauth">
+              <form className="form-stack" onSubmit={onSendMagic}>
+                <button type="button" className="btn-oauth" disabled title="OAuth coming soon" style={{ opacity: 0.55, cursor: "not-allowed" }}>
                   <GoogleIcon />
                   Continue with Google
                 </button>
-                <button className="btn-oauth">
+                <button type="button" className="btn-oauth" disabled title="OAuth coming soon" style={{ opacity: 0.55, cursor: "not-allowed" }}>
                   <AppleIcon />
                   Continue with Apple
                 </button>
 
                 <div className="divider"><span>or with email</span></div>
 
-                <input type="email" className="input-field" placeholder="you@artist.fm" />
-                <button className="btn-primary">Send magic link →</button>
-              </div>
+                {status === "sent" ? (
+                  <div style={{
+                    padding: "16px 18px", borderRadius: 12, border: "1px solid var(--accent-d)",
+                    background: "var(--accent-bg)", color: "var(--accent-d)",
+                    fontFamily: "var(--font-display)", fontSize: 13, lineHeight: 1.45
+                  }}>
+                    <strong>Check your inbox.</strong> We sent a magic link to <b>{email}</b>. Open it on this device to sign in.
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="email"
+                      className="input-field"
+                      placeholder="you@artist.fm"
+                      value={email}
+                      onChange={e => { setEmail(e.target.value); if (status === "error") setStatus("idle"); }}
+                      disabled={status === "sending" || status === "checking"}
+                      autoComplete="email"
+                    />
+                    <button
+                      type="submit"
+                      className="btn-primary"
+                      disabled={status === "sending" || status === "checking" || !email}
+                    >
+                      {status === "checking" ? "Loading…" : status === "sending" ? "Sending link…" : "Send magic link →"}
+                    </button>
+                    {errMsg && (
+                      <div style={{ color: "var(--danger)", fontSize: 12, fontFamily: "var(--font-display)", marginTop: -4 }}>{errMsg}</div>
+                    )}
+                  </>
+                )}
+              </form>
 
               <p className="tos">
                 By signing up you agree to Seshn's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.

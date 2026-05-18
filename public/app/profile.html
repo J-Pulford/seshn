@@ -147,6 +147,8 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/seshn-supabase.js"></script>
 
   <script type="text/babel">
     // ——— Procedural helpers ———
@@ -347,58 +349,79 @@
       </nav>
     );
 
+    // ——— Helpers for live profile data ———
+    function initials(name) {
+      if (!name) return "··";
+      const parts = String(name).trim().split(/\s+/).filter(Boolean);
+      if (parts.length === 0) return "··";
+      if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    function getUsernameFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("u") || null;
+    }
+
     // ——— Profile App ———
-    const ProfileApp = () => (
+    const ProfileApp = ({ profile, isOwner }) => (
       <div style={{minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column"}}>
         <TopNav/>
 
         {/* ——— Cover + Avatar Header ——— */}
         <div style={{position:"relative",background:"var(--surface)"}}>
-          <CoverHeader seed="maya-cover" height={180}/>
+          <CoverHeader seed={profile.username || "seshn-cover"} height={180}/>
 
           {/* Avatar overlapping the cover */}
           <div style={{position:"absolute",left:36,bottom:-42,display:"flex",alignItems:"flex-end",gap:14}}>
             <div style={{background:"var(--frame)",padding:4,borderRadius:"50%",boxShadow:"0 0 0 1px var(--line)"}}>
-              <span className="avatar xl" style={{background:"linear-gradient(135deg,#a8ebc8,#2CCB73)",color:"#062c19",fontSize:26,fontFamily:"var(--font-display)",fontWeight:700}}>MO</span>
+              <span className="avatar xl" style={{background:"linear-gradient(135deg,#a8ebc8,#2CCB73)",color:"#062c19",fontSize:26,fontFamily:"var(--font-display)",fontWeight:700}}>{initials(profile.display_name)}</span>
             </div>
           </div>
 
           {/* Action buttons + sticker overlay */}
           <div style={{position:"absolute",right:32,bottom:18,display:"flex",gap:10,alignItems:"center"}}>
-            <span style={{
-              display:"inline-block",transform:"rotate(-4deg)",padding:"5px 11px",borderRadius:4,
-              background:"var(--ink)",color:"var(--frame)",fontFamily:"var(--font-display)",fontWeight:700,
-              fontSize:11,letterSpacing:"0.04em",textTransform:"uppercase",
-              boxShadow:"0 4px 12px rgba(0,0,0,0.18)"
-            }}>✓ Pro · Verified</span>
-            <button className="btn" style={{backdropFilter:"blur(8px)",background:"rgba(255,255,255,0.9)"}}>Invite to project</button>
-            <button className="btn primary">Message</button>
+            {profile.is_pro && (
+              <span style={{
+                display:"inline-block",transform:"rotate(-4deg)",padding:"5px 11px",borderRadius:4,
+                background:"var(--ink)",color:"var(--frame)",fontFamily:"var(--font-display)",fontWeight:700,
+                fontSize:11,letterSpacing:"0.04em",textTransform:"uppercase",
+                boxShadow:"0 4px 12px rgba(0,0,0,0.18)"
+              }}>✓ Pro · Verified</span>
+            )}
+            {isOwner ? (
+              <>
+                <button className="btn" style={{backdropFilter:"blur(8px)",background:"rgba(255,255,255,0.9)"}} onClick={() => alert("Profile editing coming soon — for now you can re-run onboarding.")}>Edit profile</button>
+                <button className="btn primary" onClick={async () => { await window.seshn.signOut(); window.location.href = "auth.html"; }}>Sign out</button>
+              </>
+            ) : (
+              <>
+                <button className="btn" style={{backdropFilter:"blur(8px)",background:"rgba(255,255,255,0.9)"}}>Invite to project</button>
+                <button className="btn primary">Message</button>
+              </>
+            )}
           </div>
         </div>
 
         {/* ——— Name + meta ——— */}
         <div style={{background:"var(--surface)",borderBottom:"1px solid var(--line)",padding:"52px 36px 20px 140px"}}>
           <div className="row" style={{gap:10,marginBottom:5,flexWrap:"wrap"}}>
-            <h1 className="t-h1" style={{fontSize:30}}>Maya Oduya</h1>
+            <h1 className="t-h1" style={{fontSize:30}}>{profile.display_name}</h1>
           </div>
           <div className="row" style={{gap:14,marginBottom:10,flexWrap:"wrap"}}>
-            <Rating value={4.9} count={28} size={13}/>
-            <span className="dot"/>
+            <Rating value={0} count={0} size={13}/>
+            {profile.location && <><span className="dot"/>
             <span className="t-meta" style={{display:"flex",alignItems:"center",gap:5}}>
-              <Icon kind="pin" size={12}/> Brooklyn, NY
-            </span>
+              <Icon kind="pin" size={12}/> {profile.location}
+            </span></>}
             <span className="dot"/>
             <span className="t-meta">
               <span style={{width:7,height:7,background:"var(--accent)",borderRadius:"50%",display:"inline-block",marginRight:5}}/>
-              Active 2h ago
+              New on Seshn
             </span>
           </div>
           <div className="row" style={{gap:6,flexWrap:"wrap"}}>
-            <span className="pill accent">Producer</span>
-            <span className="pill accent">Vocalist</span>
-            <span className="pill">R&amp;B</span>
-            <span className="pill">Afrobeats</span>
-            <span className="pill">Soul</span>
+            {(profile.roles || []).map(r => <span key={r} className="pill accent">{r}</span>)}
+            {(profile.genres || []).map(g => <span key={g} className="pill">{g}</span>)}
           </div>
         </div>
 
@@ -411,10 +434,8 @@
             {/* Bio */}
             <section>
               <div className="t-eyebrow" style={{marginBottom:10}}>Bio</div>
-              <p style={{fontSize:14,lineHeight:1.65,color:"var(--ink-2)",maxWidth:680}}>
-                Brooklyn-based producer &amp; vocalist working at the seam of R&amp;B and West African pop.
-                Credits with <b style={{color:"var(--ink)"}}>Tems</b>, <b style={{color:"var(--ink)"}}>Lojay</b>, and a few rooms I can't name yet.
-                Open to topline, vocal-feature, and co-production work — paid or fair-split. Studio in Bed-Stuy.
+              <p style={{fontSize:14,lineHeight:1.65,color:"var(--ink-2)",maxWidth:680,whiteSpace:"pre-wrap"}}>
+                {profile.bio || <span style={{color:"var(--ink-3)",fontStyle:"italic"}}>No bio yet{isOwner ? " — add one in your profile settings." : "."}</span>}
               </p>
             </section>
 
@@ -559,7 +580,7 @@
             <div style={{padding:"14px 0",borderTop:"1px solid var(--line-soft)"}}>
               <div className="t-eyebrow" style={{marginBottom:8}}>Share profile</div>
               <div style={{padding:"8px 12px",background:"var(--surface-2)",borderRadius:8,border:"1px solid var(--line)",fontSize:11,color:"var(--ink-3)",fontFamily:"var(--font-body)"}}>
-                seshn.fm/@maya.oduya
+                seshn.fm/@{profile.username}
               </div>
             </div>
           </aside>
@@ -567,7 +588,63 @@
       </div>
     );
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<ProfileApp/>);
+    function ProfileLoader() {
+      const [state, setState] = React.useState({ status: "loading", profile: null, isOwner: false });
+
+      React.useEffect(() => {
+        (async () => {
+          if (!window.seshn) { setState({ status: "error", profile: null, isOwner: false }); return; }
+          const username = getUsernameFromUrl();
+          const me = await window.seshn.getUser();
+          let profile = null;
+          if (username) {
+            profile = await window.seshn.getProfile({ username });
+          } else if (me) {
+            profile = await window.seshn.getProfile({ id: me.id });
+            if (!profile) { window.location.href = "onboarding.html"; return; }
+            // Canonicalize URL to /profile.html?u=<username>
+            if (profile.username) {
+              const u = new URL(window.location.href);
+              u.searchParams.set("u", profile.username);
+              window.history.replaceState({}, "", u.toString());
+            }
+          } else {
+            // No username and not signed in → send to auth
+            window.location.href = "auth.html"; return;
+          }
+          if (!profile) { setState({ status: "notfound", profile: null, isOwner: false }); return; }
+          document.title = "Seshn — " + (profile.display_name || profile.username);
+          setState({ status: "ready", profile, isOwner: !!(me && me.id === profile.id) });
+        })();
+      }, []);
+
+      if (state.status === "loading") {
+        return (
+          <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ink-3)", fontFamily: "var(--font-display)", fontSize: 13 }}>
+            Loading profile…
+          </div>
+        );
+      }
+      if (state.status === "notfound") {
+        return (
+          <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, padding: 24, textAlign: "center" }}>
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 28, color: "var(--ink)" }}>Profile not found</span>
+            <span style={{ color: "var(--ink-3)", fontSize: 14 }}>The username you're looking for doesn't exist on Seshn yet.</span>
+            <a href="../index.html" className="btn primary" style={{ marginTop: 8 }}>← Back to home</a>
+          </div>
+        );
+      }
+      if (state.status === "error") {
+        return (
+          <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--danger)", fontFamily: "var(--font-display)", fontSize: 13 }}>
+            Couldn't load Seshn. Check your connection and refresh.
+          </div>
+        );
+      }
+      return <ProfileApp profile={state.profile} isOwner={state.isOwner}/>;
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<ProfileLoader/>);
   </script>
 </body>
 </html>
