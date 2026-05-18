@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seshn — Inbox</title>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=satoshi@400,500,600,700&display=swap" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f4f3ef; --frame: #ffffff; --surface: #ffffff; --surface-2: #f7f6f3;
+      --line: #d8d6d1; --line-soft: #ececea; --ink: #0d0d0d; --ink-2: #3a3a38;
+      --ink-3: #6e6c66; --ink-4: #a4a29c; --ph: #ececea; --ph-2: #e2e0db;
+      --accent: #2CCB73; --accent-d: #1C8F56; --accent-bg: #A8EBC8;
+      --r-sm: 4px; --r: 8px; --r-lg: 14px; --r-pill: 999px;
+      --font-display: "General Sans", ui-sans-serif, system-ui, sans-serif;
+      --font-body: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+    }
+    html, body { height: 100%; overflow: hidden; background: var(--bg); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+    #root { height: 100%; display: flex; flex-direction: column; }
+
+    .logo { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.04em; font-size: 20px; color: var(--ink); display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+    .logo::before { content: ""; width: 14px; height: 14px; border-radius: 3px; background: var(--accent); display: inline-block; box-shadow: 0 0 0 2px var(--frame), 0 0 0 3px var(--ink); margin-right: 2px; }
+
+    .top-nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; border-bottom: 1px solid var(--line); background: var(--frame); flex-shrink: 0; }
+    .nav-search { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: var(--surface-2); border-radius: 999px; border: 1px solid var(--line); flex: 1; max-width: 360px; margin-left: 24px; }
+    .nav-right { display: flex; align-items: center; gap: 14px; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; border-radius: var(--r); font-size: 12px; font-weight: 600; font-family: var(--font-display); cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink); white-space: nowrap; text-decoration: none; }
+    .btn.primary { background: var(--accent); color: #062c19; border-color: transparent; }
+    .btn.sm { padding: 6px 10px; font-size: 11px; }
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--r-pill); font-size: 11px; font-weight: 500; font-family: var(--font-display); white-space: nowrap; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+    .pill.solid { background: var(--ink); border-color: transparent; color: var(--frame); }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--ph); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--ink-3); flex-shrink: 0; }
+    .avatar.md { width: 40px; height: 40px; font-size: 14px; }
+
+    .main { display: grid; grid-template-columns: 320px 1fr; flex: 1; overflow: hidden; }
+
+    /* Conversation list */
+    .convo-list { border-right: 1px solid var(--line); display: flex; flex-direction: column; overflow: hidden; }
+    .convo-header { padding: 16px 18px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+    .convo-header-row { display: flex; align-items: center; justify-content: space-between; }
+    .search-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--surface-2); border-radius: 999px; border: 1px solid var(--line); }
+    .filter-row { display: flex; gap: 6px; }
+    .convo-scroll { overflow-y: auto; flex: 1; }
+
+    .convo-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; border-left: 3px solid transparent; cursor: pointer; transition: background 0.1s; }
+    .convo-item:hover { background: var(--surface-2); }
+    .convo-item.active { background: var(--surface-2); border-left-color: var(--ink); }
+    .convo-info { flex: 1; min-width: 0; }
+    .convo-name-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+    .convo-name { font-family: var(--font-display); font-weight: 600; font-size: 13px; color: var(--ink); }
+    .convo-time { font-size: 11px; color: var(--ink-4); }
+    .convo-preview { font-size: 12px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .convo-preview.unread { color: var(--ink-2); font-weight: 500; }
+    .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 4px; }
+
+    /* Active DM */
+    .dm-panel { display: flex; flex-direction: column; overflow: hidden; }
+    .dm-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+    .dm-header-left { display: flex; align-items: center; gap: 12px; }
+    .dm-header-right { display: flex; gap: 14px; align-items: center; }
+
+    .messages { flex: 1; overflow-y: auto; padding: 16px 24px; display: flex; flex-direction: column; gap: 0; }
+    .date-divider { text-align: center; font-size: 11px; color: var(--ink-4); padding: 10px 0; font-family: var(--font-display); }
+
+    .msg-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; }
+    .msg-row.self { flex-direction: row-reverse; }
+    .msg-content { display: flex; flex-direction: column; gap: 4px; max-width: 68%; }
+    .msg-row.self .msg-content { align-items: flex-end; }
+    .msg-meta { display: flex; gap: 8px; align-items: center; font-size: 11px; }
+    .msg-name { font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--ink); }
+    .msg-time { color: var(--ink-4); }
+    .msg-bubble { padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.45; color: var(--ink); background: var(--surface-2); border-top-left-radius: 3px; }
+    .msg-row.self .msg-bubble { background: var(--ink); color: var(--frame); border-top-left-radius: 12px; border-top-right-radius: 3px; }
+
+    .audio-embed { border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); padding: 8px 10px; display: flex; align-items: center; gap: 10px; }
+    .play-btn { width: 26px; height: 26px; border-radius: 50%; background: var(--ink); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .play-btn::after { content: ""; width: 0; height: 0; border-left: 7px solid var(--accent); border-top: 4px solid transparent; border-bottom: 4px solid transparent; margin-left: 2px; }
+    .ph-line { background: var(--ph); border-radius: 2px; height: 6px; }
+
+    .composer { padding: 12px 24px; border-top: 1px solid var(--line); flex-shrink: 0; }
+    .composer-inner { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+    .composer-input { flex: 1; background: transparent; border: none; outline: none; font-size: 13px; font-family: var(--font-body); color: var(--ink); }
+    .composer-input::placeholder { color: var(--ink-4); }
+
+    .t-meta { font-size: 11px; color: var(--ink-3); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+
+  <script type="text/babel">
+    const V_PAL = { plum:"#5b3858", cream:"#f0e8d6", rust:"#d96e3f", forest:"#2a4d3a", mint:"#a8ebc8", ink:"#0d0d0d", navy:"#1f3a5f", bone:"#f4f1e9", lime:"#c4e83a", cherry:"#c43d3f", green:"#2CCB73", butter:"#f6d36b" };
+    const COVER_PALETTES = [[V_PAL.plum,V_PAL.cream,V_PAL.rust],[V_PAL.cream,V_PAL.ink,V_PAL.rust],[V_PAL.forest,V_PAL.mint,V_PAL.butter],[V_PAL.navy,V_PAL.bone,V_PAL.butter],[V_PAL.ink,V_PAL.lime,V_PAL.mint],[V_PAL.cherry,V_PAL.cream,V_PAL.ink],[V_PAL.bone,V_PAL.plum,V_PAL.rust],[V_PAL.rust,V_PAL.cream,V_PAL.ink],[V_PAL.green,V_PAL.ink,V_PAL.bone],[V_PAL.mint,V_PAL.forest,V_PAL.ink]];
+    function _hash(s){let h=2166136261>>>0;s=String(s||"x");for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+    function _rng(seed){let s=seed>>>0;return()=>{s=(s+0x6D2B79F5)>>>0;let t=s;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
+    const AlbumArt=({seed="track",size=40,radius=6,style})=>{const h=_hash(seed);const v=h%8;const pal=COVER_PALETTES[((h>>>3)%COVER_PALETTES.length)];const bg=pal[0],fg=pal[1],ac=pal[2];const rng=_rng(h);const wrap={width:size,height:size,borderRadius:radius,overflow:"hidden",flex:"0 0 auto",display:"inline-block",...style};let inner;if(v===0){const cy=38+(rng()-0.5)*16;inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/><circle cx={50} cy={cy} r={26} fill={ac}/><rect x="0" y="68" width="100" height="6" fill={fg}/></svg>;}else if(v===1){const dots=[];for(let y=0;y<10;y++)for(let x=0;x<10;x++){const d=(x+y)/18;const r=Math.max(0.4,4.2*(1-d)+rng()*0.4);dots.push(<circle key={x+"_"+y} cx={5+x*10} cy={5+y*10} r={r} fill={fg}/>);}inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/>{dots}</svg>;}else if(v===3){const bars=[];for(let i=0;i<28;i++){const t=i/27;const env=Math.sin(t*Math.PI)**0.6;const a=10+rng()*80*env;bars.push(<rect key={i} x={5+i*3.4} y={50-a/2} width="2" height={a} fill={fg} rx="1"/>);}inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/>{bars}</svg>;}else if(v===5){inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/>{[36,26,16].map((r,i)=><circle key={i} cx="50" cy="50" r={r} fill="none" stroke={fg} strokeWidth={i===1?2:1.2} opacity={0.85-i*0.1}/>)}<circle cx={50+36*Math.cos(((h>>>5)%360)*Math.PI/180)} cy={50+36*Math.sin(((h>>>5)%360)*Math.PI/180)} r="5" fill={ac}/></svg>;}else{inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/><rect y="55" width="100" height="45" fill={fg}/><circle cx="50" cy="55" r="20" fill={ac}/></svg>;}return <div style={wrap} aria-hidden="true">{inner}</div>;};
+
+    function Waveform({ seed="wf", height=18, bars=40, progress=0.3 }) {
+      const h=_hash(seed); const rng=_rng(h); const arr=[];
+      for(let i=0;i<bars;i++){const t=i/(bars-1);const env=0.35+0.65*(Math.sin(t*Math.PI)**0.6);arr.push((0.18+0.82*rng())*env);}
+      const W=bars*2.8; const bw=W/bars-1;
+      return <svg viewBox={`0 0 ${W} ${height}`} preserveAspectRatio="none" width="100%" height={height} style={{display:"block"}}>{arr.map((a,i)=>{const x=i*(W/bars);const bh=Math.max(1.5,a*height);const y=(height-bh)/2;return <rect key={i} x={x} y={y} width={bw} height={bh} fill={(i/bars)<progress?"var(--ink)":"rgba(0,0,0,0.18)"} rx={bw/2}/>;})}</svg>;
+    }
+
+    const CONVOS = [
+      { ini: "NK", name: "Nia Kassim", time: "9:33", last: "will track that today. I'll have a stem up by EOD.", active: true, unread: false },
+      { ini: "TB", name: "Theo Brooks", time: "9:48", last: "84 MB · drum-bus_v2_groove-shift", unread: true },
+      { ini: "SP", name: "Sam Park", time: "Mon", last: "sounds good — sending the rough mix tonight", unread: true },
+      { ini: "LV", name: "Lina Vega", time: "Mon", last: "Voice note · 0:42", unread: true },
+      { ini: "IR", name: "Iván Reyes", time: "Sun", last: "thanks for the intro, will reach out!", unread: false },
+      { ini: "AL", name: "Amaya L.", time: "May 10", last: "up for a co-write tomorrow?", unread: false },
+      { ini: "RK", name: "Robi K.", time: "May 8", last: "here's the demo, let me know what you think →", unread: false },
+    ];
+
+    function InboxPage() {
+      const [activeConvo, setActiveConvo] = React.useState("NK");
+      const [filter, setFilter] = React.useState("all");
+
+      return (
+        <div id="root-inner" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+          {/* Nav */}
+          <nav className="top-nav">
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <a href="../../index.html" className="logo">Seshn</a>
+              <div className="nav-search">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--ink-3)" }}><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <span style={{ fontSize: 12, color: "var(--ink-4)" }}>Search artists, roles, genres…</span>
+              </div>
+            </div>
+            <div className="nav-right">
+              <a href="post.html" className="btn primary sm">+ Post a gig</a>
+              <a href="inbox.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-d)" strokeWidth="2.5"><path d="M21 12a8 8 0 0 1-12 7l-5 1 1-5a8 8 0 1 1 16-3z"/></svg></a>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--ink-2)" }}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+              <div className="avatar">YT</div>
+            </div>
+          </nav>
+
+          {/* Main */}
+          <div className="main">
+            {/* Conversation list */}
+            <div className="convo-list">
+              <div className="convo-header">
+                <div className="convo-header-row">
+                  <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 20 }}>Inbox</span>
+                  <span className="t-meta">3 unread</span>
+                </div>
+                <div className="search-bar">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--ink-3)", flexShrink: 0 }}><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                  <span style={{ fontSize: 12, color: "var(--ink-4)" }}>Search messages</span>
+                </div>
+                <div className="filter-row">
+                  {[["all", "All"], ["unread", "Unread"], ["requests", "Requests · 4"]].map(([id, label]) => (
+                    <span key={id} className={`pill ${filter === id ? "solid" : ""}`} onClick={() => setFilter(id)}>{label}</span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="convo-scroll">
+                {CONVOS.map(c => (
+                  <div key={c.ini} className={`convo-item ${c.ini === activeConvo ? "active" : ""}`} onClick={() => setActiveConvo(c.ini)}>
+                    <div className="avatar">{c.ini}</div>
+                    <div className="convo-info">
+                      <div className="convo-name-row">
+                        <span className="convo-name">{c.name}</span>
+                        <span className="convo-time">{c.time}</span>
+                      </div>
+                      <span className={`convo-preview ${c.unread ? "unread" : ""}`}>{c.last}</span>
+                    </div>
+                    {c.unread && <div className="unread-dot" />}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Active DM: Nia Kassim */}
+            <div className="dm-panel">
+              <div className="dm-header">
+                <div className="dm-header-left">
+                  <div className="avatar md">NK</div>
+                  <div>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 3 }}>
+                      <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15 }}>Nia Kassim</span>
+                      <span className="pill solid" style={{ fontSize: 9, padding: "2px 7px" }}>✓ Pro</span>
+                    </div>
+                    <div className="t-meta">Vocalist · London · <span style={{ color: "var(--accent-d)", fontWeight: 600 }}>Active now</span></div>
+                  </div>
+                </div>
+                <div className="dm-header-right">
+                  <button className="btn sm">Invite to project</button>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--ink-3)", cursor: "pointer" }}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--ink-3)", cursor: "pointer" }}><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+                </div>
+              </div>
+
+              <div className="messages">
+                <div className="date-divider">May 13</div>
+
+                {/* Nia message 1 */}
+                <div className="msg-row">
+                  <div className="avatar">NK</div>
+                  <div className="msg-content">
+                    <div className="msg-meta"><span className="msg-name">Nia</span><span className="msg-time">2:14p</span></div>
+                    <div className="msg-bubble">hi! saw your post for the Afrobeats topline — really like Sunday Drives. I have a demo I think fits the vibe.</div>
+                  </div>
+                </div>
+
+                {/* Nia audio */}
+                <div className="msg-row" style={{ paddingTop: 2 }}>
+                  <div className="avatar" style={{ visibility: "hidden" }}>NK</div>
+                  <div className="msg-content">
+                    <div className="audio-embed" style={{ maxWidth: 320 }}>
+                      <AlbumArt seed="demo-nia-v1" size={36} radius={4} />
+                      <div className="play-btn" />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+                          <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 12 }}>demo_nia_v1.mp3</span>
+                          <span className="t-meta" style={{ marginLeft: 8, flexShrink: 0 }}>Audio</span>
+                        </div>
+                        <Waveform seed="demo-nia-v1" height={18} progress={0.0} />
+                        <div className="t-meta" style={{ marginTop: 3 }}>Nia K. · 1:02</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Your reply */}
+                <div className="msg-row self">
+                  <div className="avatar" style={{ background: "var(--ink)", color: "var(--frame)" }}>YT</div>
+                  <div className="msg-content">
+                    <div className="msg-meta" style={{ flexDirection: "row-reverse" }}><span className="msg-name">You</span><span className="msg-time">2:31p</span></div>
+                    <div className="msg-bubble">oh this is great — voice is perfect for it. want to jump on a quick call this week?</div>
+                  </div>
+                </div>
+
+                {/* Nia reply */}
+                <div className="msg-row">
+                  <div className="avatar">NK</div>
+                  <div className="msg-content">
+                    <div className="msg-meta"><span className="msg-name">Nia</span><span className="msg-time">9:33</span></div>
+                    <div className="msg-bubble">will track that today. I'll have a stem up by EOD.</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Composer */}
+              <div className="composer">
+                <div className="composer-inner">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--ink-3)", flexShrink: 0, cursor: "pointer" }}><path d="m21 12-8.5 8.5a5 5 0 1 1-7-7L14 5a3 3 0 1 1 4 4l-9 9a1 1 0 1 1-1.5-1.5L15 8"/></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--ink-3)", flexShrink: 0, cursor: "pointer" }}><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+                  <input className="composer-input" placeholder="Message Nia…" />
+                  <button className="btn primary sm">Send</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<InboxPage />);
+  </script>
+</body>
+</html>

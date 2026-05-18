@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seshn — Maya Oduya</title>
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <style>
+    @import url("https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=satoshi@400,500,600,700&display=swap");
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f4f3ef;
+      --frame:     #ffffff;
+      --surface:   #ffffff;
+      --surface-2: #f7f6f3;
+      --line:      #d8d6d1;
+      --line-soft: #ececea;
+      --ink:       #0d0d0d;
+      --ink-2:     #3a3a38;
+      --ink-3:     #6e6c66;
+      --ink-4:     #a4a29c;
+      --ph:        #ececea;
+      --ph-2:      #e2e0db;
+      --accent:    #2CCB73;
+      --accent-d:  #1C8F56;
+      --accent-m:  #63D89A;
+      --accent-bg: #A8EBC8;
+      --ink-black: #0D0D0D;
+      --r-sm: 4px;
+      --r:    8px;
+      --r-lg: 14px;
+      --r-pill: 999px;
+      --font-display: "General Sans", ui-sans-serif, system-ui, sans-serif;
+      --font-body:    "Satoshi", ui-sans-serif, system-ui, sans-serif;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-size: 13px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .t-h1 { font-family: var(--font-display); font-weight: 600; font-size: 30px; line-height: 1.05; letter-spacing: -0.025em; }
+    .t-h2 { font-family: var(--font-display); font-weight: 600; font-size: 22px; line-height: 1.15; letter-spacing: -0.02em; }
+    .t-h3 { font-family: var(--font-display); font-weight: 600; font-size: 16px; line-height: 1.2; }
+    .t-eyebrow { font-family: var(--font-display); font-weight: 500; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+    .t-meta { font-size: 11px; color: var(--ink-3); }
+    .t-muted { color: var(--ink-3); }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 9px; border-radius: var(--r-pill);
+      font-size: 10.5px; font-weight: 500; font-family: var(--font-display);
+      letter-spacing: 0.01em; white-space: nowrap;
+      border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); line-height: 1;
+    }
+    .pill.accent { background: var(--accent-bg); border-color: transparent; color: var(--accent-d); }
+    .pill.solid { background: var(--accent); border-color: transparent; color: #062c19; }
+    .pill.ghost { background: transparent; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 8px 14px; border-radius: var(--r); font-size: 12px; font-weight: 600;
+      font-family: var(--font-display); letter-spacing: -0.005em; cursor: pointer;
+      border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+      line-height: 1; white-space: nowrap; text-decoration: none;
+    }
+    .btn.primary { background: var(--accent); color: #062c19; border-color: transparent; }
+    .btn.sm { padding: 6px 10px; font-size: 11px; }
+    .btn:hover { opacity: 0.88; }
+
+    .avatar {
+      border-radius: 50%; background: var(--ph);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-weight: 600; color: var(--ink-3); flex-shrink: 0;
+      position: relative;
+    }
+    .avatar.sm { width: 28px; height: 28px; font-size: 10px; }
+    .avatar.md { width: 36px; height: 36px; font-size: 13px; }
+    .avatar.lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar.xl { width: 88px; height: 88px; font-size: 24px; }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--r-lg); padding: 14px;
+    }
+    .card.hairline { border-color: var(--line-soft); }
+
+    .gig {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--r-lg); padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    .audio {
+      border: 1px solid var(--line); border-radius: var(--r);
+      background: var(--surface); padding: 10px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .play-btn {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--ink);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; cursor: pointer; border: none; position: relative;
+    }
+    .play-btn::before {
+      content: ""; width: 0; height: 0;
+      border-left: 8px solid var(--accent);
+      border-top: 5px solid transparent; border-bottom: 5px solid transparent;
+      margin-left: 3px;
+    }
+    .play-btn.playing::before {
+      border: none; width: 8px; height: 9px; margin: 0;
+      background: linear-gradient(var(--accent),var(--accent)) left/2px 100% no-repeat,
+                  linear-gradient(var(--accent),var(--accent)) right/2px 100% no-repeat;
+    }
+
+    .row { display: flex; align-items: center; gap: 8px; }
+    .col { display: flex; flex-direction: column; }
+    .between { display: flex; align-items: center; justify-content: space-between; }
+    .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--ink-4); display: inline-block; }
+
+    .logo {
+      font-family: var(--font-display); font-weight: 700; letter-spacing: -0.04em;
+      font-size: 18px; color: var(--ink); display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+    }
+    .logo::before {
+      content: ""; width: 14px; height: 14px; border-radius: 3px; background: var(--accent);
+      display: inline-block; box-shadow: 0 0 0 2px var(--frame), 0 0 0 3px var(--ink);
+      margin-right: 2px; flex-shrink: 0;
+    }
+
+    .ph-line { background: var(--ph); border-radius: 2px; height: 8px; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    // ——— Procedural helpers ———
+    function _hash(s){let h=2166136261>>>0;s=String(s||"x");for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+    function _rng(seed){let s=seed>>>0;return()=>{s=(s+0x6D2B79F5)>>>0;let t=s;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
+    const V_PAL={cream:"#f0e8d6",bone:"#f4f1e9",rust:"#d96e3f",plum:"#5b3858",forest:"#2a4d3a",ink:"#0d0d0d",navy:"#1f3a5f",mint:"#a8ebc8",lime:"#c4e83a",cherry:"#c43d3f",green:"#2CCB73",deep:"#1C8F56",butter:"#f6d36b",fog:"#c9d3d2"};
+    const COVER_PALETTES=[[V_PAL.plum,V_PAL.cream,V_PAL.rust],[V_PAL.cream,V_PAL.ink,V_PAL.rust],[V_PAL.forest,V_PAL.mint,V_PAL.butter],[V_PAL.navy,V_PAL.bone,V_PAL.butter],[V_PAL.ink,V_PAL.lime,V_PAL.mint],[V_PAL.cherry,V_PAL.cream,V_PAL.ink],[V_PAL.bone,V_PAL.plum,V_PAL.rust],[V_PAL.rust,V_PAL.cream,V_PAL.ink],[V_PAL.green,V_PAL.ink,V_PAL.bone],[V_PAL.mint,V_PAL.forest,V_PAL.ink]];
+
+    // ——— AlbumArt ———
+    const AlbumArt = ({ seed="track", size=56, variant, radius=6, style }) => {
+      const h=_hash(seed);const v=variant!=null?variant:h%8;const pal=COVER_PALETTES[((h>>>3)%COVER_PALETTES.length)];const [bg,fg,ac]=pal;const rng=_rng(h);
+      const wrap={width:size,height:size,borderRadius:radius,overflow:"hidden",flexShrink:0,display:"inline-block",...style};
+      let inner;
+      if(v===0){const cy=38+(rng()-0.5)*16;inner=<svg viewBox="0 0 100 100"width="100%"height="100%"><rect width="100"height="100"fill={bg}/><circle cx="50"cy={cy}r="26"fill={ac}/><rect x="0"y="68"width="100"height="6"fill={fg}/></svg>;}
+      else if(v===1){const dots=[];for(let y=0;y<10;y++)for(let x=0;x<10;x++){const d=(x+y)/18;const r=Math.max(0.4,4.2*(1-d)+rng()*0.4);dots.push(<circle key={x+"_"+y}cx={5+x*10}cy={5+y*10}r={r}fill={fg}/>);}inner=<svg viewBox="0 0 100 100"width="100%"height="100%"><rect width="100"height="100"fill={bg}/>{dots}</svg>;}
+      else if(v===2){const letter=(seed[0]||"S").toUpperCase();inner=<svg viewBox="0 0 100 100"width="100%"height="100%"><rect width="100"height="100"fill={bg}/><text x="50"y="72"textAnchor="middle"fontFamily="General Sans,sans-serif"fontWeight="700"fontSize="86"letterSpacing="-3"fill={fg}>{letter}</text><rect x="14"y="84"width="72"height="4"fill={ac}/></svg>;}
+      else if(v===3){const bars=[];for(let i=0;i<28;i++){const t=i/27;const env=Math.sin(t*Math.PI)**0.6;const a=10+rng()*80*env;bars.push(<rect key={i}x={5+i*3.4}y={50-a/2}width="2"height={a}fill={fg}rx="1"/>);}inner=<svg viewBox="0 0 100 100"width="100%"height="100%"><rect width="100"height="100"fill={bg}/>{bars}</svg>;}
+      else if(v===4){inner=<svg viewBox="0 0 100 100"width="100%"height="100%"><rect width="100"height="100"fill={bg}/><polygon points="0,0 100,0 0,100"fill={fg}/><circle cx="50"cy="50"r="18"fill={ac}/></svg>;}
+      else if(v===5){inner=<svg viewBox="0 0 100 100"width="100%"height="100%"><rect width="100"height="100"fill={bg}/>{[36,26,16].map((r,i)=><circle key={i}cx="50"cy="50"r={r}fill="none"stroke={fg}strokeWidth={i===1?2:1.2}opacity={0.85-i*0.1}/>)}<circle cx={50+36*Math.cos(((h>>>5)%360)*Math.PI/180)}cy={50+36*Math.sin(((h>>>5)%360)*Math.PI/180)}r="5"fill={ac}/></svg>;}
+      else if(v===6){inner=<svg viewBox="0 0 100 100"width="100%"height="100%"><rect width="100"height="100"fill={bg}/><rect x="18"y="22"width="58"height="58"fill={ac}/><rect x="26"y="30"width="58"height="58"fill={fg}opacity="0.85"/><rect x="34"y="38"width="58"height="58"fill={ac}opacity="0.6"/></svg>;}
+      else{inner=<svg viewBox="0 0 100 100"width="100%"height="100%"><rect width="100"height="55"fill={bg}/><rect y="55"width="100"height="45"fill={fg}/><circle cx="50"cy="55"r="20"fill={ac}/></svg>;}
+      return <div style={wrap}>{inner}</div>;
+    };
+
+    // ——— Waveform ———
+    const Waveform = ({ seed="wf", height=22, bars=56, progress=0.32, style }) => {
+      const h=_hash(seed);const rng=_rng(h);const arr=[];
+      for(let i=0;i<bars;i++){const t=i/(bars-1);const env=0.35+0.65*(Math.sin(t*Math.PI)**0.6);arr.push((0.18+0.82*rng())*env);}
+      const W=bars*3;const gap=1.2;const bw=(W/bars)-gap;
+      return <svg viewBox={`0 0 ${W} ${height}`}preserveAspectRatio="none"width="100%"height={height}style={{display:"block",...style}}>
+        {arr.map((a,i)=>{const x=i*(W/bars);const bh=Math.max(2,a*height);const y=(height-bh)/2;const isPlayed=(i/bars)<progress;return <rect key={i}x={x}y={y}width={bw}height={bh}fill={isPlayed?"var(--ink)":"rgba(0,0,0,0.16)"}rx={bw/2}/>;})}</svg>;
+    };
+
+    // ——— CoverHeader ———
+    const CoverHeader = ({ height=150, seed="cover", style }) => {
+      const h=_hash(seed);const pal=COVER_PALETTES[h%COVER_PALETTES.length];const [bg,fg,ac]=pal;
+      const NOISE_SVG=`<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.45 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>`;
+      const GRAIN_URL=`url("data:image/svg+xml;utf8,${NOISE_SVG}")`;
+      return (
+        <div style={{height,position:"relative",overflow:"hidden",background:bg,...style}}>
+          <svg viewBox="0 0 400 150"width="100%"height="100%"preserveAspectRatio="xMidYMid slice"style={{position:"absolute",inset:0}}>
+            <circle cx="80"cy="60"r="64"fill={ac}/>
+            <circle cx="320"cy="80"r="44"fill={fg}opacity="0.85"/>
+            <rect x="0"y="120"width="400"height="6"fill={fg}/>
+            {Array.from({length:14}).map((_,i)=>(
+              <circle key={i}cx={200+i*13}cy={40}r={5-i*0.3}fill={fg}opacity={0.6-i*0.04}/>
+            ))}
+          </svg>
+          <div style={{position:"absolute",inset:0,backgroundImage:GRAIN_URL,opacity:0.22,mixBlendMode:"overlay",pointerEvents:"none"}}/>
+        </div>
+      );
+    };
+
+    // ——— Icons ———
+    const SVGS={
+      search:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><circle cx='11' cy='11' r='7'/><path d='m20 20-3.5-3.5'/></svg>`,
+      bell:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9'/><path d='M10 21a2 2 0 0 0 4 0'/></svg>`,
+      message:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M21 12a8 8 0 0 1-12 7l-5 1 1-5a8 8 0 1 1 16-3z'/></svg>`,
+      chevron:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='m9 6 6 6-6 6'/></svg>`,
+      pin:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M12 22s-7-7.5-7-13a7 7 0 1 1 14 0c0 5.5-7 13-7 13z'/><circle cx='12' cy='9' r='2.5'/></svg>`,
+      star:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='m12 3 2.7 6 6.3.6-4.8 4.2L17.6 20 12 16.7 6.4 20l1.5-6.2L3 9.6 9.3 9z'/></svg>`,
+      link:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg>`,
+    };
+    const Icon = ({ kind, size=16, style={} }) => {
+      const svg=SVGS[kind]||SVGS.star;
+      return <span style={{width:size,height:size,display:"inline-flex",alignItems:"center",justifyContent:"center",flexShrink:0,...style}} dangerouslySetInnerHTML={{__html:svg}}/>;
+    };
+
+    // ——— Star Rating ———
+    const StarRow = ({ value=0, size=13, color="var(--ink)" }) => {
+      const stars=[];
+      for(let i=1;i<=5;i++){
+        const fill=Math.min(1,Math.max(0,value-(i-1)));
+        stars.push(
+          <span key={i} style={{position:"relative",width:size,height:size,display:"inline-block"}}>
+            <svg viewBox="0 0 24 24"width={size}height={size}style={{position:"absolute",inset:0}}>
+              <path d="M12 3l2.7 6 6.3.6-4.8 4.2L17.6 20 12 16.7 6.4 20l1.5-6.2L3 9.6 9.3 9z"fill="none"stroke={color}strokeWidth="1.5"/>
+            </svg>
+            <span style={{position:"absolute",inset:0,overflow:"hidden",width:`${fill*100}%`}}>
+              <svg viewBox="0 0 24 24"width={size}height={size}>
+                <path d="M12 3l2.7 6 6.3.6-4.8 4.2L17.6 20 12 16.7 6.4 20l1.5-6.2L3 9.6 9.3 9z"fill={color}/>
+              </svg>
+            </span>
+          </span>
+        );
+      }
+      return <span style={{display:"inline-flex",gap:2}}>{stars}</span>;
+    };
+
+    const Rating = ({ value, count, size=13 }) => (
+      <span style={{display:"inline-flex",alignItems:"center",gap:6}}>
+        <StarRow value={value} size={size}/>
+        <b style={{fontFamily:"var(--font-display)",fontWeight:600,fontSize:size}}>{value.toFixed(1)}</b>
+        {count!=null && <span style={{fontSize:size-2,color:"var(--ink-3)"}}>· {count} reviews</span>}
+      </span>
+    );
+
+    // ——— Testimonial Card ———
+    const Testimonial = ({ name, ini, role, rating, quote, project, date }) => {
+      const bgColors=["#f5e6d3","#d3e8f5","#e8d3f5","#d3f5e0","#f5d3d3","#f5f0d3"];
+      const bg=bgColors[_hash(ini)%bgColors.length];
+      return (
+        <div className="card" style={{padding:18,display:"flex",flexDirection:"column",gap:10,borderRadius:12}}>
+          <div className="row" style={{gap:10}}>
+            <span className="avatar sm" style={{background:bg,color:"#3a3a38",fontFamily:"var(--font-display)",fontWeight:700,fontSize:10}}>{ini}</span>
+            <div className="col" style={{gap:1,flex:1,minWidth:0}}>
+              <div className="row" style={{gap:6}}>
+                <span style={{fontFamily:"var(--font-display)",fontWeight:600,fontSize:13}}>{name}</span>
+                <span className="t-meta">· {role}</span>
+              </div>
+              <StarRow value={rating} size={11}/>
+            </div>
+            <span className="t-meta" style={{fontSize:10.5,flexShrink:0}}>{date}</span>
+          </div>
+          <div style={{fontSize:13.5,lineHeight:1.55,color:"var(--ink-2)"}}>
+            <span style={{color:"var(--accent-d)",fontFamily:"var(--font-display)",fontWeight:700,fontSize:18,marginRight:4}}>"</span>
+            {quote}
+          </div>
+          {project && (
+            <div className="row" style={{gap:6,paddingTop:8,borderTop:"1px solid var(--line-soft)"}}>
+              <span className="pill" style={{fontSize:10}}>Project · {project}</span>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ——— Audio Player ———
+    const AudioPlayer = ({ title, artist, source, seed, playing, progress=0 }) => (
+      <div className="audio">
+        <AlbumArt seed={seed||title} size={42} radius={6}/>
+        <button className={"play-btn" + (playing?" playing":"")} />
+        <div className="col" style={{flex:1,gap:3,minWidth:0}}>
+          <div className="row" style={{justifyContent:"space-between",alignItems:"baseline"}}>
+            <b style={{fontFamily:"var(--font-display)",fontSize:12,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{title}</b>
+            <span style={{fontSize:10.5,color:"var(--ink-3)",flexShrink:0,marginLeft:8}}>{source}</span>
+          </div>
+          <Waveform seed={seed||title} height={22} progress={progress||0.12}/>
+          <span style={{fontSize:10.5,color:"var(--ink-3)"}}>{artist}</span>
+        </div>
+      </div>
+    );
+
+    // ——— Gig Card ———
+    const GigCard = ({ role="Vocalist", title="Gig title", tags=[], comp="Paid", time="2h", name="Artist", initials="A", roleTag="PRO", applied=12 }) => (
+      <div className="gig">
+        <div className="row" style={{gap:10}}>
+          <span className="avatar md" style={{background:"var(--ph-2)"}}>
+            {initials}
+            <span style={{position:"absolute",bottom:-2,right:-2,background:"var(--frame)",borderRadius:999,padding:"1px 4px",fontSize:7,fontFamily:"var(--font-display)",fontWeight:600,color:"var(--ink)",border:"1px solid var(--line)",lineHeight:1.4,textTransform:"uppercase"}}>{roleTag}</span>
+          </span>
+          <div className="col" style={{flex:1,gap:2,minWidth:0}}>
+            <div className="row" style={{gap:6}}>
+              <span style={{fontWeight:600,fontFamily:"var(--font-display)",fontSize:13}}>{name}</span>
+              <span className="dot"/>
+              <span className="t-meta">{time} ago</span>
+            </div>
+            <div className="row" style={{gap:6}}>
+              <span className="pill accent">{role} needed</span>
+              <span className="t-meta">· {comp}</span>
+            </div>
+          </div>
+        </div>
+        <div style={{fontFamily:"var(--font-display)",fontWeight:600,fontSize:16,letterSpacing:"-0.012em",lineHeight:1.2}}>{title}</div>
+        <div className="row" style={{gap:6,flexWrap:"wrap"}}>
+          {tags.map(t=><span key={t} className="pill">{t}</span>)}
+        </div>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,paddingTop:10,borderTop:"1px solid var(--line-soft)"}}>
+          <span className="t-meta">{applied} applied · 3 days left</span>
+          <div className="row" style={{gap:8}}>
+            <button className="btn sm">View</button>
+            <button className="btn primary sm">Apply</button>
+          </div>
+        </div>
+      </div>
+    );
+
+    // ——— Top Nav ———
+    const TopNav = () => (
+      <nav style={{background:"var(--surface)",borderBottom:"1px solid var(--line)",padding:"0 28px",height:58,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100}}>
+        <div className="row" style={{gap:18,flex:1}}>
+          <a href="feed.html" className="logo">Seshn</a>
+          <div style={{flex:1,maxWidth:380,marginLeft:8}}>
+            <div className="row" style={{padding:"8px 13px",background:"var(--surface-2)",borderRadius:999,border:"1px solid var(--line)",gap:8,cursor:"text"}}>
+              <Icon kind="search" size={14} style={{color:"var(--ink-3)"}}/>
+              <span className="t-meta">Search artists, roles, genres…</span>
+            </div>
+          </div>
+        </div>
+        <div className="row" style={{gap:14}}>
+          <a href="post.html" className="btn primary sm">+ Post a gig</a>
+          <a href="inbox.html" style={{display:"inline-flex",color:"var(--ink-2)"}}><Icon kind="message" size={18}/></a>
+          <span style={{color:"var(--ink-2)",cursor:"pointer"}}><Icon kind="bell" size={18}/></span>
+          <a href="profile.html">
+            <span className="avatar md" style={{background:"#d1f5e0",color:"var(--accent-d)",fontSize:12,fontFamily:"var(--font-display)",fontWeight:700}}>YT</span>
+          </a>
+        </div>
+      </nav>
+    );
+
+    // ——— Profile App ———
+    const ProfileApp = () => (
+      <div style={{minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column"}}>
+        <TopNav/>
+
+        {/* ——— Cover + Avatar Header ——— */}
+        <div style={{position:"relative",background:"var(--surface)"}}>
+          <CoverHeader seed="maya-cover" height={180}/>
+
+          {/* Avatar overlapping the cover */}
+          <div style={{position:"absolute",left:36,bottom:-42,display:"flex",alignItems:"flex-end",gap:14}}>
+            <div style={{background:"var(--frame)",padding:4,borderRadius:"50%",boxShadow:"0 0 0 1px var(--line)"}}>
+              <span className="avatar xl" style={{background:"linear-gradient(135deg,#a8ebc8,#2CCB73)",color:"#062c19",fontSize:26,fontFamily:"var(--font-display)",fontWeight:700}}>MO</span>
+            </div>
+          </div>
+
+          {/* Action buttons + sticker overlay */}
+          <div style={{position:"absolute",right:32,bottom:18,display:"flex",gap:10,alignItems:"center"}}>
+            <span style={{
+              display:"inline-block",transform:"rotate(-4deg)",padding:"5px 11px",borderRadius:4,
+              background:"var(--ink)",color:"var(--frame)",fontFamily:"var(--font-display)",fontWeight:700,
+              fontSize:11,letterSpacing:"0.04em",textTransform:"uppercase",
+              boxShadow:"0 4px 12px rgba(0,0,0,0.18)"
+            }}>✓ Pro · Verified</span>
+            <button className="btn" style={{backdropFilter:"blur(8px)",background:"rgba(255,255,255,0.9)"}}>Invite to project</button>
+            <button className="btn primary">Message</button>
+          </div>
+        </div>
+
+        {/* ——— Name + meta ——— */}
+        <div style={{background:"var(--surface)",borderBottom:"1px solid var(--line)",padding:"52px 36px 20px 140px"}}>
+          <div className="row" style={{gap:10,marginBottom:5,flexWrap:"wrap"}}>
+            <h1 className="t-h1" style={{fontSize:30}}>Maya Oduya</h1>
+          </div>
+          <div className="row" style={{gap:14,marginBottom:10,flexWrap:"wrap"}}>
+            <Rating value={4.9} count={28} size={13}/>
+            <span className="dot"/>
+            <span className="t-meta" style={{display:"flex",alignItems:"center",gap:5}}>
+              <Icon kind="pin" size={12}/> Brooklyn, NY
+            </span>
+            <span className="dot"/>
+            <span className="t-meta">
+              <span style={{width:7,height:7,background:"var(--accent)",borderRadius:"50%",display:"inline-block",marginRight:5}}/>
+              Active 2h ago
+            </span>
+          </div>
+          <div className="row" style={{gap:6,flexWrap:"wrap"}}>
+            <span className="pill accent">Producer</span>
+            <span className="pill accent">Vocalist</span>
+            <span className="pill">R&amp;B</span>
+            <span className="pill">Afrobeats</span>
+            <span className="pill">Soul</span>
+          </div>
+        </div>
+
+        {/* ——— Two-column body ——— */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 320px",gap:24,padding:"24px 32px",maxWidth:1300,margin:"0 auto",width:"100%"}}>
+
+          {/* ——— Left: Bio, Portfolio, Testimonials, Recent posts ——— */}
+          <div className="col" style={{gap:28,minWidth:0}}>
+
+            {/* Bio */}
+            <section>
+              <div className="t-eyebrow" style={{marginBottom:10}}>Bio</div>
+              <p style={{fontSize:14,lineHeight:1.65,color:"var(--ink-2)",maxWidth:680}}>
+                Brooklyn-based producer &amp; vocalist working at the seam of R&amp;B and West African pop.
+                Credits with <b style={{color:"var(--ink)"}}>Tems</b>, <b style={{color:"var(--ink)"}}>Lojay</b>, and a few rooms I can't name yet.
+                Open to topline, vocal-feature, and co-production work — paid or fair-split. Studio in Bed-Stuy.
+              </p>
+            </section>
+
+            {/* Portfolio */}
+            <section>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+                <div className="row" style={{gap:10,alignItems:"baseline"}}>
+                  <div className="t-eyebrow">Portfolio</div>
+                  <span className="pill solid" style={{fontSize:9}}>▶ now playing · v3 topline</span>
+                </div>
+                <span className="t-meta">6 tracks</span>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+                <AudioPlayer title="Sunday Drives" artist="Maya O. ft. Lojay · 3:24" source="SoundCloud" seed="sunday-drives" playing progress={0.42}/>
+                <AudioPlayer title="Coast (demo)" artist="Maya O. · 2:51" source="Spotify" seed="coast-demo" progress={0}/>
+                <AudioPlayer title="Hold The Line" artist="prod. Maya O. · 4:02" source="YouTube" seed="hold-the-line" progress={0}/>
+                <AudioPlayer title="Morning Light" artist="Maya O. · 3:18" source="SoundCloud" seed="morning-light" progress={0}/>
+              </div>
+            </section>
+
+            {/* Testimonials */}
+            <section>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+                <div className="row" style={{gap:12,alignItems:"center"}}>
+                  <div className="t-eyebrow">From collaborators</div>
+                  <Rating value={4.9} size={12}/>
+                </div>
+                <span className="t-meta" style={{cursor:"pointer"}}>See all 28 →</span>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <Testimonial
+                  name="Nia Kassim" ini="NK" role="Vocalist" rating={5}
+                  date="May 2026" project="Sundowner EP"
+                  quote="Maya turned a sketch into a full record in two sessions. Knows when to push and when to let the song breathe."
+                />
+                <Testimonial
+                  name="Theo Brooks" ini="TB" role="Drummer" rating={5}
+                  date="Apr 2026" project="Live run · NYC"
+                  quote="Studio brain, performer ear. Sent stems on time and the notes were always musical, never vague."
+                />
+                <Testimonial
+                  name="Sam Park" ini="SP" role="Mixing eng." rating={4.5}
+                  date="Mar 2026" project="Coast (demo)"
+                  quote="Best client communicator on Seshn full stop. Clear references, clear budget, paid early."
+                />
+                <Testimonial
+                  name="Iván Reyes" ini="IR" role="Producer" rating={5}
+                  date="Feb 2026" project="Hold The Line"
+                  quote="We're already booking the next one. That's the highest review I can give."
+                />
+              </div>
+            </section>
+
+            {/* Recent posts */}
+            <section>
+              <div className="t-eyebrow" style={{marginBottom:12}}>Recent posts</div>
+              <div className="col" style={{gap:12}}>
+                <GigCard
+                  role="Topline writer"
+                  title="Topline writer for an Afrobeats demo"
+                  tags={["Afrobeats","Toplines"]}
+                  comp="Paid · $200"
+                  name="Maya Oduya"
+                  initials="MO"
+                  roleTag="PRO"
+                  time="2h"
+                  applied={14}
+                />
+                <GigCard
+                  role="Drummer"
+                  title="Live drummer for 3-show NYC run"
+                  tags={["Live","Soul"]}
+                  comp="Paid · $450/show"
+                  name="Maya Oduya"
+                  initials="MO"
+                  roleTag="PRO"
+                  time="3d"
+                  applied={7}
+                />
+              </div>
+            </section>
+          </div>
+
+          {/* ——— Right Sidebar ——— */}
+          <aside className="col" style={{gap:16,position:"sticky",top:82,height:"fit-content"}}>
+
+            {/* Looking for */}
+            <div className="card" style={{padding:18}}>
+              <div className="t-eyebrow" style={{marginBottom:12}}>Looking for</div>
+              <div className="col" style={{gap:12}}>
+                {[
+                  ["Mixing engineers","for an EP coming in Q3"],
+                  ["Co-writers","R&B / soul-leaning"],
+                  ["Session bassists","NYC, paid sessions"],
+                ].map(([t,s]) => (
+                  <div key={t} className="row" style={{gap:10,alignItems:"flex-start"}}>
+                    <span style={{width:7,height:7,borderRadius:"50%",background:"var(--accent)",marginTop:5,flexShrink:0}}/>
+                    <div className="col" style={{gap:2}}>
+                      <span style={{fontFamily:"var(--font-display)",fontWeight:600,fontSize:13}}>{t}</span>
+                      <span className="t-meta" style={{fontSize:11}}>{s}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* On Seshn stats */}
+            <div className="card" style={{padding:18}}>
+              <div className="t-eyebrow" style={{marginBottom:12}}>On Seshn</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+                {[
+                  ["Projects","12"],
+                  ["Collaborators","38"],
+                  ["Response time","~4h"],
+                  ["Member since","2024"],
+                ].map(([k,v]) => (
+                  <div key={k} className="col" style={{gap:2}}>
+                    <span className="t-meta">{k}</span>
+                    <span style={{fontFamily:"var(--font-display)",fontWeight:600,fontSize:20,letterSpacing:"-0.01em"}}>{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Links */}
+            <div className="card hairline" style={{padding:18}}>
+              <div className="t-eyebrow" style={{marginBottom:12}}>Links</div>
+              <div className="col" style={{gap:10}}>
+                {["Instagram","SoundCloud","Spotify for Artists"].map(l => (
+                  <div key={l} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"4px 0"}}>
+                    <div className="row" style={{gap:8}}>
+                      <span style={{width:7,height:7,borderRadius:2,background:"var(--ph-2)",display:"inline-block"}}/>
+                      <span style={{fontSize:13}}>{l}</span>
+                    </div>
+                    <Icon kind="chevron" size={13} style={{color:"var(--ink-3)"}}/>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Share / contact CTA */}
+            <div style={{padding:"14px 0",borderTop:"1px solid var(--line-soft)"}}>
+              <div className="t-eyebrow" style={{marginBottom:8}}>Share profile</div>
+              <div style={{padding:"8px 12px",background:"var(--surface-2)",borderRadius:8,border:"1px solid var(--line)",fontSize:11,color:"var(--ink-3)",fontFamily:"var(--font-body)"}}>
+                seshn.fm/@maya.oduya
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    );
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<ProfileApp/>);
+  </script>
+</body>
+</html>

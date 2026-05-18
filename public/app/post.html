@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seshn — Create Gig</title>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=satoshi@400,500,600,700&display=swap" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f4f3ef; --frame: #ffffff; --surface: #ffffff; --surface-2: #f7f6f3;
+      --line: #d8d6d1; --line-soft: #ececea; --ink: #0d0d0d; --ink-2: #3a3a38;
+      --ink-3: #6e6c66; --ink-4: #a4a29c; --ph: #ececea; --ph-2: #e2e0db;
+      --accent: #2CCB73; --accent-d: #1C8F56; --accent-bg: #A8EBC8;
+      --r-sm: 4px; --r: 8px; --r-lg: 14px; --r-pill: 999px;
+      --font-display: "General Sans", ui-sans-serif, system-ui, sans-serif;
+      --font-body: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+    }
+    html, body { height: 100%; background: var(--bg); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+
+    .logo { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.04em; font-size: 20px; color: var(--ink); display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+    .logo::before { content: ""; width: 14px; height: 14px; border-radius: 3px; background: var(--accent); display: inline-block; box-shadow: 0 0 0 2px var(--frame), 0 0 0 3px var(--ink); margin-right: 2px; }
+
+    .top-nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; border-bottom: 1px solid var(--line); background: var(--frame); position: sticky; top: 0; z-index: 10; }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; border-radius: var(--r); font-size: 12px; font-weight: 600; font-family: var(--font-display); cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink); white-space: nowrap; text-decoration: none; }
+    .btn.primary { background: var(--accent); color: #062c19; border-color: transparent; }
+    .btn.sm { padding: 6px 10px; font-size: 11px; }
+    .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-2); }
+    .btn.lg { padding: 12px 20px; font-size: 13px; border-radius: 10px; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--ph); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--ink-3); flex-shrink: 0; }
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--r-pill); font-size: 11px; font-weight: 500; font-family: var(--font-display); white-space: nowrap; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+    .pill.accent { background: var(--accent-bg); border-color: transparent; color: var(--accent-d); }
+    .pill.solid { background: var(--ink); border-color: transparent; color: var(--frame); }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 14px; }
+    .card.hairline { border-color: var(--line-soft); }
+    .input-field { width: 100%; padding: 10px 12px; border-radius: var(--r); border: 1px solid var(--line); background: var(--surface); font-size: 13px; font-family: var(--font-body); color: var(--ink); outline: none; }
+    .input-field:focus { border-color: var(--ink); }
+    .input-field::placeholder { color: var(--ink-4); }
+
+    .page { background: var(--bg); min-height: 100vh; }
+    .content { max-width: 1200px; margin: 0 auto; padding: 28px 48px 60px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 36px; }
+
+    .step-label { font-family: var(--font-display); font-weight: 500; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
+    h1 { font-family: var(--font-display); font-weight: 600; font-size: 30px; line-height: 1.05; letter-spacing: -0.025em; color: var(--ink); }
+    .section-label { font-family: var(--font-display); font-weight: 600; font-size: 14px; color: var(--ink); margin-bottom: 10px; }
+    .t-meta { font-size: 11px; color: var(--ink-3); }
+
+    .progress { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
+    .step-node { width: 22px; height: 22px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 600; font-size: 11px; }
+    .step-connector { width: 28px; height: 1px; background: var(--line); }
+
+    .comp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .comp-card { padding: 12px; border-radius: var(--r); border: 1px solid var(--line); background: var(--surface); cursor: pointer; }
+    .comp-card.selected { border-color: var(--accent-d); background: var(--accent-bg); }
+    .comp-card .title { font-family: var(--font-display); font-weight: 600; font-size: 13px; color: var(--ink); }
+    .comp-card.selected .title { color: var(--accent-d); }
+    .comp-card .sub { font-size: 10.5px; color: var(--ink-3); margin-top: 2px; }
+
+    .amount-row { display: flex; gap: 10px; margin-top: 10px; }
+
+    .preview-section { position: sticky; top: 80px; }
+    .eyebrow { font-family: var(--font-display); font-weight: 500; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+
+    .gig-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+    .gig-head { display: flex; align-items: center; gap: 10px; }
+    .gig-title { font-family: var(--font-display); font-weight: 600; font-size: 16px; letter-spacing: -0.012em; line-height: 1.2; }
+    .gig-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 10px; border-top: 1px solid var(--line-soft); }
+    .ph-line { background: var(--ph); border-radius: 2px; height: 8px; }
+
+    .actions { display: flex; align-items: center; justify-content: space-between; padding-top: 20px; border-top: 1px solid var(--line); margin-top: 16px; }
+
+    .check-icon { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; color: var(--accent-d); }
+
+    @media (max-width: 900px) {
+      .content { grid-template-columns: 1fr; padding: 20px 20px 40px; }
+      .preview-section { position: static; }
+      .comp-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+
+  <script type="text/babel">
+    const V_PAL = { plum:"#5b3858", cream:"#f0e8d6", rust:"#d96e3f", forest:"#2a4d3a", mint:"#a8ebc8", ink:"#0d0d0d", navy:"#1f3a5f", bone:"#f4f1e9", lime:"#c4e83a", cherry:"#c43d3f", green:"#2CCB73", butter:"#f6d36b" };
+    const COVER_PALETTES = [[V_PAL.plum,V_PAL.cream,V_PAL.rust],[V_PAL.cream,V_PAL.ink,V_PAL.rust],[V_PAL.forest,V_PAL.mint,V_PAL.butter],[V_PAL.navy,V_PAL.bone,V_PAL.butter],[V_PAL.ink,V_PAL.lime,V_PAL.mint],[V_PAL.cherry,V_PAL.cream,V_PAL.ink],[V_PAL.bone,V_PAL.plum,V_PAL.rust],[V_PAL.rust,V_PAL.cream,V_PAL.ink],[V_PAL.green,V_PAL.ink,V_PAL.bone],[V_PAL.mint,V_PAL.forest,V_PAL.ink]];
+    function _hash(s){let h=2166136261>>>0;s=String(s||"x");for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+    function _rng(seed){let s=seed>>>0;return()=>{s=(s+0x6D2B79F5)>>>0;let t=s;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
+    const AlbumArt=({seed="track",size=56,variant,radius=6,style})=>{const h=_hash(seed);const v=variant!=null?variant:h%8;const pal=COVER_PALETTES[((h>>>3)%COVER_PALETTES.length)];const bg=pal[0],fg=pal[1],ac=pal[2];const rng=_rng(h);const wrap={width:size,height:size,borderRadius:radius,overflow:"hidden",flex:"0 0 auto",display:"inline-block",...style};let inner;if(v===0){const cx=50,cy=38+(rng()-0.5)*16;inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/><circle cx={cx} cy={cy} r={26} fill={ac}/><rect x="0" y="68" width="100" height="6" fill={fg}/></svg>;}else if(v===1){const dots=[];for(let y=0;y<10;y++)for(let x=0;x<10;x++){const d=(x+y)/18;const r=Math.max(0.4,4.2*(1-d)+rng()*0.4);dots.push(<circle key={x+"_"+y} cx={5+x*10} cy={5+y*10} r={r} fill={fg}/>);}inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/>{dots}</svg>;}else if(v===2){const letter=(seed[0]||"S").toUpperCase();inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/><text x="50" y="72" textAnchor="middle" fontFamily="var(--font-display)" fontWeight="700" fontSize="86" fill={fg}>{letter}</text><rect x="14" y="84" width="72" height="4" fill={ac}/></svg>;}else if(v===3){const bars=[];for(let i=0;i<28;i++){const t=i/27;const env=Math.sin(t*Math.PI)**0.6;const a=10+rng()*80*env;bars.push(<rect key={i} x={5+i*3.4} y={50-a/2} width="2" height={a} fill={fg} rx="1"/>);}inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/>{bars}</svg>;}else if(v===4){inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/><polygon points="0,0 100,0 0,100" fill={fg}/><circle cx="50" cy="50" r="18" fill={ac}/></svg>;}else if(v===5){inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/>{[36,26,16].map((r,i)=><circle key={i} cx="50" cy="50" r={r} fill="none" stroke={fg} strokeWidth={i===1?2:1.2} opacity={0.85-i*0.1}/>)}<circle cx={50+36*Math.cos(((h>>>5)%360)*Math.PI/180)} cy={50+36*Math.sin(((h>>>5)%360)*Math.PI/180)} r="5" fill={ac}/></svg>;}else if(v===6){inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/><rect x="18" y="22" width="58" height="58" fill={ac}/><rect x="26" y="30" width="58" height="58" fill={fg} opacity="0.85"/><rect x="34" y="38" width="58" height="58" fill={ac} opacity="0.6"/></svg>;}else{inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/><rect y="55" width="100" height="45" fill={fg}/><circle cx="50" cy="55" r="20" fill={ac}/></svg>;}return <div style={wrap} aria-hidden="true">{inner}</div>;};
+
+    const ROLES = ["Vocalist","Topline writer","Producer","Mixing eng.","Drummer","Bassist","Songwriter","Guitarist","DJ","Other"];
+    const GENRES = ["Afrobeats","R&B","Soul","Pop","Hip-hop","Indie","Electronic","Folk","Jazz"];
+    const COMP_OPTIONS = [
+      { id: "paid", label: "Paid", sub: "Fixed fee" },
+      { id: "split", label: "Split", sub: "Royalty share" },
+      { id: "trade", label: "Trade", sub: "Reciprocal work" },
+      { id: "unpaid", label: "Unpaid", sub: "Portfolio piece" },
+    ];
+
+    function PostPage() {
+      const [selRole, setSelRole] = React.useState("Topline writer");
+      const [selGenres, setSelGenres] = React.useState(new Set(["Afrobeats", "R&B"]));
+      const [selComp, setSelComp] = React.useState("paid");
+      const [amount, setAmount] = React.useState("200");
+
+      const toggleGenre = (g) => {
+        setSelGenres(prev => {
+          const next = new Set(prev);
+          if (next.has(g)) { next.delete(g); }
+          else if (next.size < 3) { next.add(g); }
+          return next;
+        });
+      };
+
+      return (
+        <div className="page">
+          {/* Nav */}
+          <nav className="top-nav">
+            <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+              <a href="../../index.html" className="logo">Seshn</a>
+            </div>
+            <div className="nav-right">
+              <span style={{ fontSize: 12, color: "var(--ink-3)", fontFamily: "var(--font-display)" }}>Auto-saved 2s ago</span>
+              <a href="feed.html" className="btn ghost">Cancel</a>
+              <div className="avatar" style={{ background: "var(--ph)" }}>YT</div>
+            </div>
+          </nav>
+
+          <div className="content">
+            {/* Left: form */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+              {/* Progress */}
+              <div className="progress">
+                {[1, 2, 3].map((n, idx) => (
+                  <React.Fragment key={n}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div className="step-node" style={{
+                        background: n <= 2 ? "var(--ink)" : "transparent",
+                        border: "1px solid " + (n <= 2 ? "var(--ink)" : "var(--line)"),
+                        color: n <= 2 ? "var(--frame)" : "var(--ink-3)",
+                      }}>
+                        {n < 2 ? "✓" : n}
+                      </div>
+                      <span style={{ fontFamily: "var(--font-display)", fontSize: 12, fontWeight: 500, color: n <= 2 ? "var(--ink)" : "var(--ink-3)" }}>
+                        {["Brief", "Details", "Review"][n - 1]}
+                      </span>
+                    </div>
+                    {n < 3 && <div className="step-connector" />}
+                  </React.Fragment>
+                ))}
+              </div>
+
+              <div>
+                <div className="step-label">Step 2 of 3</div>
+                <h1>Who and what.</h1>
+              </div>
+
+              {/* Role */}
+              <div>
+                <div className="section-label">Role needed</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {ROLES.map(r => (
+                    <span key={r} className={`pill ${r === selRole ? "solid" : ""}`} onClick={() => setSelRole(r)}>
+                      {r === selRole && "✓ "}{r}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Genres */}
+              <div>
+                <div className="section-label">
+                  Genre tags <span className="t-meta">· up to 3</span>
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {GENRES.map(g => (
+                    <span key={g} className={`pill ${selGenres.has(g) ? "accent" : ""}`} onClick={() => toggleGenre(g)}>
+                      {selGenres.has(g) && "✓ "}{g}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Compensation */}
+              <div>
+                <div className="section-label">Compensation</div>
+                <div className="comp-grid">
+                  {COMP_OPTIONS.map(c => (
+                    <div key={c.id} className={`comp-card ${selComp === c.id ? "selected" : ""}`} onClick={() => setSelComp(c.id)}>
+                      <div className="title">{selComp === c.id && "✓ "}{c.label}</div>
+                      <div className="sub">{c.sub}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {selComp === "paid" && (
+                  <div className="amount-row">
+                    <input className="input-field" placeholder="$ Amount" value={amount} onChange={e => setAmount(e.target.value)} style={{ maxWidth: 160 }} />
+                    <input className="input-field" placeholder="USD" defaultValue="USD" style={{ maxWidth: 100 }} />
+                    <input className="input-field" placeholder="Deadline · Jun 14, 2026" defaultValue="Jun 14, 2026" />
+                  </div>
+                )}
+                {selComp === "split" && (
+                  <div className="amount-row">
+                    <input className="input-field" placeholder="Split % (e.g. 50/50)" style={{ maxWidth: 220 }} />
+                    <input className="input-field" placeholder="Deadline" />
+                  </div>
+                )}
+              </div>
+
+              <div className="actions">
+                <a href="post.html" className="btn">← Back · Brief</a>
+                <a href="gig.html" className="btn primary lg">Continue → Review</a>
+              </div>
+            </div>
+
+            {/* Right: preview */}
+            <div className="preview-section">
+              <div className="eyebrow">Live preview · feed card</div>
+
+              <div className="gig-card" style={{ marginBottom: 12 }}>
+                <div className="gig-head">
+                  <div className="avatar" style={{ position: "relative" }}>
+                    MO
+                    <span style={{ position: "absolute", bottom: -2, right: -2, background: "var(--frame)", borderRadius: 999, padding: "2px 5px", fontSize: 8, fontFamily: "var(--font-display)", fontWeight: 600, color: "var(--ink)", border: "1px solid var(--line)", lineHeight: 1, textTransform: "uppercase" }}>PRO</span>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4 }}>
+                      <span style={{ fontWeight: 600, fontFamily: "var(--font-display)", fontSize: 13 }}>Maya Oduya</span>
+                      <span style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--ink-4)", flexShrink: 0 }} />
+                      <span className="t-meta">just now ago</span>
+                    </div>
+                    <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                      <span className="pill accent">{selRole} needed</span>
+                      <span className="t-meta">· {selComp === "paid" ? `Paid · $${amount}` : selComp === "split" ? "Split" : selComp === "trade" ? "Trade" : "Unpaid"}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="gig-title">Topline writer wanted for Afrobeats demo</div>
+                <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                  {[...selGenres].map(t => <span key={t} className="pill">{t}</span>)}
+                </div>
+                <div className="gig-foot">
+                  <span className="t-meta">0 applied · closing Jun 14</span>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button className="btn sm">View</button>
+                    <button className="btn sm primary">Apply</button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card hairline" style={{ padding: 12 }}>
+                <div className="eyebrow" style={{ marginBottom: 8 }}>Visibility</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 12, color: "var(--ink-2)" }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <span style={{ color: "var(--accent-d)" }}>✓</span> Posted to public feed
+                  </div>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <span style={{ color: "var(--accent-d)" }}>✓</span> Matches ~142 {selRole.toLowerCase()}s
+                  </div>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <span style={{ color: "var(--accent-d)" }}>✓</span> Notifications to 12 suggested
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<PostPage />);
+  </script>
+</body>
+</html>

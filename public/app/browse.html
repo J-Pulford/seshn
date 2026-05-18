@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seshn — Browse Artists</title>
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <style>
+    @import url("https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=satoshi@400,500,600,700&display=swap");
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f4f3ef;
+      --frame:     #ffffff;
+      --surface:   #ffffff;
+      --surface-2: #f7f6f3;
+      --line:      #d8d6d1;
+      --line-soft: #ececea;
+      --ink:       #0d0d0d;
+      --ink-2:     #3a3a38;
+      --ink-3:     #6e6c66;
+      --ink-4:     #a4a29c;
+      --ph:        #ececea;
+      --ph-2:      #e2e0db;
+      --accent:    #2CCB73;
+      --accent-d:  #1C8F56;
+      --accent-m:  #63D89A;
+      --accent-bg: #A8EBC8;
+      --ink-black: #0D0D0D;
+      --r-sm: 4px;
+      --r:    8px;
+      --r-lg: 14px;
+      --r-pill: 999px;
+      --font-display: "General Sans", ui-sans-serif, system-ui, sans-serif;
+      --font-body:    "Satoshi", ui-sans-serif, system-ui, sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-size: 13px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .t-eyebrow { font-family: var(--font-display); font-weight: 500; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+    .t-meta { font-size: 11px; color: var(--ink-3); }
+    .t-muted { color: var(--ink-3); }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: var(--r-pill);
+      font-size: 10.5px;
+      font-weight: 500;
+      font-family: var(--font-display);
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink-2);
+      line-height: 1;
+      cursor: pointer;
+    }
+    .pill.accent { background: var(--accent-bg); border-color: transparent; color: var(--accent-d); }
+    .pill.solid { background: var(--accent); border-color: transparent; color: #062c19; }
+    .pill.ghost { background: transparent; }
+    .pill.dark { background: var(--ink); color: var(--frame); border-color: transparent; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: var(--r);
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--font-display);
+      letter-spacing: -0.005em;
+      cursor: pointer;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      line-height: 1;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .btn.primary { background: var(--accent); color: #062c19; border-color: transparent; }
+    .btn.sm { padding: 6px 10px; font-size: 11px; }
+    .btn:hover { opacity: 0.88; }
+
+    .avatar {
+      border-radius: 50%;
+      background: var(--ph);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 600;
+      color: var(--ink-3);
+      flex-shrink: 0;
+    }
+    .avatar.sm { width: 28px; height: 28px; font-size: 10px; }
+    .avatar.md { width: 36px; height: 36px; font-size: 13px; }
+    .avatar.lg { width: 56px; height: 56px; font-size: 18px; }
+
+    .input {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: var(--r);
+      border: 1px solid var(--line);
+      background: var(--surface);
+      font-size: 12px;
+      font-family: var(--font-body);
+      color: var(--ink);
+      outline: none;
+    }
+    .input:focus { border-color: var(--ink); }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--r-lg);
+      padding: 14px;
+    }
+
+    .row { display: flex; align-items: center; gap: 8px; }
+    .col { display: flex; flex-direction: column; }
+    .between { display: flex; align-items: center; justify-content: space-between; }
+
+    .logo {
+      font-family: var(--font-display);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      font-size: 18px;
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+    .logo::before {
+      content: "";
+      width: 14px; height: 14px;
+      border-radius: 3px;
+      background: var(--accent);
+      display: inline-block;
+      box-shadow: 0 0 0 2px var(--frame), 0 0 0 3px var(--ink);
+      margin-right: 2px;
+      flex-shrink: 0;
+    }
+
+    .ph-line { background: var(--ph); border-radius: 2px; height: 8px; }
+    .ph-line.sm { height: 6px; }
+
+    .check-box {
+      width: 14px; height: 14px;
+      border-radius: 3px;
+      border: 1px solid var(--line);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .check-box.checked { background: var(--ink); border-color: var(--ink); }
+    .radio-btn {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid var(--line);
+      display: inline-block;
+      flex-shrink: 0;
+      cursor: pointer;
+      position: relative;
+    }
+    .radio-btn.checked { border-color: var(--ink); }
+    .radio-btn.checked::after { content:""; position:absolute; inset:2px; background:var(--ink); border-radius:50%; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+
+    /* Active status dot */
+    .active-now::before { content:""; display:inline-block; width:7px; height:7px; background:var(--accent); border-radius:50%; margin-right:5px; }
+    .active-pro::before { content:""; display:inline-block; width:7px; height:7px; background:var(--accent); border-radius:50%; margin-right:5px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    // ——— Helpers ———
+    function _hash(s) {
+      let h=2166136261>>>0; s=String(s||"x");
+      for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+      return h>>>0;
+    }
+    function _rng(seed) {
+      let s=seed>>>0;
+      return ()=>{s=(s+0x6D2B79F5)>>>0;let t=s;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};
+    }
+    const V_PAL={cream:"#f0e8d6",bone:"#f4f1e9",rust:"#d96e3f",plum:"#5b3858",forest:"#2a4d3a",ink:"#0d0d0d",navy:"#1f3a5f",mint:"#a8ebc8",lime:"#c4e83a",cherry:"#c43d3f",green:"#2CCB73",deep:"#1C8F56",butter:"#f6d36b",fog:"#c9d3d2"};
+    const COVER_PALETTES=[[V_PAL.plum,V_PAL.cream,V_PAL.rust],[V_PAL.cream,V_PAL.ink,V_PAL.rust],[V_PAL.forest,V_PAL.mint,V_PAL.butter],[V_PAL.navy,V_PAL.bone,V_PAL.butter],[V_PAL.ink,V_PAL.lime,V_PAL.mint],[V_PAL.cherry,V_PAL.cream,V_PAL.ink],[V_PAL.bone,V_PAL.plum,V_PAL.rust],[V_PAL.rust,V_PAL.cream,V_PAL.ink],[V_PAL.green,V_PAL.ink,V_PAL.bone],[V_PAL.mint,V_PAL.forest,V_PAL.ink]];
+
+    const AlbumArt = ({ seed="track", size=56, variant, radius=6, style }) => {
+      const h=_hash(seed); const v=variant!=null?variant:h%8; const pal=COVER_PALETTES[((h>>>3)%COVER_PALETTES.length)]; const [bg,fg,ac]=pal; const rng=_rng(h);
+      const wrap={width:size,height:size,borderRadius:radius,overflow:"hidden",flexShrink:0,display:"inline-block",...style};
+      let inner;
+      if(v===0){const cy=38+(rng()-0.5)*16;inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/><circle cx="50" cy={cy} r="26" fill={ac}/><rect x="0" y="68" width="100" height="6" fill={fg}/></svg>;}
+      else if(v===1){const dots=[];for(let y=0;y<10;y++)for(let x=0;x<10;x++){const d=(x+y)/18;const r=Math.max(0.4,4.2*(1-d)+rng()*0.4);dots.push(<circle key={x+"_"+y} cx={5+x*10} cy={5+y*10} r={r} fill={fg}/>);}inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/>{dots}</svg>;}
+      else if(v===2){const letter=(seed[0]||"S").toUpperCase();inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/><text x="50" y="72" textAnchor="middle" fontFamily="General Sans,sans-serif" fontWeight="700" fontSize="86" letterSpacing="-3" fill={fg}>{letter}</text><rect x="14" y="84" width="72" height="4" fill={ac}/></svg>;}
+      else if(v===3){const bars=[];for(let i=0;i<28;i++){const t=i/27;const env=Math.sin(t*Math.PI)**0.6;const a=10+rng()*80*env;bars.push(<rect key={i} x={5+i*3.4} y={50-a/2} width="2" height={a} fill={fg} rx="1"/>);}inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/>{bars}</svg>;}
+      else if(v===4){inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/><polygon points="0,0 100,0 0,100" fill={fg}/><circle cx="50" cy="50" r="18" fill={ac}/></svg>;}
+      else if(v===5){inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/>{[36,26,16].map((r,i)=><circle key={i} cx="50" cy="50" r={r} fill="none" stroke={fg} strokeWidth={i===1?2:1.2} opacity={0.85-i*0.1}/>)}<circle cx={50+36*Math.cos(((h>>>5)%360)*Math.PI/180)} cy={50+36*Math.sin(((h>>>5)%360)*Math.PI/180)} r="5" fill={ac}/></svg>;}
+      else if(v===6){inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/><rect x="18" y="22" width="58" height="58" fill={ac}/><rect x="26" y="30" width="58" height="58" fill={fg} opacity="0.85"/><rect x="34" y="38" width="58" height="58" fill={ac} opacity="0.6"/></svg>;}
+      else{inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="55" fill={bg}/><rect y="55" width="100" height="45" fill={fg}/><circle cx="50" cy="55" r="20" fill={ac}/></svg>;}
+      return <div style={wrap}>{inner}</div>;
+    };
+
+    const SVGS = {
+      search:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><circle cx='11' cy='11' r='7'/><path d='m20 20-3.5-3.5'/></svg>`,
+      bell:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9'/><path d='M10 21a2 2 0 0 0 4 0'/></svg>`,
+      message:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M21 12a8 8 0 0 1-12 7l-5 1 1-5a8 8 0 1 1 16-3z'/></svg>`,
+      check:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5'><path d='M5 12l5 5L20 7'/></svg>`,
+      grid:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><rect x='3' y='3' width='7' height='7'/><rect x='14' y='3' width='7' height='7'/><rect x='3' y='14' width='7' height='7'/><rect x='14' y='14' width='7' height='7'/></svg>`,
+      list:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01'/></svg>`,
+      pin:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M12 22s-7-7.5-7-13a7 7 0 1 1 14 0c0 5.5-7 13-7 13z'/><circle cx='12' cy='9' r='2.5'/></svg>`,
+    };
+    const Icon = ({ kind, size=16, style={} }) => {
+      const svg=SVGS[kind]||SVGS.check;
+      return <span style={{width:size,height:size,display:"inline-flex",alignItems:"center",justifyContent:"center",flexShrink:0,...style}} dangerouslySetInnerHTML={{__html:svg}}/>;
+    };
+
+    // ——— Top Nav ———
+    const TopNav = () => (
+      <nav style={{ background:"var(--surface)", borderBottom:"1px solid var(--line)", padding:"0 28px", height:58, display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0, zIndex:100 }}>
+        <div className="row" style={{ gap:18, flex:1 }}>
+          <a href="feed.html" className="logo">Seshn</a>
+          <div style={{ flex:1, maxWidth:380, marginLeft:8 }}>
+            <div className="row" style={{ padding:"8px 13px", background:"var(--surface-2)", borderRadius:999, border:"1px solid var(--line)", gap:8, cursor:"text" }}>
+              <Icon kind="search" size={14} style={{ color:"var(--ink-3)" }} />
+              <span className="t-meta">Search artists, roles, genres…</span>
+            </div>
+          </div>
+        </div>
+        <div className="row" style={{ gap:14 }}>
+          <a href="post.html" className="btn primary sm">+ Post a gig</a>
+          <a href="inbox.html" style={{ display:"inline-flex", color:"var(--ink-2)" }}><Icon kind="message" size={18} /></a>
+          <span style={{ color:"var(--ink-2)", cursor:"pointer" }}><Icon kind="bell" size={18} /></span>
+          <a href="profile.html">
+            <span className="avatar md" style={{ background:"#d1f5e0", color:"var(--accent-d)", fontSize:12, fontFamily:"var(--font-display)", fontWeight:700 }}>YT</span>
+          </a>
+        </div>
+      </nav>
+    );
+
+    // ——— Artist Card ———
+    const ArtistCard = ({ name, ini, roles=[], sub, tags=[], active, verified }) => {
+      const bgColors = ["#f5e6d3","#d3e8f5","#e8d3f5","#d3f5e0","#f5d3d3","#f5f0d3","#d3d3f5"];
+      const h = _hash(ini);
+      const bg = bgColors[h % bgColors.length];
+      const textColor = "#3a3a38";
+      return (
+        <div className="card" style={{ padding:16, display:"flex", flexDirection:"column", gap:11 }}>
+          <div className="row" style={{ gap:12 }}>
+            <a href="profile.html">
+              <span className="avatar lg" style={{ background:bg, color:textColor, fontWeight:700, fontFamily:"var(--font-display)" }}>{ini}</span>
+            </a>
+            <div className="col" style={{ gap:3, flex:1, minWidth:0 }}>
+              <div className="row" style={{ gap:6 }}>
+                <a href="profile.html" style={{ fontFamily:"var(--font-display)", fontWeight:600, fontSize:14, color:"var(--ink)", textDecoration:"none" }}>{name}</a>
+                {verified && <span className="pill solid" style={{ fontSize:9, padding:"2px 5px" }}>✓ Pro</span>}
+              </div>
+              <span className="t-meta">{sub}</span>
+              <div className="row" style={{ gap:4, marginTop:3, flexWrap:"wrap" }}>
+                {roles.map(r => <span key={r} className="pill accent" style={{ fontSize:10 }}>{r}</span>)}
+              </div>
+            </div>
+          </div>
+          {/* Bio placeholder lines */}
+          <div className="col" style={{ gap:5 }}>
+            <div className="ph-line" style={{ width:"100%" }} />
+            <div className="ph-line" style={{ width:"72%" }} />
+          </div>
+          {/* Genre tags */}
+          <div className="row" style={{ gap:4, flexWrap:"wrap" }}>
+            {tags.map(t => <span key={t} className="pill" style={{ fontSize:10 }}>{t}</span>)}
+          </div>
+          {/* Footer */}
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", paddingTop:10, borderTop:"1px solid var(--line-soft)" }}>
+            <span className="t-meta" style={{ display:"flex", alignItems:"center", gap:5 }}>
+              {active.includes("now") && <span style={{ width:7, height:7, background:"var(--accent)", borderRadius:"50%", display:"inline-block" }} />}
+              {active}
+            </span>
+            <a href="profile.html" className="btn sm">View profile</a>
+          </div>
+        </div>
+      );
+    };
+
+    // ——— Filter Group ———
+    const CheckGroup = ({ title, items }) => (
+      <div className="col" style={{ gap:8 }}>
+        <span className="t-eyebrow">{title}</span>
+        <div className="col" style={{ gap:3 }}>
+          {items.map(([label, count, sel]) => (
+            <label key={label} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"5px 0", cursor:"pointer" }}>
+              <div className="row" style={{ gap:8 }}>
+                <span className={"check-box" + (sel?" checked":"")}>
+                  {sel && <Icon kind="check" size={9} style={{ color:"var(--frame)" }} />}
+                </span>
+                <span style={{ fontSize:12.5, color:sel?"var(--ink)":"var(--ink-2)" }}>{label}</span>
+              </div>
+              {count && <span className="t-meta">{count}</span>}
+            </label>
+          ))}
+        </div>
+      </div>
+    );
+
+    const RadioGroup = ({ title, items }) => (
+      <div className="col" style={{ gap:8 }}>
+        <span className="t-eyebrow">{title}</span>
+        <div className="col" style={{ gap:5 }}>
+          {items.map(([label, sel]) => (
+            <label key={label} style={{ display:"flex", alignItems:"center", gap:8, cursor:"pointer" }}>
+              <span className={"radio-btn" + (sel?" checked":"")} />
+              <span style={{ fontSize:12.5, color:sel?"var(--ink)":"var(--ink-2)" }}>{label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    );
+
+    const [viewMode, setViewMode] = React.useState ? React.useState("grid") : [() => "grid", () => {}];
+
+    const BrowseApp = () => {
+      const [view, setView] = React.useState("grid");
+      const [sortPill, setSort] = React.useState("recommended");
+
+      return (
+        <div style={{ minHeight:"100vh", background:"var(--bg)", display:"flex", flexDirection:"column" }}>
+          <TopNav />
+          <div style={{ display:"grid", gridTemplateColumns:"240px 1fr", gap:24, padding:"24px 28px", flex:1, maxWidth:1400, margin:"0 auto", width:"100%" }}>
+
+            {/* ——— Left Sidebar: Filters ——— */}
+            <aside style={{ position:"sticky", top:82, height:"calc(100vh - 100px)", overflowY:"auto", paddingRight:4 }}>
+              <div className="col" style={{ gap:22 }}>
+                <CheckGroup title="Roles" items={[
+                  ["Vocalist", 142, true],
+                  ["Producer", 88, true],
+                  ["Mixing engineer", 41, false],
+                  ["Drummer", 22, false],
+                  ["Songwriter", 67, false],
+                  ["Guitarist", 35, false],
+                  ["DJ", 18, false],
+                ]} />
+                <div style={{ height:1, background:"var(--line-soft)" }} />
+                <div className="col" style={{ gap:8 }}>
+                  <span className="t-eyebrow">Location</span>
+                  <input className="input" placeholder="City or 'Remote'" />
+                  <div className="row" style={{ gap:6, flexWrap:"wrap" }}>
+                    <span className="pill solid">Remote OK</span>
+                    <span className="pill">NYC</span>
+                    <span className="pill">LA</span>
+                    <span className="pill">+</span>
+                  </div>
+                </div>
+                <div style={{ height:1, background:"var(--line-soft)" }} />
+                <RadioGroup title="Availability" items={[
+                  ["Open to work", true],
+                  ["Open to projects", false],
+                  ["Busy", false],
+                ]} />
+                <button className="btn" style={{ width:"100%", marginTop:4 }}>Clear all filters</button>
+              </div>
+            </aside>
+
+            {/* ——— Main Browse Grid ——— */}
+            <main style={{ minWidth:0 }}>
+              <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:18, gap:12 }}>
+                <div>
+                  <h1 style={{ fontFamily:"var(--font-display)", fontWeight:600, fontSize:22, letterSpacing:"-0.02em" }}>Browse artists</h1>
+                  <span className="t-meta" style={{ fontSize:12 }}>1,284 artists match your filters</span>
+                </div>
+                <div className="row" style={{ gap:8, flexShrink:0 }}>
+                  {[["newest","Newest"],["active","Most active"],["recommended","Recommended"]].map(([k,label]) => (
+                    <span key={k} className={"pill" + (sortPill===k?" dark":"")} onClick={() => setSort(k)}>{label}</span>
+                  ))}
+                  <div style={{ width:1, height:20, background:"var(--line)", margin:"0 2px" }} />
+                  <span onClick={() => setView("grid")} style={{ cursor:"pointer", color:view==="grid"?"var(--ink)":"var(--ink-4)" }}><Icon kind="grid" size={16} /></span>
+                  <span onClick={() => setView("list")} style={{ cursor:"pointer", color:view==="list"?"var(--ink)":"var(--ink-4)" }}><Icon kind="list" size={16} /></span>
+                </div>
+              </div>
+
+              <div style={{ display:"grid", gridTemplateColumns:view==="grid"?"repeat(3, 1fr)":"1fr", gap:14 }}>
+                <ArtistCard name="Nia Kassim" ini="NK" roles={["Vocalist"]} sub="London · she/her" tags={["R&B","Soul","Gospel"]} active="Active now" verified />
+                <ArtistCard name="Sam Park" ini="SP" roles={["Mixing eng."]} sub="Los Angeles · he/him" tags={["Indie","Shoegaze","Post-rock"]} active="Active 3h ago" />
+                <ArtistCard name="Lina Vega" ini="LV" roles={["Producer"]} sub="Mexico City · she/her" tags={["Electronic","Latin","Pop"]} active="Active 1d ago" />
+                <ArtistCard name="Mo Daniels" ini="MD" roles={["Drummer"]} sub="NYC · he/him" tags={["Soul","Funk","Jazz"]} active="Active 2h ago" verified />
+                <ArtistCard name="Robi K." ini="RK" roles={["Songwriter"]} sub="Berlin · they/them" tags={["Pop","Electronic","Synth"]} active="Active 5h ago" />
+                <ArtistCard name="Iván Reyes" ini="IR" roles={["Vocalist","Guitarist"]} sub="Mexico City · he/him" tags={["Indie","Folk","Alt"]} active="Active 8h ago" />
+                <ArtistCard name="Theo Brooks" ini="TB" roles={["Drummer"]} sub="NYC · he/him" tags={["Soul","R&B","Hip-hop"]} active="Active now" verified />
+                <ArtistCard name="Amaya Laurent" ini="AL" roles={["Songwriter"]} sub="Paris · she/her" tags={["Pop","French","R&B"]} active="Active 4h ago" />
+                <ArtistCard name="James Osei" ini="JO" roles={["Producer"]} sub="London · he/him" tags={["Afrobeats","Dancehall","R&B"]} active="Active 12h ago" />
+              </div>
+
+              {/* Load more */}
+              <div style={{ display:"flex", justifyContent:"center", marginTop:28 }}>
+                <button className="btn" style={{ padding:"10px 32px" }}>Load more artists</button>
+              </div>
+            </main>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<BrowseApp />);
+  </script>
+</body>
+</html>
