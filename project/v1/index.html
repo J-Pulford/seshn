@@ -1,0 +1,3577 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Seshn — Wireframes</title>
+  <style>
+/* Seshn — Wireframe styles */
+
+@import url("https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=satoshi@400,500,600,700&display=swap");
+
+:root {
+  /* Wireframe palette — desaturated, with one accent */
+  --bg:        #f4f3ef;     /* canvas */
+  --frame:     #ffffff;     /* artboard surface */
+  --surface:   #ffffff;     /* card */
+  --surface-2: #f7f6f3;     /* recessed */
+  --line:      #d8d6d1;     /* primary stroke */
+  --line-soft: #ececea;     /* hairlines, grid */
+  --ink:       #0d0d0d;     /* primary text */
+  --ink-2:     #3a3a38;     /* secondary text */
+  --ink-3:     #6e6c66;     /* muted */
+  --ink-4:     #a4a29c;     /* very muted, placeholder text */
+  --ph:        #ececea;     /* placeholder fill */
+  --ph-2:      #e2e0db;     /* placeholder fill (alt) */
+
+  /* Brand */
+  --accent:    #2CCB73;     /* primary green */
+  --accent-d:  #1C8F56;     /* deep green */
+  --accent-m:  #63D89A;     /* mint */
+  --accent-bg: #A8EBC8;     /* soft mint */
+  --ink-black: #0D0D0D;
+
+  --ok:        #1C8F56;
+  --danger:    #c0392b;
+
+  --r-sm: 4px;
+  --r:    8px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+
+  --font-display: "General Sans", "Abizhar", "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-body:    "Satoshi", "Abizhar", "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Dark frame variant — applied via .dark on the frame root */
+.dark {
+  --frame:     #0d0d0d;
+  --surface:   #161614;
+  --surface-2: #1d1d1a;
+  --line:      #2a2a26;
+  --line-soft: #1f1f1c;
+  --ink:       #f4f3ef;
+  --ink-2:     #c9c7c1;
+  --ink-3:     #8a8880;
+  --ink-4:     #5a5852;
+  --ph:        #1f1f1c;
+  --ph-2:      #262622;
+}
+
+/* Reset within wireframe artboards */
+.wf, .wf * {
+  box-sizing: border-box;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  font-variant-ligatures: contextual;
+}
+
+.wf {
+  background: var(--frame);
+  color: var(--ink);
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.wf-mobile {
+  font-size: 12.5px;
+}
+
+/* ——— Type ——— */
+.t-display { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em; }
+.t-h1 { font-family: var(--font-display); font-weight: 600; font-size: 32px; line-height: 1.05; letter-spacing: -0.025em; }
+.t-h2 { font-family: var(--font-display); font-weight: 600; font-size: 22px; line-height: 1.15; letter-spacing: -0.02em; }
+.t-h3 { font-family: var(--font-display); font-weight: 600; font-size: 16px; line-height: 1.2; letter-spacing: -0.01em; }
+.t-eyebrow { font-family: var(--font-display); font-weight: 500; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+.t-meta { font-size: 11px; color: var(--ink-3); }
+.t-muted { color: var(--ink-3); }
+.t-mute2 { color: var(--ink-4); }
+
+/* ——— Placeholders ——— */
+.ph {
+  background: var(--ph);
+  border-radius: var(--r-sm);
+  color: var(--ink-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+}
+.ph-img::before {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(to top right, transparent 49.4%, var(--line) 49.7%, var(--line) 50.3%, transparent 50.6%),
+    linear-gradient(to top left,  transparent 49.4%, var(--line) 49.7%, var(--line) 50.3%, transparent 50.6%);
+  opacity: 0.55;
+}
+.ph-img > span { position: relative; z-index: 1; background: var(--ph); padding: 2px 6px; border-radius: 3px; }
+
+.ph-line { background: var(--ph); border-radius: 2px; height: 8px; }
+.ph-line.sm { height: 6px; }
+.ph-line.lg { height: 12px; }
+.ph-block { background: var(--ph); border-radius: var(--r-sm); }
+.ph-block.soft { background: var(--ph-2); }
+
+/* ——— Pills ——— */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+  font-size: 10.5px;
+  font-weight: 500;
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-2);
+  line-height: 1;
+}
+.pill.accent { background: var(--accent-bg); border-color: transparent; color: var(--accent-d); }
+.pill.solid { background: var(--accent); border-color: transparent; color: #062c19; }
+.pill.success { background: transparent; border-color: var(--accent-d); color: var(--accent-d); }
+.pill.success::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-d); }
+.pill.dark { background: var(--ink); color: var(--frame); border-color: transparent; }
+.pill.ghost { background: transparent; }
+
+/* ——— Buttons ——— */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--r);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-display);
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  line-height: 1;
+  white-space: nowrap;
+}
+.btn.primary { background: var(--accent); color: #062c19; border-color: transparent; }
+.btn.dark { background: var(--ink); color: var(--frame); border-color: transparent; }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--ink-2); }
+.btn.lg { padding: 12px 20px; font-size: 13px; border-radius: 10px; }
+.btn.sm { padding: 6px 10px; font-size: 11px; }
+.btn.block { width: 100%; }
+
+/* ——— Inputs ——— */
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--r);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 12px;
+  font-family: var(--font-body);
+  color: var(--ink);
+}
+.input.lg { padding: 14px 14px; }
+
+/* ——— Avatar ——— */
+.avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--ph);
+  position: relative;
+  flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.avatar.sm { width: 22px; height: 22px; font-size: 9px; }
+.avatar.lg { width: 56px; height: 56px; font-size: 18px; }
+.avatar.xl { width: 88px; height: 88px; font-size: 24px; }
+.avatar > .role-dot {
+  position: absolute;
+  bottom: -2px; right: -2px;
+  background: var(--frame);
+  border-radius: var(--r-pill);
+  padding: 2px 5px;
+  font-size: 8px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* ——— Card ——— */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 14px;
+}
+.card.flat { background: transparent; }
+.card.hairline { border-color: var(--line-soft); }
+
+/* ——— Gig card ——— */
+.gig {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.gig.boost {
+  border-color: var(--accent-d);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-bg) 40%, var(--surface)) 0%, var(--surface) 60%);
+}
+.gig-head { display: flex; align-items: center; gap: 10px; }
+.gig-title { font-family: var(--font-display); font-weight: 600; font-size: 16px; letter-spacing: -0.012em; line-height: 1.2; }
+.gig-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.gig-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 10px; border-top: 1px solid var(--line-soft); }
+
+/* ——— Audio embed wrapper ——— */
+.audio {
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.audio .play {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  flex: 0 0 auto;
+}
+.audio .play::before {
+  content: ""; width: 0; height: 0;
+  border-left: 7px solid #062c19;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  margin-left: 2px;
+}
+.audio .wave {
+  flex: 1; height: 24px;
+  background:
+    repeating-linear-gradient(
+      to right,
+      var(--ink-2) 0 1.5px,
+      transparent 1.5px 4px
+    );
+  -webkit-mask: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent),
+                radial-gradient(ellipse at center, #000 35%, rgba(0,0,0,0.25) 100%);
+  -webkit-mask-composite: source-in;
+          mask-composite: intersect;
+  opacity: 0.7;
+}
+.audio.compact { padding: 6px 10px; gap: 8px; }
+.audio.compact .play { width: 22px; height: 22px; }
+.audio.compact .play::before { border-left-width: 5px; border-top-width: 4px; border-bottom-width: 4px; }
+.audio.compact .wave { height: 16px; }
+.audio .meta { font-size: 10.5px; color: var(--ink-3); display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.audio .meta b { color: var(--ink); font-weight: 600; font-family: var(--font-display); font-size: 11.5px; }
+
+/* ——— Misc ——— */
+.divider { height: 1px; background: var(--line-soft); }
+.divider-v { width: 1px; background: var(--line-soft); align-self: stretch; }
+.row { display: flex; align-items: center; gap: 8px; }
+.col { display: flex; flex-direction: column; }
+.between { display: flex; align-items: center; justify-content: space-between; }
+.dot { width: 4px; height: 4px; border-radius: 50%; background: var(--ink-4); }
+
+/* Browser chrome */
+.chrome {
+  height: 38px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 12px;
+}
+.chrome .dots { display: flex; gap: 6px; }
+.chrome .dots span { width: 10px; height: 10px; border-radius: 50%; background: var(--ph-2); }
+.chrome .url {
+  flex: 1; height: 22px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--r-pill);
+  display: flex; align-items: center; padding: 0 10px;
+  font-size: 10.5px; color: var(--ink-3); font-family: var(--font-display);
+}
+
+/* Phone chrome */
+.phone-bar {
+  height: 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 18px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.phone-bar .right { display: flex; gap: 5px; align-items: center; }
+.phone-bar .right span { width: 14px; height: 8px; background: var(--ink); border-radius: 2px; }
+.phone-bar .right span.signal { background: linear-gradient(to top right, var(--ink) 60%, transparent 60%); }
+.phone-bar .right span.battery { width: 22px; border: 1px solid var(--ink); background: transparent; position: relative; }
+.phone-bar .right span.battery::after {
+  content: ""; position: absolute; inset: 1.5px; background: var(--ink);
+  width: 70%;
+}
+
+.tabbar {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 64px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  padding-bottom: 8px;
+}
+.tabbar .t {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-family: var(--font-display);
+  font-size: 9px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+.tabbar .t.active { color: var(--ink); }
+.tabbar .t .ic { width: 20px; height: 20px; border-radius: 5px; background: var(--ph); }
+.tabbar .t.active .ic { background: var(--ink); }
+.tabbar .t.post .ic { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); }
+
+/* Logo */
+.logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  font-size: 18px;
+  color: var(--ink);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.logo::before {
+  content: "";
+  width: 14px; height: 14px;
+  border-radius: 3px;
+  background: var(--accent);
+  display: inline-block;
+  box-shadow: 0 0 0 2px var(--frame), 0 0 0 3px var(--ink);
+  margin-right: 2px;
+}
+
+/* Section labels above wireframes */
+.dc-section-title { font-family: var(--font-display) !important; }
+
+  </style>
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; background: #f0eee9; }
+    body { font-family: "General Sans", "Inter Tight", system-ui, sans-serif; }
+    #root { height: 100%; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" data-presets="env,react">
+
+// DesignCanvas.jsx — Figma-ish design canvas wrapper
+// Warm gray grid bg + Sections + Artboards + PostIt notes.
+// Artboards are reorderable (grip-drag), deletable, labels/titles are
+// inline-editable, and any artboard can be opened in a fullscreen focus
+// overlay (←/→/Esc). State persists to a .design-canvas.state.json sidecar
+// via the host bridge. No assets, no deps.
+//
+// Usage:
+//   <DesignCanvas>
+//     <DCSection id="onboarding" title="Onboarding" subtitle="First-run variants">
+//       <DCArtboard id="a" label="A · Dusk" width={260} height={480}>…</DCArtboard>
+//       <DCArtboard id="b" label="B · Minimal" width={260} height={480}>…</DCArtboard>
+//     </DCSection>
+//   </DesignCanvas>
+
+const DC = {
+  bg: '#f0eee9',
+  grid: 'rgba(0,0,0,0.06)',
+  label: 'rgba(60,50,40,0.7)',
+  title: 'rgba(40,30,20,0.85)',
+  subtitle: 'rgba(60,50,40,0.6)',
+  postitBg: '#fef4a8',
+  postitText: '#5a4a2a',
+  font: '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+};
+
+// One-time CSS injection (classes are dc-prefixed so they don't collide with
+// the hosted design's own styles).
+if (typeof document !== 'undefined' && !document.getElementById('dc-styles')) {
+  const s = document.createElement('style');
+  s.id = 'dc-styles';
+  s.textContent = [
+    '.dc-editable{cursor:text;outline:none;white-space:nowrap;border-radius:3px;padding:0 2px;margin:0 -2px}',
+    '.dc-editable:focus{background:#fff;box-shadow:0 0 0 1.5px #c96442}',
+    '[data-dc-slot]{transition:transform .18s cubic-bezier(.2,.7,.3,1)}',
+    '[data-dc-slot].dc-dragging{transition:none;z-index:10;pointer-events:none}',
+    '[data-dc-slot].dc-dragging .dc-card{box-shadow:0 12px 40px rgba(0,0,0,.25),0 0 0 2px #c96442;transform:scale(1.02)}',
+    // isolation:isolate contains artboard content's z-indexes so a
+    // z-indexed child (sticky navbar etc.) can't paint over .dc-header or
+    // the .dc-menu popover that drops into the top of the card.
+    '.dc-card{isolation:isolate;transition:box-shadow .15s,transform .15s}',
+    '.dc-card *{scrollbar-width:none}',
+    '.dc-card *::-webkit-scrollbar{display:none}',
+    // Per-artboard header: grip + label on the left, delete/expand on the
+    // right. Single flex row; when the artboard's on-screen width is too
+    // narrow for both the label yields (ellipsis, then hidden entirely below
+    // ~4ch via the container query) and the buttons stay on the row.
+    '.dc-header{position:absolute;bottom:100%;left:-4px;margin-bottom:calc(4px * var(--dc-inv-zoom,1));z-index:2;',
+    '  display:flex;align-items:center;container-type:inline-size}',
+    '.dc-labelrow{display:flex;align-items:center;gap:4px;height:24px;flex:1 1 auto;min-width:0}',
+    '.dc-grip{flex:0 0 auto;cursor:grab;display:flex;align-items:center;padding:5px 4px;border-radius:4px;transition:background .12s,opacity .12s}',
+    '.dc-grip:hover{background:rgba(0,0,0,.08)}',
+    '.dc-grip:active{cursor:grabbing}',
+    '.dc-labeltext{flex:1 1 auto;min-width:0;cursor:pointer;border-radius:4px;padding:3px 6px;',
+    '  display:flex;align-items:center;transition:background .12s;overflow:hidden}',
+    // Below ~4ch of label room: hide the label entirely, and drop the grip to
+    // hover-only (same reveal rule as .dc-btns) so a narrow header is clean
+    // until the card is moused.
+    '@container (max-width: 110px){',
+    '  .dc-labeltext{display:none}',
+    '  .dc-grip{opacity:0}',
+    '  [data-dc-slot]:hover .dc-grip{opacity:1}',
+    '}',
+    '.dc-labeltext:hover{background:rgba(0,0,0,.05)}',
+    '.dc-labeltext .dc-editable{overflow:hidden;text-overflow:ellipsis;max-width:100%}',
+    '.dc-labeltext .dc-editable:focus{overflow:visible;text-overflow:clip}',
+    '.dc-btns{flex:0 0 auto;margin-left:auto;display:flex;gap:2px;opacity:0;transition:opacity .12s}',
+    '[data-dc-slot]:hover .dc-btns,.dc-btns:has(.dc-menu){opacity:1}',
+    '.dc-expand,.dc-kebab{width:22px;height:22px;border-radius:5px;border:none;cursor:pointer;padding:0;',
+    '  background:transparent;color:rgba(60,50,40,.7);display:flex;align-items:center;justify-content:center;',
+    '  font:inherit;transition:background .12s,color .12s}',
+    '.dc-expand:hover,.dc-kebab:hover{background:rgba(0,0,0,.06);color:#2a251f}',
+    // Slot hosting an open menu floats above later siblings (which otherwise
+    // paint on top — same z-index:auto, later DOM order) so the popup isn't
+    // clipped by the next card.
+    '[data-dc-slot]:has(.dc-menu){z-index:10}',
+    '.dc-menu{position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border-radius:8px;',
+    '  box-shadow:0 8px 28px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.05);padding:4px;min-width:160px;z-index:10}',
+    '.dc-menu button{display:block;width:100%;padding:7px 10px;border:0;background:transparent;',
+    '  border-radius:5px;font-family:inherit;font-size:13px;font-weight:500;line-height:1.2;',
+    '  color:#29261b;cursor:pointer;text-align:left;transition:background .12s;white-space:nowrap}',
+    '.dc-menu button:hover{background:rgba(0,0,0,.05)}',
+    '.dc-menu hr{border:0;border-top:1px solid rgba(0,0,0,.08);margin:4px 2px}',
+    '.dc-menu .dc-danger{color:#c96442}',
+    '.dc-menu .dc-danger:hover{background:rgba(201,100,66,.1)}',
+    // Chrome (titles / labels / buttons) counter-scales against the viewport
+    // zoom so it stays a constant on-screen size. --dc-inv-zoom is set by
+    // DCViewport on every transform update and inherits to all descendants —
+    // any overlay inside the world (e.g. a TweaksPanel on an artboard) can use
+    // it the same way.
+    //
+    // The header uses transform:scale (out-of-flow, so layout impact doesn't
+    // matter) with its world-space width set to card-width / inv-zoom so that
+    // after counter-scaling its on-screen width exactly matches the card's —
+    // that's what lets the container query + text-overflow behave against the
+    // card's visible edge at every zoom level.
+    //
+    // The section head uses CSS zoom instead of transform so its layout box
+    // grows with the counter-scale, pushing the card row down — otherwise the
+    // constant-screen-size title would overflow into the (shrinking) world-
+    // space gap and overlap the artboard headers at low zoom.
+    '.dc-header{width:calc((100% + 4px) / var(--dc-inv-zoom,1));',
+    '  transform:scale(var(--dc-inv-zoom,1));transform-origin:bottom left}',
+    '.dc-sectionhead{zoom:var(--dc-inv-zoom,1)}',
+  ].join('\n');
+  document.head.appendChild(s);
+}
+
+const DCCtx = React.createContext(null);
+
+// Recursively unwrap React.Fragment so <>…</> grouping doesn't hide
+// DCSection/DCArtboard children from the type-based walks below.
+function dcFlatten(children) {
+  const out = [];
+  React.Children.forEach(children, (c) => {
+    if (c && c.type === React.Fragment) out.push(...dcFlatten(c.props.children));
+    else out.push(c);
+  });
+  return out;
+}
+
+// ─────────────────────────────────────────────────────────────
+// DesignCanvas — stateful wrapper around the pan/zoom viewport.
+// Owns runtime state (per-section order, renamed titles/labels, hidden
+// artboards, focused artboard). Order/titles/labels/hidden persist to a
+// .design-canvas.state.json
+// sidecar next to the HTML. Reads go via plain fetch() so the saved
+// arrangement is visible anywhere the HTML + sidecar are served together
+// (omelette preview, direct link, downloaded zip). Writes go through the
+// host's window.omelette bridge — editing requires the omelette runtime.
+// Focus is ephemeral.
+// ─────────────────────────────────────────────────────────────
+const DC_STATE_FILE = '.design-canvas.state.json';
+
+function DesignCanvas({ children, minScale, maxScale, style }) {
+  const [state, setState] = React.useState({ sections: {}, focus: null });
+  // Hold rendering until the sidecar read settles so the saved order/titles
+  // appear on first paint (no source-order flash). didRead gates writes until
+  // the read settles so the empty initial state can't clobber a slow read;
+  // skipNextWrite suppresses the one echo-write that would otherwise follow
+  // hydration.
+  const [ready, setReady] = React.useState(false);
+  const didRead = React.useRef(false);
+  const skipNextWrite = React.useRef(false);
+
+  React.useEffect(() => {
+    let off = false;
+    fetch('./' + DC_STATE_FILE)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((saved) => {
+        if (off || !saved || !saved.sections) return;
+        skipNextWrite.current = true;
+        setState((s) => ({ ...s, sections: saved.sections }));
+      })
+      .catch(() => {})
+      .finally(() => { didRead.current = true; if (!off) setReady(true); });
+    const t = setTimeout(() => { if (!off) setReady(true); }, 150);
+    return () => { off = true; clearTimeout(t); };
+  }, []);
+
+  React.useEffect(() => {
+    if (!didRead.current) return;
+    if (skipNextWrite.current) { skipNextWrite.current = false; return; }
+    const t = setTimeout(() => {
+      window.omelette?.writeFile(DC_STATE_FILE, JSON.stringify({ sections: state.sections })).catch(() => {});
+    }, 250);
+    return () => clearTimeout(t);
+  }, [state.sections]);
+
+  // Build registries synchronously from children so FocusOverlay can read
+  // them in the same render. Fragments are flattened; wrapping in other
+  // elements still opts out of focus/reorder.
+  const registry = {};     // slotId -> { sectionId, artboard }
+  const sectionMeta = {};  // sectionId -> { title, subtitle, slotIds[] }
+  const sectionOrder = [];
+  dcFlatten(children).forEach((sec) => {
+    if (!sec || sec.type !== DCSection) return;
+    const sid = sec.props.id ?? sec.props.title;
+    if (!sid) return;
+    sectionOrder.push(sid);
+    const persisted = state.sections[sid] || {};
+    const abs = [];
+    dcFlatten(sec.props.children).forEach((ab) => {
+      if (!ab || ab.type !== DCArtboard) return;
+      const aid = ab.props.id ?? ab.props.label;
+      if (aid) abs.push([aid, ab]);
+    });
+    // hidden is scoped to one source revision — when the agent regenerates
+    // (artboard-ID set changes), prior deletes don't apply to new content.
+    const srcKey = abs.map(([k]) => k).join('\x1f');
+    const hidden = persisted.srcKey === srcKey ? (persisted.hidden || []) : [];
+    const srcIds = [];
+    abs.forEach(([aid, ab]) => {
+      if (hidden.includes(aid)) return;
+      registry[`${sid}/${aid}`] = { sectionId: sid, artboard: ab };
+      srcIds.push(aid);
+    });
+    const kept = (persisted.order || []).filter((k) => srcIds.includes(k));
+    sectionMeta[sid] = {
+      title: persisted.title ?? sec.props.title,
+      subtitle: sec.props.subtitle,
+      slotIds: [...kept, ...srcIds.filter((k) => !kept.includes(k))],
+    };
+  });
+
+  const api = React.useMemo(() => ({
+    state,
+    section: (id) => state.sections[id] || {},
+    patchSection: (id, p) => setState((s) => ({
+      ...s,
+      sections: { ...s.sections, [id]: { ...s.sections[id], ...(typeof p === 'function' ? p(s.sections[id] || {}) : p) } },
+    })),
+    setFocus: (slotId) => setState((s) => ({ ...s, focus: slotId })),
+  }), [state]);
+
+  // Esc exits focus; any outside pointerdown commits an in-progress rename.
+  React.useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') api.setFocus(null); };
+    const onPd = (e) => {
+      const ae = document.activeElement;
+      if (ae && ae.isContentEditable && !ae.contains(e.target)) ae.blur();
+    };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('pointerdown', onPd, true);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('pointerdown', onPd, true);
+    };
+  }, [api]);
+
+  return (
+    <DCCtx.Provider value={api}>
+      <DCViewport minScale={minScale} maxScale={maxScale} style={style}>{ready && children}</DCViewport>
+      {state.focus && registry[state.focus] && (
+        <DCFocusOverlay entry={registry[state.focus]} sectionMeta={sectionMeta} sectionOrder={sectionOrder} />
+      )}
+    </DCCtx.Provider>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// DCViewport — transform-based pan/zoom (internal)
+//
+// Input mapping (Figma-style):
+//   • trackpad pinch  → zoom   (ctrlKey wheel; Safari gesture* events)
+//   • trackpad scroll → pan    (two-finger)
+//   • mouse wheel     → zoom   (notched; distinguished from trackpad scroll)
+//   • middle-drag / primary-drag-on-bg → pan
+//
+// Transform state lives in a ref and is written straight to the DOM
+// (translate3d + will-change) so wheel ticks don't go through React —
+// keeps pans at 60fps on dense canvases.
+// ─────────────────────────────────────────────────────────────
+function DCViewport({ children, minScale = 0.1, maxScale = 8, style = {} }) {
+  const vpRef = React.useRef(null);
+  const worldRef = React.useRef(null);
+  const tf = React.useRef({ x: 0, y: 0, scale: 1 });
+  // Persist viewport across reloads so the user lands back where they were
+  // after an agent edit or browser refresh. The sandbox origin is already
+  // per-project; pathname keeps multiple canvas files in one project apart.
+  const tfKey = 'dc-viewport:' + location.pathname;
+  const saveT = React.useRef(0);
+
+  const lastPostedScale = React.useRef();
+  const apply = React.useCallback(() => {
+    const { x, y, scale } = tf.current;
+    const el = worldRef.current;
+    if (!el) return;
+    el.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
+    // Exposed for zoom-invariant chrome (labels, buttons, TweaksPanel).
+    el.style.setProperty('--dc-inv-zoom', String(1 / scale));
+    // Keep the host toolbar's % readout in sync with the canvas scale. Pan
+    // ticks leave scale unchanged — skip the cross-frame post for those.
+    if (lastPostedScale.current !== scale) {
+      lastPostedScale.current = scale;
+      window.parent.postMessage({ type: '__dc_zoom', scale }, '*');
+    }
+    clearTimeout(saveT.current);
+    saveT.current = setTimeout(() => {
+      try { localStorage.setItem(tfKey, JSON.stringify(tf.current)); } catch {}
+    }, 200);
+  }, [tfKey]);
+
+  React.useLayoutEffect(() => {
+    const flush = () => {
+      clearTimeout(saveT.current);
+      try { localStorage.setItem(tfKey, JSON.stringify(tf.current)); } catch {}
+    };
+    try {
+      const s = JSON.parse(localStorage.getItem(tfKey) || 'null');
+      if (s && Number.isFinite(s.x) && Number.isFinite(s.y) && Number.isFinite(s.scale)) {
+        tf.current = { x: s.x, y: s.y, scale: Math.min(maxScale, Math.max(minScale, s.scale)) };
+        apply();
+      }
+    } catch {}
+    // Flush on pagehide and unmount so a reload within the 200ms debounce
+    // window doesn't drop the last pan/zoom.
+    window.addEventListener('pagehide', flush);
+    return () => { window.removeEventListener('pagehide', flush); flush(); };
+  }, []);
+
+  React.useEffect(() => {
+    const vp = vpRef.current;
+    if (!vp) return;
+
+    const zoomAt = (cx, cy, factor) => {
+      const r = vp.getBoundingClientRect();
+      const px = cx - r.left, py = cy - r.top;
+      const t = tf.current;
+      const next = Math.min(maxScale, Math.max(minScale, t.scale * factor));
+      const k = next / t.scale;
+      // --dc-inv-zoom consumers (.dc-sectionhead's CSS zoom, each section's
+      // marginBottom) reflow on every scale change, vertically shifting the
+      // world layout — so a world point mathematically pinned under the cursor
+      // drifts as you zoom (content creeps up on zoom-in, down on zoom-out).
+      // Anchor the DOM element under the cursor instead: record its screen Y,
+      // apply the transform + --dc-inv-zoom, then cancel whatever vertical
+      // drift the reflow introduced so it stays put on screen.
+      let marker = null, markerY0 = 0;
+      if (k !== 1) {
+        const hit = document.elementFromPoint(cx, cy);
+        marker = hit && hit.closest ? hit.closest('[data-dc-slot],[data-dc-section]') : null;
+        if (marker) markerY0 = marker.getBoundingClientRect().top;
+      }
+      // keep the world point under the cursor fixed
+      t.x = px - (px - t.x) * k;
+      t.y = py - (py - t.y) * k;
+      t.scale = next;
+      apply();
+      if (marker) {
+        // A pure zoom around (cx, cy) maps screen Y → cy + (Y - cy) * k. Any
+        // departure after the --dc-inv-zoom reflow is the layout drift.
+        const drift = marker.getBoundingClientRect().top - (cy + (markerY0 - cy) * k);
+        if (Math.abs(drift) > 0.1) { t.y -= drift; apply(); }
+      }
+    };
+
+    // Mouse-wheel vs trackpad-scroll heuristic. A physical wheel sends
+    // line-mode deltas (Firefox) or large integer pixel deltas with no X
+    // component (Chrome/Safari, typically multiples of 100/120). Trackpad
+    // two-finger scroll sends small/fractional pixel deltas, often with
+    // non-zero deltaX. ctrlKey is set by the browser for trackpad pinch.
+    const isMouseWheel = (e) =>
+      e.deltaMode !== 0 ||
+      (e.deltaX === 0 && Number.isInteger(e.deltaY) && Math.abs(e.deltaY) >= 40);
+
+    const onWheel = (e) => {
+      e.preventDefault();
+      if (isGesturing) return; // Safari: gesture* owns the pinch — discard concurrent wheels
+      if ((e.ctrlKey || e.metaKey) && !isMouseWheel(e)) {
+        // trackpad pinch, or ctrl/cmd + smooth-scroll mouse. Notched
+        // wheels fall through to the fixed-step branch below.
+        zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.01));
+      } else if (isMouseWheel(e)) {
+        // notched mouse wheel — fixed-ratio step per click
+        zoomAt(e.clientX, e.clientY, Math.exp(-Math.sign(e.deltaY) * 0.18));
+      } else {
+        // trackpad two-finger scroll — pan
+        tf.current.x -= e.deltaX;
+        tf.current.y -= e.deltaY;
+        apply();
+      }
+    };
+
+    // Safari sends native gesture* events for trackpad pinch with a smooth
+    // e.scale; preferring these over the ctrl+wheel fallback gives a much
+    // better feel there. No-ops on other browsers. Safari also fires
+    // ctrlKey wheel events during the same pinch — isGesturing makes
+    // onWheel drop those entirely so they neither zoom nor pan.
+    let gsBase = 1;
+    let isGesturing = false;
+    const onGestureStart = (e) => { e.preventDefault(); isGesturing = true; gsBase = tf.current.scale; };
+    const onGestureChange = (e) => {
+      e.preventDefault();
+      zoomAt(e.clientX, e.clientY, (gsBase * e.scale) / tf.current.scale);
+    };
+    const onGestureEnd = (e) => { e.preventDefault(); isGesturing = false; };
+
+    // Drag-pan: middle button anywhere, or primary button on canvas
+    // background (anything that isn't an artboard or an inline editor).
+    let drag = null;
+    const onPointerDown = (e) => {
+      const onBg = !e.target.closest('[data-dc-slot], .dc-editable');
+      if (!(e.button === 1 || (e.button === 0 && onBg))) return;
+      e.preventDefault();
+      vp.setPointerCapture(e.pointerId);
+      drag = { id: e.pointerId, lx: e.clientX, ly: e.clientY };
+      vp.style.cursor = 'grabbing';
+    };
+    const onPointerMove = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      tf.current.x += e.clientX - drag.lx;
+      tf.current.y += e.clientY - drag.ly;
+      drag.lx = e.clientX; drag.ly = e.clientY;
+      apply();
+    };
+    const onPointerUp = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      vp.releasePointerCapture(e.pointerId);
+      drag = null;
+      vp.style.cursor = '';
+    };
+
+    // Host-driven zoom (toolbar % menu). Zooms around viewport centre so the
+    // visible midpoint stays fixed — matching the host's iframe-zoom feel.
+    const onHostMsg = (e) => {
+      const d = e.data;
+      if (d && d.type === '__dc_set_zoom' && typeof d.scale === 'number') {
+        const r = vp.getBoundingClientRect();
+        zoomAt(r.left + r.width / 2, r.top + r.height / 2, d.scale / tf.current.scale);
+      } else if (d && d.type === '__dc_probe') {
+        // Host's [readyGen] reset asks whether a canvas is present; it
+        // fires on the iframe's native 'load', which for canvases with
+        // images/fonts is after our mount-time announce, so re-announce.
+        // Clear the pan-tick guard so apply() re-posts the current scale
+        // even if it's unchanged — the host just reset dcScale to 1.
+        window.parent.postMessage({ type: '__dc_present' }, '*');
+        lastPostedScale.current = undefined;
+        apply();
+      }
+    };
+    window.addEventListener('message', onHostMsg);
+    // Announce canvas mode so the host toolbar proxies its % control here
+    // instead of scaling the iframe element (which would just shrink the
+    // viewport window of an infinite canvas). The apply() that follows emits
+    // the initial __dc_zoom so the toolbar % is correct before first pinch.
+    // lastPostedScale reset mirrors the __dc_probe handler: the layout
+    // effect's restore-path apply() may already have posted the restored
+    // scale (before __dc_present), so clear the guard to re-post it in order.
+    window.parent.postMessage({ type: '__dc_present' }, '*');
+    lastPostedScale.current = undefined;
+    apply();
+
+    vp.addEventListener('wheel', onWheel, { passive: false });
+    vp.addEventListener('gesturestart', onGestureStart, { passive: false });
+    vp.addEventListener('gesturechange', onGestureChange, { passive: false });
+    vp.addEventListener('gestureend', onGestureEnd, { passive: false });
+    vp.addEventListener('pointerdown', onPointerDown);
+    vp.addEventListener('pointermove', onPointerMove);
+    vp.addEventListener('pointerup', onPointerUp);
+    vp.addEventListener('pointercancel', onPointerUp);
+    return () => {
+      window.removeEventListener('message', onHostMsg);
+      vp.removeEventListener('wheel', onWheel);
+      vp.removeEventListener('gesturestart', onGestureStart);
+      vp.removeEventListener('gesturechange', onGestureChange);
+      vp.removeEventListener('gestureend', onGestureEnd);
+      vp.removeEventListener('pointerdown', onPointerDown);
+      vp.removeEventListener('pointermove', onPointerMove);
+      vp.removeEventListener('pointerup', onPointerUp);
+      vp.removeEventListener('pointercancel', onPointerUp);
+    };
+  }, [apply, minScale, maxScale]);
+
+  const gridSvg = `url("data:image/svg+xml,%3Csvg width='120' height='120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M120 0H0v120' fill='none' stroke='${encodeURIComponent(DC.grid)}' stroke-width='1'/%3E%3C/svg%3E")`;
+  return (
+    <div
+      ref={vpRef}
+      className="design-canvas"
+      style={{
+        height: '100vh', width: '100vw',
+        background: DC.bg,
+        overflow: 'hidden',
+        overscrollBehavior: 'none',
+        touchAction: 'none',
+        position: 'relative',
+        fontFamily: DC.font,
+        boxSizing: 'border-box',
+        ...style,
+      }}
+    >
+      <div
+        ref={worldRef}
+        style={{
+          position: 'absolute', top: 0, left: 0,
+          transformOrigin: '0 0',
+          willChange: 'transform',
+          width: 'max-content', minWidth: '100%',
+          minHeight: '100%',
+          padding: '60px 0 80px',
+        }}
+      >
+        <div style={{ position: 'absolute', inset: -6000, backgroundImage: gridSvg, backgroundSize: '120px 120px', pointerEvents: 'none', zIndex: -1 }} />
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// DCSection — editable title + h-row of artboards in persisted order
+// ─────────────────────────────────────────────────────────────
+function DCSection({ id, title, subtitle, children, gap = 48 }) {
+  const ctx = React.useContext(DCCtx);
+  const sid = id ?? title;
+  const all = React.Children.toArray(dcFlatten(children));
+  const artboards = all.filter((c) => c && c.type === DCArtboard);
+  const rest = all.filter((c) => !(c && c.type === DCArtboard));
+  const sec = (ctx && sid && ctx.section(sid)) || {};
+  // Must match DesignCanvas's srcKey computation exactly (it filters falsy
+  // IDs), or onDelete persists a srcKey that DesignCanvas never recognizes.
+  const allIds = artboards.map((a) => a.props.id ?? a.props.label).filter(Boolean);
+  const srcKey = allIds.join('\x1f');
+  const hidden = sec.srcKey === srcKey ? (sec.hidden || []) : [];
+  const srcOrder = allIds.filter((k) => !hidden.includes(k));
+
+  const order = React.useMemo(() => {
+    const kept = (sec.order || []).filter((k) => srcOrder.includes(k));
+    return [...kept, ...srcOrder.filter((k) => !kept.includes(k))];
+  }, [sec.order, srcOrder.join('|')]);
+
+  const byId = Object.fromEntries(artboards.map((a) => [a.props.id ?? a.props.label, a]));
+
+  // marginBottom counter-scales so the on-screen gap between sections stays
+  // constant — otherwise at low zoom the (world-space) gap collapses while
+  // the screen-constant sectionhead below it doesn't, and the title reads as
+  // belonging to the section above. paddingBottom below is just enough for
+  // the 24px artboard-header (abs-positioned above each card) plus ~8px, so
+  // the title sits tight against its own row at every zoom.
+  return (
+    <div data-dc-section={sid}
+      style={{ marginBottom: 'calc(80px * var(--dc-inv-zoom, 1))', position: 'relative' }}>
+      <div style={{ padding: '0 60px' }}>
+        <div className="dc-sectionhead" style={{ paddingBottom: 36 }}>
+          <DCEditable tag="div" value={sec.title ?? title}
+            onChange={(v) => ctx && sid && ctx.patchSection(sid, { title: v })}
+            style={{ fontSize: 28, fontWeight: 600, color: DC.title, letterSpacing: -0.4, marginBottom: 6, display: 'inline-block' }} />
+          {subtitle && <div style={{ fontSize: 16, color: DC.subtitle }}>{subtitle}</div>}
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap, padding: '0 60px', alignItems: 'flex-start', width: 'max-content' }}>
+        {order.map((k) => (
+          <DCArtboardFrame key={k} sectionId={sid} artboard={byId[k]} order={order}
+            label={(sec.labels || {})[k] ?? byId[k].props.label}
+            onRename={(v) => ctx && ctx.patchSection(sid, (x) => ({ labels: { ...x.labels, [k]: v } }))}
+            onReorder={(next) => ctx && ctx.patchSection(sid, { order: next })}
+            onDelete={() => ctx && ctx.patchSection(sid, (x) => ({
+              hidden: [...(x.srcKey === srcKey ? (x.hidden || []) : []), k],
+              srcKey,
+            }))}
+            onFocus={() => ctx && ctx.setFocus(`${sid}/${k}`)} />
+        ))}
+      </div>
+      {rest}
+    </div>
+  );
+}
+
+// DCArtboard — marker; rendered by DCArtboardFrame via DCSection.
+function DCArtboard() { return null; }
+
+// Per-artboard export (kind: 'png' | 'html'). Both paths share the same
+// self-contained clone: computed styles baked in, @font-face / <img> /
+// inline-style background-image urls inlined as data URIs. PNG wraps the
+// clone in foreignObject→canvas at 3× the artboard's natural width×height
+// (same pipeline the host uses for page captures); HTML wraps it in a
+// minimal standalone document. Both are independent of viewport zoom.
+async function dcExport(node, w, h, name, kind) {
+  try { await document.fonts.ready; } catch {}
+  const toDataURL = (url) => fetch(url).then((r) => r.blob()).then((b) => new Promise((res) => {
+    const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => res(url); fr.readAsDataURL(b);
+  })).catch(() => url);
+
+  // Collect @font-face rules. ss.cssRules throws SecurityError on
+  // cross-origin sheets (e.g. fonts.googleapis.com) — in that case fetch
+  // the CSS text directly (those endpoints send ACAO:*) and regex-extract
+  // the blocks. @import and @media/@supports are walked so nested
+  // @font-face rules aren't missed.
+  const fontRules = [], pending = [], seen = new Set();
+  const scrapeCss = (href) => {
+    if (seen.has(href)) return; seen.add(href);
+    pending.push(fetch(href).then((r) => r.text()).then((css) => {
+      for (const m of css.match(/@font-face\s*{[^}]*}/g) || []) fontRules.push({ css: m, base: href });
+      for (const m of css.matchAll(/@import\s+(?:url\()?['"]?([^'")\s;]+)/g))
+        scrapeCss(new URL(m[1], href).href);
+    }).catch(() => {}));
+  };
+  const walk = (rules, base) => {
+    for (const r of rules) {
+      if (r.type === CSSRule.FONT_FACE_RULE) fontRules.push({ css: r.cssText, base });
+      else if (r.type === CSSRule.IMPORT_RULE && r.styleSheet) {
+        const ibase = r.styleSheet.href || base;
+        try { walk(r.styleSheet.cssRules, ibase); } catch { scrapeCss(ibase); }
+      } else if (r.cssRules) walk(r.cssRules, base);
+    }
+  };
+  for (const ss of document.styleSheets) {
+    const base = ss.href || location.href;
+    try { walk(ss.cssRules, base); } catch { if (ss.href) scrapeCss(ss.href); }
+  }
+  while (pending.length) await pending.shift();
+  const fontCss = (await Promise.all(fontRules.map(async (rule) => {
+    let out = rule.css, m; const re = /url\((['"]?)([^'")]+)\1\)/g;
+    while ((m = re.exec(rule.css))) {
+      if (m[2].indexOf('data:') === 0) continue;
+      let abs; try { abs = new URL(m[2], rule.base).href; } catch { continue; }
+      out = out.split(m[0]).join('url("' + await toDataURL(abs) + '")');
+    }
+    return out;
+  }))).join('\n');
+
+  const cloneStyled = (src) => {
+    if (src.nodeType === 8 || (src.nodeType === 1 && src.tagName === 'SCRIPT')) return document.createTextNode('');
+    const dst = src.cloneNode(false);
+    if (src.nodeType === 1) {
+      const cs = getComputedStyle(src); let txt = '';
+      for (let i = 0; i < cs.length; i++) txt += cs[i] + ':' + cs.getPropertyValue(cs[i]) + ';';
+      dst.setAttribute('style', txt + 'animation:none;transition:none;');
+      if (src.tagName === 'CANVAS') try { const im = document.createElement('img'); im.src = src.toDataURL(); im.setAttribute('style', txt); return im; } catch {}
+    }
+    for (let c = src.firstChild; c; c = c.nextSibling) dst.appendChild(cloneStyled(c));
+    return dst;
+  };
+  const clone = cloneStyled(node);
+  clone.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+  // Drop the card's own shadow/radius so the export is a flush w×h rect;
+  // the artboard's own background (if any) is already in the computed style.
+  clone.style.boxShadow = 'none'; clone.style.borderRadius = '0';
+
+  const jobs = [];
+  clone.querySelectorAll('img').forEach((el) => {
+    const s = el.getAttribute('src');
+    if (s && s.indexOf('data:') !== 0) jobs.push(toDataURL(el.src).then((d) => el.setAttribute('src', d)));
+  });
+  [clone, ...clone.querySelectorAll('*')].forEach((el) => {
+    const bg = el.style.backgroundImage; if (!bg) return;
+    let m; const re = /url\(["']?([^"')]+)["']?\)/g;
+    while ((m = re.exec(bg))) {
+      const tok = m[0], url = m[1];
+      if (url.indexOf('data:') === 0) continue;
+      jobs.push(toDataURL(url).then((d) => { el.style.backgroundImage = el.style.backgroundImage.split(tok).join('url("' + d + '")'); }));
+    }
+  });
+  await Promise.all(jobs);
+
+  const xml = new XMLSerializer().serializeToString(clone);
+  const save = (blob, ext) => {
+    if (!blob) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name + '.' + ext; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+
+  if (kind === 'html') {
+    const html = '<!doctype html><html><head><meta charset="utf-8"><title>' + name + '</title>' +
+      (fontCss ? '<style>' + fontCss + '</style>' : '') +
+      '</head><body style="margin:0">' + xml + '</body></html>';
+    return save(new Blob([html], { type: 'text/html' }), 'html');
+  }
+
+  // PNG: the SVG's own width/height must be the output resolution — an
+  // <img>-loaded SVG rasterizes at its intrinsic size, so sizing it at 1×
+  // and ctx.scale()-ing up would just upscale a 1× bitmap. viewBox maps the
+  // w×h foreignObject onto the px·w × px·h SVG canvas so the browser renders
+  // the HTML at full resolution.
+  const px = 3;
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w * px + '" height="' + h * px +
+    '" viewBox="0 0 ' + w + ' ' + h + '"><foreignObject width="' + w + '" height="' + h + '">' +
+    (fontCss ? '<style><![CDATA[' + fontCss + ']]></style>' : '') + xml + '</foreignObject></svg>';
+  const img = new Image();
+  await new Promise((res, rej) => {
+    img.onload = res; img.onerror = () => rej(new Error('svg load failed'));
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  });
+  const cv = document.createElement('canvas');
+  cv.width = w * px; cv.height = h * px;
+  cv.getContext('2d').drawImage(img, 0, 0);
+  cv.toBlob((blob) => save(blob, 'png'), 'image/png');
+}
+
+function DCArtboardFrame({ sectionId, artboard, label, order, onRename, onReorder, onFocus, onDelete }) {
+  const { id: rawId, label: rawLabel, width = 260, height = 480, children, style = {} } = artboard.props;
+  const id = rawId ?? rawLabel;
+  const ref = React.useRef(null);
+  const cardRef = React.useRef(null);
+  const menuRef = React.useRef(null);
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const [confirming, setConfirming] = React.useState(false);
+
+  // ⋯ menu: close on any outside pointerdown. Two-click delete lives inside
+  // the menu — first click arms the row, second commits; closing disarms.
+  React.useEffect(() => {
+    if (!menuOpen) { setConfirming(false); return; }
+    const off = (e) => { if (!menuRef.current || !menuRef.current.contains(e.target)) setMenuOpen(false); };
+    document.addEventListener('pointerdown', off, true);
+    return () => document.removeEventListener('pointerdown', off, true);
+  }, [menuOpen]);
+
+  const doExport = (kind) => {
+    setMenuOpen(false);
+    if (!cardRef.current) return;
+    const name = String(label || id || 'artboard').replace(/[^\w\s.-]+/g, '_');
+    dcExport(cardRef.current, width, height, name, kind)
+      .catch((e) => console.error('[design-canvas] export failed:', e));
+  };
+
+  // Live drag-reorder: dragged card sticks to cursor; siblings slide into
+  // their would-be slots in real time via transforms. DOM order only
+  // changes on drop.
+  const onGripDown = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const me = ref.current;
+    // translateX is applied in local (pre-scale) space but pointer deltas and
+    // getBoundingClientRect().left are screen-space — divide by the viewport's
+    // current scale so the dragged card tracks the cursor at any zoom level.
+    const scale = me.getBoundingClientRect().width / me.offsetWidth || 1;
+    const peers = Array.from(document.querySelectorAll(`[data-dc-section="${sectionId}"] [data-dc-slot]`));
+    const homes = peers.map((el) => ({ el, id: el.dataset.dcSlot, x: el.getBoundingClientRect().left }));
+    const slotXs = homes.map((h) => h.x);
+    const startIdx = order.indexOf(id);
+    const startX = e.clientX;
+    let liveOrder = order.slice();
+    me.classList.add('dc-dragging');
+
+    const layout = () => {
+      for (const h of homes) {
+        if (h.id === id) continue;
+        const slot = liveOrder.indexOf(h.id);
+        h.el.style.transform = `translateX(${(slotXs[slot] - h.x) / scale}px)`;
+      }
+    };
+
+    const move = (ev) => {
+      const dx = ev.clientX - startX;
+      me.style.transform = `translateX(${dx / scale}px)`;
+      const cur = homes[startIdx].x + dx;
+      let nearest = 0, best = Infinity;
+      for (let i = 0; i < slotXs.length; i++) {
+        const d = Math.abs(slotXs[i] - cur);
+        if (d < best) { best = d; nearest = i; }
+      }
+      if (liveOrder.indexOf(id) !== nearest) {
+        liveOrder = order.filter((k) => k !== id);
+        liveOrder.splice(nearest, 0, id);
+        layout();
+      }
+    };
+
+    const up = () => {
+      document.removeEventListener('pointermove', move);
+      document.removeEventListener('pointerup', up);
+      const finalSlot = liveOrder.indexOf(id);
+      me.classList.remove('dc-dragging');
+      me.style.transform = `translateX(${(slotXs[finalSlot] - homes[startIdx].x) / scale}px)`;
+      // After the settle transition, kill transitions + clear transforms +
+      // commit the reorder in the same frame so there's no visual snap-back.
+      setTimeout(() => {
+        for (const h of homes) { h.el.style.transition = 'none'; h.el.style.transform = ''; }
+        if (liveOrder.join('|') !== order.join('|')) onReorder(liveOrder);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          for (const h of homes) h.el.style.transition = '';
+        }));
+      }, 180);
+    };
+    document.addEventListener('pointermove', move);
+    document.addEventListener('pointerup', up);
+  };
+
+  return (
+    <div ref={ref} data-dc-slot={id} style={{ position: 'relative', flexShrink: 0 }}>
+      <div className="dc-header" data-noncommentable="" style={{ color: DC.label }} onPointerDown={(e) => e.stopPropagation()}>
+        <div className="dc-labelrow">
+          <div className="dc-grip" onPointerDown={onGripDown} title="Drag to reorder">
+            <svg width="9" height="13" viewBox="0 0 9 13" fill="currentColor"><circle cx="2" cy="2" r="1.1"/><circle cx="7" cy="2" r="1.1"/><circle cx="2" cy="6.5" r="1.1"/><circle cx="7" cy="6.5" r="1.1"/><circle cx="2" cy="11" r="1.1"/><circle cx="7" cy="11" r="1.1"/></svg>
+          </div>
+          <div className="dc-labeltext" onClick={onFocus} title="Click to focus">
+            <DCEditable value={label} onChange={onRename} onClick={(e) => e.stopPropagation()}
+              style={{ fontSize: 15, fontWeight: 500, color: DC.label, lineHeight: 1 }} />
+          </div>
+        </div>
+        <div className="dc-btns">
+          <div ref={menuRef} style={{ position: 'relative' }}>
+            <button className="dc-kebab" title="More" onClick={() => setMenuOpen((o) => !o)}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="2.5" cy="6" r="1.1"/><circle cx="6" cy="6" r="1.1"/><circle cx="9.5" cy="6" r="1.1"/></svg>
+            </button>
+            {menuOpen && (
+              <div className="dc-menu" onPointerDown={(e) => e.stopPropagation()}>
+                <button onClick={() => doExport('png')}>Download PNG</button>
+                <button onClick={() => doExport('html')}>Download HTML</button>
+                <hr />
+                <button className="dc-danger"
+                  onClick={() => { if (confirming) { setMenuOpen(false); onDelete(); } else setConfirming(true); }}>
+                  {confirming ? 'Click again to delete' : 'Delete'}
+                </button>
+              </div>
+            )}
+          </div>
+          <button className="dc-expand" onClick={onFocus} title="Focus">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M7 1h4v4M5 11H1V7M11 1L7.5 4.5M1 11l3.5-3.5"/></svg>
+          </button>
+        </div>
+      </div>
+      <div ref={cardRef} className="dc-card"
+        style={{ borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06)', overflow: 'hidden', width, height, background: '#fff', ...style }}>
+        {children || <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#bbb', fontSize: 13, fontFamily: DC.font }}>{id}</div>}
+      </div>
+    </div>
+  );
+}
+
+// Inline rename — commits on blur or Enter.
+function DCEditable({ value, onChange, style, tag = 'span', onClick }) {
+  const T = tag;
+  return (
+    <T className="dc-editable" contentEditable suppressContentEditableWarning
+      onClick={onClick}
+      onPointerDown={(e) => e.stopPropagation()}
+      onBlur={(e) => onChange && onChange(e.currentTarget.textContent)}
+      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+      style={style}>{value}</T>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Focus mode — overlay one artboard; ←/→ within section, ↑/↓ across
+// sections, Esc or backdrop click to exit.
+// ─────────────────────────────────────────────────────────────
+function DCFocusOverlay({ entry, sectionMeta, sectionOrder }) {
+  const ctx = React.useContext(DCCtx);
+  const { sectionId, artboard } = entry;
+  const sec = ctx.section(sectionId);
+  const meta = sectionMeta[sectionId];
+  const peers = meta.slotIds;
+  const aid = artboard.props.id ?? artboard.props.label;
+  const idx = peers.indexOf(aid);
+  const secIdx = sectionOrder.indexOf(sectionId);
+
+  const go = (d) => { const n = peers[(idx + d + peers.length) % peers.length]; if (n) ctx.setFocus(`${sectionId}/${n}`); };
+  const goSection = (d) => {
+    // Sections whose artboards are all deleted have slotIds:[] — step past
+    // them to the next non-empty section so ↑/↓ doesn't dead-end.
+    const n = sectionOrder.length;
+    for (let i = 1; i < n; i++) {
+      const ns = sectionOrder[(((secIdx + d * i) % n) + n) % n];
+      const first = sectionMeta[ns] && sectionMeta[ns].slotIds[0];
+      if (first) { ctx.setFocus(`${ns}/${first}`); return; }
+    }
+  };
+
+  React.useEffect(() => {
+    const k = (e) => {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+      if (e.key === 'ArrowUp') { e.preventDefault(); goSection(-1); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); goSection(1); }
+    };
+    document.addEventListener('keydown', k);
+    return () => document.removeEventListener('keydown', k);
+  });
+
+  const { width = 260, height = 480, children } = artboard.props;
+  const [vp, setVp] = React.useState({ w: window.innerWidth, h: window.innerHeight });
+  React.useEffect(() => { const r = () => setVp({ w: window.innerWidth, h: window.innerHeight }); window.addEventListener('resize', r); return () => window.removeEventListener('resize', r); }, []);
+  const scale = Math.max(0.1, Math.min((vp.w - 200) / width, (vp.h - 260) / height, 2));
+
+  const [ddOpen, setDd] = React.useState(false);
+  const Arrow = ({ dir, onClick }) => (
+    <button onClick={(e) => { e.stopPropagation(); onClick(); }}
+      style={{ position: 'absolute', top: '50%', [dir]: 28, transform: 'translateY(-50%)',
+        border: 'none', background: 'rgba(255,255,255,.08)', color: 'rgba(255,255,255,.9)',
+        width: 44, height: 44, borderRadius: 22, fontSize: 18, cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background .15s' }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,.18)')}
+      onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,.08)')}>
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <path d={dir === 'left' ? 'M11 3L5 9l6 6' : 'M7 3l6 6-6 6'} /></svg>
+    </button>
+  );
+
+  // Portal to body so position:fixed is the real viewport regardless of any
+  // transform on DesignCanvas's ancestors (including the canvas zoom itself).
+  return ReactDOM.createPortal(
+    <div onClick={() => ctx.setFocus(null)}
+      onWheel={(e) => e.preventDefault()}
+      style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(24,20,16,.6)', backdropFilter: 'blur(14px)',
+        fontFamily: DC.font, color: '#fff' }}>
+
+      {/* top bar: section dropdown (left) · close (right) */}
+      <div onClick={(e) => e.stopPropagation()}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 72, display: 'flex', alignItems: 'flex-start', padding: '16px 20px 0', gap: 16 }}>
+        <div style={{ position: 'relative' }}>
+          <button onClick={() => setDd((o) => !o)}
+            style={{ border: 'none', background: 'transparent', color: '#fff', cursor: 'pointer', padding: '6px 8px',
+              borderRadius: 6, textAlign: 'left', fontFamily: 'inherit' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 18, fontWeight: 600, letterSpacing: -0.3 }}>{meta.title}</span>
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" style={{ opacity: .7 }}><path d="M2 4l3.5 3.5L9 4"/></svg>
+            </span>
+            {meta.subtitle && <span style={{ display: 'block', fontSize: 13, opacity: .6, fontWeight: 400, marginTop: 2 }}>{meta.subtitle}</span>}
+          </button>
+          {ddOpen && (
+            <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: 4, background: '#2a251f', borderRadius: 8,
+              boxShadow: '0 8px 32px rgba(0,0,0,.4)', padding: 4, minWidth: 200, zIndex: 10 }}>
+              {sectionOrder.filter((sid) => sectionMeta[sid].slotIds.length).map((sid) => (
+                <button key={sid} onClick={() => { setDd(false); const f = sectionMeta[sid].slotIds[0]; if (f) ctx.setFocus(`${sid}/${f}`); }}
+                  style={{ display: 'block', width: '100%', textAlign: 'left', border: 'none', cursor: 'pointer',
+                    background: sid === sectionId ? 'rgba(255,255,255,.1)' : 'transparent', color: '#fff',
+                    padding: '8px 12px', borderRadius: 5, fontSize: 14, fontWeight: sid === sectionId ? 600 : 400, fontFamily: 'inherit' }}>
+                  {sectionMeta[sid].title}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div style={{ flex: 1 }} />
+        <button onClick={() => ctx.setFocus(null)}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,.12)')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+          style={{ border: 'none', background: 'transparent', color: 'rgba(255,255,255,.7)', width: 32, height: 32,
+            borderRadius: 16, fontSize: 20, cursor: 'pointer', lineHeight: 1, transition: 'background .12s' }}>×</button>
+      </div>
+
+      {/* card centered, label + index below — only the card itself stops
+          propagation so any backdrop click (including the margins around
+          the card) exits focus */}
+      <div
+        style={{ position: 'absolute', top: 64, bottom: 56, left: 100, right: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+        <div onClick={(e) => e.stopPropagation()} style={{ width: width * scale, height: height * scale, position: 'relative' }}>
+          <div style={{ width, height, transform: `scale(${scale})`, transformOrigin: 'top left', background: '#fff', borderRadius: 2, overflow: 'hidden',
+            boxShadow: '0 20px 80px rgba(0,0,0,.4)' }}>
+            {children || <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#bbb' }}>{aid}</div>}
+          </div>
+        </div>
+        <div onClick={(e) => e.stopPropagation()} style={{ fontSize: 14, fontWeight: 500, opacity: .85, textAlign: 'center' }}>
+          {(sec.labels || {})[aid] ?? artboard.props.label}
+          <span style={{ opacity: .5, marginLeft: 10, fontVariantNumeric: 'tabular-nums' }}>{idx + 1} / {peers.length}</span>
+        </div>
+      </div>
+
+      <Arrow dir="left" onClick={() => go(-1)} />
+      <Arrow dir="right" onClick={() => go(1)} />
+
+      {/* dots */}
+      <div onClick={(e) => e.stopPropagation()}
+        style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 8 }}>
+        {peers.map((p, i) => (
+          <button key={p} onClick={() => ctx.setFocus(`${sectionId}/${p}`)}
+            style={{ border: 'none', padding: 0, cursor: 'pointer', width: 6, height: 6, borderRadius: 3,
+              background: i === idx ? '#fff' : 'rgba(255,255,255,.3)' }} />
+        ))}
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Post-it — absolute-positioned sticky note
+// ─────────────────────────────────────────────────────────────
+function DCPostIt({ children, top, left, right, bottom, rotate = -2, width = 180 }) {
+  return (
+    <div style={{
+      position: 'absolute', top, left, right, bottom, width,
+      background: DC.postitBg, padding: '14px 16px',
+      fontFamily: '"Comic Sans MS", "Marker Felt", "Segoe Print", cursive',
+      fontSize: 14, lineHeight: 1.4, color: DC.postitText,
+      boxShadow: '0 2px 8px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08)',
+      transform: `rotate(${rotate}deg)`,
+      zIndex: 5,
+    }}>{children}</div>
+  );
+}
+
+Object.assign(window, { DesignCanvas, DCSection, DCArtboard, DCPostIt });
+
+
+  </script>
+  <script type="text/babel" data-presets="env,react">
+// Seshn — wireframe atoms
+
+const Logo = ({ size = 18 }) => (
+  <span className="logo" style={{ fontSize: size }}>Seshn</span>
+);
+
+const Pill = ({ children, variant = "neutral", style }) => (
+  <span className={`pill ${variant}`} style={style}>{children}</span>
+);
+
+const Avatar = ({ size = "md", role, initials, style }) => {
+  const cls = size === "sm" ? "avatar sm" : size === "lg" ? "avatar lg" : size === "xl" ? "avatar xl" : "avatar";
+  return (
+    <span className={cls} style={style}>
+      {initials || ""}
+      {role && <span className="role-dot">{role}</span>}
+    </span>
+  );
+};
+
+const Btn = ({ children, variant = "default", size, block, style }) => {
+  const cls = ["btn", variant !== "default" ? variant : "", size === "lg" ? "lg" : size === "sm" ? "sm" : "", block ? "block" : ""].filter(Boolean).join(" ");
+  return <button className={cls} style={style}>{children}</button>;
+};
+
+const Input = ({ placeholder, size, style, value }) => (
+  <input className={`input ${size === "lg" ? "lg" : ""}`} placeholder={placeholder} defaultValue={value} style={style} />
+);
+
+const PH = ({ w, h, label, img, soft, radius, style }) => (
+  <div
+    className={`ph ${img ? "ph-img" : ""} ${soft ? "ph-block soft" : ""}`}
+    style={{ width: w, height: h, borderRadius: radius, ...style }}
+  >
+    {img ? <span>{label || "image"}</span> : (label || null)}
+  </div>
+);
+
+const Line = ({ w = "100%", size = "md", style }) => {
+  const cls = size === "sm" ? "ph-line sm" : size === "lg" ? "ph-line lg" : "ph-line";
+  return <div className={cls} style={{ width: w, ...style }} />;
+};
+
+const Lines = ({ count = 3, last = "60%", style }) => (
+  <div className="col" style={{ gap: 6, ...style }}>
+    {Array.from({ length: count }).map((_, i) => (
+      <Line key={i} w={i === count - 1 ? last : "100%"} />
+    ))}
+  </div>
+);
+
+const Audio = ({ compact, title = "Track title", artist = "Artist · 3:24", source = "SoundCloud" }) => (
+  <div className={`audio ${compact ? "compact" : ""}`}>
+    <span className="play" />
+    <div className="wave" />
+    <div className="meta">
+      <b>{title}</b>
+      <span>{artist} · {source}</span>
+    </div>
+  </div>
+);
+
+const Icon = ({ size = 16, kind, style }) => {
+  // Simple monochrome line glyphs, drawn with CSS
+  const s = { width: size, height: size, display: "inline-block", flex: "0 0 auto", ...style };
+  const base = {
+    width: size, height: size,
+    background: "currentColor",
+    WebkitMaskRepeat: "no-repeat", maskRepeat: "no-repeat",
+    WebkitMaskPosition: "center", maskPosition: "center",
+    WebkitMaskSize: "contain", maskSize: "contain",
+  };
+  const svgs = {
+    search:    `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><circle cx='11' cy='11' r='7'/><path d='m20 20-3.5-3.5'/></svg>`,
+    bell:      `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9'/><path d='M10 21a2 2 0 0 0 4 0'/></svg>`,
+    plus:      `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M12 5v14M5 12h14'/></svg>`,
+    message:   `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M21 12a8 8 0 0 1-12 7l-5 1 1-5a8 8 0 1 1 16-3z'/></svg>`,
+    filter:    `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M3 5h18M6 12h12M10 19h4'/></svg>`,
+    check:     `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5'><path d='M5 12l5 5L20 7'/></svg>`,
+    chevron:   `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='m9 6 6 6-6 6'/></svg>`,
+    pin:       `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M12 22s-7-7.5-7-13a7 7 0 1 1 14 0c0 5.5-7 13-7 13z'/><circle cx='12' cy='9' r='2.5'/></svg>`,
+    star:      `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='m12 3 2.7 6 6.3.5-4.8 4.2L17.6 20 12 16.7 6.4 20l1.5-6.3L3 9.5 9.3 9z'/></svg>`,
+    paperclip: `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='m21 12-8.5 8.5a5 5 0 1 1-7-7L14 5a3 3 0 1 1 4 4l-9 9a1 1 0 1 1-1.5-1.5L15 8'/></svg>`,
+    sliders:   `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M4 6h16M4 12h16M4 18h16'/><circle cx='9' cy='6' r='2'/><circle cx='15' cy='12' r='2'/><circle cx='8' cy='18' r='2'/></svg>`,
+    grid:      `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><rect x='3' y='3' width='7' height='7'/><rect x='14' y='3' width='7' height='7'/><rect x='3' y='14' width='7' height='7'/><rect x='14' y='14' width='7' height='7'/></svg>`,
+    list:      `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01'/></svg>`,
+    home:      `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M3 11 12 3l9 8'/><path d='M5 10v10h14V10'/></svg>`,
+    compass:   `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><circle cx='12' cy='12' r='9'/><path d='m9 15 2-5 5-2-2 5z'/></svg>`,
+    folder:    `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M3 6h7l2 2h9v11H3z'/></svg>`,
+    user:      `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><circle cx='12' cy='8' r='4'/><path d='M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6'/></svg>`,
+    google:    `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M21 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9c2.5 0 4.5 1 6 2.5'/><path d='M21 12h-9'/></svg>`,
+    apple:     `<svg viewBox='0 0 24 24' fill='black'><path d='M16 3c0 2-1.5 4-3.5 4 0-2 2-4 3.5-4z'/><path d='M19 17c-.8 2-1.7 4-3.3 4-1.4 0-1.8-.8-3.4-.8s-2.1.8-3.4.8c-1.7 0-2.9-2.3-3.7-4.5C3.5 12.7 5 8 8 8c1.4 0 2.3.8 3.5.8 1.1 0 1.9-.9 3.5-.9 1.4 0 2.7.8 3.5 2-3 1.7-2.5 5.7.5 7.1z'/></svg>`,
+    spark:     `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M12 3v6M12 15v6M3 12h6M15 12h6M5.6 5.6l4.2 4.2M14.2 14.2l4.2 4.2M18.4 5.6l-4.2 4.2M9.8 14.2l-4.2 4.2'/></svg>`,
+    mic:       `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><rect x='9' y='3' width='6' height='12' rx='3'/><path d='M5 11a7 7 0 0 0 14 0M12 18v3'/></svg>`,
+    gear:      `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><circle cx='12' cy='12' r='3'/><path d='M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2'/></svg>`,
+  };
+  const data = svgs[kind] || svgs.spark;
+  const url = `url("data:image/svg+xml;utf8,${encodeURIComponent(data)}")`;
+  return <span style={{ ...base, ...style, WebkitMaskImage: url, maskImage: url }} />;
+};
+
+// ——— Gig card (3 contexts: feed | compact | mini) ———
+const GigCard = ({ context = "feed", boost, role = "Vocalist", title = "Need a topline writer for an Afrobeats demo", desc, tags = ["Afrobeats", "R&B"], comp = "Paid · $200", time = "2h", name = "Maya O.", initials = "MO", roleTag = "PROD" }) => {
+  if (context === "mini") {
+    return (
+      <div className="gig" style={{ padding: 12, gap: 8, borderRadius: 12 }}>
+        <div className="row" style={{ gap: 8 }}>
+          <Avatar size="sm" initials={initials} />
+          <span className="t-meta">{name} · {time}</span>
+        </div>
+        <div className="gig-title" style={{ fontSize: 13 }}>{title}</div>
+        <div className="row" style={{ gap: 4, flexWrap: "wrap" }}>
+          <Pill variant="accent">{role}</Pill>
+          {tags.slice(0, 1).map(t => <Pill key={t}>{t}</Pill>)}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className={`gig ${boost ? "boost" : ""}`}>
+      <div className="gig-head">
+        <Avatar size="md" initials={initials} role={roleTag} />
+        <div className="col" style={{ flex: 1, gap: 2 }}>
+          <div className="row" style={{ gap: 6 }}>
+            <span style={{ fontWeight: 600, fontFamily: "var(--font-display)" }}>{name}</span>
+            <span className="dot" />
+            <span className="t-meta">{time} ago</span>
+            {boost && <Pill variant="solid" style={{ marginLeft: "auto", fontSize: 9 }}>★ Boosted</Pill>}
+          </div>
+          <div className="row" style={{ gap: 6 }}>
+            <Pill variant="accent">{role} needed</Pill>
+            <span className="t-meta">· {comp}</span>
+          </div>
+        </div>
+      </div>
+      <div className="gig-title">{title}</div>
+      {desc !== false && (
+        <div className="col" style={{ gap: 4 }}>
+          <Line />
+          <Line w="84%" />
+        </div>
+      )}
+      <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
+        {tags.map(t => <Pill key={t}>{t}</Pill>)}
+      </div>
+      <div className="gig-foot">
+        <span className="t-meta">12 applied · 3 days left</span>
+        <div className="row" style={{ gap: 8 }}>
+          <Btn size="sm">View</Btn>
+          <Btn size="sm" variant="primary">Apply</Btn>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ——— Browser frame ———
+const Browser = ({ url = "seshn.fm/feed", children, dark }) => (
+  <div className={`wf ${dark ? "dark" : ""}`}>
+    <div className="chrome">
+      <div className="dots"><span /><span /><span /></div>
+      <div className="url">{url}</div>
+      <div style={{ width: 40 }} />
+    </div>
+    <div style={{ position: "absolute", inset: "38px 0 0 0", overflow: "hidden" }}>
+      {children}
+    </div>
+  </div>
+);
+
+// ——— Phone frame ———
+const Phone = ({ time = "9:41", children, dark, tabbar }) => (
+  <div className={`wf wf-mobile ${dark ? "dark" : ""}`}>
+    <div className="phone-bar">
+      <span>{time}</span>
+      <div className="right">
+        <span className="signal" style={{ width: 14, height: 9 }} />
+        <span style={{ width: 14, height: 9, background: "transparent", border: "1px solid currentColor", borderRadius: 2 }} />
+        <span className="battery" />
+      </div>
+    </div>
+    <div style={{ position: "absolute", left: 0, right: 0, top: 28, bottom: tabbar ? 64 : 0, overflow: "hidden" }}>
+      {children}
+    </div>
+    {tabbar && tabbar}
+  </div>
+);
+
+const MobileTabBar = ({ active = "home" }) => (
+  <div className="tabbar">
+    <div className={`t ${active === "home" ? "active" : ""}`}><span className="ic" />Feed</div>
+    <div className={`t ${active === "browse" ? "active" : ""}`}><span className="ic" />Browse</div>
+    <div className="t post"><span className="ic" /></div>
+    <div className={`t ${active === "msg" ? "active" : ""}`}><span className="ic" />Inbox</div>
+    <div className={`t ${active === "me" ? "active" : ""}`}><span className="ic" />You</div>
+  </div>
+);
+
+window.SeshnAtoms = { Logo, Pill, Avatar, Btn, Input, PH, Line, Lines, Audio, Icon, GigCard, Browser, Phone, MobileTabBar };
+Object.assign(window, window.SeshnAtoms);
+
+  </script>
+  <script type="text/babel" data-presets="env,react">
+// Seshn — Screens part 1: Landing, Auth/Onboarding, Profile, Home Feed, Gig Detail
+
+const { Logo, Pill, Avatar, Btn, Input, PH, Line, Lines, Audio, Icon, GigCard, Browser, Phone, MobileTabBar } = window.SeshnAtoms;
+
+// ════════════════════════════════════════════════════════════════
+// 1. LANDING
+// ════════════════════════════════════════════════════════════════
+
+const LandingNav = ({ mobile }) => (
+  <div className="between" style={{ padding: mobile ? "14px 18px" : "18px 40px" }}>
+    <Logo />
+    {!mobile ? (
+      <div className="row" style={{ gap: 22 }}>
+        <span className="t-meta" style={{ color: "var(--ink-2)", fontWeight: 500 }}>Browse</span>
+        <span className="t-meta" style={{ color: "var(--ink-2)", fontWeight: 500 }}>How it works</span>
+        <span className="t-meta" style={{ color: "var(--ink-2)", fontWeight: 500 }}>Sign in</span>
+        <Btn variant="primary" size="sm">Sign up</Btn>
+      </div>
+    ) : (
+      <div className="row" style={{ gap: 12 }}>
+        <span className="t-meta" style={{ fontWeight: 500 }}>Sign in</span>
+        <Btn variant="primary" size="sm">Sign up</Btn>
+      </div>
+    )}
+  </div>
+);
+
+const LandingDesktop = () => (
+  <Browser url="seshn.fm" dark>
+    <div style={{ height: "100%", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+      <LandingNav />
+      {/* Hero */}
+      <div style={{ padding: "32px 40px 28px", display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: 40, alignItems: "center" }}>
+        <div className="col" style={{ gap: 24 }}>
+          <Pill variant="accent" style={{ alignSelf: "flex-start" }}>● Live · 412 sessions this week</Pill>
+          <div className="t-h1" style={{ fontSize: 56, lineHeight: 1, letterSpacing: "-0.035em" }}>
+            Find the people<br />who finish<br />your record.
+          </div>
+          <div className="t-muted" style={{ fontSize: 14, maxWidth: 380 }}>
+            Seshn connects vocalists, producers, instrumentalists and engineers building real projects — not chasing followers.
+          </div>
+          <div className="row" style={{ gap: 10 }}>
+            <Btn variant="primary" size="lg">Create your profile →</Btn>
+            <Btn size="lg">Browse the feed</Btn>
+          </div>
+          <div className="row" style={{ gap: 18, marginTop: 4 }}>
+            <span className="t-meta">Trusted by artists from</span>
+            <div className="row" style={{ gap: 14, opacity: 0.6 }}>
+              <PH w={64} h={14} label="LOGO" soft />
+              <PH w={56} h={14} label="LOGO" soft />
+              <PH w={72} h={14} label="LOGO" soft />
+              <PH w={60} h={14} label="LOGO" soft />
+            </div>
+          </div>
+        </div>
+        {/* Live feed snippet */}
+        <div className="card" style={{ padding: 14, background: "var(--surface-2)", borderRadius: 16 }}>
+          <div className="between" style={{ marginBottom: 12 }}>
+            <span className="t-eyebrow">Live feed · just now</span>
+            <Pill>● {3} new</Pill>
+          </div>
+          <div className="col" style={{ gap: 10 }}>
+            <GigCard role="Vocalist" title="Topline writer wanted — Afrobeats demo" tags={["Afrobeats", "Toplines"]} comp="Paid · $200" name="Maya O." initials="MO" roleTag="PROD" time="2h" desc={false} />
+            <GigCard role="Mixing eng." title="Mix 4-song indie EP, lo-fi shoegaze references" tags={["Shoegaze", "Indie"]} comp="Paid · $600" name="Iván R." initials="IR" roleTag="ART" time="5h" desc={false} />
+            <GigCard role="Drummer" title="Live session drummer, NYC, 3 dates in June" tags={["Live", "Soul"]} comp="Paid · $450/show" name="Theo B." initials="TB" roleTag="ART" time="9h" desc={false} boost />
+          </div>
+        </div>
+      </div>
+      {/* Feature row */}
+      <div style={{ padding: "20px 40px 0", display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18, borderTop: "1px solid var(--line)", marginTop: "auto" }}>
+        {[
+          { n: "01", t: "Post what you need", b: "Vocal, mix, session player, beat — the brief takes 90 seconds." },
+          { n: "02", t: "Find your collaborators", b: "Filter by role, genre, comp type, location. No follower counts." },
+          { n: "03", t: "Build your team", b: "Spin up a project room: chat, files, audio, deadlines, members." },
+        ].map(f => (
+          <div key={f.n} className="col" style={{ gap: 8, padding: "22px 0" }}>
+            <span className="t-eyebrow">{f.n}</span>
+            <div className="t-h3" style={{ fontSize: 18 }}>{f.t}</div>
+            <span className="t-muted" style={{ fontSize: 12 }}>{f.b}</span>
+          </div>
+        ))}
+      </div>
+      {/* Footer CTA */}
+      <div style={{ padding: "20px 40px", borderTop: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span className="t-muted" style={{ fontSize: 12 }}>Free to join · Pro from $5/mo</span>
+        <Btn variant="primary" size="lg">Create your profile →</Btn>
+      </div>
+    </div>
+  </Browser>
+);
+
+const LandingMobile = () => (
+  <Phone dark>
+    <div className="col" style={{ height: "100%", overflowY: "auto" }}>
+      <LandingNav mobile />
+      <div style={{ padding: "12px 20px 24px" }}>
+        <Pill variant="accent" style={{ marginBottom: 14 }}>● Live · 412 sessions this week</Pill>
+        <div className="t-h1" style={{ fontSize: 34, marginBottom: 12 }}>
+          Find the<br />people who<br />finish your<br />record.
+        </div>
+        <div className="t-muted" style={{ fontSize: 13, marginBottom: 16 }}>
+          Vocalists, producers, instrumentalists & engineers building real projects.
+        </div>
+        <Btn variant="primary" size="lg" block>Create your profile →</Btn>
+        <div style={{ height: 8 }} />
+        <Btn block>Browse the feed</Btn>
+      </div>
+      <div style={{ padding: "0 14px 14px" }}>
+        <div className="t-eyebrow" style={{ padding: "0 6px 8px" }}>Live feed</div>
+        <div className="col" style={{ gap: 8 }}>
+          <GigCard role="Vocalist" title="Topline writer — Afrobeats demo" tags={["Afrobeats"]} comp="$200" name="Maya O." initials="MO" roleTag="PROD" time="2h" desc={false} />
+          <GigCard role="Mixing eng." title="Mix 4-song indie EP" tags={["Shoegaze"]} comp="$600" name="Iván R." initials="IR" roleTag="ART" time="5h" desc={false} />
+        </div>
+      </div>
+      <div style={{ padding: "8px 20px 28px", borderTop: "1px solid var(--line)" }}>
+        {[
+          { n: "01", t: "Post what you need" },
+          { n: "02", t: "Find your collaborators" },
+          { n: "03", t: "Build your team" },
+        ].map(f => (
+          <div key={f.n} className="row" style={{ gap: 14, padding: "14px 0", borderBottom: "1px solid var(--line-soft)" }}>
+            <span className="t-eyebrow" style={{ width: 28 }}>{f.n}</span>
+            <span className="t-h3" style={{ fontSize: 15, flex: 1 }}>{f.t}</span>
+            <Icon kind="chevron" size={14} style={{ color: "var(--ink-3)" }} />
+          </div>
+        ))}
+        <div style={{ height: 16 }} />
+        <Btn variant="primary" size="lg" block>Create your profile</Btn>
+      </div>
+    </div>
+  </Phone>
+);
+
+// ════════════════════════════════════════════════════════════════
+// 2. SIGN UP / LOG IN + ONBOARDING
+// ════════════════════════════════════════════════════════════════
+
+const AuthDesktop = () => (
+  <Browser url="seshn.fm/join">
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", height: "100%" }}>
+      {/* Left: form */}
+      <div className="col" style={{ padding: "40px 64px", justifyContent: "center", gap: 18 }}>
+        <Logo size={20} />
+        <div style={{ height: 14 }} />
+        <div className="t-h1" style={{ fontSize: 36 }}>Make your first session.</div>
+        <div className="t-muted" style={{ maxWidth: 360, fontSize: 13 }}>
+          Create a profile, post a brief, find your collaborators. Free forever.
+        </div>
+        <div style={{ height: 10 }} />
+        <div className="col" style={{ gap: 10, maxWidth: 360 }}>
+          <Btn block size="lg" style={{ justifyContent: "flex-start" }}>
+            <Icon kind="google" size={16} style={{ color: "var(--ink)", marginRight: 8 }} />
+            Continue with Google
+          </Btn>
+          <Btn block size="lg" style={{ justifyContent: "flex-start" }}>
+            <Icon kind="apple" size={16} style={{ color: "var(--ink)", marginRight: 8 }} />
+            Continue with Apple
+          </Btn>
+          <div className="row" style={{ gap: 10, padding: "6px 0" }}>
+            <div style={{ flex: 1, height: 1, background: "var(--line)" }} />
+            <span className="t-meta">or with email</span>
+            <div style={{ flex: 1, height: 1, background: "var(--line)" }} />
+          </div>
+          <Input size="lg" placeholder="you@artist.fm" />
+          <Btn variant="primary" size="lg" block>Send magic link →</Btn>
+        </div>
+        <div style={{ height: 10 }} />
+        <span className="t-meta" style={{ maxWidth: 360 }}>
+          By signing up you agree to Seshn's Terms and Privacy Policy.
+        </span>
+      </div>
+      {/* Right: rotating quote */}
+      <div style={{ background: "var(--ink-black)", color: "var(--frame)", padding: "40px 56px", position: "relative", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <div className="row" style={{ gap: 8 }}>
+          <span className="pill ghost" style={{ borderColor: "rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.7)" }}>● Featured artist · this week</span>
+        </div>
+        <div className="col" style={{ gap: 22 }}>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: 22, lineHeight: 1.25, letterSpacing: "-0.01em", color: "var(--frame)" }}>
+            "I found my whole band on Seshn in three weeks. Two of them ended up on the record."
+          </span>
+          <div className="row" style={{ gap: 10 }}>
+            <Avatar size="md" initials="NK" style={{ background: "rgba(255,255,255,0.1)", color: "var(--frame)" }} />
+            <div className="col" style={{ gap: 2 }}>
+              <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, color: "var(--frame)" }}>Nia Kassim</span>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)" }}>Vocalist · London</span>
+            </div>
+          </div>
+          <div className="row" style={{ gap: 6 }}>
+            {[0,1,2,3].map(i => (
+              <span key={i} style={{ width: 18, height: 3, background: i === 0 ? "var(--accent)" : "rgba(255,255,255,0.2)", borderRadius: 2 }} />
+            ))}
+          </div>
+        </div>
+        <div className="row" style={{ gap: 12, justifyContent: "space-between", color: "rgba(255,255,255,0.55)", fontSize: 11 }}>
+          <span>seshn.fm</span>
+          <span>01 / 04</span>
+        </div>
+      </div>
+    </div>
+  </Browser>
+);
+
+const AuthMobile = () => (
+  <Phone>
+    <div className="col" style={{ height: "100%" }}>
+      <div style={{ padding: "12px 20px" }}><Logo /></div>
+      <div style={{ height: 160, margin: "8px 20px 18px", background: "var(--ink-black)", borderRadius: 14, padding: 18, color: "var(--frame)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <span className="pill ghost" style={{ alignSelf: "flex-start", borderColor: "rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.6)" }}>● Featured</span>
+        <div className="col" style={{ gap: 10 }}>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: 14, lineHeight: 1.3, color: "var(--frame)" }}>
+            "Found my whole band on Seshn in three weeks."
+          </span>
+          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.55)" }}>Nia K. · Vocalist, London</span>
+        </div>
+      </div>
+      <div className="col" style={{ padding: "0 20px", gap: 10 }}>
+        <div className="t-h1" style={{ fontSize: 24 }}>Make your first session.</div>
+        <Btn block size="lg" style={{ justifyContent: "flex-start" }}>
+          <Icon kind="google" size={14} style={{ marginRight: 8 }} />Continue with Google
+        </Btn>
+        <Btn block size="lg" style={{ justifyContent: "flex-start" }}>
+          <Icon kind="apple" size={14} style={{ marginRight: 8 }} />Continue with Apple
+        </Btn>
+        <div className="row" style={{ gap: 10, padding: "4px 0" }}>
+          <div style={{ flex: 1, height: 1, background: "var(--line)" }} />
+          <span className="t-meta">or email</span>
+          <div style={{ flex: 1, height: 1, background: "var(--line)" }} />
+        </div>
+        <Input size="lg" placeholder="you@artist.fm" />
+        <Btn variant="primary" size="lg" block>Send magic link →</Btn>
+      </div>
+      <span className="t-meta" style={{ padding: "16px 20px", textAlign: "center" }}>
+        Already on Seshn? <b style={{ color: "var(--ink)" }}>Sign in</b>
+      </span>
+    </div>
+  </Phone>
+);
+
+const OnboardingDesktop = () => (
+  <Browser url="seshn.fm/welcome/roles">
+    <div className="col" style={{ height: "100%", padding: "32px 64px", alignItems: "center" }}>
+      <div className="between" style={{ width: "100%", maxWidth: 720 }}>
+        <Logo />
+        <span className="t-meta">Step 1 of 3 · You can change all of this later</span>
+      </div>
+      {/* Progress */}
+      <div className="row" style={{ width: "100%", maxWidth: 720, gap: 6, margin: "20px 0 30px" }}>
+        <div style={{ flex: 1, height: 3, background: "var(--accent)", borderRadius: 2 }} />
+        <div style={{ flex: 1, height: 3, background: "var(--line)", borderRadius: 2 }} />
+        <div style={{ flex: 1, height: 3, background: "var(--line)", borderRadius: 2 }} />
+      </div>
+      <div className="col" style={{ maxWidth: 720, width: "100%", gap: 6, marginBottom: 22 }}>
+        <span className="t-eyebrow">01 · Pick your roles</span>
+        <div className="t-h1" style={{ fontSize: 32 }}>What do you bring to the room?</div>
+        <span className="t-muted" style={{ fontSize: 13 }}>Pick up to 3. Your roles appear on your profile and tune the gigs you see.</span>
+      </div>
+      <div style={{ maxWidth: 720, width: "100%", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+        {[
+          ["Producer", true], ["Vocalist", true], ["Songwriter", false], ["Rapper", false],
+          ["Mixing eng.", false], ["Mastering", false], ["Guitarist", true], ["Drummer", false],
+          ["Bassist", false], ["Keys", false], ["DJ", false], ["A&R", false],
+        ].map(([r, sel]) => (
+          <div key={r} className="card" style={{ padding: "14px 14px", textAlign: "center", borderColor: sel ? "var(--accent-d)" : "var(--line)", background: sel ? "var(--accent-bg)" : "var(--surface)", borderRadius: 10 }}>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13, color: sel ? "var(--accent-d)" : "var(--ink)" }}>
+              {sel && "✓ "}{r}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="between" style={{ maxWidth: 720, width: "100%", marginTop: "auto", paddingTop: 24 }}>
+        <Btn variant="ghost">Skip for now</Btn>
+        <Btn variant="primary" size="lg">Continue → Genres</Btn>
+      </div>
+    </div>
+  </Browser>
+);
+
+// ════════════════════════════════════════════════════════════════
+// 3. PROFILE
+// ════════════════════════════════════════════════════════════════
+
+const ProfileDesktop = () => (
+  <Browser url="seshn.fm/@maya.o">
+    <div className="col" style={{ height: "100%", overflowY: "auto" }}>
+      {/* Top nav */}
+      <div className="between" style={{ padding: "12px 32px", borderBottom: "1px solid var(--line)" }}>
+        <Logo />
+        <div className="row" style={{ gap: 18 }}>
+          <Icon kind="search" size={16} style={{ color: "var(--ink-2)" }} />
+          <Icon kind="bell" size={16} style={{ color: "var(--ink-2)" }} />
+          <Avatar size="sm" initials="YT" />
+        </div>
+      </div>
+      {/* Header */}
+      <div style={{ padding: "28px 32px 18px", display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 22, alignItems: "flex-start" }}>
+        <Avatar size="xl" initials="MO" />
+        <div className="col" style={{ gap: 8 }}>
+          <div className="row" style={{ gap: 8 }}>
+            <span className="t-h1" style={{ fontSize: 28 }}>Maya Oduya</span>
+            <Pill variant="solid">✓ Pro</Pill>
+          </div>
+          <div className="row" style={{ gap: 10 }}>
+            <span className="t-muted" style={{ fontSize: 12 }}>Brooklyn, NY · she/her · Active 2h ago</span>
+          </div>
+          <div className="row" style={{ gap: 6, marginTop: 4, flexWrap: "wrap" }}>
+            <Pill variant="accent">Producer</Pill>
+            <Pill variant="accent">Vocalist</Pill>
+            <Pill>R&B</Pill>
+            <Pill>Afrobeats</Pill>
+            <Pill>Soul</Pill>
+          </div>
+        </div>
+        <div className="row" style={{ gap: 8 }}>
+          <Btn>Invite to project</Btn>
+          <Btn variant="primary">Message</Btn>
+        </div>
+      </div>
+      {/* Body grid */}
+      <div style={{ padding: "10px 32px 32px", display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 24 }}>
+        <div className="col" style={{ gap: 22 }}>
+          {/* Bio */}
+          <div>
+            <div className="t-eyebrow" style={{ marginBottom: 8 }}>Bio</div>
+            <div style={{ fontSize: 14, lineHeight: 1.6, color: "var(--ink-2)" }}>
+              Brooklyn-based producer & vocalist working at the seam of R&B and West African pop.
+              Credits with <b>Tems</b>, <b>Lojay</b>, and a few rooms I can't name yet. Open to topline,
+              vocal-feature, and co-production work — paid or fair-split. Studio in Bed-Stuy.
+            </div>
+          </div>
+          {/* Portfolio */}
+          <div>
+            <div className="between" style={{ marginBottom: 10 }}>
+              <div className="t-eyebrow">Portfolio</div>
+              <span className="t-meta">6 tracks</span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <Audio title="Sunday Drives" artist="Maya O. ft. Lojay · 3:24" source="SoundCloud" />
+              <Audio title="Coast (demo)" artist="Maya O. · 2:51" source="Spotify" />
+              <Audio title="Hold The Line" artist="prod. Maya O. · 4:02" source="YouTube" />
+              <Audio title="Morning Light" artist="Maya O. · 3:18" source="SoundCloud" />
+            </div>
+          </div>
+          {/* Recent posts */}
+          <div>
+            <div className="t-eyebrow" style={{ marginBottom: 10 }}>Recent posts</div>
+            <div className="col" style={{ gap: 10 }}>
+              <GigCard role="Topline writer" title="Topline writer for an Afrobeats demo" tags={["Afrobeats", "Toplines"]} comp="Paid · $200" name="Maya Oduya" initials="MO" roleTag="PRO" time="2h" desc={false} />
+              <GigCard role="Drummer" title="Live drummer for 3-show NYC run" tags={["Live", "Soul"]} comp="Paid · $450/show" name="Maya Oduya" initials="MO" roleTag="PRO" time="3d" desc={false} />
+            </div>
+          </div>
+        </div>
+        <div className="col" style={{ gap: 18 }}>
+          {/* Looking for */}
+          <div className="card">
+            <div className="t-eyebrow" style={{ marginBottom: 10 }}>Looking for</div>
+            <div className="col" style={{ gap: 10 }}>
+              {[
+                ["Mixing engineers", "for an EP coming in Q3"],
+                ["Co-writers", "R&B / soul-leaning"],
+                ["Session bassists", "NYC, paid sessions"],
+              ].map(([t, s]) => (
+                <div key={t} className="row" style={{ gap: 10, alignItems: "flex-start" }}>
+                  <span style={{ width: 6, height: 6, borderRadius: 3, background: "var(--accent)", marginTop: 6 }} />
+                  <div className="col" style={{ gap: 1 }}>
+                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13 }}>{t}</span>
+                    <span className="t-meta">{s}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Stats */}
+          <div className="card">
+            <div className="t-eyebrow" style={{ marginBottom: 10 }}>On Seshn</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              {[
+                ["Projects", "12"],
+                ["Collaborators", "38"],
+                ["Response time", "~4h"],
+                ["Member since", "2024"],
+              ].map(([k, v]) => (
+                <div key={k} className="col" style={{ gap: 2 }}>
+                  <span className="t-meta">{k}</span>
+                  <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18 }}>{v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Verified gear / contact (placeholder for sidebar) */}
+          <div className="card hairline">
+            <div className="t-eyebrow" style={{ marginBottom: 10 }}>Links</div>
+            <div className="col" style={{ gap: 8 }}>
+              {["Instagram", "SoundCloud", "Spotify for Artists"].map(l => (
+                <div key={l} className="between">
+                  <span style={{ fontSize: 13 }}>{l}</span>
+                  <Icon kind="chevron" size={14} style={{ color: "var(--ink-3)" }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Browser>
+);
+
+const ProfileMobile = () => (
+  <Phone tabbar={<MobileTabBar active="me" />}>
+    <div className="col" style={{ height: "100%", overflowY: "auto" }}>
+      <div className="between" style={{ padding: "10px 16px" }}>
+        <Icon kind="chevron" size={16} style={{ color: "var(--ink-2)", transform: "rotate(180deg)" }} />
+        <Icon kind="gear" size={16} style={{ color: "var(--ink-2)" }} />
+      </div>
+      <div className="col" style={{ padding: "8px 20px 0", alignItems: "flex-start", gap: 8 }}>
+        <Avatar size="xl" initials="MO" />
+        <div className="row" style={{ gap: 6 }}>
+          <span className="t-h1" style={{ fontSize: 22 }}>Maya Oduya</span>
+          <Pill variant="solid" style={{ fontSize: 9 }}>✓ Pro</Pill>
+        </div>
+        <span className="t-meta">Brooklyn, NY · Active 2h ago</span>
+        <div className="row" style={{ gap: 4, flexWrap: "wrap" }}>
+          <Pill variant="accent">Producer</Pill>
+          <Pill variant="accent">Vocalist</Pill>
+          <Pill>R&B</Pill>
+          <Pill>Afrobeats</Pill>
+        </div>
+        <div className="row" style={{ gap: 8, width: "100%", marginTop: 6 }}>
+          <Btn block>Invite</Btn>
+          <Btn variant="primary" block>Message</Btn>
+        </div>
+      </div>
+      <div className="col" style={{ padding: "18px 20px", gap: 16 }}>
+        <div>
+          <div className="t-eyebrow" style={{ marginBottom: 6 }}>Bio</div>
+          <div style={{ fontSize: 12.5, lineHeight: 1.55, color: "var(--ink-2)" }}>
+            Brooklyn-based producer & vocalist. R&B at the seam of West African pop. Credits with Tems, Lojay & rooms I can't name yet.
+          </div>
+        </div>
+        <div>
+          <div className="between" style={{ marginBottom: 8 }}>
+            <div className="t-eyebrow">Portfolio</div>
+            <span className="t-meta">6 tracks</span>
+          </div>
+          <div className="col" style={{ gap: 8 }}>
+            <Audio compact title="Sunday Drives" artist="ft. Lojay · 3:24" source="SC" />
+            <Audio compact title="Coast (demo)" artist="2:51" source="Spotify" />
+            <Audio compact title="Hold The Line" artist="prod. Maya · 4:02" source="YT" />
+          </div>
+        </div>
+        <div className="card">
+          <div className="t-eyebrow" style={{ marginBottom: 8 }}>Looking for</div>
+          <div className="col" style={{ gap: 6, fontSize: 12.5 }}>
+            <div className="row" style={{ gap: 8 }}><span style={{ width: 5, height: 5, borderRadius: 3, background: "var(--accent)" }} /> Mixing engineers · for Q3 EP</div>
+            <div className="row" style={{ gap: 8 }}><span style={{ width: 5, height: 5, borderRadius: 3, background: "var(--accent)" }} /> Co-writers · R&B / soul</div>
+            <div className="row" style={{ gap: 8 }}><span style={{ width: 5, height: 5, borderRadius: 3, background: "var(--accent)" }} /> Bassists · NYC, paid</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Phone>
+);
+
+// ════════════════════════════════════════════════════════════════
+// 4. HOME FEED
+// ════════════════════════════════════════════════════════════════
+
+const FeedTopbar = () => (
+  <div className="between" style={{ padding: "10px 24px", borderBottom: "1px solid var(--line)" }}>
+    <div className="row" style={{ gap: 18, flex: 1 }}>
+      <Logo />
+      <div style={{ flex: 1, maxWidth: 360, marginLeft: 12 }}>
+        <div className="row" style={{ padding: "8px 12px", background: "var(--surface-2)", borderRadius: 999, border: "1px solid var(--line)", gap: 8 }}>
+          <Icon kind="search" size={13} style={{ color: "var(--ink-3)" }} />
+          <span className="t-meta">Search artists, roles, genres…</span>
+        </div>
+      </div>
+    </div>
+    <div className="row" style={{ gap: 12 }}>
+      <Btn variant="primary" size="sm">+ Post a gig</Btn>
+      <Icon kind="message" size={16} style={{ color: "var(--ink-2)" }} />
+      <Icon kind="bell" size={16} style={{ color: "var(--ink-2)" }} />
+      <Avatar size="sm" initials="YT" />
+    </div>
+  </div>
+);
+
+const FilterGroup = ({ title, items, multi }) => (
+  <div className="col" style={{ gap: 8 }}>
+    <span className="t-eyebrow">{title}</span>
+    <div className="col" style={{ gap: 4 }}>
+      {items.map(([label, count, sel]) => (
+        <div key={label} className="between" style={{ padding: "5px 0" }}>
+          <div className="row" style={{ gap: 8 }}>
+            <span style={{ width: 14, height: 14, borderRadius: multi ? 3 : 999, border: "1px solid var(--line)", background: sel ? "var(--ink)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {sel && <Icon kind="check" size={9} style={{ color: "var(--frame)" }} />}
+            </span>
+            <span style={{ fontSize: 12.5, color: sel ? "var(--ink)" : "var(--ink-2)" }}>{label}</span>
+          </div>
+          <span className="t-meta">{count}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const FeedDesktop = () => (
+  <Browser url="seshn.fm/feed">
+    <div className="col" style={{ height: "100%" }}>
+      <FeedTopbar />
+      <div style={{ display: "grid", gridTemplateColumns: "240px 1fr 280px", gap: 24, padding: "20px 24px", flex: 1, overflow: "hidden" }}>
+        {/* Filters */}
+        <div className="col" style={{ gap: 22, overflowY: "auto", paddingRight: 4 }}>
+          <FilterGroup title="Role needed" multi items={[
+            ["Vocalist", 142, true],
+            ["Producer", 88, false],
+            ["Mixing engineer", 41, true],
+            ["Drummer", 22, false],
+            ["Songwriter", 67, false],
+            ["Guitarist", 35, false],
+          ]} />
+          <FilterGroup title="Compensation" items={[
+            ["Paid", 218, true],
+            ["Split / royalty", 84, false],
+            ["Trade / barter", 19, false],
+            ["Unpaid", 12, false],
+          ]} />
+          <FilterGroup title="Genre" multi items={[
+            ["R&B", 92, true],
+            ["Afrobeats", 38, true],
+            ["Hip-hop", 121, false],
+            ["Indie", 88, false],
+            ["Electronic", 57, false],
+          ]} />
+          <FilterGroup title="Location" items={[
+            ["Remote OK", 184, true],
+            ["Near me", 47, false],
+            ["My city", 12, false],
+          ]} />
+        </div>
+        {/* Feed */}
+        <div className="col" style={{ gap: 14, overflowY: "auto", paddingRight: 4 }}>
+          <div className="between">
+            <div className="t-h2" style={{ fontSize: 18 }}>Your feed <span className="t-muted" style={{ fontSize: 12, fontWeight: 400 }}>· 24 new today</span></div>
+            <div className="row" style={{ gap: 6 }}>
+              <Pill variant="ghost">Newest</Pill>
+              <Pill>Recommended</Pill>
+            </div>
+          </div>
+          <GigCard boost role="Vocalist" title="Topline writer wanted for Afrobeats demo (Tems-leaning)" tags={["Afrobeats", "R&B", "Topline"]} comp="Paid · $200" name="Maya Oduya" initials="MO" roleTag="PRO" time="2h" />
+          <GigCard role="Mixing engineer" title="Mix 4-song shoegaze EP, MBV-coded references" tags={["Shoegaze", "Indie"]} comp="Paid · $600" name="Iván Reyes" initials="IR" roleTag="ART" time="5h" />
+          <GigCard role="Drummer" title="Live session drummer · 3 NYC dates in June" tags={["Soul", "Live"]} comp="Paid · $450/show" name="Theo Brooks" initials="TB" roleTag="ART" time="9h" />
+          <GigCard role="Songwriter" title="Co-writer for pop demo — top 40 references welcome" tags={["Pop"]} comp="Split · 50/50" name="Amaya L." initials="AL" roleTag="WRT" time="1d" />
+        </div>
+        {/* Right rail */}
+        <div className="col" style={{ gap: 16, overflowY: "auto" }}>
+          <div>
+            <div className="t-eyebrow" style={{ marginBottom: 10 }}>Suggested for you</div>
+            <div className="col" style={{ gap: 10 }}>
+              {[
+                ["Nia Kassim", "NK", "Vocalist · London", "R&B"],
+                ["Sam Park", "SP", "Mixing eng. · LA", "Indie"],
+                ["Lina Vega", "LV", "Producer · CDMX", "Electronic"],
+                ["Mo Daniels", "MD", "Drummer · NYC", "Soul"],
+                ["Robi K.", "RK", "Songwriter · Berlin", "Pop"],
+              ].map(([n, ini, sub, tag]) => (
+                <div key={n} className="row" style={{ gap: 10 }}>
+                  <Avatar initials={ini} />
+                  <div className="col" style={{ gap: 1, flex: 1, minWidth: 0 }}>
+                    <span style={{ fontFamily: "var(--font-display)", fontSize: 12.5, fontWeight: 600 }}>{n}</span>
+                    <span className="t-meta">{sub}</span>
+                  </div>
+                  <Btn size="sm">Follow</Btn>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="card" style={{ background: "var(--accent-bg)", borderColor: "transparent" }}>
+            <div className="t-eyebrow" style={{ color: "var(--accent-d)", marginBottom: 6 }}>Go Pro</div>
+            <div className="t-h3" style={{ fontSize: 14, color: "var(--accent-d)" }}>Message anyone first, unlock analytics, get the verified badge.</div>
+            <div style={{ height: 10 }} />
+            <Btn variant="dark" size="sm">Upgrade — $5/mo</Btn>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Browser>
+);
+
+const FeedMobile = () => (
+  <Phone tabbar={<MobileTabBar active="home" />}>
+    <div className="col" style={{ height: "100%" }}>
+      <div className="between" style={{ padding: "10px 16px", borderBottom: "1px solid var(--line-soft)" }}>
+        <Logo size={16} />
+        <div className="row" style={{ gap: 14 }}>
+          <Icon kind="search" size={15} style={{ color: "var(--ink-2)" }} />
+          <Icon kind="bell" size={15} style={{ color: "var(--ink-2)" }} />
+        </div>
+      </div>
+      <div className="row" style={{ gap: 6, padding: "10px 14px", overflowX: "auto" }}>
+        <Pill variant="solid">All · 24</Pill>
+        <Pill>Vocalist</Pill>
+        <Pill>Mix eng.</Pill>
+        <Pill>Drummer</Pill>
+        <Pill>Producer</Pill>
+        <Icon kind="sliders" size={14} style={{ color: "var(--ink-2)", marginLeft: 4, alignSelf: "center" }} />
+      </div>
+      <div className="col" style={{ gap: 10, padding: "0 14px 14px", overflowY: "auto", flex: 1 }}>
+        <GigCard boost role="Vocalist" title="Topline writer — Afrobeats demo" tags={["Afrobeats", "R&B"]} comp="$200" name="Maya O." initials="MO" roleTag="PRO" time="2h" desc={false} />
+        <GigCard role="Mix eng." title="Mix 4-song shoegaze EP" tags={["Indie"]} comp="$600" name="Iván R." initials="IR" roleTag="ART" time="5h" desc={false} />
+        <GigCard role="Drummer" title="Live drummer · 3 NYC dates" tags={["Soul"]} comp="$450/show" name="Theo B." initials="TB" roleTag="ART" time="9h" desc={false} />
+        <GigCard role="Songwriter" title="Co-writer for pop demo" tags={["Pop"]} comp="50/50 split" name="Amaya L." initials="AL" roleTag="WRT" time="1d" desc={false} />
+      </div>
+    </div>
+  </Phone>
+);
+
+// ════════════════════════════════════════════════════════════════
+// 5. GIG DETAIL
+// ════════════════════════════════════════════════════════════════
+
+const GigDetailDesktop = () => (
+  <Browser url="seshn.fm/g/topline-afrobeats-2k4">
+    <div className="col" style={{ height: "100%", overflowY: "auto" }}>
+      <FeedTopbar />
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 28, padding: "24px 56px" }}>
+        <div className="col" style={{ gap: 20 }}>
+          <div className="row" style={{ gap: 8 }}>
+            <span className="t-meta">← Back to feed</span>
+          </div>
+          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+            <Pill variant="solid">★ Boosted</Pill>
+            <Pill variant="accent">Vocalist needed</Pill>
+            <Pill>Paid · $200</Pill>
+            <Pill>Remote OK</Pill>
+            <Pill>Deadline · Jun 14</Pill>
+          </div>
+          <div className="t-h1" style={{ fontSize: 36, maxWidth: 640 }}>
+            Topline writer wanted for an Afrobeats demo.
+          </div>
+          <div className="row" style={{ gap: 12 }}>
+            <Avatar size="md" initials="MO" role="PRO" />
+            <div className="col" style={{ gap: 2 }}>
+              <span style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Maya Oduya</span>
+              <span className="t-meta">Producer · Brooklyn · Posted 2h ago</span>
+            </div>
+          </div>
+          <div className="card hairline" style={{ background: "transparent", padding: "20px 0", borderLeft: 0, borderRight: 0, borderTopColor: "var(--line)" }}>
+            <Lines count={4} last="70%" />
+            <div style={{ height: 14 }} />
+            <Lines count={3} last="50%" />
+          </div>
+          {/* Reference track */}
+          <div>
+            <div className="t-eyebrow" style={{ marginBottom: 8 }}>Reference</div>
+            <Audio title="Coast (demo) — vibe reference" artist="Maya O. · 2:51" source="SoundCloud" />
+          </div>
+          {/* Apply */}
+          <div className="card" style={{ background: "var(--surface-2)" }}>
+            <div className="t-h2" style={{ fontSize: 18, marginBottom: 4 }}>Apply</div>
+            <span className="t-muted" style={{ fontSize: 12 }}>Maya sees your pitch + 1 attached track.</span>
+            <div style={{ height: 14 }} />
+            <div className="col" style={{ gap: 10 }}>
+              <textarea className="input" rows={4} placeholder="Short pitch — what you'd bring, references, turnaround…" style={{ resize: "none", fontFamily: "inherit" }} />
+              <div className="row" style={{ gap: 10, alignItems: "stretch" }}>
+                <div className="row" style={{ flex: 1, border: "1px dashed var(--line)", borderRadius: 8, padding: "8px 12px", gap: 8 }}>
+                  <Icon kind="paperclip" size={14} style={{ color: "var(--ink-3)" }} />
+                  <span className="t-meta">Attach a portfolio track →</span>
+                </div>
+                <Btn variant="primary" size="lg">Send application</Btn>
+              </div>
+            </div>
+          </div>
+          {/* Related */}
+          <div>
+            <div className="t-eyebrow" style={{ marginBottom: 10 }}>Related posts</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <GigCard context="mini" role="Vocalist" title="Hook writer for an R&B groove" tags={["R&B"]} name="Sam P." initials="SP" time="4h" />
+              <GigCard context="mini" role="Topline" title="Topline x melody for pop ref" tags={["Pop"]} name="Lina V." initials="LV" time="1d" />
+            </div>
+          </div>
+        </div>
+        {/* Sidebar — poster card */}
+        <div className="col" style={{ gap: 14 }}>
+          <div className="card">
+            <div className="row" style={{ gap: 10, marginBottom: 12 }}>
+              <Avatar size="lg" initials="MO" />
+              <div className="col" style={{ gap: 1, flex: 1 }}>
+                <div className="row" style={{ gap: 6 }}>
+                  <span style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Maya Oduya</span>
+                  <Pill variant="solid" style={{ fontSize: 9 }}>✓ Pro</Pill>
+                </div>
+                <span className="t-meta">Producer · Vocalist · Brooklyn</span>
+              </div>
+            </div>
+            <Lines count={2} last="70%" style={{ marginBottom: 12 }} />
+            <div className="row" style={{ gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+              <Pill>R&B</Pill>
+              <Pill>Afrobeats</Pill>
+              <Pill>Soul</Pill>
+            </div>
+            <div className="between" style={{ paddingTop: 10, borderTop: "1px solid var(--line-soft)" }}>
+              <div className="col" style={{ gap: 2 }}>
+                <span className="t-meta">Response time</span>
+                <span style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>~4h</span>
+              </div>
+              <Btn size="sm">View profile</Btn>
+            </div>
+          </div>
+          <div className="card hairline">
+            <div className="t-eyebrow" style={{ marginBottom: 8 }}>Application stats</div>
+            <div className="col" style={{ gap: 8 }}>
+              <div className="between"><span className="t-muted" style={{ fontSize: 12 }}>Applications</span><b style={{ fontFamily: "var(--font-display)" }}>12</b></div>
+              <div className="between"><span className="t-muted" style={{ fontSize: 12 }}>Avg. response</span><b style={{ fontFamily: "var(--font-display)" }}>4h</b></div>
+              <div className="between"><span className="t-muted" style={{ fontSize: 12 }}>Closes</span><b style={{ fontFamily: "var(--font-display)" }}>Jun 14</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Browser>
+);
+
+const GigDetailMobile = () => (
+  <Phone tabbar={<MobileTabBar active="home" />}>
+    <div className="col" style={{ height: "100%", overflowY: "auto" }}>
+      <div className="between" style={{ padding: "10px 16px" }}>
+        <Icon kind="chevron" size={16} style={{ color: "var(--ink-2)", transform: "rotate(180deg)" }} />
+        <Icon kind="star" size={16} style={{ color: "var(--ink-2)" }} />
+      </div>
+      <div className="col" style={{ padding: "4px 20px 16px", gap: 12 }}>
+        <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
+          <Pill variant="solid" style={{ fontSize: 9 }}>★ Boosted</Pill>
+          <Pill variant="accent">Vocalist</Pill>
+          <Pill>$200</Pill>
+        </div>
+        <div className="t-h1" style={{ fontSize: 22 }}>Topline writer wanted for an Afrobeats demo.</div>
+        <div className="row" style={{ gap: 10 }}>
+          <Avatar size="sm" initials="MO" role="PRO" />
+          <span className="t-meta">Maya O. · 2h ago · Brooklyn</span>
+        </div>
+        <Lines count={4} last="60%" />
+        <Audio compact title="Coast (demo) — reference" artist="Maya O. · 2:51" source="SC" />
+      </div>
+      <div className="col" style={{ padding: "14px 20px", background: "var(--surface-2)", borderTop: "1px solid var(--line)", gap: 10 }}>
+        <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14 }}>Apply</span>
+        <textarea className="input" rows={3} placeholder="Short pitch…" style={{ resize: "none", fontFamily: "inherit" }} />
+        <div className="row" style={{ border: "1px dashed var(--line)", borderRadius: 8, padding: "8px 12px", gap: 8 }}>
+          <Icon kind="paperclip" size={13} style={{ color: "var(--ink-3)" }} />
+          <span className="t-meta">Attach portfolio track</span>
+        </div>
+        <Btn variant="primary" size="lg" block>Send application</Btn>
+      </div>
+    </div>
+  </Phone>
+);
+
+window.SeshnScreens1 = {
+  LandingDesktop, LandingMobile,
+  AuthDesktop, AuthMobile, OnboardingDesktop,
+  ProfileDesktop, ProfileMobile,
+  FeedDesktop, FeedMobile,
+  GigDetailDesktop, GigDetailMobile,
+};
+Object.assign(window, window.SeshnScreens1);
+
+  </script>
+  <script type="text/babel" data-presets="env,react">
+// Seshn — Screens part 2: Create post, Browse profiles, Project room, DMs, Pro
+
+const { Logo, Pill, Avatar, Btn, Input, PH, Line, Lines, Audio, Icon, GigCard, Browser, Phone, MobileTabBar } = window.SeshnAtoms;
+
+const FeedTopbar = window.FeedTopbar || (() => (
+  <div className="between" style={{ padding: "10px 24px", borderBottom: "1px solid var(--line)" }}>
+    <div className="row" style={{ gap: 18, flex: 1 }}>
+      <Logo />
+      <div style={{ flex: 1, maxWidth: 360, marginLeft: 12 }}>
+        <div className="row" style={{ padding: "8px 12px", background: "var(--surface-2)", borderRadius: 999, border: "1px solid var(--line)", gap: 8 }}>
+          <Icon kind="search" size={13} style={{ color: "var(--ink-3)" }} />
+          <span className="t-meta">Search artists, roles, genres…</span>
+        </div>
+      </div>
+    </div>
+    <div className="row" style={{ gap: 12 }}>
+      <Btn variant="primary" size="sm">+ Post a gig</Btn>
+      <Icon kind="message" size={16} style={{ color: "var(--ink-2)" }} />
+      <Icon kind="bell" size={16} style={{ color: "var(--ink-2)" }} />
+      <Avatar size="sm" initials="YT" />
+    </div>
+  </div>
+));
+
+// ════════════════════════════════════════════════════════════════
+// 6. CREATE POST FLOW
+// ════════════════════════════════════════════════════════════════
+
+const CreateProgress = ({ step }) => (
+  <div className="row" style={{ gap: 8, alignItems: "center" }}>
+    {[1, 2, 3].map(n => (
+      <React.Fragment key={n}>
+        <div className="row" style={{ gap: 8 }}>
+          <span style={{
+            width: 22, height: 22, borderRadius: 999,
+            background: n <= step ? "var(--ink)" : "transparent",
+            border: "1px solid " + (n <= step ? "var(--ink)" : "var(--line)"),
+            color: n <= step ? "var(--frame)" : "var(--ink-3)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 11,
+          }}>{n < step ? "✓" : n}</span>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: 12, fontWeight: 500, color: n <= step ? "var(--ink)" : "var(--ink-3)" }}>
+            {["Brief", "Details", "Review"][n - 1]}
+          </span>
+        </div>
+        {n < 3 && <div style={{ width: 28, height: 1, background: "var(--line)" }} />}
+      </React.Fragment>
+    ))}
+  </div>
+);
+
+const CreateDesktop = () => (
+  <Browser url="seshn.fm/post/new">
+    <div className="col" style={{ height: "100%", overflowY: "auto" }}>
+      <FeedTopbar />
+      <div style={{ padding: "26px 56px 48px", display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 32 }}>
+        <div className="col" style={{ gap: 20 }}>
+          <div className="between">
+            <CreateProgress step={2} />
+            <span className="t-meta">Auto-saved 2s ago</span>
+          </div>
+          <div>
+            <div className="t-eyebrow">Step 2 of 3</div>
+            <div className="t-h1" style={{ fontSize: 28, marginTop: 4 }}>Who and what.</div>
+          </div>
+          {/* Role */}
+          <div className="col" style={{ gap: 10 }}>
+            <span className="t-h3" style={{ fontSize: 14 }}>Role needed</span>
+            <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
+              {["Vocalist", "Topline writer", "Producer", "Mixing eng.", "Drummer", "Bassist", "Songwriter", "Guitarist", "DJ", "Other"].map((r, i) => (
+                <Pill key={r} variant={i === 1 ? "solid" : "neutral"}>{i === 1 && "✓ "}{r}</Pill>
+              ))}
+            </div>
+          </div>
+          {/* Genre */}
+          <div className="col" style={{ gap: 10 }}>
+            <span className="t-h3" style={{ fontSize: 14 }}>Genre tags <span className="t-meta">· up to 3</span></span>
+            <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
+              {["Afrobeats", "R&B", "Soul", "Pop", "Hip-hop", "Indie", "Electronic", "Folk", "Jazz"].map((r, i) => (
+                <Pill key={r} variant={i < 2 ? "accent" : "neutral"}>{i < 2 && "✓ "}{r}</Pill>
+              ))}
+            </div>
+          </div>
+          {/* Compensation */}
+          <div className="col" style={{ gap: 10 }}>
+            <span className="t-h3" style={{ fontSize: 14 }}>Compensation</span>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+              {[
+                ["Paid", "Fixed fee", true],
+                ["Split", "Royalty / writers share", false],
+                ["Trade", "Reciprocal work", false],
+                ["Unpaid", "Portfolio piece", false],
+              ].map(([t, s, sel]) => (
+                <div key={t} className="card" style={{ padding: 12, borderColor: sel ? "var(--accent-d)" : "var(--line)", background: sel ? "var(--accent-bg)" : "var(--surface)" }}>
+                  <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13, color: sel ? "var(--accent-d)" : "var(--ink)" }}>{sel && "✓ "}{t}</div>
+                  <span className="t-meta">{s}</span>
+                </div>
+              ))}
+            </div>
+            <div className="row" style={{ gap: 10 }}>
+              <Input placeholder="$ Amount" value="200" style={{ maxWidth: 160 }} />
+              <Input placeholder="USD" style={{ maxWidth: 100 }} />
+              <Input placeholder="Deadline · Jun 14, 2026" />
+            </div>
+          </div>
+          <div className="between" style={{ marginTop: 12, paddingTop: 18, borderTop: "1px solid var(--line)" }}>
+            <Btn>← Back · Brief</Btn>
+            <Btn variant="primary" size="lg">Continue → Review</Btn>
+          </div>
+        </div>
+        {/* Right: live preview */}
+        <div className="col" style={{ gap: 12, position: "sticky", top: 0 }}>
+          <div className="t-eyebrow">Live preview · feed card</div>
+          <GigCard role="Topline writer" title="Topline writer wanted for Afrobeats demo" tags={["Afrobeats", "R&B"]} comp="Paid · $200" name="Maya Oduya" initials="MO" roleTag="PRO" time="just now" />
+          <div className="card hairline" style={{ padding: 12 }}>
+            <div className="t-eyebrow" style={{ marginBottom: 6 }}>Visibility</div>
+            <div className="col" style={{ gap: 5, fontSize: 12 }}>
+              <div className="row" style={{ gap: 8 }}><Icon kind="check" size={11} style={{ color: "var(--accent-d)" }} /> Posted to public feed</div>
+              <div className="row" style={{ gap: 8 }}><Icon kind="check" size={11} style={{ color: "var(--accent-d)" }} /> Matches ~142 vocalists</div>
+              <div className="row" style={{ gap: 8 }}><Icon kind="check" size={11} style={{ color: "var(--accent-d)" }} /> Notifications to 12 suggested</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Browser>
+);
+
+const CreateMobile = () => (
+  <Phone>
+    <div className="col" style={{ height: "100%" }}>
+      <div className="between" style={{ padding: "10px 16px", borderBottom: "1px solid var(--line-soft)" }}>
+        <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14 }}>New gig</span>
+        <span className="t-meta">Step 2 / 3</span>
+      </div>
+      <div className="row" style={{ gap: 4, padding: "10px 16px" }}>
+        {[1,2,3].map(n => (
+          <div key={n} style={{ flex: 1, height: 3, background: n <= 2 ? "var(--ink)" : "var(--line)", borderRadius: 2 }} />
+        ))}
+      </div>
+      <div className="col" style={{ padding: "8px 16px 12px", gap: 18, overflowY: "auto", flex: 1 }}>
+        <div>
+          <div className="t-h2" style={{ fontSize: 18 }}>Who and what.</div>
+          <span className="t-meta">Pick the role and how you'll comp.</span>
+        </div>
+        <div className="col" style={{ gap: 8 }}>
+          <span className="t-h3" style={{ fontSize: 13 }}>Role needed</span>
+          <div className="row" style={{ gap: 5, flexWrap: "wrap" }}>
+            {["Vocalist","Topline","Producer","Mix eng.","Drummer","Bassist","Other"].map((r, i) => (
+              <Pill key={r} variant={i === 1 ? "solid" : "neutral"}>{i === 1 && "✓ "}{r}</Pill>
+            ))}
+          </div>
+        </div>
+        <div className="col" style={{ gap: 8 }}>
+          <span className="t-h3" style={{ fontSize: 13 }}>Genres</span>
+          <div className="row" style={{ gap: 5, flexWrap: "wrap" }}>
+            {["Afrobeats","R&B","Soul","Pop","Hip-hop","Indie"].map((r, i) => (
+              <Pill key={r} variant={i < 2 ? "accent" : "neutral"}>{i < 2 && "✓ "}{r}</Pill>
+            ))}
+          </div>
+        </div>
+        <div className="col" style={{ gap: 8 }}>
+          <span className="t-h3" style={{ fontSize: 13 }}>Compensation</span>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            {[["Paid", true], ["Split", false], ["Trade", false], ["Unpaid", false]].map(([t, sel]) => (
+              <div key={t} className="card" style={{ padding: 10, borderColor: sel ? "var(--accent-d)" : "var(--line)", background: sel ? "var(--accent-bg)" : "var(--surface)", textAlign: "center", fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 12, color: sel ? "var(--accent-d)" : "var(--ink)" }}>
+                {sel && "✓ "}{t}
+              </div>
+            ))}
+          </div>
+          <Input placeholder="$ Amount" value="200" />
+        </div>
+      </div>
+      <div className="row" style={{ padding: "12px 16px", borderTop: "1px solid var(--line)", gap: 8 }}>
+        <Btn block>Back</Btn>
+        <Btn variant="primary" block>Continue →</Btn>
+      </div>
+    </div>
+  </Phone>
+);
+
+// Variant: Step 3 review + boost upsell
+const CreateReviewDesktop = () => (
+  <Browser url="seshn.fm/post/new/review">
+    <div className="col" style={{ height: "100%", overflowY: "auto" }}>
+      <FeedTopbar />
+      <div style={{ padding: "26px 56px 48px", display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 32 }}>
+        <div className="col" style={{ gap: 20 }}>
+          <CreateProgress step={3} />
+          <div>
+            <div className="t-eyebrow">Step 3 of 3</div>
+            <div className="t-h1" style={{ fontSize: 28, marginTop: 4 }}>Look it over.</div>
+          </div>
+          <GigCard role="Topline writer" title="Topline writer wanted for Afrobeats demo" tags={["Afrobeats", "R&B"]} comp="Paid · $200" name="Maya Oduya" initials="MO" roleTag="PRO" time="just now" />
+          <div className="row" style={{ gap: 16 }}>
+            <Btn>← Edit details</Btn>
+            <Btn variant="primary" size="lg">Publish to feed →</Btn>
+          </div>
+        </div>
+        {/* Boost upsell */}
+        <div className="card" style={{ background: "var(--ink-black)", color: "var(--frame)", borderColor: "transparent", padding: 24 }}>
+          <div className="row" style={{ gap: 8 }}>
+            <Pill variant="solid">★ Boost</Pill>
+            <span className="t-meta" style={{ color: "rgba(255,255,255,0.55)" }}>Optional · 7 days</span>
+          </div>
+          <div className="t-h2" style={{ color: "var(--frame)", fontSize: 24, marginTop: 14, lineHeight: 1.15 }}>
+            Get 5× more applicants.
+          </div>
+          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", marginTop: 8, lineHeight: 1.5 }}>
+            Pin to the top of the feed, push to matched artists, and tag with a Boosted badge for 7 days.
+          </div>
+          <div className="col" style={{ gap: 8, marginTop: 16, marginBottom: 16 }}>
+            {["Top of the feed", "Push notification to matches", "Boosted badge & ranking"].map(t => (
+              <div key={t} className="row" style={{ gap: 8 }}>
+                <Icon kind="check" size={12} style={{ color: "var(--accent)" }} />
+                <span style={{ fontSize: 12.5, color: "rgba(255,255,255,0.85)" }}>{t}</span>
+              </div>
+            ))}
+          </div>
+          <div className="between" style={{ paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.12)" }}>
+            <div className="col" style={{ gap: 2 }}>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, color: "var(--frame)" }}>$5</span>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)" }}>one-time, 7 days</span>
+            </div>
+            <Btn variant="primary">Add boost</Btn>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Browser>
+);
+
+// ════════════════════════════════════════════════════════════════
+// 7. BROWSE PROFILES
+// ════════════════════════════════════════════════════════════════
+
+const ArtistCard = ({ name, ini, role, sub, tags, active }) => (
+  <div className="card" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+    <div className="row" style={{ gap: 10 }}>
+      <Avatar size="lg" initials={ini} />
+      <div className="col" style={{ gap: 2, flex: 1, minWidth: 0 }}>
+        <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14 }}>{name}</span>
+        <span className="t-meta">{sub}</span>
+        <div className="row" style={{ gap: 4, marginTop: 4 }}>
+          {role.map(r => <Pill key={r} variant="accent">{r}</Pill>)}
+        </div>
+      </div>
+    </div>
+    <Lines count={2} last="65%" />
+    <div className="row" style={{ gap: 4, flexWrap: "wrap" }}>
+      {tags.map(t => <Pill key={t}>{t}</Pill>)}
+    </div>
+    <div className="gig-foot">
+      <span className="t-meta">{active}</span>
+      <Btn size="sm">View profile</Btn>
+    </div>
+  </div>
+);
+
+const BrowseDesktop = () => (
+  <Browser url="seshn.fm/browse">
+    <div className="col" style={{ height: "100%" }}>
+      <FeedTopbar />
+      <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 24, padding: "20px 24px", flex: 1, overflow: "hidden" }}>
+        <div className="col" style={{ gap: 22, overflowY: "auto" }}>
+          <div className="col" style={{ gap: 8 }}>
+            <span className="t-eyebrow">Roles</span>
+            <div className="col" style={{ gap: 4 }}>
+              {[["Vocalist", 142, true], ["Producer", 88, true], ["Mixing engineer", 41], ["Drummer", 22], ["Songwriter", 67], ["Guitarist", 35], ["DJ", 18]].map(([r, c, s]) => (
+                <div key={r} className="between" style={{ padding: "5px 0" }}>
+                  <div className="row" style={{ gap: 8 }}>
+                    <span style={{ width: 14, height: 14, borderRadius: 3, border: "1px solid var(--line)", background: s ? "var(--ink)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {s && <Icon kind="check" size={9} style={{ color: "var(--frame)" }} />}
+                    </span>
+                    <span style={{ fontSize: 12.5 }}>{r}</span>
+                  </div>
+                  <span className="t-meta">{c}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="col" style={{ gap: 8 }}>
+            <span className="t-eyebrow">Location</span>
+            <Input placeholder="City or 'Remote'" />
+            <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
+              <Pill variant="solid">Remote OK</Pill>
+              <Pill>NYC</Pill>
+              <Pill>LA</Pill>
+              <Pill>+</Pill>
+            </div>
+          </div>
+          <div className="col" style={{ gap: 8 }}>
+            <span className="t-eyebrow">Availability</span>
+            <div className="col" style={{ gap: 5, fontSize: 12 }}>
+              {["Open to work", "Open to projects", "Busy"].map((a, i) => (
+                <div key={a} className="row" style={{ gap: 8 }}>
+                  <span style={{ width: 14, height: 14, borderRadius: 999, border: "1px solid var(--line)", background: i === 0 ? "var(--ink)" : "transparent" }} />
+                  <span>{a}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="col" style={{ gap: 16, overflowY: "auto" }}>
+          <div className="between">
+            <div>
+              <div className="t-h2" style={{ fontSize: 20 }}>Browse artists</div>
+              <span className="t-muted" style={{ fontSize: 12 }}>1,284 artists match your filters</span>
+            </div>
+            <div className="row" style={{ gap: 10 }}>
+              <Pill variant="ghost">Newest</Pill>
+              <Pill>Most active</Pill>
+              <Pill variant="solid">Recommended</Pill>
+              <div style={{ width: 1, alignSelf: "stretch", background: "var(--line)" }} />
+              <Icon kind="grid" size={16} style={{ color: "var(--ink)" }} />
+              <Icon kind="list" size={16} style={{ color: "var(--ink-4)" }} />
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+            <ArtistCard name="Nia Kassim" ini="NK" role={["Vocalist"]} sub="London · she/her" tags={["R&B", "Soul"]} active="Active now · Pro" />
+            <ArtistCard name="Sam Park" ini="SP" role={["Mixing eng."]} sub="LA · he/him" tags={["Indie", "Shoegaze"]} active="Active 3h ago" />
+            <ArtistCard name="Lina Vega" ini="LV" role={["Producer"]} sub="CDMX · she/her" tags={["Electronic", "Latin"]} active="Active 1d ago" />
+            <ArtistCard name="Mo Daniels" ini="MD" role={["Drummer"]} sub="NYC · he/him" tags={["Soul", "Funk"]} active="Active 2h ago · Pro" />
+            <ArtistCard name="Robi K." ini="RK" role={["Songwriter"]} sub="Berlin · they/them" tags={["Pop", "Electronic"]} active="Active 5h ago" />
+            <ArtistCard name="Iván Reyes" ini="IR" role={["Vocalist", "Guitar"]} sub="Mexico City · he/him" tags={["Indie", "Folk"]} active="Active 8h ago" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </Browser>
+);
+
+const BrowseMobile = () => (
+  <Phone tabbar={<MobileTabBar active="browse" />}>
+    <div className="col" style={{ height: "100%" }}>
+      <div className="between" style={{ padding: "10px 16px", borderBottom: "1px solid var(--line-soft)" }}>
+        <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 16 }}>Browse</span>
+        <Icon kind="sliders" size={16} style={{ color: "var(--ink-2)" }} />
+      </div>
+      <div className="row" style={{ gap: 6, padding: "10px 14px", overflowX: "auto" }}>
+        <Pill variant="solid">Recommended</Pill>
+        <Pill>Vocalist</Pill>
+        <Pill>Producer</Pill>
+        <Pill>Mix eng.</Pill>
+        <Pill>Remote</Pill>
+      </div>
+      <div className="col" style={{ padding: "0 14px 14px", gap: 10, overflowY: "auto", flex: 1 }}>
+        <ArtistCard name="Nia Kassim" ini="NK" role={["Vocalist"]} sub="London · she/her" tags={["R&B", "Soul"]} active="Active now · Pro" />
+        <ArtistCard name="Sam Park" ini="SP" role={["Mixing eng."]} sub="LA · he/him" tags={["Indie"]} active="Active 3h ago" />
+        <ArtistCard name="Lina Vega" ini="LV" role={["Producer"]} sub="CDMX" tags={["Electronic"]} active="Active 1d ago" />
+      </div>
+    </div>
+  </Phone>
+);
+
+// ════════════════════════════════════════════════════════════════
+// 8. PROJECT ROOM
+// ════════════════════════════════════════════════════════════════
+
+const ChatMessage = ({ self, ini, name, time, body, audio, file }) => (
+  <div className="row" style={{ gap: 10, padding: "10px 0", alignItems: "flex-start", flexDirection: self ? "row-reverse" : "row" }}>
+    <Avatar size="sm" initials={ini} style={{ flex: "0 0 auto" }} />
+    <div className="col" style={{ gap: 4, maxWidth: "70%", alignItems: self ? "flex-end" : "flex-start" }}>
+      <div className="row" style={{ gap: 8, flexDirection: self ? "row-reverse" : "row" }}>
+        <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 12 }}>{name}</span>
+        <span className="t-meta">{time}</span>
+      </div>
+      {body && (
+        <div style={{
+          padding: "10px 14px",
+          background: self ? "var(--ink)" : "var(--surface-2)",
+          color: self ? "var(--frame)" : "var(--ink)",
+          borderRadius: 12,
+          borderTopRightRadius: self ? 4 : 12,
+          borderTopLeftRadius: self ? 12 : 4,
+          fontSize: 13, lineHeight: 1.4,
+        }}>
+          {body}
+        </div>
+      )}
+      {audio && <Audio compact title={audio.title} artist={audio.meta} source="Audio" />}
+      {file && (
+        <div className="row" style={{ gap: 8, padding: "8px 12px", border: "1px solid var(--line)", borderRadius: 10, background: "var(--surface)" }}>
+          <Icon kind="folder" size={14} style={{ color: "var(--ink-3)" }} />
+          <div className="col">
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 12 }}>{file.name}</span>
+            <span className="t-meta">{file.size}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+const ProjectDesktop = () => (
+  <Browser url="seshn.fm/p/sundowner-ep">
+    <div className="col" style={{ height: "100%" }}>
+      {/* Project header */}
+      <div style={{ padding: "16px 28px", borderBottom: "1px solid var(--line)" }}>
+        <div className="between">
+          <div className="col" style={{ gap: 4 }}>
+            <span className="t-eyebrow">Project · started Apr 12</span>
+            <div className="row" style={{ gap: 10 }}>
+              <span className="t-h1" style={{ fontSize: 22 }}>Sundowner EP</span>
+              <Pill variant="accent">In progress</Pill>
+            </div>
+          </div>
+          <div className="row" style={{ gap: 14 }}>
+            <div className="row" style={{ gap: -8 }}>
+              {["MO", "NK", "TB", "SP"].map((i, k) => (
+                <Avatar key={i} size="sm" initials={i} style={{ marginLeft: k > 0 ? -8 : 0, border: "2px solid var(--frame)" }} />
+              ))}
+              <span className="pill" style={{ marginLeft: 6, fontSize: 10 }}>+2</span>
+            </div>
+            <Btn size="sm">Invite</Btn>
+            <Icon kind="gear" size={16} style={{ color: "var(--ink-2)" }} />
+          </div>
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", flex: 1, overflow: "hidden" }}>
+        {/* Chat */}
+        <div className="col" style={{ flex: 1 }}>
+          <div className="col" style={{ flex: 1, overflowY: "auto", padding: "12px 28px" }}>
+            <div className="row" style={{ gap: 10, padding: "8px 0", justifyContent: "center" }}>
+              <span className="t-meta">— Today, Tuesday May 14 —</span>
+            </div>
+            <ChatMessage ini="MO" name="Maya Oduya" time="9:14" body="just pushed v3 of the topline. let me know if the bridge lands. ✶" />
+            <ChatMessage ini="MO" name="Maya Oduya" time="9:14" audio={{ title: "sundowner_topline_v3.wav", meta: "Maya O. · 1:42" }} />
+            <ChatMessage self ini="YT" name="You" time="9:21" body="oh this is the move. the pre is doing exactly what we talked about. one note — can we hold the last word in the bridge a beat longer?" />
+            <ChatMessage ini="NK" name="Nia Kassim" time="9:33" body="will track that today. I'll have a stem up by EOD." />
+            <ChatMessage ini="TB" name="Theo Brooks" time="9:48" file={{ name: "drum-bus_v2_groove-shift.zip", size: "84 MB · Reaper session" }} />
+            <ChatMessage ini="TB" name="Theo Brooks" time="9:48" body="re-cut the hat to push behind the beat. small thing, big feel." />
+          </div>
+          {/* Composer */}
+          <div style={{ padding: "12px 28px", borderTop: "1px solid var(--line)" }}>
+            <div className="row" style={{ gap: 8, padding: "8px 12px", border: "1px solid var(--line)", borderRadius: 12, background: "var(--surface-2)" }}>
+              <Icon kind="paperclip" size={14} style={{ color: "var(--ink-3)" }} />
+              <Icon kind="mic" size={14} style={{ color: "var(--ink-3)" }} />
+              <span className="t-meta" style={{ flex: 1 }}>Reply to the room…</span>
+              <Btn size="sm" variant="primary">Send</Btn>
+            </div>
+          </div>
+        </div>
+        {/* Right panel */}
+        <div style={{ borderLeft: "1px solid var(--line)", padding: "16px 18px", overflowY: "auto", background: "var(--surface-2)" }}>
+          <div className="t-eyebrow" style={{ marginBottom: 8 }}>Brief</div>
+          <Lines count={4} last="55%" style={{ marginBottom: 16 }} />
+          <div className="row" style={{ gap: 6, flexWrap: "wrap", marginBottom: 18 }}>
+            <Pill>R&B</Pill>
+            <Pill>Soul</Pill>
+            <Pill variant="accent">Q3 release</Pill>
+          </div>
+          <div className="t-eyebrow" style={{ marginBottom: 10 }}>Members · 6</div>
+          <div className="col" style={{ gap: 10, marginBottom: 18 }}>
+            {[
+              ["Maya Oduya", "MO", "Producer · Owner"],
+              ["Nia Kassim", "NK", "Vocalist"],
+              ["Theo Brooks", "TB", "Drummer"],
+              ["Sam Park", "SP", "Mix engineer"],
+              ["Iván Reyes", "IR", "Guitar"],
+              ["You", "YT", "A&R"],
+            ].map(([n, i, r]) => (
+              <div key={n} className="row" style={{ gap: 8 }}>
+                <Avatar size="sm" initials={i} />
+                <div className="col" style={{ gap: 0 }}>
+                  <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 11.5 }}>{n}</span>
+                  <span className="t-meta">{r}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="t-eyebrow" style={{ marginBottom: 8 }}>Deadline</div>
+          <div className="card" style={{ padding: 12 }}>
+            <div className="row" style={{ gap: 8 }}>
+              <Icon kind="pin" size={14} style={{ color: "var(--accent-d)" }} />
+              <div className="col" style={{ gap: 1 }}>
+                <span style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Aug 1, 2026</span>
+                <span className="t-meta">Mix lock · 78 days</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Browser>
+);
+
+const ProjectMobile = () => (
+  <Phone>
+    <div className="col" style={{ height: "100%" }}>
+      <div className="between" style={{ padding: "10px 16px", borderBottom: "1px solid var(--line)" }}>
+        <Icon kind="chevron" size={16} style={{ color: "var(--ink-2)", transform: "rotate(180deg)" }} />
+        <div className="col" style={{ alignItems: "center" }}>
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13 }}>Sundowner EP</span>
+          <span className="t-meta">6 members · Q3 release</span>
+        </div>
+        <Icon kind="gear" size={16} style={{ color: "var(--ink-2)" }} />
+      </div>
+      <div className="col" style={{ flex: 1, overflowY: "auto", padding: "8px 14px" }}>
+        <span className="t-meta" style={{ textAlign: "center", padding: "6px 0" }}>— Today, May 14 —</span>
+        <ChatMessage ini="MO" name="Maya" time="9:14" body="just pushed v3 of the topline. let me know if the bridge lands." />
+        <ChatMessage ini="MO" name="Maya" time="9:14" audio={{ title: "topline_v3.wav", meta: "1:42" }} />
+        <ChatMessage self ini="YT" name="You" time="9:21" body="this is the move. one note — hold the last word a beat longer?" />
+        <ChatMessage ini="TB" name="Theo" time="9:48" file={{ name: "drum-bus_v2.zip", size: "84 MB" }} />
+      </div>
+      <div className="row" style={{ padding: "10px 14px", borderTop: "1px solid var(--line)", gap: 8, background: "var(--surface-2)" }}>
+        <Icon kind="paperclip" size={14} style={{ color: "var(--ink-3)" }} />
+        <Icon kind="mic" size={14} style={{ color: "var(--ink-3)" }} />
+        <span className="t-meta" style={{ flex: 1, padding: "4px 10px", background: "var(--surface)", borderRadius: 999, border: "1px solid var(--line)" }}>Reply to the room…</span>
+      </div>
+    </div>
+  </Phone>
+);
+
+// ════════════════════════════════════════════════════════════════
+// 9. DIRECT MESSAGES
+// ════════════════════════════════════════════════════════════════
+
+const ConvoItem = ({ ini, name, time, last, unread, active }) => (
+  <div className="row" style={{ gap: 10, padding: "10px 14px", background: active ? "var(--surface-2)" : "transparent", borderLeft: "3px solid " + (active ? "var(--ink)" : "transparent"), alignItems: "flex-start" }}>
+    <Avatar initials={ini} />
+    <div className="col" style={{ flex: 1, gap: 2, minWidth: 0 }}>
+      <div className="between">
+        <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13 }}>{name}</span>
+        <span className="t-meta">{time}</span>
+      </div>
+      <span style={{ fontSize: 12, color: unread ? "var(--ink)" : "var(--ink-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{last}</span>
+    </div>
+    {unread && <span style={{ width: 8, height: 8, borderRadius: 999, background: "var(--accent)", marginTop: 6 }} />}
+  </div>
+);
+
+const DMDesktop = () => (
+  <Browser url="seshn.fm/dm/nia.kassim">
+    <div className="col" style={{ height: "100%" }}>
+      <FeedTopbar />
+      <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", flex: 1, overflow: "hidden" }}>
+        {/* Conversation list */}
+        <div className="col" style={{ borderRight: "1px solid var(--line)" }}>
+          <div className="col" style={{ padding: "16px 18px", gap: 10, borderBottom: "1px solid var(--line)" }}>
+            <div className="between">
+              <span className="t-h2" style={{ fontSize: 18 }}>Inbox</span>
+              <span className="t-meta">3 unread</span>
+            </div>
+            <div className="row" style={{ padding: "8px 12px", background: "var(--surface-2)", borderRadius: 999, gap: 8 }}>
+              <Icon kind="search" size={13} style={{ color: "var(--ink-3)" }} />
+              <span className="t-meta">Search messages</span>
+            </div>
+            <div className="row" style={{ gap: 6 }}>
+              <Pill variant="solid">All</Pill>
+              <Pill>Unread</Pill>
+              <Pill>Requests · 4</Pill>
+            </div>
+          </div>
+          <div className="col" style={{ overflowY: "auto", flex: 1 }}>
+            <ConvoItem ini="NK" name="Nia Kassim" time="9:33" last="will track that today. I'll have a stem up by EOD." active />
+            <ConvoItem ini="TB" name="Theo Brooks" time="9:48" last="84 MB · drum-bus_v2_groove-shift" unread />
+            <ConvoItem ini="SP" name="Sam Park" time="Mon" last="sounds good — sending the rough mix tonight" unread />
+            <ConvoItem ini="LV" name="Lina Vega" time="Mon" last="Voice note · 0:42" unread />
+            <ConvoItem ini="IR" name="Iván Reyes" time="Sun" last="thanks for the intro, will reach out!" />
+            <ConvoItem ini="AL" name="Amaya L." time="May 10" last="up for a co-write tomorrow?" />
+            <ConvoItem ini="RK" name="Robi K." time="May 8" last="here's the demo, let me know what you think →" />
+          </div>
+        </div>
+        {/* Active conversation */}
+        <div className="col">
+          <div className="between" style={{ padding: "14px 24px", borderBottom: "1px solid var(--line)" }}>
+            <div className="row" style={{ gap: 10 }}>
+              <Avatar size="md" initials="NK" />
+              <div className="col" style={{ gap: 1 }}>
+                <div className="row" style={{ gap: 6 }}>
+                  <span style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Nia Kassim</span>
+                  <Pill variant="solid" style={{ fontSize: 9 }}>✓ Pro</Pill>
+                </div>
+                <span className="t-meta">Vocalist · London · Active now</span>
+              </div>
+            </div>
+            <div className="row" style={{ gap: 14 }}>
+              <Btn size="sm">Invite to project</Btn>
+              <Icon kind="bell" size={16} style={{ color: "var(--ink-3)" }} />
+              <Icon kind="gear" size={16} style={{ color: "var(--ink-3)" }} />
+            </div>
+          </div>
+          <div className="col" style={{ flex: 1, overflowY: "auto", padding: "12px 24px" }}>
+            <div className="row" style={{ gap: 10, padding: "8px 0", justifyContent: "center" }}>
+              <span className="t-meta">May 13</span>
+            </div>
+            <ChatMessage ini="NK" name="Nia" time="2:14p" body="hi! saw your post for the Afrobeats topline — really like Sunday Drives. I have a demo I think fits the vibe." />
+            <ChatMessage ini="NK" name="Nia" time="2:14p" audio={{ title: "demo_nia_v1.mp3", meta: "Nia K. · 1:02" }} />
+            <ChatMessage self ini="YT" name="You" time="2:31p" body="oh this is great — voice is perfect for it. want to jump on a quick call this week?" />
+            <ChatMessage ini="NK" name="Nia" time="9:33" body="will track that today. I'll have a stem up by EOD." />
+          </div>
+          <div style={{ padding: "12px 24px", borderTop: "1px solid var(--line)" }}>
+            <div className="row" style={{ gap: 8, padding: "8px 12px", border: "1px solid var(--line)", borderRadius: 12, background: "var(--surface-2)" }}>
+              <Icon kind="paperclip" size={14} style={{ color: "var(--ink-3)" }} />
+              <Icon kind="mic" size={14} style={{ color: "var(--ink-3)" }} />
+              <span className="t-meta" style={{ flex: 1 }}>Message Nia…</span>
+              <Btn size="sm" variant="primary">Send</Btn>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Browser>
+);
+
+const DMMobile = () => (
+  <Phone tabbar={<MobileTabBar active="msg" />}>
+    <div className="col" style={{ height: "100%" }}>
+      <div className="col" style={{ padding: "10px 16px 8px", borderBottom: "1px solid var(--line-soft)" }}>
+        <div className="between">
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18 }}>Inbox</span>
+          <Icon kind="search" size={16} style={{ color: "var(--ink-2)" }} />
+        </div>
+        <div className="row" style={{ gap: 6, marginTop: 10 }}>
+          <Pill variant="solid">All</Pill>
+          <Pill>Unread · 3</Pill>
+          <Pill>Requests · 4</Pill>
+        </div>
+      </div>
+      <div className="col" style={{ overflowY: "auto", flex: 1 }}>
+        <ConvoItem ini="NK" name="Nia Kassim" time="9:33" last="will track that today. stem up EOD." unread />
+        <ConvoItem ini="TB" name="Theo Brooks" time="9:48" last="84 MB · drum-bus_v2" unread />
+        <ConvoItem ini="SP" name="Sam Park" time="Mon" last="sending rough mix tonight" unread />
+        <ConvoItem ini="LV" name="Lina Vega" time="Mon" last="Voice note · 0:42" />
+        <ConvoItem ini="IR" name="Iván Reyes" time="Sun" last="thanks for the intro!" />
+        <ConvoItem ini="AL" name="Amaya L." time="May 10" last="up for a co-write?" />
+      </div>
+    </div>
+  </Phone>
+);
+
+// ════════════════════════════════════════════════════════════════
+// 10. PRO UPGRADE
+// ════════════════════════════════════════════════════════════════
+
+const ProDesktop = () => (
+  <Browser url="seshn.fm/pro">
+    <div className="col" style={{ height: "100%", overflowY: "auto" }}>
+      <div className="between" style={{ padding: "14px 32px", borderBottom: "1px solid var(--line)" }}>
+        <Logo />
+        <span className="t-meta">← Back to feed</span>
+      </div>
+      <div className="col" style={{ padding: "36px 80px", alignItems: "center", gap: 28 }}>
+        <Pill variant="accent">✶ Seshn Pro</Pill>
+        <div className="t-h1" style={{ fontSize: 44, textAlign: "center", maxWidth: 640, lineHeight: 1.05 }}>
+          Move first, get heard first.
+        </div>
+        <span className="t-muted" style={{ fontSize: 14, maxWidth: 480, textAlign: "center" }}>
+          Pro gives you the tools serious artists use to find collaborators faster — and look like one.
+        </span>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, width: "100%", maxWidth: 880 }}>
+          {/* Free */}
+          <div className="card" style={{ padding: 28 }}>
+            <div className="t-eyebrow">Free</div>
+            <div className="t-h1" style={{ fontSize: 28, margin: "10px 0 4px" }}>$0</div>
+            <span className="t-muted" style={{ fontSize: 12 }}>Everything to start.</span>
+            <div style={{ height: 18 }} />
+            <div className="col" style={{ gap: 10, fontSize: 13 }}>
+              {[
+                "Unlimited gig posts",
+                "Apply to any post",
+                "Up to 3 portfolio embeds",
+                "Reply to messages you receive",
+                "Basic search & filters",
+              ].map(t => (
+                <div key={t} className="row" style={{ gap: 10 }}>
+                  <Icon kind="check" size={13} style={{ color: "var(--ink-2)" }} />
+                  <span>{t}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ height: 22 }} />
+            <Btn block>You're on Free</Btn>
+          </div>
+          {/* Pro */}
+          <div className="card" style={{ padding: 28, background: "var(--ink-black)", color: "var(--frame)", borderColor: "transparent" }}>
+            <div className="between">
+              <span className="t-eyebrow" style={{ color: "var(--accent)" }}>Pro</span>
+              <Pill variant="solid" style={{ fontSize: 9 }}>Most popular</Pill>
+            </div>
+            <div className="row" style={{ gap: 6, alignItems: "baseline", marginTop: 10 }}>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: 36, fontWeight: 600, color: "var(--frame)" }}>$5</span>
+              <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>/ month</span>
+            </div>
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>or $48/year — save 20%</span>
+            <div style={{ height: 18 }} />
+            <div className="col" style={{ gap: 10, fontSize: 13, color: "rgba(255,255,255,0.85)" }}>
+              {[
+                "Verified ✓ badge",
+                "Message anyone first",
+                "Profile view analytics",
+                "Unlimited portfolio slots",
+                "Priority in search results",
+                "Boost credits — 1 / month",
+              ].map(t => (
+                <div key={t} className="row" style={{ gap: 10 }}>
+                  <Icon kind="check" size={13} style={{ color: "var(--accent)" }} />
+                  <span>{t}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ height: 22 }} />
+            <Btn variant="primary" size="lg" block>Upgrade to Pro →</Btn>
+            <span style={{ display: "block", textAlign: "center", marginTop: 10, fontSize: 11, color: "rgba(255,255,255,0.55)" }}>
+              Cancel anytime · Powered by Stripe
+            </span>
+          </div>
+        </div>
+        {/* Testimonials / FAQ snippet */}
+        <div style={{ width: "100%", maxWidth: 880, paddingTop: 16, borderTop: "1px solid var(--line)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+            {[
+              ["3.2×", "more applications on boosted posts"],
+              ["~4h", "average response time for Pro users"],
+              ["94%", "of Pro users say they'd recommend it"],
+            ].map(([n, s]) => (
+              <div key={n} className="col" style={{ gap: 4 }}>
+                <span style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 600, letterSpacing: "-0.02em" }}>{n}</span>
+                <span className="t-muted" style={{ fontSize: 12 }}>{s}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </Browser>
+);
+
+const ProMobile = () => (
+  <Phone>
+    <div className="col" style={{ height: "100%", overflowY: "auto" }}>
+      <div className="between" style={{ padding: "10px 16px" }}>
+        <Icon kind="chevron" size={16} style={{ color: "var(--ink-2)", transform: "rotate(180deg)" }} />
+        <Logo size={16} />
+        <div style={{ width: 16 }} />
+      </div>
+      <div className="col" style={{ padding: "12px 20px 0", alignItems: "center", gap: 12, textAlign: "center" }}>
+        <Pill variant="accent">✶ Seshn Pro</Pill>
+        <div className="t-h1" style={{ fontSize: 28, lineHeight: 1.05 }}>Move first,<br />get heard first.</div>
+        <span className="t-muted" style={{ fontSize: 12 }}>Tools serious artists use to find collaborators faster.</span>
+      </div>
+      <div className="col" style={{ padding: "20px 16px", gap: 12 }}>
+        <div className="card" style={{ padding: 18, background: "var(--ink-black)", color: "var(--frame)", borderColor: "transparent" }}>
+          <div className="between">
+            <span className="t-eyebrow" style={{ color: "var(--accent)" }}>Pro</span>
+            <Pill variant="solid" style={{ fontSize: 9 }}>Popular</Pill>
+          </div>
+          <div className="row" style={{ gap: 4, alignItems: "baseline", marginTop: 8 }}>
+            <span style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 600, color: "var(--frame)" }}>$5</span>
+            <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 12 }}>/ mo</span>
+          </div>
+          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)" }}>or $48/yr — save 20%</span>
+          <div style={{ height: 14 }} />
+          <div className="col" style={{ gap: 8, fontSize: 12, color: "rgba(255,255,255,0.85)" }}>
+            {["Verified ✓ badge", "Message anyone first", "View analytics", "Unlimited portfolio", "Priority in search", "1 boost credit/mo"].map(t => (
+              <div key={t} className="row" style={{ gap: 8 }}><Icon kind="check" size={12} style={{ color: "var(--accent)" }} /> {t}</div>
+            ))}
+          </div>
+          <div style={{ height: 14 }} />
+          <Btn variant="primary" size="lg" block>Upgrade to Pro</Btn>
+          <span style={{ display: "block", textAlign: "center", marginTop: 8, fontSize: 10, color: "rgba(255,255,255,0.55)" }}>
+            Cancel anytime · Stripe
+          </span>
+        </div>
+        <div className="card" style={{ padding: 16 }}>
+          <div className="t-eyebrow" style={{ marginBottom: 10 }}>Free · current</div>
+          <div className="col" style={{ gap: 6, fontSize: 12, color: "var(--ink-2)" }}>
+            <div className="row" style={{ gap: 8 }}><Icon kind="check" size={12} style={{ color: "var(--ink-3)" }} /> Unlimited posts</div>
+            <div className="row" style={{ gap: 8 }}><Icon kind="check" size={12} style={{ color: "var(--ink-3)" }} /> Reply to messages received</div>
+            <div className="row" style={{ gap: 8 }}><Icon kind="check" size={12} style={{ color: "var(--ink-3)" }} /> 3 portfolio embeds</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Phone>
+);
+
+window.SeshnScreens2 = {
+  CreateDesktop, CreateMobile, CreateReviewDesktop,
+  BrowseDesktop, BrowseMobile,
+  ProjectDesktop, ProjectMobile,
+  DMDesktop, DMMobile,
+  ProDesktop, ProMobile,
+};
+Object.assign(window, window.SeshnScreens2);
+
+  </script>
+  <script type="text/babel" data-presets="env,react">
+// Seshn — Info artboards: rationale, palette, type, components, empty states, dev notes
+
+const { Logo, Pill, Avatar, Btn, Input, PH, Line, Lines, Audio, Icon, GigCard, Browser, Phone, MobileTabBar } = window.SeshnAtoms;
+
+// ════════════════════════════════════════════════════════════════
+// Cover / rationale
+// ════════════════════════════════════════════════════════════════
+const CoverCard = () => (
+  <div className="wf" style={{ padding: "44px 48px", display: "flex", flexDirection: "column", justifyContent: "space-between", background: "var(--frame)" }}>
+    <div>
+      <Logo size={22} />
+      <div style={{ height: 18 }} />
+      <span className="t-eyebrow">Wireframe set · v0.1 MVP</span>
+      <div className="t-h1" style={{ fontSize: 56, lineHeight: 0.98, letterSpacing: "-0.035em", marginTop: 14, maxWidth: 780 }}>
+        A platform for the<br />
+        people who finish<br />
+        <span style={{ color: "var(--accent-d)" }}>your record.</span>
+      </div>
+      <div style={{ height: 30 }} />
+      <div className="t-eyebrow" style={{ marginBottom: 8 }}>Rationale · 200w</div>
+      <div style={{ maxWidth: 720, fontSize: 14.5, lineHeight: 1.6, color: "var(--ink-2)" }}>
+        Seshn sits between three references — <b>Bandcamp</b>'s editorial calm, <b>Are.na</b>'s soft information density, and <b>Splice</b>'s utility. The wireframes are intentionally grayscale plus one accent green, because the brand color carries
+        a lot of weight on its own and the layout has to read before the paint does.
+        <br /><br />
+        Type pairs a confident display sans for headlines (Abizhar, falling back to General Sans / Inter Tight) with a quiet body sans (Satoshi). Density is calm: generous gutters,
+        a single accent, no decoration that doesn't earn it. Audio is a first-class citizen — every profile and post is built around a unified embed wrapper so SoundCloud, Spotify and YouTube look like Seshn,
+        not three sites in a trench coat. Dark mode is the default elevation for the landing and project room; light mode is the working surface for feed, create, and inbox so reading scans long sessions stay legible.
+        <br /><br />
+        Every screen on this canvas is paired desktop ↔ mobile. Components below the screens specify the gig card variants, audio embed, tag pills, avatar+role badge, and four empty states.
+      </div>
+    </div>
+    <div className="row" style={{ gap: 28, paddingTop: 28, borderTop: "1px solid var(--line)", flexWrap: "wrap" }}>
+      <div className="col" style={{ gap: 2 }}>
+        <span className="t-meta">Brand</span>
+        <span className="t-h3">Seshn</span>
+      </div>
+      <div className="col" style={{ gap: 2 }}>
+        <span className="t-meta">Output</span>
+        <span className="t-h3">10 screens · 20 wireframes</span>
+      </div>
+      <div className="col" style={{ gap: 2 }}>
+        <span className="t-meta">Fidelity</span>
+        <span className="t-h3">Lo-fi · grayscale + 1 accent</span>
+      </div>
+      <div className="col" style={{ gap: 2 }}>
+        <span className="t-meta">Build target</span>
+        <span className="t-h3">Webflow / Next.js</span>
+      </div>
+      <div className="col" style={{ gap: 2, marginLeft: "auto" }}>
+        <span className="t-meta">Drag to pan · scroll to zoom · ↗ to focus any artboard</span>
+      </div>
+    </div>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// Palette
+// ════════════════════════════════════════════════════════════════
+const Swatch = ({ name, hex, role, dark }) => (
+  <div className="col" style={{ gap: 8 }}>
+    <div style={{ height: 110, borderRadius: 10, background: hex, border: "1px solid " + (hex === "#FFFFFF" || hex === "#F4F3EF" ? "var(--line)" : "transparent"), display: "flex", alignItems: "flex-end", padding: 10 }}>
+      {role && <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 11, color: dark ? "var(--frame)" : "var(--ink)", background: "rgba(255,255,255,0.7)", padding: "2px 6px", borderRadius: 4 }}>{role}</span>}
+    </div>
+    <div className="col" style={{ gap: 1 }}>
+      <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 12 }}>{name}</span>
+      <span style={{ fontSize: 10.5, color: "var(--ink-3)", letterSpacing: "0.04em" }}>{hex}</span>
+    </div>
+  </div>
+);
+
+const PaletteCard = () => (
+  <div className="wf" style={{ padding: 40, overflowY: "auto" }}>
+    <Logo />
+    <div className="t-eyebrow" style={{ marginTop: 22 }}>03 · Color palette</div>
+    <div className="t-h1" style={{ fontSize: 32, marginTop: 6 }}>Vibrant green, anchored to black.</div>
+    <span className="t-muted" style={{ fontSize: 13, maxWidth: 540, display: "block", marginTop: 10 }}>
+      One accent green, used sparingly. Backgrounds are warm-neutral in light mode and true black in dark mode — this is a music platform, not an enterprise tool.
+    </span>
+    <div className="t-eyebrow" style={{ marginTop: 30, marginBottom: 12 }}>Brand · greens</div>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 14 }}>
+      <Swatch name="Primary Green" hex="#2CCB73" role="accent" />
+      <Swatch name="Deep Green" hex="#1C8F56" role="accent · pressed / text" dark />
+      <Swatch name="Mint Accent" hex="#63D89A" role="accent · hover" />
+      <Swatch name="Soft Mint" hex="#A8EBC8" role="bg · highlight" />
+      <Swatch name="Ink Black" hex="#0D0D0D" role="ink / dark frame" dark />
+    </div>
+    <div className="t-eyebrow" style={{ marginTop: 30, marginBottom: 12 }}>Surfaces · light</div>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 14 }}>
+      <Swatch name="Background" hex="#F4F3EF" role="canvas" />
+      <Swatch name="Frame" hex="#FFFFFF" role="page" />
+      <Swatch name="Surface 2" hex="#F7F6F3" role="recessed / input" />
+      <Swatch name="Line" hex="#D8D6D1" role="stroke" />
+      <Swatch name="Line soft" hex="#ECECEA" role="hairline" />
+    </div>
+    <div className="t-eyebrow" style={{ marginTop: 30, marginBottom: 12 }}>Ink · text</div>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
+      <Swatch name="Ink primary" hex="#0D0D0D" role="text" dark />
+      <Swatch name="Ink secondary" hex="#3A3A38" role="body" dark />
+      <Swatch name="Ink muted" hex="#6E6C66" role="meta" dark />
+      <Swatch name="Ink subtle" hex="#A4A29C" role="placeholder" />
+    </div>
+    <div className="t-eyebrow" style={{ marginTop: 30, marginBottom: 12 }}>Semantic</div>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, maxWidth: 540 }}>
+      <Swatch name="Success" hex="#1C8F56" role="filled / verified" dark />
+      <Swatch name="Danger" hex="#C0392B" role="destructive" dark />
+      <Swatch name="Warn" hex="#D9A441" role="deadline" />
+    </div>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// Typography
+// ════════════════════════════════════════════════════════════════
+const TypeCard = () => (
+  <div className="wf" style={{ padding: 40, overflowY: "auto" }}>
+    <Logo />
+    <div className="t-eyebrow" style={{ marginTop: 22 }}>04 · Typography</div>
+    <div className="t-h1" style={{ fontSize: 32, marginTop: 6 }}>Confident display, quiet body.</div>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, marginTop: 28 }}>
+      {/* Display */}
+      <div className="col" style={{ gap: 14 }}>
+        <span className="t-eyebrow">Display</span>
+        <div className="card" style={{ padding: 24 }}>
+          <span className="t-meta">Abizhar · 600 (primary)<br />→ General Sans · 600 (web fallback)<br />→ Inter Tight · 600 (final fallback)</span>
+          <div style={{ height: 18 }} />
+          <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 56, letterSpacing: "-0.035em", lineHeight: 1 }}>Seshn</div>
+          <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 32, letterSpacing: "-0.025em", marginTop: 14 }}>Find the people who finish your record.</div>
+          <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 22, letterSpacing: "-0.02em", marginTop: 10 }}>Heading 2 / card titles</div>
+          <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 16, marginTop: 6 }}>Heading 3 / inline</div>
+        </div>
+        <div className="card hairline" style={{ padding: 16 }}>
+          <span className="t-eyebrow">Specimen · A a g Q 0–9</span>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: 64, letterSpacing: "-0.04em", marginTop: 8, lineHeight: 1 }}>Aag Q 0123</div>
+        </div>
+      </div>
+      {/* Body */}
+      <div className="col" style={{ gap: 14 }}>
+        <span className="t-eyebrow">Body</span>
+        <div className="card" style={{ padding: 24 }}>
+          <span className="t-meta">Satoshi · 400 / 500 (primary)<br />→ system-ui (fallback)</span>
+          <div style={{ height: 18 }} />
+          <p style={{ fontSize: 17, lineHeight: 1.55, margin: 0 }}>
+            Body large · 17 / 26 — used for the hero subtitle and long-form bio. Calm, readable, just enough weight in the descenders to feel editorial.
+          </p>
+          <p style={{ fontSize: 14, lineHeight: 1.55, margin: "12px 0 0", color: "var(--ink-2)" }}>
+            Body · 14 / 22 — the default. This is where 80% of the reading happens on Seshn.
+          </p>
+          <p style={{ fontSize: 12, lineHeight: 1.45, margin: "12px 0 0", color: "var(--ink-3)" }}>
+            Meta · 12 / 17 — timestamps, helper copy, filter counts.
+          </p>
+          <p style={{ fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", margin: "16px 0 0", color: "var(--ink-3)" }}>
+            Eyebrow · 10 / 0.14em
+          </p>
+        </div>
+        <div className="card hairline" style={{ padding: 16 }}>
+          <span className="t-eyebrow">Scale (rem on 16px base)</span>
+          <div className="col" style={{ marginTop: 8, gap: 4, fontSize: 12 }}>
+            {[["Display XL", "56 / 3.5r"], ["Display L", "32 / 2.0r"], ["Display M", "22 / 1.375r"], ["Display S", "16 / 1.0r"], ["Body L", "17 / 1.0625r"], ["Body", "14 / 0.875r"], ["Meta", "12 / 0.75r"], ["Eyebrow", "10 / 0.625r"]].map(([k, v]) => (
+              <div key={k} className="between"><span>{k}</span><span className="t-meta">{v}</span></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// Component spec — gig card variants, audio embed, pills, avatar
+// ════════════════════════════════════════════════════════════════
+const ComponentsCard = () => (
+  <div className="wf" style={{ padding: 40, overflowY: "auto", background: "var(--bg)" }}>
+    <Logo />
+    <div className="t-eyebrow" style={{ marginTop: 22 }}>Components · contracts</div>
+    <div className="t-h1" style={{ fontSize: 32, marginTop: 6, marginBottom: 24 }}>One component, three contexts.</div>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18 }}>
+      <div className="col" style={{ gap: 8 }}>
+        <span className="t-eyebrow">Gig card · feed</span>
+        <span className="t-meta">Full · w 540 / pad 16</span>
+        <GigCard role="Vocalist" title="Topline writer wanted for an Afrobeats demo" tags={["Afrobeats", "R&B"]} comp="Paid · $200" name="Maya O." initials="MO" roleTag="PROD" time="2h" />
+      </div>
+      <div className="col" style={{ gap: 8 }}>
+        <span className="t-eyebrow">Gig card · related</span>
+        <span className="t-meta">Mini · w 240 / pad 12</span>
+        <GigCard context="mini" role="Topline" title="Topline x melody for pop ref" tags={["Pop"]} name="Lina V." initials="LV" time="1d" />
+        <GigCard context="mini" role="Vocalist" title="Hook writer for an R&B groove" tags={["R&B"]} name="Sam P." initials="SP" time="4h" />
+      </div>
+      <div className="col" style={{ gap: 8 }}>
+        <span className="t-eyebrow">Gig card · boosted</span>
+        <span className="t-meta">Pinned · accent border</span>
+        <GigCard boost role="Drummer" title="Live drummer · 3 NYC dates in June" tags={["Soul", "Live"]} comp="$450/show" name="Theo B." initials="TB" roleTag="ART" time="9h" />
+      </div>
+    </div>
+    <div className="divider" style={{ margin: "28px 0" }} />
+    <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", gap: 18 }}>
+      <div className="col" style={{ gap: 10 }}>
+        <span className="t-eyebrow">Audio embed · unified</span>
+        <span className="t-meta">Wraps SoundCloud, Spotify, YouTube into one visual</span>
+        <Audio title="Sunday Drives" artist="Maya O. ft. Lojay · 3:24" source="SoundCloud" />
+        <Audio title="Coast (demo)" artist="Maya O. · 2:51" source="Spotify" />
+        <Audio compact title="Hold The Line" artist="prod. Maya · 4:02" source="YouTube" />
+      </div>
+      <div className="col" style={{ gap: 10 }}>
+        <span className="t-eyebrow">Tag pill · variants</span>
+        <span className="t-meta">3 styles + 2 utility</span>
+        <div className="card" style={{ padding: 16 }}>
+          <div className="col" style={{ gap: 12 }}>
+            <div><span className="t-meta">Neutral · roles / genres</span><br /><div className="row" style={{ gap: 6, marginTop: 4, flexWrap: "wrap" }}><Pill>R&B</Pill><Pill>Vocalist</Pill><Pill>Remote</Pill></div></div>
+            <div><span className="t-meta">Accent · primary role</span><br /><div className="row" style={{ gap: 6, marginTop: 4 }}><Pill variant="accent">Vocalist needed</Pill><Pill variant="accent">Producer</Pill></div></div>
+            <div><span className="t-meta">Success · filled</span><br /><div className="row" style={{ gap: 6, marginTop: 4 }}><Pill variant="success">Filled</Pill><Pill variant="success">Booked</Pill></div></div>
+            <div><span className="t-meta">Solid · CTA / badge</span><br /><div className="row" style={{ gap: 6, marginTop: 4 }}><Pill variant="solid">★ Boosted</Pill><Pill variant="solid">✓ Pro</Pill></div></div>
+          </div>
+        </div>
+      </div>
+      <div className="col" style={{ gap: 10 }}>
+        <span className="t-eyebrow">Avatar + role badge</span>
+        <span className="t-meta">4 sizes · overlay role tag</span>
+        <div className="card" style={{ padding: 16 }}>
+          <div className="row" style={{ gap: 16, alignItems: "flex-end", marginBottom: 16 }}>
+            <Avatar size="sm" initials="MO" />
+            <Avatar initials="MO" role="PRO" />
+            <Avatar size="lg" initials="MO" role="VOC" />
+            <Avatar size="xl" initials="MO" role="MIX" />
+          </div>
+          <div className="t-meta">22 · 32 · 56 · 88 px<br />Role badge: 3-letter, mono, only set on primary role.</div>
+        </div>
+        <div className="card hairline" style={{ padding: 12 }}>
+          <span className="t-eyebrow">Button states</span>
+          <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+            <Btn variant="primary">Primary</Btn>
+            <Btn>Default</Btn>
+            <Btn variant="dark">Dark</Btn>
+            <Btn variant="ghost">Ghost</Btn>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// Empty states
+// ════════════════════════════════════════════════════════════════
+const EmptyCard = ({ title, body, cta, kind, mobile }) => {
+  const Glyph = () => (
+    <div style={{ width: mobile ? 56 : 72, height: mobile ? 56 : 72, borderRadius: "50%", background: "var(--accent-bg)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--accent-d)" }}>
+      <Icon kind={kind} size={mobile ? 22 : 28} />
+    </div>
+  );
+  return (
+    <div className="card" style={{ padding: mobile ? 22 : 36, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 12, background: "var(--surface)" }}>
+      <Glyph />
+      <div className="t-h3" style={{ fontSize: mobile ? 14 : 16 }}>{title}</div>
+      <div className="t-muted" style={{ fontSize: mobile ? 11.5 : 13, maxWidth: 280 }}>{body}</div>
+      <div style={{ height: 4 }} />
+      <Btn variant="primary" size={mobile ? "sm" : "default"}>{cta}</Btn>
+    </div>
+  );
+};
+
+const EmptyStatesCard = () => (
+  <div className="wf" style={{ padding: 40, overflowY: "auto", background: "var(--bg)" }}>
+    <Logo />
+    <div className="t-eyebrow" style={{ marginTop: 22 }}>Empty states · first impressions</div>
+    <div className="t-h1" style={{ fontSize: 32, marginTop: 6, marginBottom: 6 }}>Blank, but never empty.</div>
+    <span className="t-muted" style={{ fontSize: 13, maxWidth: 480, display: "block", marginBottom: 24 }}>
+      Every empty state ships a glyph, a one-line "what now", and a single action. Tone should feel like a friend nudging you — not a system telling you what's missing.
+    </span>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
+      <EmptyCard kind="compass" title="Your feed is fresh." body="Pick at least 2 roles and 1 genre and we'll surface gigs you'd actually take." cta="Tune your filters →" />
+      <EmptyCard kind="mic" title="No tracks here yet." body="Drop a SoundCloud, Spotify, or YouTube link — your portfolio is how people decide." cta="Add a portfolio link" />
+      <EmptyCard kind="message" title="Inbox zero." body="Apply to a gig or post one — that's how conversations start on Seshn." cta="Browse the feed" />
+      <EmptyCard kind="folder" title="Start a project." body="Project rooms are where the actual work happens — chat, files, deadlines, audio, all in one place." cta="Create your first project" />
+    </div>
+    <div style={{ height: 22 }} />
+    <span className="t-eyebrow">Mobile variants · stacked</span>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginTop: 12 }}>
+      <EmptyCard kind="compass" title="Feed is fresh." body="Pick 2 roles + 1 genre." cta="Tune filters" mobile />
+      <EmptyCard kind="mic" title="No tracks yet." body="Drop a portfolio link." cta="Add link" mobile />
+      <EmptyCard kind="message" title="Inbox zero." body="Apply to a gig or post one." cta="Browse" mobile />
+      <EmptyCard kind="folder" title="Start a project." body="Chat, files, audio." cta="New project" mobile />
+    </div>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// Dev notes
+// ════════════════════════════════════════════════════════════════
+const DevNotesCard = () => (
+  <div className="wf" style={{ padding: 40, overflowY: "auto" }}>
+    <Logo />
+    <div className="t-eyebrow" style={{ marginTop: 22 }}>05 · For the developer</div>
+    <div className="t-h1" style={{ fontSize: 32, marginTop: 6, marginBottom: 6 }}>What could go wrong.</div>
+    <span className="t-muted" style={{ fontSize: 13, maxWidth: 540, display: "block", marginBottom: 24 }}>
+      Two things to design around early — both have downstream consequences if discovered late.
+    </span>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 22 }}>
+      <div className="card" style={{ padding: 26 }}>
+        <div className="row" style={{ gap: 10 }}>
+          <span style={{ width: 28, height: 28, borderRadius: 999, background: "var(--accent-bg)", color: "var(--accent-d)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13 }}>01</span>
+          <div className="t-h3" style={{ fontSize: 18 }}>Audio embeds are not all equal.</div>
+        </div>
+        <div style={{ fontSize: 13, lineHeight: 1.55, color: "var(--ink-2)", marginTop: 14 }}>
+          SoundCloud, Spotify, and YouTube each return a different iframe size, theming surface, and "what happens when the link expires" behavior.
+          The audio component must be a <b>wrapper</b> — a thin Seshn-styled shell with a uniform play button and metadata strip on top of the provider iframe — not a re-skin.
+          <br /><br />
+          <b>Specifically:</b>
+          <ul style={{ paddingLeft: 18, margin: "8px 0 0", color: "var(--ink-2)" }}>
+            <li>Don't trust provider thumbnails — cache & resize server-side, fall back to a Seshn-painted "no art" tile.</li>
+            <li>Lazy-load iframes (intersection observer). A profile with 6 embeds otherwise loads 6 audio engines.</li>
+            <li>Validate URLs on submit — reject anything that isn't an oEmbed-supported URL, surface a clear error.</li>
+            <li>Track-removed states: show "this track is no longer available" with the original metadata, not a broken iframe.</li>
+          </ul>
+        </div>
+      </div>
+      <div className="card" style={{ padding: 26 }}>
+        <div className="row" style={{ gap: 10 }}>
+          <span style={{ width: 28, height: 28, borderRadius: 999, background: "var(--accent-bg)", color: "var(--accent-d)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13 }}>02</span>
+          <div className="t-h3" style={{ fontSize: 18 }}>Pro vs Free gates the wrong surface, easily.</div>
+        </div>
+        <div style={{ fontSize: 13, lineHeight: 1.55, color: "var(--ink-2)", marginTop: 14 }}>
+          "Message anyone first" is the Pro feature most likely to cause confusion if it's implemented as a hard wall vs a soft prompt.
+          Free users should be able to <b>reply</b> to messages they receive — and <b>apply</b> to any post — without hitting Pro friction.
+          Pro only gates outbound first-contact DMs and analytics.
+          <br /><br />
+          <b>Specifically:</b>
+          <ul style={{ paddingLeft: 18, margin: "8px 0 0", color: "var(--ink-2)" }}>
+            <li>Reply-to is free forever — block-listing it would kill the feedback loop that makes the platform feel alive.</li>
+            <li>Boost is a one-time purchase ($5) <em>and</em> a Pro perk (1 credit/mo). Pricing copy must not imply Pro = free boosts forever.</li>
+            <li>Verified ✓ badge: only granted to Pro AND after lightweight ID/credit check. The two are bundled in UI but independent in policy.</li>
+            <li>Subscription billing through Stripe — keep dunning, proration, and yearly→monthly downgrade flows out of v1 scope.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div className="divider" style={{ margin: "28px 0" }} />
+    <div className="t-eyebrow" style={{ marginBottom: 14 }}>Out of scope for v1 — reminder</div>
+    <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+      {["Leaderboard", "Song feedback", "Team applications", "Payment escrow", "Mobile app"].map(t => <Pill key={t}>{t}</Pill>)}
+    </div>
+  </div>
+);
+
+window.SeshnInfo = { CoverCard, PaletteCard, TypeCard, ComponentsCard, EmptyStatesCard, DevNotesCard };
+Object.assign(window, window.SeshnInfo);
+
+  </script>
+  <script type="text/babel" data-presets="env,react">
+// Seshn — entry point. Loads after all atoms/screens/info scripts.
+
+const {
+  LandingDesktop, LandingMobile,
+  AuthDesktop, AuthMobile, OnboardingDesktop,
+  ProfileDesktop, ProfileMobile,
+  FeedDesktop, FeedMobile,
+  GigDetailDesktop, GigDetailMobile,
+  CreateDesktop, CreateMobile, CreateReviewDesktop,
+  BrowseDesktop, BrowseMobile,
+  ProjectDesktop, ProjectMobile,
+  DMDesktop, DMMobile,
+  ProDesktop, ProMobile,
+  CoverCard, PaletteCard, TypeCard, ComponentsCard, EmptyStatesCard, DevNotesCard,
+  DesignCanvas, DCSection, DCArtboard,
+} = window;
+
+const D = { w: 1280, h: 800 };
+const M = { w: 390, h: 760 };
+const CARD = { w: 1280, h: 720 };
+
+const App = () => (
+  <DesignCanvas>
+    <DCSection id="intro" title="Seshn — wireframes" subtitle="Music collaboration platform · MVP · v0.1">
+      <DCArtboard id="cover" label="01 · Rationale" width={CARD.w} height={CARD.h}>
+        <CoverCard />
+      </DCArtboard>
+      <DCArtboard id="palette" label="Palette" width={CARD.w} height={CARD.h}>
+        <PaletteCard />
+      </DCArtboard>
+      <DCArtboard id="type" label="Typography" width={CARD.w} height={CARD.h}>
+        <TypeCard />
+      </DCArtboard>
+    </DCSection>
+
+    <DCSection id="s1" title="01 · Landing (logged out)" subtitle="Editorial hero, live feed snippet, three-up features">
+      <DCArtboard id="s1d" label="Desktop · 1280" width={D.w} height={D.h}><LandingDesktop /></DCArtboard>
+      <DCArtboard id="s1m" label="Mobile · 390" width={M.w} height={M.h}><LandingMobile /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="s2" title="02 · Sign up / log in + onboarding" subtitle="Split-screen form · 3-step onboarding (roles → genres → portfolio)">
+      <DCArtboard id="s2d" label="Auth · Desktop" width={D.w} height={D.h}><AuthDesktop /></DCArtboard>
+      <DCArtboard id="s2m" label="Auth · Mobile" width={M.w} height={M.h}><AuthMobile /></DCArtboard>
+      <DCArtboard id="s2o" label="Onboarding · Step 1 · Desktop" width={D.w} height={D.h}><OnboardingDesktop /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="s3" title="03 · Profile page" subtitle="Header · bio · portfolio · looking-for · recent posts · CTAs">
+      <DCArtboard id="s3d" label="Desktop" width={D.w} height={D.h}><ProfileDesktop /></DCArtboard>
+      <DCArtboard id="s3m" label="Mobile" width={M.w} height={M.h}><ProfileMobile /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="s4" title="04 · Home feed (logged in)" subtitle="Filters · gig feed · suggested artists · Pro upsell">
+      <DCArtboard id="s4d" label="Desktop" width={D.w} height={D.h}><FeedDesktop /></DCArtboard>
+      <DCArtboard id="s4m" label="Mobile" width={M.w} height={M.h}><FeedMobile /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="s5" title="05 · View post (gig detail)" subtitle="Full post · poster card · apply form · related">
+      <DCArtboard id="s5d" label="Desktop" width={D.w} height={D.h}><GigDetailDesktop /></DCArtboard>
+      <DCArtboard id="s5m" label="Mobile" width={M.w} height={M.h}><GigDetailMobile /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="s6" title="06 · Create post flow" subtitle="Step 2 details · Step 3 review with boost upsell">
+      <DCArtboard id="s6d" label="Step 2 · Details · Desktop" width={D.w} height={D.h}><CreateDesktop /></DCArtboard>
+      <DCArtboard id="s6m" label="Step 2 · Details · Mobile" width={M.w} height={M.h}><CreateMobile /></DCArtboard>
+      <DCArtboard id="s6r" label="Step 3 · Review + Boost · Desktop" width={D.w} height={D.h}><CreateReviewDesktop /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="s7" title="07 · Browse profiles" subtitle="Filter sidebar · grid of artist cards · sort & layout switch">
+      <DCArtboard id="s7d" label="Desktop" width={D.w} height={D.h}><BrowseDesktop /></DCArtboard>
+      <DCArtboard id="s7m" label="Mobile" width={M.w} height={M.h}><BrowseMobile /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="s8" title="08 · Project room" subtitle="Chat with audio/file inline · members panel · deadline">
+      <DCArtboard id="s8d" label="Desktop" width={D.w} height={D.h}><ProjectDesktop /></DCArtboard>
+      <DCArtboard id="s8m" label="Mobile" width={M.w} height={M.h}><ProjectMobile /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="s9" title="09 · Direct messages" subtitle="Conversation list · active conversation · audio attachments">
+      <DCArtboard id="s9d" label="Desktop" width={D.w} height={D.h}><DMDesktop /></DCArtboard>
+      <DCArtboard id="s9m" label="Mobile" width={M.w} height={M.h}><DMMobile /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="s10" title="10 · Pro upgrade" subtitle="Free vs Pro · $5/mo or $48/yr · Stripe checkout">
+      <DCArtboard id="s10d" label="Desktop" width={D.w} height={D.h}><ProDesktop /></DCArtboard>
+      <DCArtboard id="s10m" label="Mobile" width={M.w} height={M.h}><ProMobile /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="comp" title="Components · contracts" subtitle="Gig card variants · audio embed · tag pills · avatar + role">
+      <DCArtboard id="compd" label="Component spec" width={CARD.w} height={CARD.h}><ComponentsCard /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="empty" title="Empty states" subtitle="Feed · portfolio · inbox · project room — desktop & mobile variants">
+      <DCArtboard id="emptyd" label="Empty states" width={CARD.w} height={CARD.h}><EmptyStatesCard /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="dev" title="Dev notes" subtitle="Two things that will bite if you don't plan for them">
+      <DCArtboard id="devd" label="Dev notes" width={CARD.w} height={CARD.h}><DevNotesCard /></DCArtboard>
+    </DCSection>
+  </DesignCanvas>
+);
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+
+  </script>
+</body>
+</html>

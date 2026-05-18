@@ -1,0 +1,2688 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Seshn — find the people who finish your record</title>
+  <style>
+/* Seshn — Wireframe styles */
+
+@import url("https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=satoshi@400,500,600,700&display=swap");
+
+:root {
+  /* Wireframe palette — desaturated, with one accent */
+  --bg:        #f4f3ef;     /* canvas */
+  --frame:     #ffffff;     /* artboard surface */
+  --surface:   #ffffff;     /* card */
+  --surface-2: #f7f6f3;     /* recessed */
+  --line:      #d8d6d1;     /* primary stroke */
+  --line-soft: #ececea;     /* hairlines, grid */
+  --ink:       #0d0d0d;     /* primary text */
+  --ink-2:     #3a3a38;     /* secondary text */
+  --ink-3:     #6e6c66;     /* muted */
+  --ink-4:     #a4a29c;     /* very muted, placeholder text */
+  --ph:        #ececea;     /* placeholder fill */
+  --ph-2:      #e2e0db;     /* placeholder fill (alt) */
+
+  /* Brand */
+  --accent:    #2CCB73;     /* primary green */
+  --accent-d:  #1C8F56;     /* deep green */
+  --accent-m:  #63D89A;     /* mint */
+  --accent-bg: #A8EBC8;     /* soft mint */
+  --ink-black: #0D0D0D;
+
+  --ok:        #1C8F56;
+  --danger:    #c0392b;
+
+  --r-sm: 4px;
+  --r:    8px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+
+  --font-display: "General Sans", "Abizhar", "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-body:    "Satoshi", "Abizhar", "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Dark frame variant — applied via .dark on the frame root */
+.dark {
+  --frame:     #0d0d0d;
+  --surface:   #161614;
+  --surface-2: #1d1d1a;
+  --line:      #2a2a26;
+  --line-soft: #1f1f1c;
+  --ink:       #f4f3ef;
+  --ink-2:     #c9c7c1;
+  --ink-3:     #8a8880;
+  --ink-4:     #5a5852;
+  --ph:        #1f1f1c;
+  --ph-2:      #262622;
+}
+
+/* Reset within wireframe artboards */
+.wf, .wf * {
+  box-sizing: border-box;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  font-variant-ligatures: contextual;
+}
+
+.wf {
+  background: var(--frame);
+  color: var(--ink);
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.wf-mobile {
+  font-size: 12.5px;
+}
+
+/* ——— Type ——— */
+.t-display { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em; }
+.t-h1 { font-family: var(--font-display); font-weight: 600; font-size: 32px; line-height: 1.05; letter-spacing: -0.025em; }
+.t-h2 { font-family: var(--font-display); font-weight: 600; font-size: 22px; line-height: 1.15; letter-spacing: -0.02em; }
+.t-h3 { font-family: var(--font-display); font-weight: 600; font-size: 16px; line-height: 1.2; letter-spacing: -0.01em; }
+.t-eyebrow { font-family: var(--font-display); font-weight: 500; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+.t-meta { font-size: 11px; color: var(--ink-3); }
+.t-muted { color: var(--ink-3); }
+.t-mute2 { color: var(--ink-4); }
+
+/* ——— Placeholders ——— */
+.ph {
+  background: var(--ph);
+  border-radius: var(--r-sm);
+  color: var(--ink-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+}
+.ph-img::before {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(to top right, transparent 49.4%, var(--line) 49.7%, var(--line) 50.3%, transparent 50.6%),
+    linear-gradient(to top left,  transparent 49.4%, var(--line) 49.7%, var(--line) 50.3%, transparent 50.6%);
+  opacity: 0.55;
+}
+.ph-img > span { position: relative; z-index: 1; background: var(--ph); padding: 2px 6px; border-radius: 3px; }
+
+.ph-line { background: var(--ph); border-radius: 2px; height: 8px; }
+.ph-line.sm { height: 6px; }
+.ph-line.lg { height: 12px; }
+.ph-block { background: var(--ph); border-radius: var(--r-sm); }
+.ph-block.soft { background: var(--ph-2); }
+
+/* ——— Pills ——— */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+  font-size: 10.5px;
+  font-weight: 500;
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-2);
+  line-height: 1;
+}
+.pill.accent { background: var(--accent-bg); border-color: transparent; color: var(--accent-d); }
+.pill.solid { background: var(--accent); border-color: transparent; color: #062c19; }
+.pill.success { background: transparent; border-color: var(--accent-d); color: var(--accent-d); }
+.pill.success::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-d); }
+.pill.dark { background: var(--ink); color: var(--frame); border-color: transparent; }
+.pill.ghost { background: transparent; }
+
+/* ——— Buttons ——— */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--r);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-display);
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  line-height: 1;
+  white-space: nowrap;
+}
+.btn.primary { background: var(--accent); color: #062c19; border-color: transparent; }
+.btn.dark { background: var(--ink); color: var(--frame); border-color: transparent; }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--ink-2); }
+.btn.lg { padding: 12px 20px; font-size: 13px; border-radius: 10px; }
+.btn.sm { padding: 6px 10px; font-size: 11px; }
+.btn.block { width: 100%; }
+
+/* ——— Inputs ——— */
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--r);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 12px;
+  font-family: var(--font-body);
+  color: var(--ink);
+}
+.input.lg { padding: 14px 14px; }
+
+/* ——— Avatar ——— */
+.avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--ph);
+  position: relative;
+  flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.avatar.sm { width: 22px; height: 22px; font-size: 9px; }
+.avatar.lg { width: 56px; height: 56px; font-size: 18px; }
+.avatar.xl { width: 88px; height: 88px; font-size: 24px; }
+.avatar > .role-dot {
+  position: absolute;
+  bottom: -2px; right: -2px;
+  background: var(--frame);
+  border-radius: var(--r-pill);
+  padding: 2px 5px;
+  font-size: 8px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* ——— Card ——— */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 14px;
+}
+.card.flat { background: transparent; }
+.card.hairline { border-color: var(--line-soft); }
+
+/* ——— Gig card ——— */
+.gig {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.gig.boost {
+  border-color: var(--accent-d);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-bg) 40%, var(--surface)) 0%, var(--surface) 60%);
+}
+.gig-head { display: flex; align-items: center; gap: 10px; }
+.gig-title { font-family: var(--font-display); font-weight: 600; font-size: 16px; letter-spacing: -0.012em; line-height: 1.2; }
+.gig-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.gig-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 10px; border-top: 1px solid var(--line-soft); }
+
+/* ——— Audio embed wrapper ——— */
+.audio {
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.audio .play {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  flex: 0 0 auto;
+  position: relative;
+}
+.audio .play::before {
+  content: ""; width: 0; height: 0;
+  border-left: 8px solid var(--accent);
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  margin-left: 3px;
+}
+.audio .play.playing::before {
+  border: none;
+  width: 8px; height: 9px; margin: 0;
+  background:
+    linear-gradient(var(--accent), var(--accent)) left/2px 100% no-repeat,
+    linear-gradient(var(--accent), var(--accent)) right/2px 100% no-repeat;
+}
+.audio.compact { padding: 6px 8px; gap: 8px; }
+.audio.compact .play { width: 22px; height: 22px; }
+.audio.compact .play::before { border-left-width: 6px; border-top-width: 4px; border-bottom-width: 4px; }
+.audio .meta { font-size: 10.5px; color: var(--ink-3); display: flex; gap: 1px; min-width: 0; }
+.audio .meta b { color: var(--ink); font-weight: 600; font-family: var(--font-display); font-size: 12px; }
+.audio.compact .meta b { font-size: 11px; }
+
+/* ——— Misc ——— */
+.divider { height: 1px; background: var(--line-soft); }
+.divider-v { width: 1px; background: var(--line-soft); align-self: stretch; }
+.row { display: flex; align-items: center; gap: 8px; }
+.col { display: flex; flex-direction: column; }
+.between { display: flex; align-items: center; justify-content: space-between; }
+.dot { width: 4px; height: 4px; border-radius: 50%; background: var(--ink-4); }
+
+/* Browser chrome */
+.chrome {
+  height: 38px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 12px;
+}
+.chrome .dots { display: flex; gap: 6px; }
+.chrome .dots span { width: 10px; height: 10px; border-radius: 50%; background: var(--ph-2); }
+.chrome .url {
+  flex: 1; height: 22px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--r-pill);
+  display: flex; align-items: center; padding: 0 10px;
+  font-size: 10.5px; color: var(--ink-3); font-family: var(--font-display);
+}
+
+/* Phone chrome */
+.phone-bar {
+  height: 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 18px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.phone-bar .right { display: flex; gap: 5px; align-items: center; }
+.phone-bar .right span { width: 14px; height: 8px; background: var(--ink); border-radius: 2px; }
+.phone-bar .right span.signal { background: linear-gradient(to top right, var(--ink) 60%, transparent 60%); }
+.phone-bar .right span.battery { width: 22px; border: 1px solid var(--ink); background: transparent; position: relative; }
+.phone-bar .right span.battery::after {
+  content: ""; position: absolute; inset: 1.5px; background: var(--ink);
+  width: 70%;
+}
+
+.tabbar {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 64px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  padding-bottom: 8px;
+}
+.tabbar .t {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-family: var(--font-display);
+  font-size: 9px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+.tabbar .t.active { color: var(--ink); }
+.tabbar .t .ic { width: 20px; height: 20px; border-radius: 5px; background: var(--ph); }
+.tabbar .t.active .ic { background: var(--ink); }
+.tabbar .t.post .ic { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); }
+
+/* Logo */
+.logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  font-size: 18px;
+  color: var(--ink);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.logo::before {
+  content: "";
+  width: 14px; height: 14px;
+  border-radius: 3px;
+  background: var(--accent);
+  display: inline-block;
+  box-shadow: 0 0 0 2px var(--frame), 0 0 0 3px var(--ink);
+  margin-right: 2px;
+}
+
+/* Section labels above wireframes */
+.dc-section-title { font-family: var(--font-display) !important; }
+
+  </style>
+  <style>
+/* Seshn — landing page styles (additive on top of styles.css) */
+
+:root {
+  --land-bg: #0d0d0d;
+  --land-surface: #161614;
+  --land-surface-2: #1d1d1a;
+  --land-line: #25251f;
+  --land-ink: #f4f3ef;
+  --land-ink-2: #c9c7c1;
+  --land-ink-3: #8a8880;
+}
+
+html, body { margin: 0; padding: 0; background: var(--land-bg); }
+body {
+  font-family: var(--font-body);
+  color: var(--land-ink);
+  -webkit-font-smoothing: antialiased;
+  font-variant-ligatures: contextual;
+}
+* { box-sizing: border-box; }
+
+.land {
+  background: var(--land-bg);
+  color: var(--land-ink);
+  min-height: 100vh;
+}
+
+/* Section spacing */
+.land-section { padding: 90px 0; position: relative; }
+.land-section.tight { padding: 60px 0; }
+.land-container { max-width: 1240px; margin: 0 auto; padding: 0 28px; position: relative; }
+
+/* Nav */
+.land-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(13, 13, 13, 0.75);
+  backdrop-filter: saturate(1.4) blur(20px);
+  -webkit-backdrop-filter: saturate(1.4) blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.land-nav-inner {
+  max-width: 1240px; margin: 0 auto; padding: 14px 28px;
+  display: flex; align-items: center; justify-content: space-between; gap: 32px;
+}
+.land-nav .links { display: flex; gap: 28px; align-items: center; }
+.land-nav a {
+  color: var(--land-ink-2); text-decoration: none;
+  font-family: var(--font-display); font-weight: 500; font-size: 14px;
+  transition: color .15s;
+}
+.land-nav a:hover { color: var(--land-ink); }
+.land-logo, .land .logo { color: var(--land-ink); }
+
+/* Hero */
+.hero {
+  padding: 110px 0 60px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-grid {
+  display: grid; grid-template-columns: 1.05fr 1fr; gap: 60px; align-items: center;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 80px;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  margin: 18px 0 22px;
+  color: var(--land-ink);
+}
+.hero h1 .accent { color: var(--accent); }
+.hero p.sub {
+  font-size: 18px; line-height: 1.5;
+  color: var(--land-ink-2);
+  margin: 0 0 28px;
+  max-width: 480px;
+}
+.hero .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+.hero .stat-row {
+  display: flex; gap: 22px; align-items: center; flex-wrap: wrap;
+  padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.08);
+}
+.hero .stat-row .stat { display: flex; flex-direction: column; }
+.hero .stat-row .stat b { font-family: var(--font-display); font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+.hero .stat-row .stat span { font-size: 11.5px; color: var(--land-ink-3); }
+
+.hero .glow {
+  position: absolute;
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(44,203,115,0.18) 0%, transparent 55%);
+  top: -300px; right: -200px;
+  pointer-events: none;
+  filter: blur(10px);
+}
+
+/* Button overrides for dark theme */
+.land .btn { font-family: var(--font-display); font-weight: 600; padding: 12px 18px; border-radius: 10px; font-size: 13px; cursor: pointer; border: 1px solid rgba(255,255,255,0.14); background: transparent; color: var(--land-ink); letter-spacing: -0.005em; transition: all .15s; }
+.land .btn.lg { padding: 16px 24px; font-size: 14px; border-radius: 12px; }
+.land .btn:hover { background: rgba(255,255,255,0.06); }
+.land .btn.primary { background: var(--accent); color: #062c19; border-color: transparent; }
+.land .btn.primary:hover { background: var(--accent-m); }
+.land .btn.ghost { border-color: transparent; color: var(--land-ink-2); }
+
+/* Trust strip */
+.trust {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.02);
+  padding: 22px 0;
+}
+.trust-inner {
+  max-width: 1240px; margin: 0 auto; padding: 0 28px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px;
+}
+.trust-item { display: flex; flex-direction: column; gap: 4px; }
+.trust-item b { font-family: var(--font-display); font-size: 32px; font-weight: 700; letter-spacing: -0.03em; color: var(--land-ink); line-height: 1; }
+.trust-item span { font-size: 12px; color: var(--land-ink-3); }
+.trust-item .green { color: var(--accent); }
+
+/* Section headers */
+.sec-head { max-width: 720px; margin: 0 auto 60px; text-align: center; }
+.sec-head .eyebrow {
+  display: inline-block;
+  font-family: var(--font-display); font-weight: 500; letter-spacing: 0.14em;
+  font-size: 11px; text-transform: uppercase; color: var(--accent);
+  margin-bottom: 14px;
+}
+.sec-head h2 {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 48px; line-height: 1.02; letter-spacing: -0.03em;
+  margin: 0 0 14px; color: var(--land-ink);
+}
+.sec-head p { font-size: 16px; line-height: 1.55; color: var(--land-ink-2); margin: 0; }
+
+/* Steps */
+.steps { display: flex; flex-direction: column; gap: 90px; }
+.step {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+.step.reverse { direction: rtl; }
+.step.reverse > * { direction: ltr; }
+.step .text .num {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 14px; letter-spacing: 0.16em;
+  color: var(--accent);
+  display: inline-block; margin-bottom: 14px;
+}
+.step .text h3 {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 38px; line-height: 1.05; letter-spacing: -0.025em;
+  margin: 0 0 14px; color: var(--land-ink);
+}
+.step .text p { font-size: 15px; line-height: 1.55; color: var(--land-ink-2); margin: 0 0 20px; max-width: 440px; }
+.step .text ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.step .text ul li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--land-ink-2); }
+.step .text ul li::before {
+  content: "✓"; color: var(--accent);
+  flex: 0 0 18px; font-family: var(--font-display); font-weight: 700;
+}
+
+.step .anim {
+  position: relative;
+  padding: 14px;
+  background: linear-gradient(180deg, rgba(44,203,115,0.05), transparent 60%);
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 30px 80px -20px rgba(0,0,0,0.5);
+}
+
+/* Feature grid */
+.feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.feat-card {
+  background: var(--land-surface);
+  border: 1px solid var(--land-line);
+  border-radius: 18px;
+  padding: 26px;
+  display: flex; flex-direction: column; gap: 14px;
+  min-height: 320px;
+  transition: transform .25s, border-color .25s;
+}
+.feat-card:hover { transform: translateY(-3px); border-color: rgba(44,203,115,0.4); }
+.feat-card h4 {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 20px; line-height: 1.1; letter-spacing: -0.015em;
+  margin: 0; color: var(--land-ink);
+}
+.feat-card p { font-size: 13.5px; line-height: 1.5; color: var(--land-ink-3); margin: 0; }
+.feat-card .anim-slot { height: 92px; display: flex; align-items: center; }
+
+/* Project room deep feature */
+.deep {
+  display: grid; grid-template-columns: 1fr 1.2fr; gap: 64px; align-items: center;
+}
+.deep .text h3 { font-family: var(--font-display); font-weight: 700; font-size: 44px; line-height: 1.02; letter-spacing: -0.03em; margin: 18px 0 18px; color: var(--land-ink); }
+.deep .text p { font-size: 15.5px; line-height: 1.55; color: var(--land-ink-2); margin: 0 0 24px; max-width: 460px; }
+.deep .mock {
+  position: relative;
+  padding: 14px;
+  background: var(--land-surface);
+  border: 1px solid var(--land-line);
+  border-radius: 18px;
+  box-shadow: 0 40px 80px -30px rgba(0,0,0,0.7);
+}
+
+/* Testimonials */
+.tests-wrap {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+.test-card {
+  background: var(--land-surface);
+  border: 1px solid var(--land-line);
+  border-radius: 16px;
+  padding: 22px;
+  display: flex; flex-direction: column; gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.test-card .quote { font-size: 15px; line-height: 1.5; color: var(--land-ink); }
+.test-card .quote::before {
+  content: "“"; font-family: var(--font-display); font-weight: 700;
+  font-size: 48px; color: var(--accent);
+  line-height: 0.6; margin-right: 4px; vertical-align: -10px;
+}
+.test-card .who { display: flex; gap: 10px; align-items: center; }
+.test-card .who .col { display: flex; flex-direction: column; gap: 2px; }
+.test-card .who b { font-family: var(--font-display); font-weight: 600; font-size: 13.5px; color: var(--land-ink); }
+.test-card .who span { font-size: 11.5px; color: var(--land-ink-3); }
+
+/* Pricing */
+.price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; max-width: 880px; margin: 0 auto; }
+.price-card {
+  background: var(--land-surface);
+  border: 1px solid var(--land-line);
+  border-radius: 18px;
+  padding: 32px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.price-card.pro {
+  background: linear-gradient(160deg, rgba(44,203,115,0.18) 0%, var(--land-surface) 40%);
+  border-color: rgba(44,203,115,0.5);
+  position: relative;
+  overflow: hidden;
+}
+.price-card .price { display: flex; align-items: baseline; gap: 6px; }
+.price-card .price b { font-family: var(--font-display); font-weight: 700; font-size: 52px; letter-spacing: -0.04em; line-height: 1; color: var(--land-ink); }
+.price-card .price span { color: var(--land-ink-3); font-size: 14px; }
+.price-card ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; font-size: 13.5px; color: var(--land-ink-2); }
+.price-card ul li { display: flex; align-items: center; gap: 10px; }
+.price-card ul li::before { content: "✓"; color: var(--accent); font-weight: 700; }
+
+/* FAQ */
+.faq { max-width: 760px; margin: 0 auto; }
+.faq-item {
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 22px 0;
+  cursor: pointer;
+}
+.faq-item summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  font-family: var(--font-display); font-weight: 600; font-size: 17px;
+  color: var(--land-ink); list-style: none;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: "+"; font-family: var(--font-display); color: var(--accent); font-size: 22px;
+  transition: transform .2s;
+}
+.faq-item[open] summary::after { content: "−"; }
+.faq-item .ans { padding-top: 14px; font-size: 14px; line-height: 1.6; color: var(--land-ink-2); max-width: 600px; }
+
+/* Final CTA */
+.final-cta {
+  background: linear-gradient(180deg, var(--land-surface) 0%, var(--land-bg) 100%);
+  padding: 110px 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.final-cta::before {
+  content: "";
+  position: absolute; left: 50%; top: 0; transform: translateX(-50%);
+  width: 1200px; height: 600px;
+  background: radial-gradient(ellipse, rgba(44,203,115,0.22) 0%, transparent 60%);
+  pointer-events: none;
+}
+.final-cta h2 {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 64px; line-height: 1.0; letter-spacing: -0.035em;
+  margin: 0 0 18px; color: var(--land-ink); position: relative;
+}
+.final-cta p { font-size: 17px; color: var(--land-ink-2); margin: 0 0 28px; position: relative; }
+.final-cta form {
+  display: inline-flex; gap: 8px; padding: 6px;
+  background: var(--land-surface); border: 1px solid var(--land-line);
+  border-radius: 14px; position: relative;
+}
+.final-cta input {
+  background: transparent; border: none; outline: none;
+  color: var(--land-ink); padding: 12px 14px; min-width: 260px;
+  font-family: var(--font-body); font-size: 14px;
+}
+.final-cta input::placeholder { color: var(--land-ink-3); }
+
+/* Footer */
+.footer {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 50px 0 32px;
+  color: var(--land-ink-3);
+  font-size: 12.5px;
+}
+.footer-inner { max-width: 1240px; margin: 0 auto; padding: 0 28px; display: flex; justify-content: space-between; gap: 28px; flex-wrap: wrap; }
+.footer-cols { display: flex; gap: 50px; flex-wrap: wrap; }
+.footer-col { display: flex; flex-direction: column; gap: 8px; }
+.footer-col b { font-family: var(--font-display); font-weight: 600; font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--land-ink); margin-bottom: 4px; }
+.footer-col a { color: var(--land-ink-3); text-decoration: none; }
+.footer-col a:hover { color: var(--land-ink); }
+.footer .bottom { max-width: 1240px; margin: 32px auto 0; padding: 18px 28px 0; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; gap: 28px; }
+
+/* Problem section */
+.problem {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent 40%);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.problem-intro { max-width: 820px; margin: 0 auto 50px; text-align: center; }
+.problem-intro h2 {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 60px; line-height: 1.0; letter-spacing: -0.038em;
+  margin: 0 0 22px; color: var(--land-ink);
+}
+.problem-intro h2 .strike { text-decoration: line-through; text-decoration-color: rgba(192, 57, 43, 0.7); text-decoration-thickness: 4px; }
+.problem-intro p { font-size: 17px; line-height: 1.55; color: var(--land-ink-2); margin: 0; }
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  max-width: 1080px; margin: 0 auto;
+}
+.stat-card {
+  background: var(--land-surface);
+  border: 1px solid var(--land-line);
+  border-radius: 18px;
+  padding: 32px;
+  display: flex; flex-direction: column; gap: 14px;
+  position: relative;
+}
+.stat-card .big {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 72px; line-height: 0.95; letter-spacing: -0.04em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.stat-card .big.danger { color: #e76f51; }
+.stat-card .big.ink { color: var(--land-ink); }
+.stat-card h3 {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 22px; line-height: 1.15; letter-spacing: -0.02em;
+  margin: 0; color: var(--land-ink);
+}
+.stat-card p { font-size: 14px; line-height: 1.55; color: var(--land-ink-2); margin: 0; }
+.stat-card .source {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--land-ink-3);
+  padding-top: 12px; margin-top: auto;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.problem-quote {
+  max-width: 820px; margin: 60px auto 0; text-align: center;
+  padding: 30px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.problem-quote .line {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: 28px; line-height: 1.2; letter-spacing: -0.02em;
+  color: var(--land-ink); margin: 0 0 6px;
+}
+.problem-quote .line .accent { color: var(--accent); }
+.problem-quote .sub { color: var(--land-ink-3); font-size: 13px; }
+
+@media (max-width: 920px) {
+  .stat-grid { grid-template-columns: 1fr; }
+  .problem-intro h2 { font-size: 38px; }
+  .stat-card .big { font-size: 56px; }
+  .problem-quote .line { font-size: 22px; }
+}
+
+/* Animations */
+@keyframes seshn-caret { from { opacity: 1; } to { opacity: 0; } }
+
+/* Ensure components inside light-card animations stay readable */
+.land .gig, .land .audio, .land .card { color: var(--ink); }
+.land .land-anim-card { color: var(--ink); }
+@keyframes seshn-pop {
+  from { transform: scale(0.7); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+@keyframes seshn-pop-in {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+@keyframes seshn-float-a {
+  0%, 100% { transform: translate(0, 0) rotate(6deg); }
+  50% { transform: translate(-4px, -8px) rotate(8deg); }
+}
+@keyframes seshn-float-b {
+  0%, 100% { transform: translate(0, 0) rotate(-5deg); }
+  50% { transform: translate(4px, 6px) rotate(-3deg); }
+}
+@keyframes seshn-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: seshn-fade-up 0.7s cubic-bezier(.2,.7,.3,1) both; }
+
+/* Reveal-on-scroll observer trigger */
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity .7s, transform .7s; }
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+/* Responsive */
+@media (max-width: 920px) {
+  .hero-grid, .step, .deep { grid-template-columns: 1fr; gap: 30px; }
+  .step.reverse { direction: ltr; }
+  .hero h1 { font-size: 52px; }
+  .sec-head h2 { font-size: 36px; }
+  .feat-grid, .tests-wrap { grid-template-columns: 1fr; }
+  .price-grid { grid-template-columns: 1fr; }
+  .trust-inner { grid-template-columns: repeat(2, 1fr); }
+  .final-cta h2 { font-size: 42px; }
+  .deep .text h3 { font-size: 32px; }
+  .land-nav .links { display: none; }
+}
+
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel">
+// Seshn — visuals: procedural album covers, real waveforms, instrument illustrations,
+// sticker badges, marquee, vinyl, cassette, grain texture, cover headers.
+
+// ──────────────────────────────────────────────────────────────
+// Palette — editorial accents that complement the brand greens.
+// Cover-art swatches and decorative backgrounds.
+const V_PAL = {
+  cream:   "#f0e8d6",
+  bone:    "#f4f1e9",
+  rust:    "#d96e3f",
+  plum:    "#5b3858",
+  forest:  "#2a4d3a",
+  ink:     "#0d0d0d",
+  navy:    "#1f3a5f",
+  mint:    "#a8ebc8",
+  lime:    "#c4e83a",
+  cherry:  "#c43d3f",
+  green:   "#2CCB73",
+  deep:    "#1C8F56",
+  butter:  "#f6d36b",
+  fog:     "#c9d3d2",
+};
+
+// Curated cover-art palettes (bg, fg, accent) — chosen for harmony.
+const COVER_PALETTES = [
+  [V_PAL.plum,   V_PAL.cream,  V_PAL.rust],
+  [V_PAL.cream,  V_PAL.ink,    V_PAL.rust],
+  [V_PAL.forest, V_PAL.mint,   V_PAL.butter],
+  [V_PAL.navy,   V_PAL.bone,   V_PAL.butter],
+  [V_PAL.ink,    V_PAL.lime,   V_PAL.mint],
+  [V_PAL.cherry, V_PAL.cream,  V_PAL.ink],
+  [V_PAL.bone,   V_PAL.plum,   V_PAL.rust],
+  [V_PAL.rust,   V_PAL.cream,  V_PAL.ink],
+  [V_PAL.green,  V_PAL.ink,    V_PAL.bone],
+  [V_PAL.mint,   V_PAL.forest, V_PAL.ink],
+];
+
+// Deterministic hash → 32-bit
+function _hash(s) {
+  let h = 2166136261 >>> 0;
+  s = String(s || "x");
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+function _rng(seed) {
+  let s = seed >>> 0;
+  return () => {
+    s = (s + 0x6D2B79F5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// ──────────────────────────────────────────────────────────────
+// AlbumArt — procedural SVG cover art seeded by `seed` (title string).
+// Variants: 0 sun-disc · 1 halftone · 2 big-initial · 3 waveform-poster
+//           4 sliced · 5 orbit · 6 stack · 7 horizon
+const AlbumArt = ({ seed = "track", size = 56, variant, radius = 6, style, initial }) => {
+  const h = _hash(seed);
+  const v = variant != null ? variant : h % 8;
+  const pal = COVER_PALETTES[((h >>> 3) % COVER_PALETTES.length)];
+  const bg = pal[0], fg = pal[1], ac = pal[2];
+  const rng = _rng(h);
+
+  const wrap = {
+    width: size, height: size,
+    borderRadius: radius,
+    overflow: "hidden",
+    flex: "0 0 auto",
+    display: "inline-block",
+    ...style,
+  };
+
+  let inner;
+  if (v === 0) {
+    // Sun disc + horizon line
+    const cx = 50, cy = 38 + (rng() - 0.5) * 16;
+    inner = (
+      <svg viewBox="0 0 100 100" style={{ display: "block" }} width="100%" height="100%">
+        <rect width="100" height="100" fill={bg} />
+        <circle cx={cx} cy={cy} r={26} fill={ac} />
+        <rect x="0" y="68" width="100" height="6" fill={fg} />
+        <rect x="0" y="78" width="100" height="2" fill={fg} opacity="0.45" />
+      </svg>
+    );
+  } else if (v === 1) {
+    // Halftone gradient — dots fade across diagonal
+    const dots = [];
+    for (let y = 0; y < 10; y++)
+      for (let x = 0; x < 10; x++) {
+        const d = (x + y) / 18; // 0..1
+        const r = Math.max(0.4, 4.2 * (1 - d) + rng() * 0.4);
+        dots.push(<circle key={x + "_" + y} cx={5 + x * 10} cy={5 + y * 10} r={r} fill={fg} />);
+      }
+    inner = (
+      <svg viewBox="0 0 100 100" width="100%" height="100%">
+        <rect width="100" height="100" fill={bg} />
+        {dots}
+      </svg>
+    );
+  } else if (v === 2) {
+    // Big initial — display letter
+    const letter = (initial || seed[0] || "S").toUpperCase();
+    inner = (
+      <svg viewBox="0 0 100 100" width="100%" height="100%">
+        <rect width="100" height="100" fill={bg} />
+        <text x="50" y="72" textAnchor="middle"
+          fontFamily="var(--font-display)" fontWeight="700" fontSize="86"
+          letterSpacing="-3" fill={fg}>{letter}</text>
+        <rect x="14" y="84" width="72" height="4" fill={ac} />
+      </svg>
+    );
+  } else if (v === 3) {
+    // Waveform poster
+    const bars = [];
+    for (let i = 0; i < 28; i++) {
+      const t = i / 27;
+      const env = Math.sin(t * Math.PI) ** 0.6;
+      const a = 10 + rng() * 80 * env;
+      bars.push(<rect key={i} x={5 + i * 3.4} y={50 - a / 2} width="2" height={a} fill={fg} rx="1" />);
+    }
+    inner = (
+      <svg viewBox="0 0 100 100" width="100%" height="100%">
+        <rect width="100" height="100" fill={bg} />
+        {bars}
+        <rect x="6" y="86" width="40" height="2" fill={ac} />
+      </svg>
+    );
+  } else if (v === 4) {
+    // Sliced diagonal half + circle on the seam
+    inner = (
+      <svg viewBox="0 0 100 100" width="100%" height="100%">
+        <rect width="100" height="100" fill={bg} />
+        <polygon points="0,0 100,0 0,100" fill={fg} />
+        <circle cx="50" cy="50" r="18" fill={ac} />
+      </svg>
+    );
+  } else if (v === 5) {
+    // Orbit — concentric rings + offset dot
+    inner = (
+      <svg viewBox="0 0 100 100" width="100%" height="100%">
+        <rect width="100" height="100" fill={bg} />
+        {[36, 26, 16].map((r, i) => (
+          <circle key={i} cx="50" cy="50" r={r} fill="none" stroke={fg} strokeWidth={i === 1 ? 2 : 1.2} opacity={0.85 - i * 0.1} />
+        ))}
+        <circle cx={50 + 36 * Math.cos(((h >>> 5) % 360) * Math.PI / 180)}
+                cy={50 + 36 * Math.sin(((h >>> 5) % 360) * Math.PI / 180)} r="5" fill={ac} />
+      </svg>
+    );
+  } else if (v === 6) {
+    // Stack — three offset blocks like overlapping LPs
+    inner = (
+      <svg viewBox="0 0 100 100" width="100%" height="100%">
+        <rect width="100" height="100" fill={bg} />
+        <rect x="18" y="22" width="58" height="58" fill={ac} />
+        <rect x="26" y="30" width="58" height="58" fill={fg} opacity="0.85" />
+        <rect x="34" y="38" width="58" height="58" fill={ac} opacity="0.6" />
+      </svg>
+    );
+  } else {
+    // 7 — Horizon — sky/land split with sun
+    inner = (
+      <svg viewBox="0 0 100 100" width="100%" height="100%">
+        <rect width="100" height="55" fill={bg} />
+        <rect y="55" width="100" height="45" fill={fg} />
+        <circle cx="50" cy="55" r="20" fill={ac} />
+        <rect x="0" y="55" width="100" height="1.5" fill={ac} opacity="0.4" />
+      </svg>
+    );
+  }
+
+  return <div style={wrap} aria-hidden="true">{inner}</div>;
+};
+
+// ──────────────────────────────────────────────────────────────
+// Waveform — SVG waveform with optional playhead progress.
+const Waveform = ({ seed = "wf", height = 28, bars = 56, progress = 0.32, color, played, compact, style }) => {
+  const h = _hash(seed);
+  const rng = _rng(h);
+  const arr = [];
+  for (let i = 0; i < bars; i++) {
+    const t = i / (bars - 1);
+    // gentle envelope so it looks musical, not random
+    const env = 0.35 + 0.65 * (Math.sin(t * Math.PI) ** 0.6);
+    const a = (0.18 + 0.82 * rng()) * env;
+    arr.push(a);
+  }
+  const W = bars * (compact ? 2.4 : 3);
+  const gap = compact ? 1 : 1.2;
+  const bw = (W / bars) - gap;
+  const playedColor = played || "var(--ink)";
+  const restColor = color || "rgba(0,0,0,0.22)";
+  return (
+    <svg viewBox={`0 0 ${W} ${height}`} preserveAspectRatio="none"
+      width="100%" height={height} style={{ display: "block", ...style }}>
+      {arr.map((a, i) => {
+        const x = i * (W / bars);
+        const bh = Math.max(2, a * height);
+        const y = (height - bh) / 2;
+        const isPlayed = (i / bars) < progress;
+        return <rect key={i} x={x} y={y} width={bw} height={bh}
+          fill={isPlayed ? playedColor : restColor} rx={bw / 2} />;
+      })}
+    </svg>
+  );
+};
+
+// ──────────────────────────────────────────────────────────────
+// Marquee — horizontal scrolling ticker
+const Marquee = ({ items = [], speed = 60, sep = "✶", style, dark }) => {
+  // duplicate items so the loop seam is invisible
+  const doubled = [...items, ...items];
+  return (
+    <div style={{
+      overflow: "hidden",
+      borderTop: "1px solid var(--line)",
+      borderBottom: "1px solid var(--line)",
+      background: dark ? "var(--ink-black)" : "var(--surface)",
+      color: dark ? "var(--frame)" : "var(--ink)",
+      ...style,
+    }}>
+      <div style={{
+        display: "flex",
+        whiteSpace: "nowrap",
+        animation: `seshn-marquee ${speed}s linear infinite`,
+        willChange: "transform",
+      }}>
+        {doubled.map((it, i) => (
+          <div key={i} style={{
+            display: "inline-flex", alignItems: "center", gap: 14,
+            padding: "10px 22px",
+            fontFamily: "var(--font-display)", fontSize: 13, fontWeight: 500, letterSpacing: "-0.005em",
+          }}>
+            <span>{it}</span>
+            <span style={{ color: dark ? "var(--accent)" : "var(--accent-d)", fontSize: 11 }}>{sep}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ──────────────────────────────────────────────────────────────
+// Sticker — small rotated badge, hand-placed feel
+const Sticker = ({ children, rot = -4, color = "accent", style, size = "md" }) => {
+  const colors = {
+    accent: { bg: "var(--accent)", fg: "#062c19" },
+    ink:    { bg: "var(--ink)", fg: "var(--frame)" },
+    cream:  { bg: V_PAL.cream, fg: "var(--ink)" },
+    rust:   { bg: V_PAL.rust, fg: "var(--bone)" },
+  };
+  const c = colors[color] || colors.accent;
+  const pad = size === "sm" ? "4px 10px" : "6px 12px";
+  return (
+    <span style={{
+      display: "inline-block",
+      transform: `rotate(${rot}deg)`,
+      padding: pad,
+      borderRadius: 4,
+      background: c.bg,
+      color: c.fg,
+      fontFamily: "var(--font-display)", fontWeight: 700,
+      fontSize: size === "sm" ? 10 : 12,
+      letterSpacing: "0.04em",
+      textTransform: "uppercase",
+      boxShadow: "0 6px 14px rgba(0,0,0,0.15), 0 1px 0 rgba(0,0,0,0.08)",
+      ...style,
+    }}>{children}</span>
+  );
+};
+
+// ──────────────────────────────────────────────────────────────
+// Vinyl — decorative SVG
+const Vinyl = ({ size = 44, color = "var(--ink)", label = "var(--accent)", style }) => (
+  <svg viewBox="0 0 100 100" width={size} height={size} style={{ display: "block", ...style }}>
+    <circle cx="50" cy="50" r="48" fill={color} />
+    <circle cx="50" cy="50" r="36" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+    <circle cx="50" cy="50" r="28" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
+    <circle cx="50" cy="50" r="20" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
+    <circle cx="50" cy="50" r="14" fill={label} />
+    <circle cx="50" cy="50" r="2" fill={color} />
+  </svg>
+);
+
+// ──────────────────────────────────────────────────────────────
+// Cassette — decorative SVG
+const Cassette = ({ size = 60, color = V_PAL.cream, accent = V_PAL.plum, style }) => (
+  <svg viewBox="0 0 120 80" width={size} height={size * (80 / 120)} style={{ display: "block", ...style }}>
+    <rect x="2" y="2" width="116" height="76" rx="6" fill={color} stroke={accent} strokeWidth="2" />
+    <rect x="10" y="34" width="100" height="22" rx="2" fill={accent} />
+    <circle cx="36" cy="45" r="7" fill={color} />
+    <circle cx="84" cy="45" r="7" fill={color} />
+    <circle cx="36" cy="45" r="2.5" fill={accent} />
+    <circle cx="84" cy="45" r="2.5" fill={accent} />
+    <rect x="20" y="14" width="80" height="14" rx="2" fill={color} stroke={accent} strokeWidth="1" />
+    <rect x="24" y="18" width="38" height="2" fill={accent} opacity="0.6" />
+    <rect x="24" y="22" width="50" height="2" fill={accent} opacity="0.3" />
+    <rect x="14" y="62" width="92" height="2" fill={accent} opacity="0.4" />
+  </svg>
+);
+
+// ──────────────────────────────────────────────────────────────
+// Polaroid — small rotated photo card
+const Polaroid = ({ rot = -3, caption = "studio · tues", size = 80, seed = "p", style }) => (
+  <div style={{
+    transform: `rotate(${rot}deg)`,
+    background: "var(--frame)",
+    padding: 6,
+    paddingBottom: 18,
+    boxShadow: "0 8px 22px rgba(0,0,0,0.18)",
+    display: "inline-block",
+    position: "relative",
+    ...style,
+  }}>
+    <AlbumArt seed={seed} size={size} radius={0} />
+    <div style={{
+      position: "absolute", bottom: 4, left: 6, right: 6,
+      fontFamily: "var(--font-display)", fontSize: 9,
+      color: "var(--ink-3)", textAlign: "center",
+    }}>{caption}</div>
+  </div>
+);
+
+// ──────────────────────────────────────────────────────────────
+// CoverHeader — banner for profile / project (abstract shapes + grain)
+const CoverHeader = ({ height = 130, seed = "cover", style }) => {
+  const h = _hash(seed);
+  const pal = COVER_PALETTES[h % COVER_PALETTES.length];
+  const bg = pal[0], fg = pal[1], ac = pal[2];
+  return (
+    <div style={{ height, position: "relative", overflow: "hidden", background: bg, ...style }}>
+      <svg viewBox="0 0 400 130" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" style={{ position: "absolute", inset: 0 }}>
+        <circle cx="80" cy="60" r="64" fill={ac} />
+        <circle cx="320" cy="80" r="44" fill={fg} opacity="0.85" />
+        <rect x="0" y="100" width="400" height="6" fill={fg} />
+        {/* Halftone trail */}
+        {Array.from({ length: 14 }).map((_, i) => (
+          <circle key={i} cx={200 + i * 13} cy={40} r={5 - i * 0.3} fill={fg} opacity={0.6 - i * 0.04} />
+        ))}
+      </svg>
+      <Grain />
+    </div>
+  );
+};
+
+// ──────────────────────────────────────────────────────────────
+// Grain — film-grain overlay (SVG noise data URL)
+const NOISE_SVG = `<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.45 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>`;
+const GRAIN_URL = `url("data:image/svg+xml;utf8,${NOISE_SVG}")`;
+const Grain = ({ opacity = 0.22, blend = "overlay", style }) => (
+  <div style={{
+    position: "absolute", inset: 0,
+    backgroundImage: GRAIN_URL,
+    opacity,
+    mixBlendMode: blend,
+    pointerEvents: "none",
+    ...style,
+  }} />
+);
+
+// ──────────────────────────────────────────────────────────────
+// Instrument illustrations — used for empty states & decoration.
+// Hand-drawn-feeling line work, single-color.
+const Illo = ({ kind, size = 72, color = "var(--ink)", style }) => {
+  const props = {
+    width: size, height: size, viewBox: "0 0 100 100",
+    fill: "none", stroke: color, strokeWidth: 2.2,
+    strokeLinecap: "round", strokeLinejoin: "round",
+    style: { display: "block", ...style },
+  };
+  switch (kind) {
+    case "mic":
+      return (
+        <svg {...props}>
+          <rect x="38" y="14" width="24" height="44" rx="12" />
+          <path d="M28 48a22 22 0 0 0 44 0" />
+          <path d="M50 70v14M40 84h20" />
+          <circle cx="50" cy="32" r="1.4" fill={color} />
+        </svg>
+      );
+    case "headphones":
+      return (
+        <svg {...props}>
+          <path d="M18 56v-6a32 32 0 0 1 64 0v6" />
+          <rect x="12" y="56" width="14" height="26" rx="4" />
+          <rect x="74" y="56" width="14" height="26" rx="4" />
+          <path d="M22 70l-4 2M82 70l4 2" />
+        </svg>
+      );
+    case "vinyl":
+      return (
+        <svg width={size} height={size} viewBox="0 0 100 100" style={{ display: "block", ...style }}>
+          <circle cx="50" cy="50" r="38" fill="none" stroke={color} strokeWidth="2.2" />
+          <circle cx="50" cy="50" r="30" fill="none" stroke={color} strokeWidth="0.8" opacity="0.6" />
+          <circle cx="50" cy="50" r="22" fill="none" stroke={color} strokeWidth="0.8" opacity="0.6" />
+          <circle cx="50" cy="50" r="14" fill={color} />
+          <circle cx="50" cy="50" r="2.5" fill="var(--frame)" />
+        </svg>
+      );
+    case "stems":
+      return (
+        <svg {...props}>
+          <rect x="14" y="24" width="72" height="14" rx="3" />
+          <rect x="14" y="44" width="72" height="14" rx="3" />
+          <rect x="14" y="64" width="72" height="14" rx="3" />
+          <path d="M22 31h12M40 31h22M22 51h38M22 71h26M58 71h14" stroke={color} strokeWidth="1.4" opacity="0.5" />
+          <circle cx="80" cy="31" r="2" fill={color} />
+          <circle cx="80" cy="51" r="2" fill={color} />
+          <circle cx="80" cy="71" r="2" fill={color} />
+        </svg>
+      );
+    case "cassette":
+      return (
+        <svg {...props}>
+          <rect x="12" y="26" width="76" height="48" rx="5" />
+          <rect x="20" y="48" width="60" height="14" rx="2" />
+          <circle cx="36" cy="55" r="4" />
+          <circle cx="64" cy="55" r="4" />
+          <rect x="26" y="32" width="48" height="10" rx="1.5" />
+          <path d="M16 70v2M84 70v2" />
+        </svg>
+      );
+    case "mailbox":
+      return (
+        <svg {...props}>
+          <path d="M14 40v40h72V40" />
+          <path d="M50 16l34 24H16z" />
+          <path d="M38 56h24v18H38z" />
+          <path d="M50 56v18" />
+        </svg>
+      );
+    case "compass":
+      return (
+        <svg {...props}>
+          <circle cx="50" cy="50" r="36" />
+          <path d="M50 22v6M50 72v6M22 50h6M72 50h6" />
+          <path d="m42 58 8-20 8 20-8-6z" fill={color} />
+        </svg>
+      );
+    case "spark":
+      return (
+        <svg {...props}>
+          <path d="M50 18v18M50 64v18M18 50h18M64 50h18" />
+          <path d="m30 30 12 12M58 58l12 12M70 30 58 42M30 70l12-12" />
+        </svg>
+      );
+    case "session":
+      return (
+        <svg {...props}>
+          <rect x="14" y="30" width="72" height="44" rx="3" />
+          {[26, 38, 50, 62, 74].map(x => <path key={x} d={`M${x} 38v28`} />)}
+          {[22, 30, 42, 54, 66, 78].map(x => <path key={x} d={`M${x} 34v36`} strokeWidth="1" opacity="0.4" />)}
+          <circle cx="32" cy="48" r="2" fill={color} />
+          <circle cx="56" cy="60" r="2" fill={color} />
+          <circle cx="68" cy="44" r="2" fill={color} />
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
+
+// ──────────────────────────────────────────────────────────────
+// Highlight — fake hand-drawn highlighter mark under a word
+const Highlight = ({ children, color = "var(--accent)", style }) => (
+  <span style={{ position: "relative", display: "inline-block", ...style }}>
+    <span style={{ position: "relative", zIndex: 1 }}>{children}</span>
+    <span style={{
+      position: "absolute",
+      left: "-2%", right: "-2%", bottom: "0.05em",
+      height: "0.32em",
+      background: color,
+      borderRadius: 999,
+      zIndex: 0,
+      transform: "skewX(-4deg)",
+      opacity: 0.55,
+    }} />
+  </span>
+);
+
+// ──────────────────────────────────────────────────────────────
+// Global CSS injection for keyframes — once.
+if (typeof document !== "undefined" && !document.getElementById("seshn-visuals-css")) {
+  const s = document.createElement("style");
+  s.id = "seshn-visuals-css";
+  s.textContent = `
+    @keyframes seshn-marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    @keyframes seshn-spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    .seshn-vinyl-spin { animation: seshn-spin 6s linear infinite; }
+  `;
+  document.head.appendChild(s);
+}
+
+window.SeshnVisuals = {
+  AlbumArt, Waveform, Marquee, Sticker, Vinyl, Cassette, Polaroid,
+  CoverHeader, Grain, Illo, Highlight,
+  V_PAL, COVER_PALETTES,
+};
+Object.assign(window, window.SeshnVisuals);
+
+</script>
+  <script type="text/babel">
+// Seshn — wireframe atoms
+
+const Logo = ({ size = 18 }) => (
+  <span className="logo" style={{ fontSize: size }}>Seshn</span>
+);
+
+const Pill = ({ children, variant = "neutral", style }) => (
+  <span className={`pill ${variant}`} style={style}>{children}</span>
+);
+
+const Avatar = ({ size = "md", role, initials, style }) => {
+  const cls = size === "sm" ? "avatar sm" : size === "lg" ? "avatar lg" : size === "xl" ? "avatar xl" : "avatar";
+  return (
+    <span className={cls} style={style}>
+      {initials || ""}
+      {role && <span className="role-dot">{role}</span>}
+    </span>
+  );
+};
+
+const Btn = ({ children, variant = "default", size, block, style }) => {
+  const cls = ["btn", variant !== "default" ? variant : "", size === "lg" ? "lg" : size === "sm" ? "sm" : "", block ? "block" : ""].filter(Boolean).join(" ");
+  return <button className={cls} style={style}>{children}</button>;
+};
+
+const Input = ({ placeholder, size, style, value }) => (
+  <input className={`input ${size === "lg" ? "lg" : ""}`} placeholder={placeholder} defaultValue={value} style={style} />
+);
+
+const PH = ({ w, h, label, img, soft, radius, style }) => (
+  <div
+    className={`ph ${img ? "ph-img" : ""} ${soft ? "ph-block soft" : ""}`}
+    style={{ width: w, height: h, borderRadius: radius, ...style }}
+  >
+    {img ? <span>{label || "image"}</span> : (label || null)}
+  </div>
+);
+
+const Line = ({ w = "100%", size = "md", style }) => {
+  const cls = size === "sm" ? "ph-line sm" : size === "lg" ? "ph-line lg" : "ph-line";
+  return <div className={cls} style={{ width: w, ...style }} />;
+};
+
+const Lines = ({ count = 3, last = "60%", style }) => (
+  <div className="col" style={{ gap: 6, ...style }}>
+    {Array.from({ length: count }).map((_, i) => (
+      <Line key={i} w={i === count - 1 ? last : "100%"} />
+    ))}
+  </div>
+);
+
+const Audio = ({ compact, title = "Track title", artist = "Artist · 3:24", source = "SoundCloud", seed, art = true, progress = 0.32, playing }) => {
+  const AA = window.AlbumArt;
+  const WF = window.Waveform;
+  const artSize = compact ? 28 : 42;
+  return (
+    <div className={`audio ${compact ? "compact" : ""}`}>
+      {art && AA && <AA seed={seed || title} size={artSize} radius={compact ? 4 : 6} />}
+      <span className={`play ${playing ? "playing" : ""}`} />
+      <div className="col" style={{ flex: 1, gap: compact ? 2 : 4, minWidth: 0 }}>
+        <div className="meta" style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
+          <b style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</b>
+          <span style={{ flexShrink: 0, marginLeft: 8, fontSize: compact ? 9.5 : 10.5 }}>{source}</span>
+        </div>
+        {WF ? <WF seed={seed || title} height={compact ? 14 : 22} progress={progress} compact={compact} /> : <div className="wave" />}
+        <div className="meta">
+          <span>{artist}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Icon = ({ size = 16, kind, style }) => {
+  // Simple monochrome line glyphs, drawn with CSS
+  const s = { width: size, height: size, display: "inline-block", flex: "0 0 auto", ...style };
+  const base = {
+    width: size, height: size,
+    background: "currentColor",
+    WebkitMaskRepeat: "no-repeat", maskRepeat: "no-repeat",
+    WebkitMaskPosition: "center", maskPosition: "center",
+    WebkitMaskSize: "contain", maskSize: "contain",
+  };
+  const svgs = {
+    search:    `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><circle cx='11' cy='11' r='7'/><path d='m20 20-3.5-3.5'/></svg>`,
+    bell:      `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9'/><path d='M10 21a2 2 0 0 0 4 0'/></svg>`,
+    plus:      `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M12 5v14M5 12h14'/></svg>`,
+    message:   `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M21 12a8 8 0 0 1-12 7l-5 1 1-5a8 8 0 1 1 16-3z'/></svg>`,
+    filter:    `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M3 5h18M6 12h12M10 19h4'/></svg>`,
+    check:     `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5'><path d='M5 12l5 5L20 7'/></svg>`,
+    chevron:   `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='m9 6 6 6-6 6'/></svg>`,
+    pin:       `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M12 22s-7-7.5-7-13a7 7 0 1 1 14 0c0 5.5-7 13-7 13z'/><circle cx='12' cy='9' r='2.5'/></svg>`,
+    star:      `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='m12 3 2.7 6 6.3.5-4.8 4.2L17.6 20 12 16.7 6.4 20l1.5-6.3L3 9.5 9.3 9z'/></svg>`,
+    paperclip: `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='m21 12-8.5 8.5a5 5 0 1 1-7-7L14 5a3 3 0 1 1 4 4l-9 9a1 1 0 1 1-1.5-1.5L15 8'/></svg>`,
+    sliders:   `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M4 6h16M4 12h16M4 18h16'/><circle cx='9' cy='6' r='2'/><circle cx='15' cy='12' r='2'/><circle cx='8' cy='18' r='2'/></svg>`,
+    grid:      `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><rect x='3' y='3' width='7' height='7'/><rect x='14' y='3' width='7' height='7'/><rect x='3' y='14' width='7' height='7'/><rect x='14' y='14' width='7' height='7'/></svg>`,
+    list:      `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01'/></svg>`,
+    home:      `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M3 11 12 3l9 8'/><path d='M5 10v10h14V10'/></svg>`,
+    compass:   `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><circle cx='12' cy='12' r='9'/><path d='m9 15 2-5 5-2-2 5z'/></svg>`,
+    folder:    `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M3 6h7l2 2h9v11H3z'/></svg>`,
+    user:      `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><circle cx='12' cy='8' r='4'/><path d='M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6'/></svg>`,
+    google:    `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M21 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9c2.5 0 4.5 1 6 2.5'/><path d='M21 12h-9'/></svg>`,
+    apple:     `<svg viewBox='0 0 24 24' fill='black'><path d='M16 3c0 2-1.5 4-3.5 4 0-2 2-4 3.5-4z'/><path d='M19 17c-.8 2-1.7 4-3.3 4-1.4 0-1.8-.8-3.4-.8s-2.1.8-3.4.8c-1.7 0-2.9-2.3-3.7-4.5C3.5 12.7 5 8 8 8c1.4 0 2.3.8 3.5.8 1.1 0 1.9-.9 3.5-.9 1.4 0 2.7.8 3.5 2-3 1.7-2.5 5.7.5 7.1z'/></svg>`,
+    spark:     `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M12 3v6M12 15v6M3 12h6M15 12h6M5.6 5.6l4.2 4.2M14.2 14.2l4.2 4.2M18.4 5.6l-4.2 4.2M9.8 14.2l-4.2 4.2'/></svg>`,
+    mic:       `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><rect x='9' y='3' width='6' height='12' rx='3'/><path d='M5 11a7 7 0 0 0 14 0M12 18v3'/></svg>`,
+    gear:      `<svg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><circle cx='12' cy='12' r='3'/><path d='M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2'/></svg>`,
+  };
+  const data = svgs[kind] || svgs.spark;
+  const url = `url("data:image/svg+xml;utf8,${encodeURIComponent(data)}")`;
+  return <span style={{ ...base, ...style, WebkitMaskImage: url, maskImage: url }} />;
+};
+
+// ——— Gig card (3 contexts: feed | compact | mini) ———
+const GigCard = ({ context = "feed", boost, art, role = "Vocalist", title = "Need a topline writer for an Afrobeats demo", desc, tags = ["Afrobeats", "R&B"], comp = "Paid · $200", time = "2h", name = "Maya O.", initials = "MO", roleTag = "PROD" }) => {
+  const AA = window.AlbumArt;
+  if (context === "mini") {
+    return (
+      <div className="gig" style={{ padding: 12, gap: 8, borderRadius: 12 }}>
+        <div className="row" style={{ gap: 8 }}>
+          <Avatar size="sm" initials={initials} />
+          <span className="t-meta">{name} · {time}</span>
+        </div>
+        <div className="gig-title" style={{ fontSize: 13 }}>{title}</div>
+        <div className="row" style={{ gap: 4, flexWrap: "wrap" }}>
+          <Pill variant="accent">{role}</Pill>
+          {tags.slice(0, 1).map(t => <Pill key={t}>{t}</Pill>)}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className={`gig ${boost ? "boost" : ""}`}>
+      <div className="gig-head">
+        <Avatar size="md" initials={initials} role={roleTag} />
+        <div className="col" style={{ flex: 1, gap: 2, minWidth: 0 }}>
+          <div className="row" style={{ gap: 6 }}>
+            <span style={{ fontWeight: 600, fontFamily: "var(--font-display)" }}>{name}</span>
+            <span className="dot" />
+            <span className="t-meta">{time} ago</span>
+            {boost && <Pill variant="solid" style={{ marginLeft: "auto", fontSize: 9 }}>★ Boosted</Pill>}
+          </div>
+          <div className="row" style={{ gap: 6 }}>
+            <Pill variant="accent">{role} needed</Pill>
+            <span className="t-meta">· {comp}</span>
+          </div>
+        </div>
+        {art && AA && <AA seed={art === true ? title : art} size={48} radius={6} />}
+      </div>
+      <div className="gig-title">{title}</div>
+      {desc !== false && (
+        <div className="col" style={{ gap: 4 }}>
+          <Line />
+          <Line w="84%" />
+        </div>
+      )}
+      <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
+        {tags.map(t => <Pill key={t}>{t}</Pill>)}
+      </div>
+      <div className="gig-foot">
+        <span className="t-meta">12 applied · 3 days left</span>
+        <div className="row" style={{ gap: 8 }}>
+          <Btn size="sm">View</Btn>
+          <Btn size="sm" variant="primary">Apply</Btn>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ——— Browser frame ———
+const Browser = ({ url = "seshn.fm/feed", children, dark }) => (
+  <div className={`wf ${dark ? "dark" : ""}`}>
+    <div className="chrome">
+      <div className="dots"><span /><span /><span /></div>
+      <div className="url">{url}</div>
+      <div style={{ width: 40 }} />
+    </div>
+    <div style={{ position: "absolute", inset: "38px 0 0 0", overflow: "hidden" }}>
+      {children}
+    </div>
+  </div>
+);
+
+// ——— Phone frame ———
+const Phone = ({ time = "9:41", children, dark, tabbar }) => (
+  <div className={`wf wf-mobile ${dark ? "dark" : ""}`}>
+    <div className="phone-bar">
+      <span>{time}</span>
+      <div className="right">
+        <span className="signal" style={{ width: 14, height: 9 }} />
+        <span style={{ width: 14, height: 9, background: "transparent", border: "1px solid currentColor", borderRadius: 2 }} />
+        <span className="battery" />
+      </div>
+    </div>
+    <div style={{ position: "absolute", left: 0, right: 0, top: 28, bottom: tabbar ? 64 : 0, overflow: "hidden" }}>
+      {children}
+    </div>
+    {tabbar && tabbar}
+  </div>
+);
+
+const MobileTabBar = ({ active = "home" }) => (
+  <div className="tabbar">
+    <div className={`t ${active === "home" ? "active" : ""}`}><span className="ic" />Feed</div>
+    <div className={`t ${active === "browse" ? "active" : ""}`}><span className="ic" />Browse</div>
+    <div className="t post"><span className="ic" /></div>
+    <div className={`t ${active === "msg" ? "active" : ""}`}><span className="ic" />Inbox</div>
+    <div className={`t ${active === "me" ? "active" : ""}`}><span className="ic" />You</div>
+  </div>
+);
+
+window.SeshnAtoms = { Logo, Pill, Avatar, Btn, Input, PH, Line, Lines, Audio, Icon, GigCard, Browser, Phone, MobileTabBar };
+Object.assign(window, window.SeshnAtoms);
+
+// ——— Star rating (read + interactive variants) ———
+const StarRow = ({ value = 0, size = 13, color = "var(--ink)" }) => {
+  const stars = [];
+  for (let i = 1; i <= 5; i++) {
+    const fill = Math.min(1, Math.max(0, value - (i - 1)));
+    stars.push(
+      <span key={i} style={{ position: "relative", width: size, height: size, display: "inline-block" }}>
+        <svg viewBox="0 0 24 24" width={size} height={size} style={{ position: "absolute", inset: 0 }}>
+          <path d="M12 3l2.7 6 6.3.6-4.8 4.2L17.6 20 12 16.7 6.4 20l1.5-6.2L3 9.6 9.3 9z" fill="none" stroke={color} strokeWidth="1.5" />
+        </svg>
+        <span style={{ position: "absolute", inset: 0, overflow: "hidden", width: `${fill * 100}%` }}>
+          <svg viewBox="0 0 24 24" width={size} height={size}>
+            <path d="M12 3l2.7 6 6.3.6-4.8 4.2L17.6 20 12 16.7 6.4 20l1.5-6.2L3 9.6 9.3 9z" fill={color} />
+          </svg>
+        </span>
+      </span>
+    );
+  }
+  return <span style={{ display: "inline-flex", gap: 2 }}>{stars}</span>;
+};
+
+const Rating = ({ value, count, size = 13, compact, color }) => (
+  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+    <StarRow value={value} size={size} color={color} />
+    <b style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: size, color: color || "var(--ink)" }}>{value.toFixed(1)}</b>
+    {!compact && count != null && <span style={{ fontSize: size - 2, color: "var(--ink-3)" }}>· {count} reviews</span>}
+  </span>
+);
+
+// ——— Testimonial card ———
+const Testimonial = ({ name, ini, role, rating, quote, project, date, mobile }) => (
+  <div className="card" style={{ padding: mobile ? 16 : 20, display: "flex", flexDirection: "column", gap: 10, background: "var(--surface)", borderRadius: 12 }}>
+    <div className="row" style={{ gap: 10 }}>
+      <Avatar size="sm" initials={ini} />
+      <div className="col" style={{ gap: 1, flex: 1, minWidth: 0 }}>
+        <div className="row" style={{ gap: 6 }}>
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: mobile ? 12.5 : 13 }}>{name}</span>
+          <span className="t-meta">· {role}</span>
+        </div>
+        <StarRow value={rating} size={11} />
+      </div>
+      <span className="t-meta" style={{ fontSize: 10.5 }}>{date}</span>
+    </div>
+    <div style={{ fontSize: mobile ? 12.5 : 13.5, lineHeight: 1.55, color: "var(--ink-2)" }}>
+      <span style={{ color: "var(--accent-d)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18, marginRight: 4 }}>“</span>
+      {quote}
+    </div>
+    {project && (
+      <div className="row" style={{ gap: 6, paddingTop: 8, borderTop: "1px solid var(--line-soft)" }}>
+        <Pill style={{ fontSize: 10 }}>Project · {project}</Pill>
+      </div>
+    )}
+  </div>
+);
+
+Object.assign(window, { StarRow, Rating, Testimonial });
+
+</script>
+  <script type="text/babel">
+// Seshn — animated scenes for the landing page.
+// Lottie-style inline SVG/CSS animations — no JSON needed; swap in real
+// Lottie files later by replacing each <X /> with <lottie-player src=… />.
+
+const { Logo, Pill, Avatar, Btn, Input, Icon, GigCard, Audio } = window.SeshnAtoms;
+const { AlbumArt, Waveform, Sticker } = window.SeshnVisuals;
+
+// ────────────────────────────────────────────────────
+// HOOK · loop a sequence of steps with a step duration
+function useLoopStep(stepCount, stepMs = 1400) {
+  const [s, setS] = React.useState(0);
+  React.useEffect(() => {
+    const t = setInterval(() => setS(x => (x + 1) % stepCount), stepMs);
+    return () => clearInterval(t);
+  }, [stepCount, stepMs]);
+  return s;
+}
+
+// ────────────────────────────────────────────────────
+// HERO — Network of musicians connecting.
+// Nodes pulse, edges animate in, audio pulses travel along edges.
+const NetworkAnim = ({ width = 540, height = 460 }) => {
+  // Node layout — 6 musicians in a circle + one center "you"
+  const NODES = [
+    { id: "you",   x: 0.50, y: 0.50, ini: "YT", role: "you", r: 36, you: true },
+    { id: "maya",  x: 0.16, y: 0.22, ini: "MO", role: "PROD" },
+    { id: "nia",   x: 0.82, y: 0.20, ini: "NK", role: "VOC" },
+    { id: "theo",  x: 0.90, y: 0.66, ini: "TB", role: "DRM" },
+    { id: "sam",   x: 0.60, y: 0.88, ini: "SP", role: "MIX" },
+    { id: "lina",  x: 0.18, y: 0.82, ini: "LV", role: "PROD" },
+    { id: "ivan",  x: 0.08, y: 0.52, ini: "IR", role: "GTR" },
+  ];
+  const EDGES = [
+    ["you", "maya"], ["you", "nia"], ["you", "theo"],
+    ["you", "sam"], ["you", "lina"], ["you", "ivan"],
+    ["maya", "nia"], ["nia", "theo"], ["theo", "sam"], ["sam", "lina"], ["lina", "ivan"], ["ivan", "maya"],
+  ];
+  const W = width, H = height;
+  const nodeMap = Object.fromEntries(NODES.map(n => [n.id, { ...n, X: n.x * W, Y: n.y * H }]));
+
+  // Animated time tick for pulse positions
+  const [t, setT] = React.useState(0);
+  React.useEffect(() => {
+    let raf, start = performance.now();
+    const step = () => {
+      setT((performance.now() - start) / 1000);
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  return (
+    <div style={{ position: "relative", width: "100%", height, maxWidth: width, margin: "0 auto" }}>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} style={{ overflow: "visible" }}>
+        <defs>
+          <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="rgba(44,203,115,0.35)" />
+            <stop offset="60%" stopColor="rgba(44,203,115,0.06)" />
+            <stop offset="100%" stopColor="rgba(44,203,115,0)" />
+          </radialGradient>
+          <filter id="softblur"><feGaussianBlur stdDeviation="0.6" /></filter>
+        </defs>
+
+        {/* Central glow */}
+        <circle cx={W * 0.5} cy={H * 0.5} r={W * 0.4} fill="url(#centerGlow)" />
+
+        {/* Subtle concentric rings */}
+        {[0.18, 0.28, 0.38].map((r, i) => (
+          <circle key={i} cx={W * 0.5} cy={H * 0.5} r={W * r}
+            fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1"
+            strokeDasharray="2 4" />
+        ))}
+
+        {/* Edges */}
+        {EDGES.map(([a, b], i) => {
+          const A = nodeMap[a], B = nodeMap[b];
+          // Travelling pulse position (0..1) — offset per edge so they're staggered
+          const period = 3.5;
+          const offset = (i * 0.31) % 1;
+          const u = ((t / period) + offset) % 1;
+          const px = A.X + (B.X - A.X) * u;
+          const py = A.Y + (B.Y - A.Y) * u;
+          const isHub = a === "you" || b === "you";
+          return (
+            <g key={i}>
+              <line x1={A.X} y1={A.Y} x2={B.X} y2={B.Y}
+                stroke={isHub ? "rgba(44,203,115,0.35)" : "rgba(255,255,255,0.08)"}
+                strokeWidth={isHub ? 1.4 : 1} strokeLinecap="round"
+                strokeDasharray={isHub ? "0" : "3 4"} />
+              {/* Pulse dot */}
+              <circle cx={px} cy={py} r={isHub ? 3.5 : 2.5}
+                fill={isHub ? "#2CCB73" : "rgba(255,255,255,0.7)"}>
+                <animate attributeName="opacity" values="0.4;1;0.4" dur="1.4s" repeatCount="indefinite" />
+              </circle>
+            </g>
+          );
+        })}
+
+        {/* Nodes */}
+        {NODES.map((n, i) => {
+          const nm = nodeMap[n.id];
+          const breathe = 1 + 0.04 * Math.sin(t * 1.4 + i);
+          return (
+            <g key={n.id} transform={`translate(${nm.X} ${nm.Y}) scale(${breathe})`}>
+              {n.you && (
+                <circle r={n.r + 12} fill="none" stroke="rgba(44,203,115,0.35)" strokeWidth="1.2" strokeDasharray="3 5">
+                  <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="22s" repeatCount="indefinite" />
+                </circle>
+              )}
+              <circle r={n.r || 26} fill={n.you ? "var(--accent)" : "var(--surface)"}
+                stroke={n.you ? "transparent" : "rgba(255,255,255,0.15)"} strokeWidth="1" />
+              <text y="5" textAnchor="middle"
+                fontFamily="var(--font-display)" fontWeight="700" fontSize={n.you ? 16 : 13}
+                fill={n.you ? "#062c19" : "var(--ink)"}>{n.ini}</text>
+              {!n.you && (
+                <g transform={`translate(${(n.r || 26) - 4} ${(n.r || 26) - 14})`}>
+                  <rect x="-13" y="-7" width="30" height="14" rx="7" fill="var(--ink)" />
+                  <text y="3" textAnchor="middle" fontFamily="var(--font-display)" fontWeight="600"
+                    fontSize="8" letterSpacing="0.06em" fill="var(--frame)">{n.role}</text>
+                </g>
+              )}
+            </g>
+          );
+        })}
+
+        {/* Audio waveform tag on you-node */}
+        <g transform={`translate(${W * 0.5} ${H * 0.5 + 56})`}>
+          <rect x="-44" y="-12" width="88" height="22" rx="11" fill="var(--ink)" />
+          {Array.from({ length: 16 }).map((_, i) => {
+            const env = 0.3 + 0.7 * Math.abs(Math.sin(t * 6 + i * 0.7));
+            const h = 4 + env * 10;
+            return <rect key={i} x={-38 + i * 5} y={-h / 2} width="2" height={h}
+              rx="1" fill="var(--accent)" />;
+          })}
+        </g>
+      </svg>
+
+      {/* Floating album-art accents */}
+      <div style={{ position: "absolute", top: 10, right: 10, transform: "rotate(6deg)", animation: "seshn-float-a 6s ease-in-out infinite" }}>
+        <AlbumArt seed="hero-1" size={64} radius={6} />
+      </div>
+      <div style={{ position: "absolute", bottom: 20, left: 0, transform: "rotate(-5deg)", animation: "seshn-float-b 7s ease-in-out infinite" }}>
+        <AlbumArt seed="hero-2" size={52} radius={6} />
+      </div>
+    </div>
+  );
+};
+
+// ────────────────────────────────────────────────────
+// STEP 1 — POST.  Gig card composes itself in place — cleaner than the
+// previous fly-to-feed transition, every element fades in instead of
+// transforming the whole layout.
+const PostAnim = () => {
+  const step = useLoopStep(7, 850);
+  // 0: empty card, 1: title typed, 2: role pill, 3: genre pills, 4: pay row, 5: published badge, 6: hold
+  const title = step >= 1 ? "Topline writer wanted — Afrobeats demo" : "";
+  const showRole = step >= 2;
+  const showTags = step >= 3;
+  const showPay = step >= 4;
+  const published = step >= 5;
+  return (
+    <div className="land-anim-card" style={{ padding: 16, borderRadius: 16, background: "#f5f3ee", border: "1px solid rgba(0,0,0,0.06)", height: 420, display: "flex", flexDirection: "column", color: "var(--ink)", position: "relative", overflow: "hidden" }}>
+      {/* Header */}
+      <div className="row" style={{ gap: 8, marginBottom: 14, justifyContent: "space-between", color: "var(--ink)" }}>
+        <div className="row" style={{ gap: 8 }}>
+          <span style={{ width: 6, height: 6, borderRadius: 3, background: published ? "#1c8f56" : "#d96e3f", boxShadow: published ? "0 0 0 3px rgba(28,143,86,0.15)" : "0 0 0 3px rgba(217,110,63,0.15)", transition: "all .3s" }} />
+          <span style={{ fontFamily: "var(--font-display)", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0d0d0d" }}>
+            {published ? "Published · live" : "Draft · composing"}
+          </span>
+        </div>
+        <span style={{ fontFamily: "var(--font-display)", fontSize: 11, fontWeight: 500, color: "#6e6c66" }}>Step 2 of 3</span>
+      </div>
+
+      {/* Gig card composing in place */}
+      <div style={{ background: "#fff", border: published ? "2px solid #1c8f56" : "1px solid rgba(0,0,0,0.08)", borderRadius: 14, padding: 16, transition: "border-color .35s, box-shadow .35s", boxShadow: published ? "0 12px 28px rgba(28,143,86,0.18)" : "0 4px 14px rgba(0,0,0,0.04)", display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
+        {/* Poster row */}
+        <div className="row" style={{ gap: 10 }}>
+          <Avatar size="md" initials="MO" role="PRO" />
+          <div className="col" style={{ flex: 1, gap: 2 }}>
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13.5, color: "#0d0d0d" }}>Maya Oduya</span>
+            <span style={{ fontSize: 10.5, color: "#6e6c66" }}>Posting now · Brooklyn</span>
+          </div>
+          {published && (
+            <span style={{ animation: "seshn-pop .4s", background: "#1c8f56", color: "#fff", padding: "4px 10px", borderRadius: 999, fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 10, letterSpacing: "0.06em" }}>✓ LIVE</span>
+          )}
+        </div>
+        {/* Title row */}
+        <div style={{ minHeight: 26, fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 16, color: "#0d0d0d", lineHeight: 1.2, letterSpacing: "-0.015em" }}>
+          {title}
+          {!published && (
+            <span style={{ display: "inline-block", width: 2, height: 16, background: "#2CCB73", marginLeft: 2, verticalAlign: "middle", animation: "seshn-caret 0.6s steps(2) infinite" }} />
+          )}
+        </div>
+        {/* Pills row */}
+        <div className="row" style={{ gap: 6, flexWrap: "wrap", minHeight: 24 }}>
+          {showRole && <span style={{ animation: "seshn-pop .3s", background: "#A8EBC8", color: "#1C8F56", padding: "4px 10px", borderRadius: 999, fontSize: 11, fontFamily: "var(--font-display)", fontWeight: 600 }}>Vocalist needed</span>}
+          {showTags && <span style={{ animation: "seshn-pop .3s", background: "#f0eee9", color: "#0d0d0d", padding: "4px 10px", borderRadius: 999, fontSize: 11, fontFamily: "var(--font-display)", fontWeight: 500 }}>Afrobeats</span>}
+          {showTags && <span style={{ animation: "seshn-pop .3s", background: "#f0eee9", color: "#0d0d0d", padding: "4px 10px", borderRadius: 999, fontSize: 11, fontFamily: "var(--font-display)", fontWeight: 500 }}>Topline</span>}
+        </div>
+        {/* Pay row */}
+        <div style={{ minHeight: 36, paddingTop: 8, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+          {showPay && (
+            <div className="row" style={{ gap: 14, animation: "seshn-pop .3s" }}>
+              <div className="col" style={{ gap: 2 }}>
+                <span style={{ fontSize: 9.5, color: "#6e6c66", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)", fontWeight: 500 }}>Pay</span>
+                <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, color: "#0d0d0d" }}>$200</span>
+              </div>
+              <div className="col" style={{ gap: 2 }}>
+                <span style={{ fontSize: 9.5, color: "#6e6c66", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)", fontWeight: 500 }}>Deadline</span>
+                <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, color: "#0d0d0d" }}>Jun 14</span>
+              </div>
+              <div className="col" style={{ gap: 2 }}>
+                <span style={{ fontSize: 9.5, color: "#6e6c66", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)", fontWeight: 500 }}>Location</span>
+                <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, color: "#0d0d0d" }}>Remote</span>
+              </div>
+            </div>
+          )}
+        </div>
+        {/* Reach indicator */}
+        <div style={{ minHeight: 32 }}>
+          {published && (
+            <div style={{ animation: "seshn-pop-in .4s", padding: "8px 12px", background: "#A8EBC8", borderRadius: 8, color: "#1C8F56", fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 11.5, display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ width: 6, height: 6, borderRadius: 3, background: "#1C8F56", animation: "seshn-caret 1s infinite" }} />
+              Now visible to <b>142 matched artists</b> · Maya, Theo, Nia +139 others
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ────────────────────────────────────────────────────
+// STEP 2 — MATCH.  Artist grid filters down to relevant ones.
+const MatchAnim = () => {
+  const step = useLoopStep(5, 1100);
+  // 0: all artists, 1: role filter, 2: genre filter, 3: result narrows, 4: chat thread appears
+  const artists = [
+    { ini: "NK", role: "Vocalist", genres: ["R&B", "Soul"], pro: true, match: true },
+    { ini: "SP", role: "Mix eng.", genres: ["Indie"], match: false },
+    { ini: "LV", role: "Producer", genres: ["Electronic"], match: false },
+    { ini: "MD", role: "Drummer", genres: ["Soul"], match: false },
+    { ini: "AL", role: "Vocalist", genres: ["R&B", "Pop"], match: true },
+    { ini: "RK", role: "Songwriter", genres: ["Pop"], match: false },
+  ];
+  const showFilter1 = step >= 1;
+  const showFilter2 = step >= 2;
+  const filterApplied = step >= 3;
+  const showChat = step >= 4;
+  return (
+    <div style={{ padding: 16, borderRadius: 16, background: "var(--surface-2)", border: "1px solid var(--line)", minHeight: 340, position: "relative" }}>
+      <div className="row" style={{ gap: 6, marginBottom: 12, minHeight: 24 }}>
+        <span className="t-eyebrow">Filters</span>
+        {showFilter1 && <Pill variant="solid" style={{ animation: "seshn-pop .3s" }}>✓ Vocalist</Pill>}
+        {showFilter2 && <Pill variant="solid" style={{ animation: "seshn-pop .3s" }}>✓ R&B</Pill>}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, transition: "all .4s" }}>
+        {artists.map((a, i) => {
+          const hidden = filterApplied && !a.match;
+          return (
+            <div key={i} className="card" style={{
+              padding: 10, transition: "all .5s",
+              opacity: hidden ? 0.18 : 1,
+              transform: hidden ? "scale(0.9)" : "scale(1)",
+              borderColor: filterApplied && a.match ? "var(--accent-d)" : "var(--line)",
+              background: filterApplied && a.match ? "var(--accent-bg)" : "var(--surface)",
+              position: "relative",
+            }}>
+              <div className="row" style={{ gap: 8 }}>
+                <Avatar size="sm" initials={a.ini} />
+                <div className="col" style={{ flex: 1, minWidth: 0, gap: 1 }}>
+                  <span style={{ fontFamily: "var(--font-display)", fontSize: 11, fontWeight: 600, color: "#0d0d0d" }}>{a.role}</span>
+                  <span style={{ fontSize: 9.5, color: "#6e6c66" }}>{a.genres.join(" · ")}</span>
+                </div>
+              </div>
+              {filterApplied && a.match && i === 0 && (
+                <div style={{ position: "absolute", top: -4, right: -4, animation: "seshn-pop .3s" }}>
+                  <span style={{ background: "var(--accent)", color: "#062c19", padding: "1px 5px", borderRadius: 6, fontSize: 8, fontFamily: "var(--font-display)", fontWeight: 700 }}>NEW</span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {showChat && (
+        <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "var(--ink)", color: "var(--frame)", animation: "seshn-pop-in .4s" }}>
+          <div className="row" style={{ gap: 8 }}>
+            <Avatar size="sm" initials="NK" style={{ background: "rgba(255,255,255,0.1)", color: "var(--frame)" }} />
+            <div className="col" style={{ flex: 1, gap: 2 }}>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: 11.5, fontWeight: 600, color: "var(--frame)" }}>Nia K. → you</span>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.8)" }}>"saw your post — have a demo I think fits ↵"</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ────────────────────────────────────────────────────
+// STEP 3 — BUILD.  Project room with messages appearing, audio playing,
+// deadline ticking, status finishing.
+const BuildAnim = () => {
+  const step = useLoopStep(6, 900);
+  // 0..5: messages appear one by one, finally status changes to delivered
+  const msgs = [
+    { who: "MO", side: "L", body: "topline v3 incoming ✶", at: 1 },
+    { who: "MO", side: "L", audio: true, at: 2 },
+    { who: "YT", side: "R", body: "this is the move — let's track tomorrow", at: 3 },
+    { who: "TB", side: "L", file: true, at: 4 },
+  ];
+  const showDelivered = step >= 5;
+  return (
+    <div style={{ padding: 16, borderRadius: 16, background: "var(--surface-2)", border: "1px solid var(--line)", minHeight: 340, display: "flex", flexDirection: "column" }}>
+      <div className="between" style={{ marginBottom: 10 }}>
+        <div className="row" style={{ gap: 8 }}>
+          <AlbumArt seed="anim-project" size={26} radius={4} />
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13 }}>Sundowner EP</span>
+        </div>
+        <Pill variant={showDelivered ? "success" : "accent"} style={{ transition: "all .3s" }}>
+          {showDelivered ? "Delivered" : "In progress"}
+        </Pill>
+      </div>
+      <div className="col" style={{ flex: 1, gap: 8 }}>
+        {msgs.map((m, i) => step >= m.at && (
+          <div key={i} className="row" style={{ gap: 8, justifyContent: m.side === "R" ? "flex-end" : "flex-start", animation: "seshn-pop-in .35s" }}>
+            {m.side === "L" && <Avatar size="sm" initials={m.who} />}
+            {m.body && (
+              <div style={{
+                padding: "7px 11px",
+                background: m.side === "R" ? "var(--ink)" : "var(--surface)",
+                color: m.side === "R" ? "var(--frame)" : "var(--ink)",
+                borderRadius: 10, fontSize: 12, lineHeight: 1.35, maxWidth: "75%",
+                border: m.side === "L" ? "1px solid var(--line)" : "none",
+              }}>{m.body}</div>
+            )}
+            {m.audio && (
+              <div style={{ flex: "0 0 auto", maxWidth: 200 }}>
+                <Audio compact title="topline_v3.wav" artist="Maya · 1:42" source="" seed="anim-audio" playing progress={0.4} />
+              </div>
+            )}
+            {m.file && (
+              <div className="row" style={{ gap: 6, padding: "6px 10px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 10 }}>
+                <Icon kind="folder" size={12} style={{ color: "var(--ink-3)" }} />
+                <div className="col" style={{ gap: 0 }}>
+                  <span style={{ fontFamily: "var(--font-display)", fontSize: 11, fontWeight: 600 }}>drum-bus_v2.zip</span>
+                  <span className="t-meta" style={{ fontSize: 9.5 }}>84 MB</span>
+                </div>
+              </div>
+            )}
+            {m.side === "R" && <Avatar size="sm" initials={m.who} />}
+          </div>
+        ))}
+      </div>
+      {showDelivered && (
+        <div style={{ marginTop: 10, padding: "8px 12px", background: "var(--accent-bg)", borderRadius: 8, color: "var(--accent-d)", fontSize: 12, fontFamily: "var(--font-display)", fontWeight: 600, animation: "seshn-pop-in .4s" }}>
+          ✓ Mix lock met · Aug 1, 2026
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ────────────────────────────────────────────────────
+// FEATURE MINI-ANIMATIONS — small persistent loops for each card.
+const FeatAudio = () => (
+  <div style={{ display: "flex", alignItems: "center", gap: 8, padding: 10, background: "var(--surface)", borderRadius: 8, border: "1px solid var(--line)" }}>
+    <div style={{ width: 22, height: 22, borderRadius: 11, background: "var(--ink)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ width: 0, height: 0, borderLeft: "6px solid var(--accent)", borderTop: "4px solid transparent", borderBottom: "4px solid transparent", marginLeft: 2 }} />
+    </div>
+    <Waveform seed="feat-audio" height={20} bars={32} progress={0.55} played="var(--ink)" />
+  </div>
+);
+
+const FeatPills = () => {
+  const [i, setI] = React.useState(0);
+  const all = [["R&B", "Vocalist", "Remote"], ["Indie", "Producer", "NYC"], ["Pop", "Songwriter", "Paid"], ["Afrobeats", "Mix eng.", "Split"]];
+  React.useEffect(() => { const t = setInterval(() => setI(x => (x + 1) % all.length), 1700); return () => clearInterval(t); }, []);
+  return (
+    <div className="row" style={{ gap: 4, flexWrap: "wrap", minHeight: 22, transition: "all .3s" }}>
+      {all[i].map((t, k) => <span key={t} className="pill" style={{ animation: "seshn-pop-in .35s", animationDelay: `${k * 0.08}s`, animationFillMode: "both" }}>{t}</span>)}
+    </div>
+  );
+};
+
+const FeatTyping = () => {
+  const step = useLoopStep(4, 900);
+  return (
+    <div style={{ padding: 10, background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 8, display: "flex", flexDirection: "column", gap: 6, height: 76 }}>
+      <div className="row" style={{ gap: 6, height: 24 }}>
+        <Avatar size="sm" initials="MO" />
+        <div style={{ flex: 1, padding: "4px 8px", background: "var(--surface-2)", borderRadius: 6, fontSize: 11 }}>
+          {step >= 1 ? "stems incoming ✶" : <span style={{ letterSpacing: 2 }}>•••</span>}
+        </div>
+      </div>
+      <div className="row" style={{ gap: 6, justifyContent: "flex-end", height: 24, opacity: step >= 2 ? 1 : 0, transition: "opacity .3s" }}>
+        <div style={{ padding: "4px 8px", background: "var(--ink)", color: "var(--frame)", borderRadius: 6, fontSize: 11 }}>
+          {step >= 3 ? "🔥" : <span style={{ letterSpacing: 2 }}>•••</span>}
+        </div>
+        <Avatar size="sm" initials="YT" />
+      </div>
+    </div>
+  );
+};
+
+const FeatStars = () => {
+  const [v, setV] = React.useState(0);
+  React.useEffect(() => {
+    const t = setInterval(() => setV(x => x >= 5 ? 0 : x + 0.5), 240);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="row" style={{ gap: 8 }}>
+      <window.StarRow value={v} size={20} color="var(--accent-d)" />
+      <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 16, color: "var(--ink)" }}>{v.toFixed(1)}</span>
+    </div>
+  );
+};
+
+const FeatPaid = () => {
+  const [n, setN] = React.useState(0);
+  const ref = React.useRef(null);
+  const [inView, setInView] = React.useState(false);
+  React.useEffect(() => {
+    if (!ref.current) return;
+    const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && setInView(true)), { threshold: 0.5 });
+    io.observe(ref.current);
+    return () => io.disconnect();
+  }, []);
+  React.useEffect(() => {
+    if (!inView) return;
+    const target = 4724, dur = 1700;
+    const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+    let raf, holdT;
+    const start = (t0) => {
+      const startTime = performance.now();
+      const tick = () => {
+        const u = Math.min(1, (performance.now() - startTime) / dur);
+        setN(Math.floor(target * easeOut(u)));
+        if (u < 1) {
+          raf = requestAnimationFrame(tick);
+        } else {
+          // Hold 3 seconds, then reset and loop.
+          holdT = setTimeout(() => { setN(0); start(); }, 3000);
+        }
+      };
+      raf = requestAnimationFrame(tick);
+    };
+    start();
+    return () => { cancelAnimationFrame(raf); clearTimeout(holdT); };
+  }, [inView]);
+  return (
+    <div ref={ref} className="row" style={{ gap: 8, alignItems: "baseline" }}>
+      <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 28, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}>${n.toLocaleString()}</span>
+      <span className="t-meta">paid out this week</span>
+    </div>
+  );
+};
+
+const FeatBoost = () => {
+  const step = useLoopStep(4, 800);
+  return (
+    <div style={{ padding: 8, background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+      {[2, 1, 0].map(rank => {
+        const isYou = rank === (3 - step) % 3;
+        return (
+          <div key={rank} className="row" style={{ gap: 6, padding: "4px 6px", background: isYou ? "var(--accent-bg)" : "transparent", borderRadius: 4, transition: "all .4s" }}>
+            <span style={{ fontFamily: "var(--font-display)", fontSize: 10, fontWeight: 700, color: "var(--ink-3)" }}>#{rank + 1}</span>
+            <div style={{ height: 4, flex: 1, borderRadius: 2, background: "var(--line-soft)" }}>
+              <div style={{ height: "100%", width: isYou ? "100%" : `${60 - rank * 15}%`, background: isYou ? "var(--accent-d)" : "var(--ink-3)", borderRadius: 2, transition: "width .4s" }} />
+            </div>
+            {isYou && <span style={{ fontSize: 9, fontFamily: "var(--font-display)", fontWeight: 700, color: "var(--accent-d)" }}>YOU</span>}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+Object.assign(window, { NetworkAnim, PostAnim, MatchAnim, BuildAnim, FeatAudio, FeatPills, FeatTyping, FeatStars, FeatPaid, FeatBoost, useLoopStep });
+
+</script>
+  <script type="text/babel">
+// Seshn — landing page sections + composition
+
+const { Logo, Pill, Avatar, Btn, Input, Icon, GigCard, Audio, StarRow, Rating, Testimonial } = window;
+const { AlbumArt, Waveform, Sticker, Vinyl, Cassette, Marquee, Illo, Highlight } = window;
+const { NetworkAnim, PostAnim, MatchAnim, BuildAnim,
+        FeatAudio, FeatPills, FeatTyping, FeatStars, FeatPaid, FeatBoost } = window;
+
+// ─────────────────────────────────────────────────────
+// Reveal-on-scroll wrapper
+const Reveal = ({ children, delay = 0, style }) => {
+  const ref = React.useRef(null);
+  React.useEffect(() => {
+    if (!ref.current) return;
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add("in"), delay);
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    io.observe(ref.current);
+    return () => io.disconnect();
+  }, [delay]);
+  return <div ref={ref} className="reveal" style={style}>{children}</div>;
+};
+
+// ─────────────────────────────────────────────────────
+// NAV
+const LandNav = () => (
+  <nav className="land-nav">
+    <div className="land-nav-inner">
+      <span className="land-logo"><Logo size={20} /></span>
+      <div className="links">
+        <a href="#problem">The problem</a>
+        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a href="#" style={{ color: "var(--land-ink)" }}>Sign in</a>
+        <button className="btn primary">Create profile</button>
+      </div>
+    </div>
+  </nav>
+);
+
+// ─────────────────────────────────────────────────────
+// HERO
+const Hero = () => (
+  <section className="hero">
+    <div className="glow" />
+    <div className="land-container">
+      <div className="hero-grid">
+        <div>
+          <Pill className="pill accent" style={{ display: "inline-flex", padding: "4px 10px" }}>
+            ● Live · 412 sessions this week
+          </Pill>
+          <h1>
+            Find the people<br />
+            who <span className="accent">finish</span><br />
+            your record.
+          </h1>
+          <p className="sub">
+            Seshn is the home base for vocalists, producers, instrumentalists and engineers building real work — not chasing followers. Post a brief in 90 seconds. Find your team by the end of the day.
+          </p>
+          <div className="cta-row">
+            <button className="btn primary lg">Create your profile →</button>
+            <button className="btn lg">Watch a 60s demo</button>
+          </div>
+          <div className="stat-row">
+            <div className="stat"><b>2,841</b><span>artists on Seshn</span></div>
+            <div className="stat"><b>412</b><span>sessions this week</span></div>
+            <div className="stat"><b style={{ color: "var(--accent)" }}>$47k</b><span>paid out last month</span></div>
+            <div className="stat"><b>98</b><span>cities</span></div>
+          </div>
+        </div>
+        <div>
+          <NetworkAnim />
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+// ─────────────────────────────────────────────────────
+// TRUST STRIP — marquee of "now happening on Seshn"
+const TrustStrip = () => (
+  <Marquee
+    dark
+    speed={42}
+    style={{
+      borderTop: "1px solid rgba(255,255,255,0.06)",
+      borderBottom: "1px solid rgba(255,255,255,0.06)",
+      background: "rgba(255,255,255,0.02)",
+    }}
+    items={[
+      "Maya O. is looking for a topline writer · 2h ago",
+      "Theo B. posted: live drummer, 3 NYC dates · 9h ago",
+      "Iván R. mixed 4 songs this week",
+      "Nia K. joined Seshn",
+      "Sundowner EP just published a stem · 1h ago",
+      "Sam P. completed a session with Lina V.",
+      "412 sessions running right now",
+      "Robi K. released a demo from Seshn",
+    ]}
+  />
+);
+
+// ─────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────
+// THE PROBLEM — market-research backed callouts.
+const Problem = () => {
+  const STATS = [
+    {
+      big: "106,000",
+      h: "songs uploaded to streaming every day.",
+      p: "Roughly 35 every minute. 50 million new tracks landed in 2025 alone — 20% of every song on streaming. The noise is loud, and most of it stays unheard.",
+      src: "Luminate · 2025 Year-End Music Report",
+      tone: "danger",
+    },
+    {
+      big: "47.6%",
+      h: "of all streaming tracks got fewer than 10 plays last year.",
+      p: "88% never crossed 1,000. 55 million songs received exactly zero plays in 2025. Posting alone isn't a strategy — being heard requires being connected.",
+      src: "Luminate · Spotify catalog",
+      tone: "danger",
+    },
+    {
+      big: "77.8%",
+      h: "of independent artists earn under $15,000/year from music.",
+      p: "64% cite financial pressure as the #1 reason they leave music — up from #4 just two years ago. Going it alone is also going broke.",
+      src: "Xposure Music · State of the Industry 2025",
+      tone: "ink",
+    },
+    {
+      big: "70%",
+      h: "of indie artists who collaborated did it with someone they'd never met in person.",
+      p: "More than half of every Billboard charting track in 2025 has multiple writers, producers, or features. The hits are built by teams — bedrooms only deliver demos.",
+      src: "Soundplate · Indie Artist Survey 2025",
+      tone: "accent",
+    },
+  ];
+  return (
+    <section className="land-section problem" id="problem">
+      <div className="land-container">
+        <Reveal>
+          <div className="problem-intro">
+            <span className="eyebrow" style={{ display: "inline-block", fontFamily: "var(--font-display)", fontWeight: 500, letterSpacing: "0.14em", fontSize: 11, textTransform: "uppercase", color: "var(--accent)", marginBottom: 14 }}>The problem</span>
+            <h2>The hardest part of making music has <span className="strike">nothing</span> <span style={{ color: "var(--accent)" }}>everything</span> to do with the people in the room.</h2>
+            <p>It's never been easier to <i>release</i> music. It's never been harder to find the people to <i>make</i> it with.</p>
+          </div>
+        </Reveal>
+        <div className="stat-grid">
+          {STATS.map((s, i) => (
+            <Reveal key={s.big} delay={i * 80}>
+              <div className="stat-card">
+                <div className={`big ${s.tone}`}>{s.big}</div>
+                <h3>{s.h}</h3>
+                <p>{s.p}</p>
+                <div className="source">Source · {s.src}</div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+        <Reveal delay={300}>
+          <div className="problem-quote">
+            <p className="line">No platform exists to connect emerging musicians with each other. <span className="accent">Until now.</span></p>
+            <p className="sub">Instagram DMs. Discord servers. Friend-of-a-friend. Luck. That's the current state of the art.</p>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+};
+
+// ─────────────────────────────────────────────────────
+// HOW IT WORKS — 3 step section
+const Steps = () => (
+  <section className="land-section" id="how">
+    <div className="land-container">
+      <Reveal>
+        <div className="sec-head">
+          <span className="eyebrow">How Seshn works</span>
+          <h2>From a brief to a finished record — together.</h2>
+          <p>Three honest steps. Each one is fast enough that you can do it today, not "someday when I have time."</p>
+        </div>
+      </Reveal>
+
+      <div className="steps">
+        {/* Step 1 — POST */}
+        <Reveal>
+          <div className="step">
+            <div className="text">
+              <span className="num">STEP 01</span>
+              <h3>Post what you actually need.</h3>
+              <p>The brief takes 90 seconds. Role, genre, comp type, deadline. Skip the bio. Your work speaks first.</p>
+              <ul>
+                <li>One template — no resume, no follower counts</li>
+                <li>Set paid, split, trade, or fair-deal upfront</li>
+                <li>Boost a post to put it at the top of every matched feed</li>
+              </ul>
+              <div style={{ marginTop: 24 }}>
+                <button className="btn">Post your first gig →</button>
+              </div>
+            </div>
+            <div className="anim"><PostAnim /></div>
+          </div>
+        </Reveal>
+
+        {/* Step 2 — MATCH */}
+        <Reveal>
+          <div className="step reverse">
+            <div className="text">
+              <span className="num">STEP 02</span>
+              <h3>Find the right collaborators.</h3>
+              <p>Filter by role, genre, comp type, location. We surface the people whose work matches the brief — not the ones with the loudest profile.</p>
+              <ul>
+                <li>Audio-first search — hear before you read</li>
+                <li>Verified ratings & testimonials, no anonymous reviews</li>
+                <li>Reach out free; Pro lets you message anyone first</li>
+              </ul>
+              <div style={{ marginTop: 24 }}>
+                <button className="btn">Browse 2,841 artists →</button>
+              </div>
+            </div>
+            <div className="anim"><MatchAnim /></div>
+          </div>
+        </Reveal>
+
+        {/* Step 3 — BUILD */}
+        <Reveal>
+          <div className="step">
+            <div className="text">
+              <span className="num">STEP 03</span>
+              <h3>Build it in a project room.</h3>
+              <p>Spin up a private space for your team. Chat, audio files, stems, deadlines, voice notes — all in one place, all out of group DMs.</p>
+              <ul>
+                <li>Inline audio previews & waveform playback</li>
+                <li>Members, roles, deadlines, brief — synced</li>
+                <li>Ratings + testimonials issued automatically on delivery</li>
+              </ul>
+              <div style={{ marginTop: 24 }}>
+                <button className="btn">See a sample room →</button>
+              </div>
+            </div>
+            <div className="anim"><BuildAnim /></div>
+          </div>
+        </Reveal>
+      </div>
+    </div>
+  </section>
+);
+
+// ─────────────────────────────────────────────────────
+// FEATURES GRID
+const Features = () => {
+  const FEATS = [
+    { t: "Audio-first profiles", b: "Every profile is a portfolio you can listen to. SoundCloud, Spotify, YouTube — unified player, instant preview.", Anim: FeatAudio },
+    { t: "Tag-based discovery", b: "Filter by role, genre, comp, location. No follower-count theatre. Recommendations tuned to what you make.", Anim: FeatPills },
+    { t: "Built-in project rooms", b: "Chat, stems, voice notes, deadlines — without piling up in group DMs.", Anim: FeatTyping },
+    { t: "Ratings & testimonials", b: "Verified collaborators leave reviews after the session. Real signal, not vanity.", Anim: FeatStars },
+    { t: "Get paid like a pro", b: "Stripe-powered payouts. Set rate, split, or trade up front. Escrow coming Q3.", Anim: FeatPaid },
+    { t: "Boost when it counts", b: "Promote a post to land at the top of every matched feed for 7 days. $5.", Anim: FeatBoost },
+  ];
+  return (
+    <section className="land-section" id="features" style={{ background: "rgba(255,255,255,0.015)" }}>
+      <div className="land-container">
+        <Reveal>
+          <div className="sec-head">
+            <span className="eyebrow">Why Seshn</span>
+            <h2>Designed by artists, for the work.</h2>
+            <p>Every feature exists because someone on the team needed it on a Tuesday and couldn't find it anywhere else.</p>
+          </div>
+        </Reveal>
+        <div className="feat-grid">
+          {FEATS.map(({ t, b, Anim }, i) => (
+            <Reveal key={t} delay={i * 80}>
+              <div className="feat-card">
+                <div className="anim-slot"><Anim /></div>
+                <h4>{t}</h4>
+                <p>{b}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ─────────────────────────────────────────────────────
+// PROJECT ROOMS DEEP DIVE
+const Deep = () => (
+  <section className="land-section">
+    <div className="land-container">
+      <div className="deep">
+        <Reveal>
+          <div className="text">
+            <span className="eyebrow" style={{ fontFamily: "var(--font-display)", fontWeight: 500, letterSpacing: "0.14em", fontSize: 11, textTransform: "uppercase", color: "var(--accent)" }}>Project rooms</span>
+            <h3>The work happens here. Not in your DMs.</h3>
+            <p>Project rooms are private workspaces for everyone on the record. Threads stay organized, audio plays inline, deadlines are visible, and when a project ships the team gets ratings + endorsements automatically — building real credibility on the platform.</p>
+            <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+              {[
+                "Inline audio: drop a WAV, hear it without leaving the chat",
+                "File versioning: v1, v2, v3 — never lose the take you want",
+                "Deadlines synced to every member's calendar",
+                "End-of-session ratings build verified profiles",
+              ].map(t => (
+                <li key={t} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 14, color: "var(--land-ink-2)" }}>
+                  <span style={{ color: "var(--accent)", fontWeight: 700 }}>✓</span>{t}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Reveal>
+        <Reveal delay={120}>
+          <div className="mock">
+            <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--land-line)", display: "flex", alignItems: "center", gap: 10 }}>
+              <AlbumArt seed="deep-project" size={36} radius={6} />
+              <div>
+                <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14 }}>Sundowner EP</div>
+                <div style={{ fontSize: 11, color: "var(--land-ink-3)" }}>6 members · Q3 release · 78 days left</div>
+              </div>
+              <div style={{ marginLeft: "auto", display: "flex", gap: -8 }}>
+                {["MO", "NK", "TB", "SP"].map((i, k) => (
+                  <Avatar key={i} size="sm" initials={i} style={{ marginLeft: k > 0 ? -8 : 0, border: "2px solid var(--land-surface)", background: "rgba(255,255,255,0.1)", color: "var(--land-ink)" }} />
+                ))}
+              </div>
+            </div>
+            <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+              <div className="row" style={{ gap: 10 }}>
+                <Avatar size="sm" initials="MO" style={{ background: "rgba(255,255,255,0.1)", color: "var(--land-ink)" }} />
+                <div style={{ padding: "8px 12px", background: "var(--land-surface-2)", borderRadius: 10, fontSize: 13, maxWidth: "75%", color: "var(--land-ink)" }}>
+                  pushed v3 of the topline — bridge lands?
+                </div>
+              </div>
+              <div style={{ maxWidth: 280 }}>
+                <Audio compact title="sundowner_topline_v3.wav" artist="Maya · 1:42" source="" seed="deep-audio" playing progress={0.55} />
+              </div>
+              <div className="row" style={{ gap: 10, justifyContent: "flex-end" }}>
+                <div style={{ padding: "8px 12px", background: "var(--accent)", color: "#062c19", borderRadius: 10, fontSize: 13, maxWidth: "75%" }}>
+                  this is the move ✶ tracking tomorrow
+                </div>
+                <Avatar size="sm" initials="YT" />
+              </div>
+              <div style={{ padding: "8px 12px", background: "rgba(44,203,115,0.08)", color: "var(--accent)", borderRadius: 8, fontSize: 11.5, fontFamily: "var(--font-display)", fontWeight: 600, alignSelf: "center" }}>
+                ✓ Mix lock met · Aug 1, 2026
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </div>
+  </section>
+);
+
+// ─────────────────────────────────────────────────────
+// TESTIMONIALS
+const Tests = () => {
+  const TESTS = [
+    { name: "Nia Kassim", role: "Vocalist · London", ini: "NK", rating: 5, quote: "I found my whole band on Seshn in three weeks. Two of them ended up on the record. I have never had a platform actually deliver work like this." },
+    { name: "Iván Reyes", role: "Producer · CDMX", ini: "IR", rating: 5, quote: "Mixed four EPs in a month. The brief format means I don't have to read between the lines or waste a discovery call. The work is the work." },
+    { name: "Maya Oduya", role: "Producer · Brooklyn", ini: "MO", rating: 5, quote: "Built a Pro profile, posted one brief, woke up to nine applications. The verified rating system means I don't have to gamble on collaborators." },
+    { name: "Theo Brooks", role: "Drummer · NYC", ini: "TB", rating: 4.5, quote: "I'm a session player. Seshn replaced three group chats, a Google sheet, and the weekly back-and-forth on Instagram DMs. Booked solid through Q3." },
+    { name: "Sam Park", role: "Mixing eng. · LA", ini: "SP", rating: 5, quote: "Stripe payouts. Inline audio. Clear briefs. The little things add up — I haven't sent an invoice manually since I joined." },
+    { name: "Lina Vega", role: "Producer · Mexico City", ini: "LV", rating: 5, quote: "I'm based in CDMX and 60% of my work is now from NYC and London artists. Seshn made my city irrelevant to my career." },
+  ];
+  return (
+    <section className="land-section">
+      <div className="land-container">
+        <Reveal>
+          <div className="sec-head">
+            <span className="eyebrow">From the room</span>
+            <h2>Built on trust, measured in records.</h2>
+            <p>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 8, marginTop: 6, padding: "6px 14px", background: "rgba(255,255,255,0.04)", borderRadius: 999 }}>
+                <StarRow value={4.9} size={14} color="var(--accent)" />
+                <b style={{ color: "var(--land-ink)", fontFamily: "var(--font-display)" }}>4.9</b>
+                <span style={{ color: "var(--land-ink-3)" }}>across 12,400+ sessions</span>
+              </span>
+            </p>
+          </div>
+        </Reveal>
+        <div className="tests-wrap">
+          {TESTS.map((t, i) => (
+            <Reveal key={t.name} delay={i * 60}>
+              <div className="test-card">
+                <StarRow value={t.rating} size={14} color="var(--accent)" />
+                <div className="quote">{t.quote}</div>
+                <div className="who">
+                  <Avatar initials={t.ini} style={{ background: "rgba(255,255,255,0.1)", color: "var(--land-ink)" }} />
+                  <div className="col">
+                    <b>{t.name}</b>
+                    <span>{t.role}</span>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ─────────────────────────────────────────────────────
+// PRICING
+const Pricing = () => (
+  <section className="land-section" id="pricing" style={{ background: "rgba(255,255,255,0.015)" }}>
+    <div className="land-container">
+      <Reveal>
+        <div className="sec-head">
+          <span className="eyebrow">Pricing</span>
+          <h2>Free forever. Pro when you're serious.</h2>
+          <p>No credit card needed to start. Cancel Pro anytime. We make money so you can stop chasing it.</p>
+        </div>
+      </Reveal>
+      <div className="price-grid">
+        <Reveal>
+          <div className="price-card">
+            <div>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 500, letterSpacing: "0.14em", fontSize: 11, textTransform: "uppercase", color: "var(--land-ink-3)", marginBottom: 8 }}>Free</div>
+              <div className="price"><b>$0</b><span>forever</span></div>
+            </div>
+            <p style={{ color: "var(--land-ink-3)", fontSize: 13, margin: 0 }}>Everything you need to start finding collaborators.</p>
+            <ul>
+              <li>Unlimited gig posts</li>
+              <li>Apply to any post</li>
+              <li>3 portfolio embeds</li>
+              <li>Reply to messages</li>
+              <li>Basic ratings & testimonials</li>
+            </ul>
+            <button className="btn lg">Start free →</button>
+          </div>
+        </Reveal>
+        <Reveal delay={100}>
+          <div className="price-card pro">
+            <div style={{ position: "absolute", top: 18, right: 18 }}>
+              <span className="pill solid">Most popular</span>
+            </div>
+            <div>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 500, letterSpacing: "0.14em", fontSize: 11, textTransform: "uppercase", color: "var(--accent)", marginBottom: 8 }}>Pro</div>
+              <div className="price"><b>$5</b><span>/ month · or $48/yr (save 20%)</span></div>
+            </div>
+            <p style={{ color: "var(--land-ink-2)", fontSize: 13, margin: 0 }}>For artists serious enough to make this their work.</p>
+            <ul>
+              <li>Verified ✓ badge</li>
+              <li>Message anyone first</li>
+              <li>Profile view analytics</li>
+              <li>Unlimited portfolio slots</li>
+              <li>Priority in search</li>
+              <li>1 free boost credit / month ($5 value)</li>
+            </ul>
+            <button className="btn primary lg">Upgrade to Pro →</button>
+          </div>
+        </Reveal>
+      </div>
+    </div>
+  </section>
+);
+
+// ─────────────────────────────────────────────────────
+// FAQ
+const FAQ = () => {
+  const items = [
+    ["Who is Seshn for?", "Vocalists, producers, instrumentalists, songwriters, engineers — any musician collaborating on real projects. From bedroom artists to working professionals."],
+    ["Do I need to be 'somebody' to join?", "No. Seshn is a working platform, not a club. Your portfolio and your collaborators are what people look at — not your follower count."],
+    ["How are payments handled?", "Through Stripe. Set your rate, split, or trade up front in the brief. Escrow (auto-release on delivery) ships in Q3 2026."],
+    ["Can I use Seshn just for paid work / just for trade work?", "Both. You can filter posts and your own profile by comp type. Plenty of artists do both depending on the project."],
+    ["What about IP and rights?", "Splits and IP terms are negotiated in the project room. Seshn doesn't take a cut of your work — we make money from Pro subscriptions and boosts only."],
+    ["Is there an app?", "Web-first. The platform works great on mobile browsers. A native app is in our 2026 roadmap once we know what the platform should actually be."],
+  ];
+  return (
+    <section className="land-section" id="faq">
+      <div className="land-container" style={{ maxWidth: 880 }}>
+        <Reveal>
+          <div className="sec-head">
+            <span className="eyebrow">FAQ</span>
+            <h2>Questions, answered.</h2>
+          </div>
+        </Reveal>
+        <div className="faq">
+          {items.map(([q, a], i) => (
+            <Reveal key={q} delay={i * 40}>
+              <details className="faq-item" open={i === 0}>
+                <summary>{q}</summary>
+                <div className="ans">{a}</div>
+              </details>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ─────────────────────────────────────────────────────
+// FINAL CTA
+const FinalCTA = () => (
+  <section className="final-cta">
+    <div className="land-container">
+      <Reveal>
+        <h2>Your next collaborator<br />is one post away.</h2>
+        <p>Free profile · 90 seconds to your first brief · no credit card.</p>
+        <form onSubmit={e => e.preventDefault()}>
+          <input type="email" placeholder="you@artist.fm" />
+          <button className="btn primary lg">Get started →</button>
+        </form>
+        <div style={{ marginTop: 24, display: "flex", gap: 18, justifyContent: "center", color: "var(--land-ink-3)", fontSize: 12 }}>
+          <span>✓ Free forever</span>
+          <span>✓ Cancel Pro anytime</span>
+          <span>✓ Built by artists</span>
+        </div>
+      </Reveal>
+    </div>
+  </section>
+);
+
+// ─────────────────────────────────────────────────────
+// FOOTER
+const Footer = () => (
+  <footer className="footer">
+    <div className="footer-inner">
+      <div style={{ maxWidth: 280 }}>
+        <Logo size={20} />
+        <p style={{ marginTop: 12, color: "var(--land-ink-3)", fontSize: 13, lineHeight: 1.5 }}>
+          Home base for working musicians. Made with ♥ in Brooklyn.
+        </p>
+      </div>
+      <div className="footer-cols">
+        <div className="footer-col">
+          <b>Product</b>
+          <a href="#">Browse</a>
+          <a href="#">Post a gig</a>
+          <a href="#">Pricing</a>
+          <a href="#">Pro</a>
+        </div>
+        <div className="footer-col">
+          <b>Resources</b>
+          <a href="#">How it works</a>
+          <a href="#">For producers</a>
+          <a href="#">For vocalists</a>
+          <a href="#">Stories</a>
+        </div>
+        <div className="footer-col">
+          <b>Company</b>
+          <a href="#">About</a>
+          <a href="#">Careers</a>
+          <a href="#">Press</a>
+          <a href="#">Contact</a>
+        </div>
+        <div className="footer-col">
+          <b>Legal</b>
+          <a href="#">Terms</a>
+          <a href="#">Privacy</a>
+          <a href="#">IP policy</a>
+        </div>
+      </div>
+    </div>
+    <div className="bottom">
+      <span>© 2026 Seshn, Inc.</span>
+      <div style={{ display: "flex", gap: 20 }}>
+        <a href="#">Instagram</a>
+        <a href="#">Twitter</a>
+        <a href="#">YouTube</a>
+      </div>
+    </div>
+  </footer>
+);
+
+// ─────────────────────────────────────────────────────
+// MAIN
+const LandingPage = () => (
+  <div className="land">
+    <LandNav />
+    <Hero />
+    <TrustStrip />
+    <Problem />
+    <Steps />
+    <Features />
+    <Deep />
+    <Tests />
+    <Pricing />
+    <FAQ />
+    <FinalCTA />
+    <Footer />
+  </div>
+);
+
+ReactDOM.createRoot(document.getElementById('root')).render(<LandingPage />);
+
+</script>
+</body>
+</html>
