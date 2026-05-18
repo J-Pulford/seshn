@@ -74,16 +74,29 @@
       const [authChecked, setAuthChecked] = React.useState(false);
 
       React.useEffect(() => {
-        if (!window.seshn) return;
-        // Must be signed in to onboard. Pre-fill defaults from existing profile (if any).
+        if (!window.seshn) {
+          setErr("Supabase client failed to load. Check your network connection and refresh.");
+          return;
+        }
         (async () => {
-          const u = await window.seshn.getUser();
-          if (!u) { window.location.href = "auth.html"; return; }
-          const p = await window.seshn.getProfile({ id: u.id });
-          if (p && p.username) {
-            // Profile already complete → straight to profile page
-            window.location.href = "profile.html?u=" + encodeURIComponent(p.username);
+          let u = null;
+          try {
+            u = await window.seshn.getUser();
+          } catch (e) {
+            setErr("Couldn't verify your session: " + (e.message || e));
             return;
+          }
+          if (!u) { window.location.href = "auth.html"; return; }
+          // Best-effort profile lookup — if the table doesn't exist or RLS blocks,
+          // we still let the user continue so the actual save shows a real error.
+          try {
+            const p = await window.seshn.getProfile({ id: u.id });
+            if (p && p.username) {
+              window.location.href = "profile.html?u=" + encodeURIComponent(p.username);
+              return;
+            }
+          } catch (e) {
+            console.warn("[seshn] profile lookup failed (continuing):", e);
           }
           if (u.email) {
             const handle = u.email.split("@")[0].toLowerCase().replace(/[^a-z0-9_.-]/g, "");
@@ -116,7 +129,10 @@
           });
           window.location.href = "profile.html?u=" + encodeURIComponent(profile.username);
         } catch (e) {
+          console.error("[seshn] upsert profile error:", e);
           if (e && e.code === "23505") setErr("That username is already taken — try another.");
+          else if (e && e.code === "42P01") setErr("The profiles table doesn't exist yet. Run the SQL migration in your Supabase dashboard (see /supabase/migrations/0001_profiles.sql).");
+          else if (e && e.code === "PGRST205") setErr("The profiles table doesn't exist yet. Run the SQL migration in your Supabase dashboard.");
           else setErr(e && e.message ? e.message : "Couldn't save your profile.");
           setSaving(false);
         }
