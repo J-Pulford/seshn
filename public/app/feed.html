@@ -277,6 +277,8 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/seshn-supabase.js"></script>
 
   <script type="text/babel">
     // ——— Helpers ———
@@ -419,8 +421,40 @@
       </div>
     );
 
+    // ——— Helpers ———
+    function timeAgo(iso) {
+      if (!iso) return "";
+      const d = new Date(iso);
+      const s = Math.floor((Date.now() - d.getTime()) / 1000);
+      if (s < 60) return s + "s";
+      const m = Math.floor(s / 60); if (m < 60) return m + "m";
+      const h = Math.floor(m / 60); if (h < 24) return h + "h";
+      const days = Math.floor(h / 24); if (days < 30) return days + "d";
+      return d.toLocaleDateString();
+    }
+    function deadlineLabel(date) {
+      if (!date) return "no deadline";
+      const d = new Date(date);
+      const days = Math.ceil((d.getTime() - Date.now()) / 86400000);
+      if (days < 0) return "closed";
+      if (days === 0) return "closes today";
+      if (days === 1) return "1 day left";
+      return days + " days left";
+    }
+    function compLabel(g) {
+      if (g.comp === "paid" && g.pay_amount) return "Paid · $" + Number(g.pay_amount).toLocaleString();
+      if (g.comp === "paid") return "Paid";
+      if (g.comp === "split") return "Split";
+      if (g.comp === "trade") return "Trade";
+      return "Unpaid";
+    }
+    function initialsOf(name) {
+      if (!name) return "··";
+      return name.trim().split(/\s+/).map(s => s[0]).join("").slice(0, 2).toUpperCase();
+    }
+
     // ——— Gig Card ———
-    const GigCard = ({ boost, art, role="Vocalist", title="Gig title", desc, tags=[], comp="Paid", time="2h", name="Artist", initials="A", roleTag="PRO", applied=12 }) => (
+    const GigCard = ({ gig, boost, art, role="Vocalist", title="Gig title", desc, tags=[], comp="Paid", time="2h", name="Artist", initials="A", roleTag="PRO", applied=0 }) => (
       <div className={"gig" + (boost?" boost":"")}>
         <div className="row" style={{ gap:10 }}>
           <span className="avatar md" style={{ background:"var(--ph-2)" }}>
@@ -442,20 +476,17 @@
           {art && <AlbumArt seed={art===true?title:art} size={48} radius={6} />}
         </div>
         <div style={{ fontFamily:"var(--font-display)", fontWeight:600, fontSize:16, letterSpacing:"-0.012em", lineHeight:1.2 }}>{title}</div>
-        {desc !== false && (
-          <div className="col" style={{ gap:4 }}>
-            <div className="ph-line" style={{ width:"100%" }} />
-            <div className="ph-line" style={{ width:"82%" }} />
-          </div>
+        {desc !== false && desc && (
+          <div style={{ fontSize:13, color:"var(--ink-2)", lineHeight:1.5, overflow:"hidden", display:"-webkit-box", WebkitLineClamp:2, WebkitBoxOrient:"vertical" }}>{desc}</div>
         )}
         <div className="row" style={{ gap:6, flexWrap:"wrap" }}>
           {tags.map(t => <span key={t} className="pill">{t}</span>)}
         </div>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, paddingTop:10, borderTop:"1px solid var(--line-soft)" }}>
-          <span className="t-meta">{applied} applied · 3 days left</span>
+          <span className="t-meta">{applied} applied · {gig ? deadlineLabel(gig.deadline) : "3 days left"}</span>
           <div className="row" style={{ gap:8 }}>
-            <a href="gig.html" className="btn sm">View</a>
-            <a href="gig.html" className="btn primary sm">Apply</a>
+            <a href={gig ? "gig.html?id=" + encodeURIComponent(gig.id) : "gig.html"} className="btn sm">View</a>
+            <a href={gig ? "gig.html?id=" + encodeURIComponent(gig.id) : "gig.html"} className="btn primary sm">Apply</a>
           </div>
         </div>
       </div>
@@ -476,7 +507,18 @@
     );
 
     // ——— Main Feed App ———
-    const FeedApp = () => (
+    const FeedApp = () => {
+      const [gigs, setGigs] = React.useState(null); // null = loading
+      const [err, setErr] = React.useState("");
+
+      React.useEffect(() => {
+        if (!window.seshn) { setErr("Supabase client failed to load."); setGigs([]); return; }
+        window.seshn.listGigs({ limit: 30 })
+          .then(list => setGigs(list))
+          .catch(e => { setErr(e.message || "Couldn't load feed."); setGigs([]); });
+      }, []);
+
+      return (
       <div style={{ minHeight:"100vh", background:"var(--bg)", display:"flex", flexDirection:"column" }}>
         <TopNav />
         <div style={{ display:"grid", gridTemplateColumns:"240px 1fr 300px", gap:24, padding:"24px 28px", flex:1, maxWidth:1400, margin:"0 auto", width:"100%" }}>
@@ -532,74 +574,41 @@
               </div>
             </div>
             <div className="col" style={{ gap:14 }}>
-              <GigCard
-                boost art
-                role="Vocalist"
-                title="Topline writer wanted for Afrobeats demo (Tems-leaning)"
-                tags={["Afrobeats", "R&B", "Topline"]}
-                comp="Paid · $200"
-                name="Maya Oduya"
-                initials="MO"
-                roleTag="PRO"
-                time="2h"
-                applied={14}
-              />
-              <GigCard
-                role="Mixing engineer"
-                title="Mix 4-song shoegaze EP, MBV-coded references"
-                tags={["Shoegaze", "Indie", "Post-rock"]}
-                comp="Paid · $600"
-                name="Iván Reyes"
-                initials="IR"
-                roleTag="ART"
-                time="5h"
-                applied={8}
-              />
-              <GigCard
-                art="theo-drummer"
-                role="Drummer"
-                title="Live session drummer · 3 NYC dates in June"
-                tags={["Soul", "Live", "NYC"]}
-                comp="Paid · $450/show"
-                name="Theo Brooks"
-                initials="TB"
-                roleTag="ART"
-                time="9h"
-                applied={6}
-              />
-              <GigCard
-                role="Songwriter"
-                title="Co-writer for pop demo — top 40 references welcome"
-                tags={["Pop", "Songwriting"]}
-                comp="Split · 50/50"
-                name="Amaya L."
-                initials="AL"
-                roleTag="WRT"
-                time="1d"
-                applied={22}
-              />
-              <GigCard
-                role="Producer"
-                title="Looking for a producer for a soul-jazz crossover project"
-                tags={["Soul", "Jazz", "R&B"]}
-                comp="Paid · $800"
-                name="Lina Vega"
-                initials="LV"
-                roleTag="ART"
-                time="1d"
-                applied={5}
-              />
-              <GigCard
-                role="Vocalist"
-                title="Feature vocalist for an electronic ambient EP"
-                tags={["Electronic", "Ambient", "Vocal"]}
-                comp="Split · 40/60"
-                name="Robi K."
-                initials="RK"
-                roleTag="ART"
-                time="2d"
-                applied={31}
-              />
+              {gigs === null ? (
+                <div style={{ padding: "60px 0", textAlign: "center", color: "var(--ink-3)", fontFamily: "var(--font-display)", fontSize: 13 }}>
+                  Loading gigs…
+                </div>
+              ) : gigs.length === 0 ? (
+                <div className="gig" style={{ alignItems: "center", textAlign: "center", padding: "40px 20px", gap: 12 }}>
+                  <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22, color: "var(--ink)" }}>Feed's quiet right now.</div>
+                  <div style={{ color: "var(--ink-3)", fontSize: 14, maxWidth: 380 }}>Be the first to post a brief — once others sign up and post, their gigs will show up here.</div>
+                  <a href="post.html" className="btn primary" style={{ marginTop: 6 }}>+ Post the first gig</a>
+                  {err && <div style={{ color: "var(--danger)", fontSize: 12, marginTop: 8 }}>{err}</div>}
+                </div>
+              ) : (
+                gigs.map(g => {
+                  const owner = g.owner || {};
+                  const isBoosted = g.boosted_until && new Date(g.boosted_until) > new Date();
+                  return (
+                    <GigCard
+                      key={g.id}
+                      gig={g}
+                      boost={!!isBoosted}
+                      art={isBoosted || (g.genres && g.genres.length) ? (g.title || "art") : null}
+                      role={g.role || "Collaborator"}
+                      title={g.title}
+                      desc={g.description}
+                      tags={(g.genres || []).slice(0, 4)}
+                      comp={compLabel(g)}
+                      name={owner.display_name || "Artist"}
+                      initials={initialsOf(owner.display_name)}
+                      roleTag={owner.is_pro ? "PRO" : "ART"}
+                      time={timeAgo(g.created_at)}
+                      applied={0}
+                    />
+                  );
+                })
+              )}
             </div>
           </main>
 
@@ -641,7 +650,8 @@
           </aside>
         </div>
       </div>
-    );
+      );
+    };
 
     ReactDOM.createRoot(document.getElementById("root")).render(<FeedApp />);
   </script>

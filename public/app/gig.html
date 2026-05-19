@@ -74,6 +74,8 @@
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/seshn-supabase.js"></script>
 
   <script type="text/babel">
     const V_PAL = { plum:"#5b3858", cream:"#f0e8d6", rust:"#d96e3f", forest:"#2a4d3a", mint:"#a8ebc8", ink:"#0d0d0d", navy:"#1f3a5f", bone:"#f4f1e9", lime:"#c4e83a", cherry:"#c43d3f", green:"#2CCB73", butter:"#f6d36b" };
@@ -117,24 +119,27 @@
       );
     }
 
-    function GigPage() {
-      const relatedGigs = [
-        { title: "Hook writer for an R&B groove", role: "Vocalist", name: "Sam P.", ini: "SP", time: "4h" },
-        { title: "Topline × melody for pop ref track", role: "Topline", name: "Lina V.", ini: "LV", time: "1d" },
-      ];
+    // ——— helpers ———
+    function gigInitials(name) {
+      if (!name) return "··";
+      return name.trim().split(/\s+/).map(s => s[0]).join("").slice(0, 2).toUpperCase();
+    }
+    function gigCompLabel(g) {
+      if (g.comp === "paid" && g.pay_amount) return "Paid · $" + Number(g.pay_amount).toLocaleString();
+      if (g.comp === "paid") return "Paid";
+      if (g.comp === "split") return "Split";
+      if (g.comp === "trade") return "Trade";
+      return "Unpaid";
+    }
+    function gigDeadlineLabel(date) {
+      if (!date) return null;
+      return "Deadline · " + new Date(date).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    }
 
-      const BODY_PARAGRAPHS = [
-        "I've got a mid-tempo Afrobeats production ready for topline. Drums are locked, chord progressions are done, and the demo vocal guide I put down is placeholder — it needs a real voice and melody writer to complete it.",
-        "The vibe is Tems meets Davido with some Oxlade softness in the hooks. Think conversational but melodic — nothing too acrobatic, let the groove carry it. I have a full breakdown at the 1:45 mark that needs something special.",
-        "Looking for someone who can deliver a recorded demo topline (rough vocals okay — I'll handle final production), a completed lyric sheet, and the ability to turn this around in 2–3 weeks.",
-      ];
-
-      const REQUIREMENTS = [
-        "Recorded demo topline — rough vocals fine, I'll handle final production",
-        "Completed lyric sheet (verse, pre-chorus, chorus, bridge)",
-        "Available for 1 Zoom feedback session",
-        "2–3 week turnaround",
-      ];
+    function GigPage({ gig }) {
+      const owner = gig.owner || {};
+      const isBoosted = gig.boosted_until && new Date(gig.boosted_until) > new Date();
+      const body = (gig.description || "").split(/\n\n+/).filter(Boolean);
 
       return (
         <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
@@ -161,87 +166,71 @@
               <a href="feed.html" className="back-link">← Back to feed</a>
 
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-                <span className="pill solid">★ Boosted</span>
-                <span className="pill accent">Vocalist needed</span>
-                <span className="pill">Paid · $200</span>
-                <span className="pill">Remote OK</span>
-                <span className="pill">Deadline · Jun 14</span>
+                {isBoosted && <span className="pill solid">★ Boosted</span>}
+                <span className="pill accent">{gig.role} needed</span>
+                <span className="pill">{gigCompLabel(gig)}</span>
+                {gig.location && <span className="pill">{gig.location}</span>}
+                {gig.deadline && <span className="pill">{gigDeadlineLabel(gig.deadline)}</span>}
               </div>
 
               <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 40, lineHeight: 1.02, letterSpacing: "-0.025em", color: "var(--ink)", marginBottom: 20 }}>
-                Topline writer wanted<br />for an Afrobeats demo.
+                {gig.title}
               </h1>
 
               {/* Cover art header */}
               <div style={{ position: "relative", marginBottom: 20 }}>
-                <CoverHeader seed="afrobeats-mood" height={160} />
+                <CoverHeader seed={gig.id || gig.title} height={160} />
                 <div style={{ position: "absolute", left: 18, bottom: 14, display: "flex", gap: 12, alignItems: "center" }}>
-                  <AlbumArt seed="reference-track" size={64} radius={6} />
-                  <div>
-                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, color: "#0d0d0d", background: "rgba(255,255,255,0.88)", padding: "2px 8px", borderRadius: 4, fontSize: 11, display: "block", marginBottom: 4 }}>Reference · vibe</span>
-                    <span style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600, color: "#0d0d0d", background: "rgba(255,255,255,0.7)", padding: "2px 8px", borderRadius: 4 }}>Coast (demo)</span>
+                  <AlbumArt seed={gig.title} size={64} radius={6} />
+                </div>
+                {gig.genres && gig.genres.length > 0 && (
+                  <div style={{ position: "absolute", top: 14, right: 14 }}>
+                    <span style={{ display: "inline-block", transform: "rotate(4deg)", padding: "5px 10px", borderRadius: 4, background: "var(--ink)", color: "var(--frame)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 11, letterSpacing: "0.04em", textTransform: "uppercase", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>{gig.genres.slice(0, 2).join(" · ")}</span>
                   </div>
-                </div>
-                <div style={{ position: "absolute", top: 14, right: 14 }}>
-                  <span style={{ display: "inline-block", transform: "rotate(4deg)", padding: "5px 10px", borderRadius: 4, background: "var(--ink)", color: "var(--frame)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 11, letterSpacing: "0.04em", textTransform: "uppercase", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>R&amp;B · Afrobeats</span>
-                </div>
+                )}
               </div>
 
               {/* Poster */}
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-                <div className="avatar" style={{ width: 40, height: 40, fontSize: 14, position: "relative" }}>
-                  MO
-                  <span style={{ position: "absolute", bottom: -2, right: -2, background: "var(--frame)", borderRadius: 999, padding: "2px 5px", fontSize: 8, fontFamily: "var(--font-display)", fontWeight: 600, color: "var(--ink)", border: "1px solid var(--line)", lineHeight: 1, textTransform: "uppercase" }}>PRO</span>
-                </div>
+                <a href={"profile.html?u=" + encodeURIComponent(owner.username || "")} className="avatar" style={{ width: 40, height: 40, fontSize: 14, position: "relative", textDecoration: "none", color: "var(--ink-3)" }}>
+                  {gigInitials(owner.display_name)}
+                  {owner.is_pro && <span style={{ position: "absolute", bottom: -2, right: -2, background: "var(--frame)", borderRadius: 999, padding: "2px 5px", fontSize: 8, fontFamily: "var(--font-display)", fontWeight: 600, color: "var(--ink)", border: "1px solid var(--line)", lineHeight: 1, textTransform: "uppercase" }}>PRO</span>}
+                </a>
                 <div>
-                  <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14 }}>Maya Oduya</div>
-                  <div className="t-meta">Producer · Brooklyn · Posted 2h ago</div>
+                  <a href={"profile.html?u=" + encodeURIComponent(owner.username || "")} style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14, color: "var(--ink)", textDecoration: "none" }}>{owner.display_name || "Artist"}</a>
+                  <div className="t-meta">{(owner.roles && owner.roles[0]) || "Artist"}{owner.location ? " · " + owner.location : ""} · Posted {gig.created_at ? new Date(gig.created_at).toLocaleDateString() : "recently"}</div>
                 </div>
               </div>
 
               {/* Body */}
-              <div style={{ borderTop: "1px solid var(--line)", paddingTop: 20, marginBottom: 24 }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                  {BODY_PARAGRAPHS.map((p, i) => (
-                    <p key={i} style={{ fontSize: 14, lineHeight: 1.65, color: "var(--ink-2)" }}>{p}</p>
-                  ))}
-                </div>
-              </div>
-
-              {/* Requirements */}
-              <div style={{ marginBottom: 24 }}>
-                <div className="t-eyebrow" style={{ marginBottom: 12 }}>Requirements</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {REQUIREMENTS.map((r, i) => (
-                    <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                      <span style={{ width: 6, height: 6, borderRadius: 3, background: "var(--accent)", marginTop: 6, flexShrink: 0 }} />
-                      <span style={{ fontSize: 14, color: "var(--ink-2)", lineHeight: 1.5 }}>{r}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Reference track */}
-              <div style={{ marginBottom: 24 }}>
-                <div className="t-eyebrow" style={{ marginBottom: 10 }}>Reference</div>
-                <div className="audio-embed">
-                  <AlbumArt seed="coast-demo" size={48} radius={6} />
-                  <div className="play-btn" />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
-                      <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13 }}>Coast (demo) — vibe reference</span>
-                      <span className="t-meta" style={{ marginLeft: 8, flexShrink: 0 }}>SoundCloud</span>
-                    </div>
-                    <Waveform seed="coast-demo" height={22} progress={0.38} />
-                    <div className="t-meta" style={{ marginTop: 4 }}>Maya O. · 2:51</div>
+              {body.length > 0 ? (
+                <div style={{ borderTop: "1px solid var(--line)", paddingTop: 20, marginBottom: 24 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                    {body.map((p, i) => (
+                      <p key={i} style={{ fontSize: 14, lineHeight: 1.65, color: "var(--ink-2)", whiteSpace: "pre-wrap" }}>{p}</p>
+                    ))}
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div style={{ borderTop: "1px solid var(--line)", paddingTop: 20, marginBottom: 24 }}>
+                  <p style={{ fontSize: 14, color: "var(--ink-3)", fontStyle: "italic" }}>No additional brief — reach out to {owner.display_name || "the poster"} for details.</p>
+                </div>
+              )}
+
+              {/* Genres */}
+              {gig.genres && gig.genres.length > 0 && (
+                <div style={{ marginBottom: 24 }}>
+                  <div className="t-eyebrow" style={{ marginBottom: 10 }}>Genres</div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {gig.genres.map(g => <span key={g} className="pill">{g}</span>)}
+                  </div>
+                </div>
+              )}
 
               {/* Apply */}
               <div className="apply-section" style={{ marginBottom: 28 }}>
                 <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, marginBottom: 6 }}>Apply</div>
-                <div className="t-meta" style={{ marginBottom: 16 }}>Maya sees your pitch + 1 attached track.</div>
+                <div className="t-meta" style={{ marginBottom: 16 }}>{(owner.display_name || "The poster").split(" ")[0]} sees your pitch + 1 attached track.</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   <textarea className="input-field" rows={5} placeholder="Short pitch — what you'd bring, references, turnaround time…" />
                   <div style={{ display: "flex", gap: 10 }}>
@@ -249,29 +238,8 @@
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m21 12-8.5 8.5a5 5 0 1 1-7-7L14 5a3 3 0 1 1 4 4l-9 9a1 1 0 1 1-1.5-1.5L15 8"/></svg>
                       Attach a portfolio track →
                     </div>
-                    <button className="btn primary lg">Send application</button>
+                    <button className="btn primary lg" onClick={() => alert("Applications are coming in the next slice — for now, message " + (owner.display_name || "the poster") + " directly.")}>Send application</button>
                   </div>
-                </div>
-              </div>
-
-              {/* Related */}
-              <div>
-                <div className="t-eyebrow" style={{ marginBottom: 12 }}>Related posts</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  {relatedGigs.map(g => (
-                    <a href="gig.html" key={g.title} style={{ textDecoration: "none" }}>
-                      <div className="mini-gig">
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <div className="avatar sm" style={{ width: 22, height: 22, fontSize: 9 }}>{g.ini}</div>
-                          <span className="t-meta">{g.name} · {g.time}</span>
-                        </div>
-                        <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13, color: "var(--ink)", lineHeight: 1.25 }}>{g.title}</div>
-                        <div style={{ display: "flex", gap: 4 }}>
-                          <span className="pill accent" style={{ fontSize: 10 }}>{g.role}</span>
-                        </div>
-                      </div>
-                    </a>
-                  ))}
                 </div>
               </div>
             </div>
@@ -281,43 +249,46 @@
               {/* Poster card */}
               <div className="card">
                 <div style={{ display: "flex", gap: 12, marginBottom: 14 }}>
-                  <div className="avatar lg">MO</div>
+                  <a href={"profile.html?u=" + encodeURIComponent(owner.username || "")} className="avatar lg" style={{ textDecoration: "none", color: "var(--ink-3)" }}>{gigInitials(owner.display_name)}</a>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 3 }}>
-                      <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15 }}>Maya Oduya</span>
-                      <span className="pill solid" style={{ fontSize: 9, padding: "2px 7px" }}>✓ Pro</span>
+                      <a href={"profile.html?u=" + encodeURIComponent(owner.username || "")} style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: "var(--ink)", textDecoration: "none" }}>{owner.display_name || "Artist"}</a>
+                      {owner.is_pro && <span className="pill solid" style={{ fontSize: 9, padding: "2px 7px" }}>✓ Pro</span>}
                     </div>
-                    <div className="t-meta">Producer · Vocalist · Brooklyn</div>
+                    <div className="t-meta">{(owner.roles && owner.roles.join(" · ")) || "Artist"}{owner.location ? " · " + owner.location : ""}</div>
                   </div>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 }}>
-                  <div className="ph-line" style={{ height: 8 }} />
-                  <div className="ph-line" style={{ width: "75%", height: 8 }} />
-                </div>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
-                  <span className="pill">R&B</span>
-                  <span className="pill">Afrobeats</span>
-                  <span className="pill">Soul</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 12, borderTop: "1px solid var(--line-soft)" }}>
                   <div>
-                    <div className="t-meta">Response time</div>
-                    <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, marginTop: 2 }}>~4h</div>
+                    <div className="t-meta">Posted</div>
+                    <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, marginTop: 2 }}>{gig.created_at ? new Date(gig.created_at).toLocaleDateString() : "—"}</div>
                   </div>
-                  <a href="profile.html" className="btn sm">View profile</a>
+                  <a href={"profile.html?u=" + encodeURIComponent(owner.username || "")} className="btn sm">View profile</a>
                 </div>
               </div>
 
               {/* Stats */}
               <div className="card hairline">
-                <div className="t-eyebrow" style={{ marginBottom: 12 }}>Application stats</div>
+                <div className="t-eyebrow" style={{ marginBottom: 12 }}>Gig details</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {[["Applications", "12"], ["Avg. response", "4h"], ["Closes", "Jun 14"]].map(([k, v]) => (
-                    <div key={k} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span className="t-meta">{k}</span>
-                      <strong style={{ fontFamily: "var(--font-display)", fontSize: 13 }}>{v}</strong>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span className="t-meta">Role</span>
+                    <strong style={{ fontFamily: "var(--font-display)", fontSize: 13 }}>{gig.role}</strong>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span className="t-meta">Pay</span>
+                    <strong style={{ fontFamily: "var(--font-display)", fontSize: 13 }}>{gigCompLabel(gig)}</strong>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span className="t-meta">Location</span>
+                    <strong style={{ fontFamily: "var(--font-display)", fontSize: 13 }}>{gig.location || "—"}</strong>
+                  </div>
+                  {gig.deadline && (
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span className="t-meta">Closes</span>
+                      <strong style={{ fontFamily: "var(--font-display)", fontSize: 13 }}>{new Date(gig.deadline).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</strong>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 
@@ -333,8 +304,39 @@
       );
     }
 
+    function GigLoader() {
+      const [state, setState] = React.useState({ status: "loading", gig: null });
+      React.useEffect(() => {
+        const id = new URLSearchParams(window.location.search).get("id");
+        if (!id) { setState({ status: "notfound", gig: null }); return; }
+        if (!window.seshn) { setState({ status: "error", gig: null }); return; }
+        window.seshn.getGig(id).then(gig => {
+          if (!gig) { setState({ status: "notfound", gig: null }); return; }
+          document.title = "Seshn — " + gig.title;
+          setState({ status: "ready", gig });
+        });
+      }, []);
+
+      if (state.status === "loading") {
+        return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ink-3)", fontFamily: "var(--font-display)", fontSize: 13 }}>Loading gig…</div>;
+      }
+      if (state.status === "notfound") {
+        return (
+          <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, padding: 24, textAlign: "center" }}>
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 28, color: "var(--ink)" }}>Gig not found</span>
+            <span style={{ color: "var(--ink-3)", fontSize: 14 }}>This gig may have been closed or removed.</span>
+            <a href="feed.html" className="btn primary" style={{ marginTop: 8 }}>← Back to the feed</a>
+          </div>
+        );
+      }
+      if (state.status === "error") {
+        return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--danger)", fontFamily: "var(--font-display)", fontSize: 13 }}>Couldn't load Seshn. Refresh to try again.</div>;
+      }
+      return <GigPage gig={state.gig} />;
+    }
+
     const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(<GigPage />);
+    root.render(<GigLoader />);
   </script>
 </body>
 </html>

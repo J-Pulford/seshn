@@ -59,6 +59,43 @@
     return sb.auth.signOut();
   }
 
+  // ── Gigs ──────────────────────────────────────────────────────────
+  async function createGig(fields) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    var row = Object.assign({ owner_id: u.id, status: "open" }, fields);
+    var res = await sb.from("gigs").insert(row).select().single();
+    if (res.error) throw res.error;
+    return res.data;
+  }
+
+  async function listGigs(opts) {
+    opts = opts || {};
+    var q = sb
+      .from("gigs")
+      .select("*, owner:profiles!owner_id(id, username, display_name, is_pro)")
+      .eq("status", "open")
+      .order("boosted_until", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false })
+      .limit(opts.limit || 30);
+    if (opts.role) q = q.eq("role", opts.role);
+    if (opts.ownerId) q = q.eq("owner_id", opts.ownerId);
+    if (opts.genre) q = q.contains("genres", [opts.genre]);
+    var res = await q;
+    if (res.error) { console.error("[seshn] listGigs error", res.error); return []; }
+    return res.data || [];
+  }
+
+  async function getGig(id) {
+    var res = await sb
+      .from("gigs")
+      .select("*, owner:profiles!owner_id(id, username, display_name, is_pro, location, roles)")
+      .eq("id", id)
+      .maybeSingle();
+    if (res.error) { console.error("[seshn] getGig error", res.error); return null; }
+    return res.data;
+  }
+
   // After auth, route based on whether profile exists.
   async function routeAfterAuth() {
     var u = await getUser();
@@ -75,6 +112,9 @@
     upsertProfile: upsertProfile,
     sendMagicLink: sendMagicLink,
     signOut: signOut,
-    routeAfterAuth: routeAfterAuth
+    routeAfterAuth: routeAfterAuth,
+    createGig: createGig,
+    listGigs: listGigs,
+    getGig: getGig
   };
 })();

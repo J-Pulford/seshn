@@ -85,6 +85,8 @@
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/seshn-supabase.js"></script>
 
   <script type="text/babel">
     const V_PAL = { plum:"#5b3858", cream:"#f0e8d6", rust:"#d96e3f", forest:"#2a4d3a", mint:"#a8ebc8", ink:"#0d0d0d", navy:"#1f3a5f", bone:"#f4f1e9", lime:"#c4e83a", cherry:"#c43d3f", green:"#2CCB73", butter:"#f6d36b" };
@@ -103,10 +105,30 @@
     ];
 
     function PostPage() {
+      const [title, setTitle] = React.useState("");
+      const [description, setDescription] = React.useState("");
       const [selRole, setSelRole] = React.useState("Topline writer");
-      const [selGenres, setSelGenres] = React.useState(new Set(["Afrobeats", "R&B"]));
+      const [selGenres, setSelGenres] = React.useState(new Set());
       const [selComp, setSelComp] = React.useState("paid");
-      const [amount, setAmount] = React.useState("200");
+      const [amount, setAmount] = React.useState("");
+      const [deadline, setDeadline] = React.useState("");
+      const [location, setLocation] = React.useState("Remote");
+      const [me, setMe] = React.useState(null);
+      const [authState, setAuthState] = React.useState("checking"); // checking | ready | unauthed
+      const [publishing, setPublishing] = React.useState(false);
+      const [err, setErr] = React.useState("");
+
+      React.useEffect(() => {
+        if (!window.seshn) { setErr("Supabase client failed to load."); return; }
+        (async () => {
+          const u = await window.seshn.getUser();
+          if (!u) { window.location.href = "auth.html"; return; }
+          const p = await window.seshn.getProfile({ id: u.id });
+          if (!p) { window.location.href = "onboarding.html"; return; }
+          setMe(p);
+          setAuthState("ready");
+        })();
+      }, []);
 
       const toggleGenre = (g) => {
         setSelGenres(prev => {
@@ -117,6 +139,36 @@
         });
       };
 
+      const titleValid = title.trim().length >= 4 && title.trim().length <= 140;
+      const compValid = selComp !== "paid" || (amount && Number(amount) > 0);
+      const canPublish = authState === "ready" && titleValid && selRole && compValid && !publishing;
+
+      async function onPublish() {
+        if (!canPublish) return;
+        setPublishing(true); setErr("");
+        try {
+          const payload = {
+            title: title.trim(),
+            description: description.trim(),
+            role: selRole,
+            genres: Array.from(selGenres),
+            comp: selComp,
+            pay_amount: selComp === "paid" ? Number(amount) : null,
+            pay_currency: "USD",
+            deadline: deadline ? deadline : null,
+            location: location.trim() || "Remote"
+          };
+          const gig = await window.seshn.createGig(payload);
+          window.location.href = "gig.html?id=" + encodeURIComponent(gig.id);
+        } catch (e) {
+          console.error("[seshn] createGig error:", e);
+          if (e && e.code === "42P01") setErr("The gigs table doesn't exist yet. Run migration 0002_gigs.sql in your Supabase dashboard.");
+          else if (e && e.code === "PGRST205") setErr("The gigs table doesn't exist yet. Run migration 0002_gigs.sql in your Supabase dashboard.");
+          else setErr(e && e.message ? e.message : "Couldn't publish the gig.");
+          setPublishing(false);
+        }
+      }
+
       return (
         <div className="page">
           {/* Nav */}
@@ -125,9 +177,9 @@
               <a href="../../index.html" className="logo">Seshn</a>
             </div>
             <div className="nav-right">
-              <span style={{ fontSize: 12, color: "var(--ink-3)", fontFamily: "var(--font-display)" }}>Auto-saved 2s ago</span>
+              <span style={{ fontSize: 12, color: "var(--ink-3)", fontFamily: "var(--font-display)" }}>{authState === "checking" ? "Loading…" : "Draft · not yet published"}</span>
               <a href="feed.html" className="btn ghost">Cancel</a>
-              <div className="avatar" style={{ background: "var(--ph)" }}>YT</div>
+              {me && <a href={"profile.html?u=" + me.username} className="avatar" style={{ background: "var(--ph)", textDecoration: "none", color: "var(--ink-3)" }}>{(me.display_name || "··").split(/\s+/).map(s => s[0]).join("").slice(0, 2).toUpperCase()}</a>}
             </div>
           </nav>
 
@@ -156,8 +208,36 @@
               </div>
 
               <div>
-                <div className="step-label">Step 2 of 3</div>
-                <h1>Who and what.</h1>
+                <div className="step-label">Post a gig</div>
+                <h1>What do you need.</h1>
+              </div>
+
+              {/* Title */}
+              <div>
+                <div className="section-label">Title <span className="t-meta">· what role + project, in plain words</span></div>
+                <input
+                  className="input-field"
+                  placeholder="e.g. Topline writer wanted for an Afrobeats demo"
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  maxLength={140}
+                />
+                {!titleValid && title.length > 0 && (
+                  <div className="t-meta" style={{ marginTop: 6, color: "var(--ink-3)" }}>4–140 characters.</div>
+                )}
+              </div>
+
+              {/* Description */}
+              <div>
+                <div className="section-label">Brief <span className="t-meta">· references, vibe, what you've got so far</span></div>
+                <textarea
+                  className="input-field"
+                  placeholder="What's the song / project about? Drop references, any tracks you've got so far, what you'd like the collaborator to bring."
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  maxLength={4000}
+                  style={{ minHeight: 120, resize: "vertical", fontFamily: "var(--font-body)", lineHeight: 1.5 }}
+                />
               </div>
 
               {/* Role */}
@@ -200,22 +280,42 @@
 
                 {selComp === "paid" && (
                   <div className="amount-row">
-                    <input className="input-field" placeholder="$ Amount" value={amount} onChange={e => setAmount(e.target.value)} style={{ maxWidth: 160 }} />
-                    <input className="input-field" placeholder="USD" defaultValue="USD" style={{ maxWidth: 100 }} />
-                    <input className="input-field" placeholder="Deadline · Jun 14, 2026" defaultValue="Jun 14, 2026" />
-                  </div>
-                )}
-                {selComp === "split" && (
-                  <div className="amount-row">
-                    <input className="input-field" placeholder="Split % (e.g. 50/50)" style={{ maxWidth: 220 }} />
-                    <input className="input-field" placeholder="Deadline" />
+                    <input className="input-field" type="number" min="1" placeholder="$ Amount" value={amount} onChange={e => setAmount(e.target.value)} style={{ maxWidth: 160 }} />
+                    <input className="input-field" placeholder="USD" defaultValue="USD" style={{ maxWidth: 100 }} readOnly />
                   </div>
                 )}
               </div>
 
+              {/* Location + Deadline */}
+              <div>
+                <div className="section-label">Where & when <span className="t-meta">· optional</span></div>
+                <div className="amount-row">
+                  <input
+                    className="input-field"
+                    placeholder="Location (e.g. NYC, Remote)"
+                    value={location}
+                    onChange={e => setLocation(e.target.value)}
+                    style={{ maxWidth: 220 }}
+                  />
+                  <input
+                    className="input-field"
+                    type="date"
+                    value={deadline}
+                    onChange={e => setDeadline(e.target.value)}
+                    style={{ maxWidth: 220 }}
+                  />
+                </div>
+              </div>
+
+              {err && (
+                <div style={{ padding: "10px 14px", borderRadius: 8, border: "1px solid var(--danger)", background: "rgba(192,57,43,0.06)", color: "var(--danger)", fontSize: 13, fontFamily: "var(--font-display)" }}>{err}</div>
+              )}
+
               <div className="actions">
-                <a href="post.html" className="btn">← Back · Brief</a>
-                <a href="gig.html" className="btn primary lg">Continue → Review</a>
+                <a href="feed.html" className="btn">← Cancel</a>
+                <button className="btn primary lg" disabled={!canPublish} onClick={onPublish} style={!canPublish ? { opacity: 0.5, cursor: "not-allowed" } : null}>
+                  {publishing ? "Publishing…" : "Publish gig →"}
+                </button>
               </div>
             </div>
 
@@ -226,22 +326,22 @@
               <div className="gig-card" style={{ marginBottom: 12 }}>
                 <div className="gig-head">
                   <div className="avatar" style={{ position: "relative" }}>
-                    MO
-                    <span style={{ position: "absolute", bottom: -2, right: -2, background: "var(--frame)", borderRadius: 999, padding: "2px 5px", fontSize: 8, fontFamily: "var(--font-display)", fontWeight: 600, color: "var(--ink)", border: "1px solid var(--line)", lineHeight: 1, textTransform: "uppercase" }}>PRO</span>
+                    {me ? (me.display_name || "··").split(/\s+/).map(s => s[0]).join("").slice(0, 2).toUpperCase() : "··"}
+                    {me && me.is_pro && <span style={{ position: "absolute", bottom: -2, right: -2, background: "var(--frame)", borderRadius: 999, padding: "2px 5px", fontSize: 8, fontFamily: "var(--font-display)", fontWeight: 600, color: "var(--ink)", border: "1px solid var(--line)", lineHeight: 1, textTransform: "uppercase" }}>PRO</span>}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4 }}>
-                      <span style={{ fontWeight: 600, fontFamily: "var(--font-display)", fontSize: 13 }}>Maya Oduya</span>
+                      <span style={{ fontWeight: 600, fontFamily: "var(--font-display)", fontSize: 13 }}>{me ? me.display_name : "You"}</span>
                       <span style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--ink-4)", flexShrink: 0 }} />
-                      <span className="t-meta">just now ago</span>
+                      <span className="t-meta">just now</span>
                     </div>
                     <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                       <span className="pill accent">{selRole} needed</span>
-                      <span className="t-meta">· {selComp === "paid" ? `Paid · $${amount}` : selComp === "split" ? "Split" : selComp === "trade" ? "Trade" : "Unpaid"}</span>
+                      <span className="t-meta">· {selComp === "paid" && amount ? `Paid · $${amount}` : selComp === "paid" ? "Paid" : selComp === "split" ? "Split" : selComp === "trade" ? "Trade" : "Unpaid"}</span>
                     </div>
                   </div>
                 </div>
-                <div className="gig-title">Topline writer wanted for Afrobeats demo</div>
+                <div className="gig-title" style={!title ? { color: "var(--ink-4)", fontStyle: "italic" } : null}>{title || "Your gig title will appear here…"}</div>
                 <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                   {[...selGenres].map(t => <span key={t} className="pill">{t}</span>)}
                 </div>
