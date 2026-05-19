@@ -36,9 +36,29 @@
     var meState = React.useState(null);
     var me = meState[0], setMe = meState[1];
 
+    var unreadState = React.useState(0);
+    var unread = unreadState[0], setUnread = unreadState[1];
+
     React.useEffect(function () {
       if (!window.seshn) return;
       window.seshn.getProfile().then(function (p) { setMe(p); }).catch(function () {});
+    }, []);
+
+    React.useEffect(function () {
+      if (!window.seshn || !window.seshn.getUnreadCount) return;
+      var cancelled = false;
+      var unsub = function () {};
+      function refresh() {
+        window.seshn.getUnreadCount().then(function (n) { if (!cancelled) setUnread(n); }).catch(function () {});
+      }
+      window.seshn.getUser().then(function (u) {
+        if (!u || cancelled) return;
+        refresh();
+        if (window.seshn.subscribeToMyConversations) {
+          window.seshn.subscribeToMyConversations(refresh).then(function (u2) { if (cancelled) u2(); else unsub = u2; });
+        }
+      });
+      return function () { cancelled = true; try { unsub(); } catch (e) {} };
     }, []);
 
     var displayName = me && me.display_name ? me.display_name : "";
@@ -132,8 +152,26 @@
         { style: { display: "flex", alignItems: "center", gap: 10 } },
         showPostButton && React.createElement("a", { href: "post.html", className: "btn primary sm" }, "+ Post a gig"),
 
-        React.createElement("a", { href: "inbox.html", style: iconBtnStyle(active === "inbox"), "aria-label": "Inbox" },
-          React.createElement(IconSvg, { kind: "message", size: 18 })),
+        React.createElement(
+          "a",
+          { href: "inbox.html", style: Object.assign({ position: "relative" }, iconBtnStyle(active === "inbox")), "aria-label": "Inbox" + (unread > 0 ? " (" + unread + " unread)" : "") },
+          React.createElement(IconSvg, { kind: "message", size: 18 }),
+          unread > 0 && React.createElement(
+            "span",
+            {
+              style: {
+                position: "absolute", top: 4, right: 4,
+                minWidth: 16, height: 16, padding: "0 4px",
+                borderRadius: 999,
+                background: "var(--accent)", color: "#062c19",
+                fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 10,
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                border: "2px solid var(--frame)", boxSizing: "content-box", lineHeight: 1
+              }
+            },
+            unread > 9 ? "9+" : String(unread)
+          )
+        ),
 
         React.createElement("span", { style: iconBtnStyle(false), "aria-label": "Notifications" },
           React.createElement(IconSvg, { kind: "bell", size: 18 })),

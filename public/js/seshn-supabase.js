@@ -182,6 +182,133 @@
     return res.data;
   }
 
+  // ── Messaging ─────────────────────────────────────────────────────
+  async function getOrCreateConversation(otherUserId) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    if (!otherUserId) throw new Error("Missing recipient");
+    if (otherUserId === u.id) throw new Error("Can't message yourself");
+    var res = await sb.rpc("get_or_create_conversation", { other_user: otherUserId });
+    if (res.error) throw res.error;
+    return res.data; // conversation id (uuid)
+  }
+
+  async function listMyConversations() {
+    var u = await getUser();
+    if (!u) return [];
+    var res = await sb
+      .from("conversations")
+      .select(
+        "id, user_a, user_b, last_message_at, last_message_preview, last_message_sender, " +
+        "user_a_profile:profiles!user_a(id, username, display_name, is_pro, location, roles), " +
+        "user_b_profile:profiles!user_b(id, username, display_name, is_pro, location, roles), " +
+        "reads:conversation_reads(user_id, last_read_at)"
+      )
+      .order("last_message_at", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false });
+    if (res.error) { console.error("[seshn] listMyConversations error", res.error); return []; }
+    // Decorate with `other` (the not-me participant) and `unread` flag.
+    return (res.data || []).map(function (c) {
+      var other = c.user_a === u.id ? c.user_b_profile : c.user_a_profile;
+      var myRead = (c.reads || []).find(function (r) { return r.user_id === u.id; });
+      var lastReadAt = myRead ? new Date(myRead.last_read_at).getTime() : 0;
+      var lastMsgAt = c.last_message_at ? new Date(c.last_message_at).getTime() : 0;
+      var unread = !!(lastMsgAt && lastMsgAt > lastReadAt && c.last_message_sender && c.last_message_sender !== u.id);
+      return Object.assign({}, c, { other: other, unread: unread, me_id: u.id });
+    });
+  }
+
+  async function getConversation(conversationId) {
+    var u = await getUser();
+    if (!u || !conversationId) return null;
+    var res = await sb
+      .from("conversations")
+      .select(
+        "id, user_a, user_b, last_message_at, " +
+        "user_a_profile:profiles!user_a(id, username, display_name, is_pro, location, roles), " +
+        "user_b_profile:profiles!user_b(id, username, display_name, is_pro, location, roles)"
+      )
+      .eq("id", conversationId)
+      .maybeSingle();
+    if (res.error) { console.error("[seshn] getConversation error", res.error); return null; }
+    if (!res.data) return null;
+    var other = res.data.user_a === u.id ? res.data.user_b_profile : res.data.user_a_profile;
+    return Object.assign({}, res.data, { other: other, me_id: u.id });
+  }
+
+  async function listMessages(conversationId, opts) {
+    if (!conversationId) return [];
+    opts = opts || {};
+    var res = await sb
+      .from("messages")
+      .select("*")
+      .eq("conversation_id", conversationId)
+      .order("created_at", { ascending: true })
+      .limit(opts.limit || 200);
+    if (res.error) { console.error("[seshn] listMessages error", res.error); return []; }
+    return res.data || [];
+  }
+
+  async function sendMessage(conversationId, body) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    if (!conversationId || !body || !body.trim()) throw new Error("Empty message");
+    var res = await sb
+      .from("messages")
+      .insert({ conversation_id: conversationId, sender_id: u.id, body: body.trim() })
+      .select("*")
+      .single();
+    if (res.error) throw res.error;
+    return res.data;
+  }
+
+  async function markConversationRead(conversationId) {
+    var u = await getUser();
+    if (!u || !conversationId) return;
+    var res = await sb
+      .from("conversation_reads")
+      .upsert(
+        { conversation_id: conversationId, user_id: u.id, last_read_at: new Date().toISOString() },
+        { onConflict: "conversation_id,user_id" }
+      );
+    if (res.error) console.error("[seshn] markConversationRead error", res.error);
+  }
+
+  // Subscribe to new messages in a conversation. Returns an unsubscribe fn.
+  function subscribeToMessages(conversationId, onInsert) {
+    if (!conversationId) return function () {};
+    var channel = sb
+      .channel("messages:" + conversationId)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages", filter: "conversation_id=eq." + conversationId },
+        function (payload) { onInsert(payload.new); }
+      )
+      .subscribe();
+    return function () { sb.removeChannel(channel); };
+  }
+
+  // Subscribe to any new message that touches one of my conversations
+  // (used to refresh the inbox sidebar + nav badge).
+  async function subscribeToMyConversations(onChange) {
+    var u = await getUser();
+    if (!u) return function () {};
+    var channel = sb
+      .channel("user-convos:" + u.id)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "conversations" },
+        function () { onChange(); }
+      )
+      .subscribe();
+    return function () { sb.removeChannel(channel); };
+  }
+
+  async function getUnreadCount() {
+    var convos = await listMyConversations();
+    return convos.filter(function (c) { return c.unread; }).length;
+  }
+
   // After auth, route based on whether profile exists.
   async function routeAfterAuth() {
     var u = await getUser();
@@ -207,6 +334,15 @@
     getMyApplication: getMyApplication,
     listApplicationsForGig: listApplicationsForGig,
     listMyApplications: listMyApplications,
-    updateApplicationStatus: updateApplicationStatus
+    updateApplicationStatus: updateApplicationStatus,
+    getOrCreateConversation: getOrCreateConversation,
+    listMyConversations: listMyConversations,
+    getConversation: getConversation,
+    listMessages: listMessages,
+    sendMessage: sendMessage,
+    markConversationRead: markConversationRead,
+    subscribeToMessages: subscribeToMessages,
+    subscribeToMyConversations: subscribeToMyConversations,
+    getUnreadCount: getUnreadCount
   };
 })();

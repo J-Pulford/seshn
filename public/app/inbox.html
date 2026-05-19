@@ -98,155 +98,368 @@
   <script src="../js/seshn-nav.js"></script>
 
   <script type="text/babel">
-    const V_PAL = { plum:"#5b3858", cream:"#f0e8d6", rust:"#d96e3f", forest:"#2a4d3a", mint:"#a8ebc8", ink:"#0d0d0d", navy:"#1f3a5f", bone:"#f4f1e9", lime:"#c4e83a", cherry:"#c43d3f", green:"#2CCB73", butter:"#f6d36b" };
-    const COVER_PALETTES = [[V_PAL.plum,V_PAL.cream,V_PAL.rust],[V_PAL.cream,V_PAL.ink,V_PAL.rust],[V_PAL.forest,V_PAL.mint,V_PAL.butter],[V_PAL.navy,V_PAL.bone,V_PAL.butter],[V_PAL.ink,V_PAL.lime,V_PAL.mint],[V_PAL.cherry,V_PAL.cream,V_PAL.ink],[V_PAL.bone,V_PAL.plum,V_PAL.rust],[V_PAL.rust,V_PAL.cream,V_PAL.ink],[V_PAL.green,V_PAL.ink,V_PAL.bone],[V_PAL.mint,V_PAL.forest,V_PAL.ink]];
-    function _hash(s){let h=2166136261>>>0;s=String(s||"x");for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
-    function _rng(seed){let s=seed>>>0;return()=>{s=(s+0x6D2B79F5)>>>0;let t=s;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
-    const AlbumArt=({seed="track",size=40,radius=6,style})=>{const h=_hash(seed);const v=h%8;const pal=COVER_PALETTES[((h>>>3)%COVER_PALETTES.length)];const bg=pal[0],fg=pal[1],ac=pal[2];const rng=_rng(h);const wrap={width:size,height:size,borderRadius:radius,overflow:"hidden",flex:"0 0 auto",display:"inline-block",...style};let inner;if(v===0){const cy=38+(rng()-0.5)*16;inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/><circle cx={50} cy={cy} r={26} fill={ac}/><rect x="0" y="68" width="100" height="6" fill={fg}/></svg>;}else if(v===1){const dots=[];for(let y=0;y<10;y++)for(let x=0;x<10;x++){const d=(x+y)/18;const r=Math.max(0.4,4.2*(1-d)+rng()*0.4);dots.push(<circle key={x+"_"+y} cx={5+x*10} cy={5+y*10} r={r} fill={fg}/>);}inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/>{dots}</svg>;}else if(v===3){const bars=[];for(let i=0;i<28;i++){const t=i/27;const env=Math.sin(t*Math.PI)**0.6;const a=10+rng()*80*env;bars.push(<rect key={i} x={5+i*3.4} y={50-a/2} width="2" height={a} fill={fg} rx="1"/>);}inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/>{bars}</svg>;}else if(v===5){inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/>{[36,26,16].map((r,i)=><circle key={i} cx="50" cy="50" r={r} fill="none" stroke={fg} strokeWidth={i===1?2:1.2} opacity={0.85-i*0.1}/>)}<circle cx={50+36*Math.cos(((h>>>5)%360)*Math.PI/180)} cy={50+36*Math.sin(((h>>>5)%360)*Math.PI/180)} r="5" fill={ac}/></svg>;}else{inner=<svg viewBox="0 0 100 100" width="100%" height="100%"><rect width="100" height="100" fill={bg}/><rect y="55" width="100" height="45" fill={fg}/><circle cx="50" cy="55" r="20" fill={ac}/></svg>;}return <div style={wrap} aria-hidden="true">{inner}</div>;};
-
-    function Waveform({ seed="wf", height=18, bars=40, progress=0.3 }) {
-      const h=_hash(seed); const rng=_rng(h); const arr=[];
-      for(let i=0;i<bars;i++){const t=i/(bars-1);const env=0.35+0.65*(Math.sin(t*Math.PI)**0.6);arr.push((0.18+0.82*rng())*env);}
-      const W=bars*2.8; const bw=W/bars-1;
-      return <svg viewBox={`0 0 ${W} ${height}`} preserveAspectRatio="none" width="100%" height={height} style={{display:"block"}}>{arr.map((a,i)=>{const x=i*(W/bars);const bh=Math.max(1.5,a*height);const y=(height-bh)/2;return <rect key={i} x={x} y={y} width={bw} height={bh} fill={(i/bars)<progress?"var(--ink)":"rgba(0,0,0,0.18)"} rx={bw/2}/>;})}</svg>;
+    function initials(name) {
+      if (!name) return "··";
+      const parts = name.trim().split(/\s+/).filter(Boolean);
+      if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+      return (parts[0] || "··").slice(0, 2).toUpperCase();
+    }
+    function formatRelativeTime(iso) {
+      if (!iso) return "";
+      const t = new Date(iso);
+      const now = new Date();
+      const sameDay = t.toDateString() === now.toDateString();
+      if (sameDay) return t.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+      const diffDays = Math.floor((now - t) / 86400000);
+      if (diffDays < 7) return t.toLocaleDateString(undefined, { weekday: "short" });
+      return t.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    }
+    function formatMessageTime(iso) {
+      return new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    }
+    function dateKey(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
     }
 
-    const CONVOS = [
-      { ini: "NK", name: "Nia Kassim", time: "9:33", last: "will track that today. I'll have a stem up by EOD.", active: true, unread: false },
-      { ini: "TB", name: "Theo Brooks", time: "9:48", last: "84 MB · drum-bus_v2_groove-shift", unread: true },
-      { ini: "SP", name: "Sam Park", time: "Mon", last: "sounds good — sending the rough mix tonight", unread: true },
-      { ini: "LV", name: "Lina Vega", time: "Mon", last: "Voice note · 0:42", unread: true },
-      { ini: "IR", name: "Iván Reyes", time: "Sun", last: "thanks for the intro, will reach out!", unread: false },
-      { ini: "AL", name: "Amaya L.", time: "May 10", last: "up for a co-write tomorrow?", unread: false },
-      { ini: "RK", name: "Robi K.", time: "May 8", last: "here's the demo, let me know what you think →", unread: false },
-    ];
+    function ConvoListItem({ convo, isActive, onSelect }) {
+      const o = convo.other || {};
+      const preview = convo.last_message_preview || (convo.last_message_at ? "" : "Say hi — no messages yet.");
+      const sentByMe = convo.last_message_sender === convo.me_id;
+      return (
+        <div className={`convo-item ${isActive ? "active" : ""}`} onClick={onSelect}>
+          <div className="avatar">{initials(o.display_name)}</div>
+          <div className="convo-info">
+            <div className="convo-name-row">
+              <span className="convo-name">{o.display_name || o.username || "User"}</span>
+              <span className="convo-time">{formatRelativeTime(convo.last_message_at)}</span>
+            </div>
+            <span className={`convo-preview ${convo.unread ? "unread" : ""}`}>
+              {sentByMe && convo.last_message_preview && <span style={{ color: "var(--ink-4)" }}>You: </span>}
+              {preview}
+            </span>
+          </div>
+          {convo.unread && <div className="unread-dot" />}
+        </div>
+      );
+    }
+
+    function MessagesPane({ convo, messages, meId }) {
+      const scrollRef = React.useRef(null);
+      React.useEffect(() => {
+        if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }, [messages]);
+
+      if (messages === null) return <div className="messages"><div className="t-meta">Loading…</div></div>;
+      if (messages.length === 0) {
+        const o = convo.other || {};
+        return (
+          <div className="messages" ref={scrollRef}>
+            <div style={{ margin: "auto", textAlign: "center", padding: 40 }}>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 16, marginBottom: 6 }}>
+                Start the conversation with {(o.display_name || "this user").split(" ")[0]}
+              </div>
+              <div className="t-meta">No messages yet — type below to say hi.</div>
+            </div>
+          </div>
+        );
+      }
+
+      // Group messages by date for dividers
+      const rendered = [];
+      let lastDate = null;
+      for (const m of messages) {
+        const dk = dateKey(m.created_at);
+        if (dk !== lastDate) {
+          rendered.push(<div key={"d-" + dk} className="date-divider">{dk}</div>);
+          lastDate = dk;
+        }
+        const mine = m.sender_id === meId;
+        const senderName = mine ? "You" : ((convo.other && convo.other.display_name) || "User");
+        const senderInitials = mine ? initials(senderName) : initials((convo.other && convo.other.display_name) || "");
+        rendered.push(
+          <div key={m.id} className={`msg-row ${mine ? "self" : ""}`}>
+            <div className="avatar" style={mine ? { background: "var(--ink)", color: "var(--frame)" } : {}}>
+              {senderInitials}
+            </div>
+            <div className="msg-content">
+              <div className="msg-meta" style={mine ? { flexDirection: "row-reverse" } : {}}>
+                <span className="msg-name">{senderName}</span>
+                <span className="msg-time">{formatMessageTime(m.created_at)}</span>
+              </div>
+              <div className="msg-bubble" style={{ whiteSpace: "pre-wrap" }}>{m.body}</div>
+            </div>
+          </div>
+        );
+      }
+      return <div className="messages" ref={scrollRef}>{rendered}</div>;
+    }
+
+    function Composer({ disabled, onSend, placeholderName }) {
+      const [draft, setDraft] = React.useState("");
+      const [busy, setBusy] = React.useState(false);
+      const send = async () => {
+        const text = draft.trim();
+        if (!text || busy) return;
+        setBusy(true);
+        try {
+          await onSend(text);
+          setDraft("");
+        } catch (e) {
+          alert((e && e.message) || "Couldn't send.");
+        } finally {
+          setBusy(false);
+        }
+      };
+      const onKey = (e) => {
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+      };
+      return (
+        <div className="composer">
+          <div className="composer-inner">
+            <input
+              className="composer-input"
+              placeholder={"Message " + (placeholderName ? placeholderName.split(" ")[0] : "") + "… (Enter to send)"}
+              value={draft}
+              onChange={e => setDraft(e.target.value)}
+              onKeyDown={onKey}
+              disabled={disabled || busy}
+              maxLength={4000}
+            />
+            <button
+              className="btn primary sm"
+              onClick={send}
+              disabled={disabled || busy || !draft.trim()}
+              style={{ opacity: (!draft.trim() || busy) ? 0.5 : 1 }}
+            >
+              {busy ? "…" : "Send"}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    function DmPanel({ convo, meId, onMessageSent }) {
+      const [messages, setMessages] = React.useState(null);
+
+      React.useEffect(() => {
+        if (!convo) return;
+        let cancelled = false;
+        setMessages(null);
+        window.seshn.listMessages(convo.id).then(list => {
+          if (!cancelled) setMessages(list);
+        });
+        window.seshn.markConversationRead(convo.id);
+        const unsub = window.seshn.subscribeToMessages(convo.id, (msg) => {
+          setMessages(prev => {
+            if (!prev) return [msg];
+            if (prev.some(m => m.id === msg.id)) return prev;
+            return prev.concat(msg);
+          });
+          if (msg.sender_id !== meId) window.seshn.markConversationRead(convo.id);
+        });
+        return () => { cancelled = true; unsub(); };
+      }, [convo && convo.id, meId]);
+
+      if (!convo) {
+        return (
+          <div className="dm-panel" style={{ alignItems: "center", justifyContent: "center" }}>
+            <div style={{ margin: "auto", textAlign: "center", padding: 40, maxWidth: 360 }}>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22, marginBottom: 6, color: "var(--ink)" }}>Your inbox</div>
+              <div className="t-meta" style={{ fontSize: 13 }}>Pick a conversation, or find someone in Browse and hit Message to start a new one.</div>
+            </div>
+          </div>
+        );
+      }
+
+      const o = convo.other || {};
+      const profileHref = "profile.html?u=" + encodeURIComponent(o.username || "");
+
+      const send = async (text) => {
+        const msg = await window.seshn.sendMessage(convo.id, text);
+        setMessages(prev => prev ? prev.concat(msg) : [msg]);
+        onMessageSent && onMessageSent(convo.id, msg);
+      };
+
+      return (
+        <div className="dm-panel">
+          <div className="dm-header">
+            <div className="dm-header-left">
+              <a href={profileHref} className="avatar md" style={{ textDecoration: "none", color: "var(--ink-3)" }}>
+                {initials(o.display_name)}
+              </a>
+              <div>
+                <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 3 }}>
+                  <a href={profileHref} style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: "var(--ink)", textDecoration: "none" }}>
+                    {o.display_name || o.username || "User"}
+                  </a>
+                  {o.is_pro && <span className="pill solid" style={{ fontSize: 9, padding: "2px 7px" }}>✓ Pro</span>}
+                </div>
+                <div className="t-meta">
+                  {(o.roles && o.roles[0]) || "Artist"}
+                  {o.location && " · " + o.location}
+                </div>
+              </div>
+            </div>
+            <div className="dm-header-right">
+              <a href={profileHref} className="btn sm">View profile</a>
+            </div>
+          </div>
+          <MessagesPane convo={convo} messages={messages} meId={meId} />
+          <Composer onSend={send} placeholderName={o.display_name || o.username || ""} />
+        </div>
+      );
+    }
 
     function InboxPage() {
-      const [activeConvo, setActiveConvo] = React.useState("NK");
+      const [me, setMe] = React.useState(undefined); // undefined = loading, null = signed out
+      const [convos, setConvos] = React.useState(null);
+      const [activeId, setActiveId] = React.useState(null);
       const [filter, setFilter] = React.useState("all");
+      const [search, setSearch] = React.useState("");
+
+      const selectConvo = React.useCallback((id) => {
+        setActiveId(id);
+        const url = new URL(window.location.href);
+        if (id) url.searchParams.set("c", id); else url.searchParams.delete("c");
+        window.history.replaceState({}, "", url.toString());
+      }, []);
+
+      // Load user + conversations
+      const refresh = React.useCallback(async () => {
+        const list = await window.seshn.listMyConversations();
+        setConvos(list);
+        return list;
+      }, []);
+
+      React.useEffect(() => {
+        let unsub = function () {};
+        (async () => {
+          const u = await window.seshn.getUser();
+          setMe(u || null);
+          if (!u) return;
+          const list = await refresh();
+          // Resolve initial active conversation from ?c=...
+          const initialId = new URLSearchParams(window.location.search).get("c");
+          if (initialId && list.some(c => c.id === initialId)) {
+            setActiveId(initialId);
+          } else if (initialId) {
+            // Conversation wasn't in the list — try fetching directly (just created)
+            const c = await window.seshn.getConversation(initialId);
+            if (c) {
+              setConvos(prev => (prev || []).concat([Object.assign({}, c, { unread: false, me_id: u.id })]));
+              setActiveId(initialId);
+            }
+          }
+          unsub = await window.seshn.subscribeToMyConversations(() => { refresh(); });
+        })();
+        return () => unsub();
+      }, [refresh]);
+
+      const activeConvo = convos && activeId ? convos.find(c => c.id === activeId) : null;
+
+      // Filter conversations by search + unread filter
+      const filtered = React.useMemo(() => {
+        if (!convos) return null;
+        let arr = convos;
+        if (filter === "unread") arr = arr.filter(c => c.unread);
+        if (search.trim()) {
+          const s = search.trim().toLowerCase();
+          arr = arr.filter(c => {
+            const o = c.other || {};
+            return (o.display_name || "").toLowerCase().includes(s)
+              || (o.username || "").toLowerCase().includes(s)
+              || (c.last_message_preview || "").toLowerCase().includes(s);
+          });
+        }
+        return arr;
+      }, [convos, filter, search]);
+
+      const unreadCount = (convos || []).filter(c => c.unread).length;
+
+      if (me === undefined) {
+        return (
+          <div id="root-inner" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+            <SeshnAppNav active="inbox" />
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ink-3)" }}>Loading…</div>
+          </div>
+        );
+      }
+      if (me === null) {
+        return (
+          <div id="root-inner" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+            <SeshnAppNav active="inbox" showPostButton={false} />
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12, alignItems: "center", justifyContent: "center", padding: 24, textAlign: "center" }}>
+              <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 28, color: "var(--ink)" }}>Sign in to use your inbox</span>
+              <span className="t-meta" style={{ fontSize: 14 }}>DMs are private to signed-in members.</span>
+              <a href={"auth.html?next=" + encodeURIComponent("/app/inbox.html")} className="btn primary" style={{ marginTop: 6 }}>Sign in</a>
+            </div>
+          </div>
+        );
+      }
 
       return (
         <div id="root-inner" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
           <SeshnAppNav active="inbox" />
 
-
-          {/* Main */}
           <div className="main">
-            {/* Conversation list */}
             <div className="convo-list">
               <div className="convo-header">
                 <div className="convo-header-row">
                   <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 20 }}>Inbox</span>
-                  <span className="t-meta">3 unread</span>
+                  <span className="t-meta">{unreadCount > 0 ? unreadCount + " unread" : "All caught up"}</span>
                 </div>
                 <div className="search-bar">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--ink-3)", flexShrink: 0 }}><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-                  <span style={{ fontSize: 12, color: "var(--ink-4)" }}>Search messages</span>
+                  <input
+                    type="text"
+                    placeholder="Search conversations"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    style={{ flex: 1, border: 0, background: "transparent", outline: "none", fontSize: 12, fontFamily: "var(--font-body)", color: "var(--ink)" }}
+                  />
                 </div>
                 <div className="filter-row">
-                  {[["all", "All"], ["unread", "Unread"], ["requests", "Requests · 4"]].map(([id, label]) => (
-                    <span key={id} className={`pill ${filter === id ? "solid" : ""}`} onClick={() => setFilter(id)}>{label}</span>
-                  ))}
+                  <span className={`pill ${filter === "all" ? "solid" : ""}`} onClick={() => setFilter("all")}>All</span>
+                  <span className={`pill ${filter === "unread" ? "solid" : ""}`} onClick={() => setFilter("unread")}>
+                    Unread{unreadCount > 0 && " · " + unreadCount}
+                  </span>
                 </div>
               </div>
 
               <div className="convo-scroll">
-                {CONVOS.map(c => (
-                  <div key={c.ini} className={`convo-item ${c.ini === activeConvo ? "active" : ""}`} onClick={() => setActiveConvo(c.ini)}>
-                    <div className="avatar">{c.ini}</div>
-                    <div className="convo-info">
-                      <div className="convo-name-row">
-                        <span className="convo-name">{c.name}</span>
-                        <span className="convo-time">{c.time}</span>
-                      </div>
-                      <span className={`convo-preview ${c.unread ? "unread" : ""}`}>{c.last}</span>
+                {filtered === null ? (
+                  <div className="t-meta" style={{ padding: 18 }}>Loading…</div>
+                ) : filtered.length === 0 ? (
+                  <div style={{ padding: 24, textAlign: "center" }}>
+                    <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14, marginBottom: 6 }}>
+                      {convos.length === 0 ? "No conversations yet" : "Nothing here"}
                     </div>
-                    {c.unread && <div className="unread-dot" />}
+                    <div className="t-meta" style={{ marginBottom: 12, fontSize: 12 }}>
+                      {convos.length === 0
+                        ? "Find someone in Browse and hit Message to say hi."
+                        : (filter !== "all" ? "Try clearing the filter." : "Try a different search.")}
+                    </div>
+                    {convos.length === 0 && <a href="browse.html" className="btn sm">Find artists</a>}
                   </div>
-                ))}
+                ) : (
+                  filtered.map(c => (
+                    <ConvoListItem
+                      key={c.id}
+                      convo={c}
+                      isActive={c.id === activeId}
+                      onSelect={() => selectConvo(c.id)}
+                    />
+                  ))
+                )}
               </div>
             </div>
 
-            {/* Active DM: Nia Kassim */}
-            <div className="dm-panel">
-              <div className="dm-header">
-                <div className="dm-header-left">
-                  <div className="avatar md">NK</div>
-                  <div>
-                    <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 3 }}>
-                      <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15 }}>Nia Kassim</span>
-                      <span className="pill solid" style={{ fontSize: 9, padding: "2px 7px" }}>✓ Pro</span>
-                    </div>
-                    <div className="t-meta">Vocalist · London · <span style={{ color: "var(--accent-d)", fontWeight: 600 }}>Active now</span></div>
-                  </div>
-                </div>
-                <div className="dm-header-right">
-                  <button className="btn sm">Invite to project</button>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--ink-3)", cursor: "pointer" }}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--ink-3)", cursor: "pointer" }}><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
-                </div>
-              </div>
-
-              <div className="messages">
-                <div className="date-divider">May 13</div>
-
-                {/* Nia message 1 */}
-                <div className="msg-row">
-                  <div className="avatar">NK</div>
-                  <div className="msg-content">
-                    <div className="msg-meta"><span className="msg-name">Nia</span><span className="msg-time">2:14p</span></div>
-                    <div className="msg-bubble">hi! saw your post for the Afrobeats topline — really like Sunday Drives. I have a demo I think fits the vibe.</div>
-                  </div>
-                </div>
-
-                {/* Nia audio */}
-                <div className="msg-row" style={{ paddingTop: 2 }}>
-                  <div className="avatar" style={{ visibility: "hidden" }}>NK</div>
-                  <div className="msg-content">
-                    <div className="audio-embed" style={{ maxWidth: 320 }}>
-                      <AlbumArt seed="demo-nia-v1" size={36} radius={4} />
-                      <div className="play-btn" />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
-                          <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 12 }}>demo_nia_v1.mp3</span>
-                          <span className="t-meta" style={{ marginLeft: 8, flexShrink: 0 }}>Audio</span>
-                        </div>
-                        <Waveform seed="demo-nia-v1" height={18} progress={0.0} />
-                        <div className="t-meta" style={{ marginTop: 3 }}>Nia K. · 1:02</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Your reply */}
-                <div className="msg-row self">
-                  <div className="avatar" style={{ background: "var(--ink)", color: "var(--frame)" }}>YT</div>
-                  <div className="msg-content">
-                    <div className="msg-meta" style={{ flexDirection: "row-reverse" }}><span className="msg-name">You</span><span className="msg-time">2:31p</span></div>
-                    <div className="msg-bubble">oh this is great — voice is perfect for it. want to jump on a quick call this week?</div>
-                  </div>
-                </div>
-
-                {/* Nia reply */}
-                <div className="msg-row">
-                  <div className="avatar">NK</div>
-                  <div className="msg-content">
-                    <div className="msg-meta"><span className="msg-name">Nia</span><span className="msg-time">9:33</span></div>
-                    <div className="msg-bubble">will track that today. I'll have a stem up by EOD.</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Composer */}
-              <div className="composer">
-                <div className="composer-inner">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--ink-3)", flexShrink: 0, cursor: "pointer" }}><path d="m21 12-8.5 8.5a5 5 0 1 1-7-7L14 5a3 3 0 1 1 4 4l-9 9a1 1 0 1 1-1.5-1.5L15 8"/></svg>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--ink-3)", flexShrink: 0, cursor: "pointer" }}><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
-                  <input className="composer-input" placeholder="Message Nia…" />
-                  <button className="btn primary sm">Send</button>
-                </div>
-              </div>
-            </div>
+            <DmPanel
+              convo={activeConvo}
+              meId={me.id}
+              onMessageSent={() => refresh()}
+            />
           </div>
         </div>
       );

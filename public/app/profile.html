@@ -399,7 +399,19 @@
             ) : (
               <>
                 <button className="btn" style={{backdropFilter:"blur(8px)",background:"rgba(255,255,255,0.9)"}}>Invite to project</button>
-                <button className="btn primary">Message</button>
+                <button className="btn primary" onClick={async () => {
+                  try {
+                    const me = await window.seshn.getUser();
+                    if (!me) {
+                      window.location.href = "auth.html?next=" + encodeURIComponent(window.location.pathname + window.location.search);
+                      return;
+                    }
+                    const cid = await window.seshn.getOrCreateConversation(profile.id);
+                    window.location.href = "inbox.html?c=" + encodeURIComponent(cid);
+                  } catch (e) {
+                    alert((e && e.message) || "Couldn't start a conversation.");
+                  }
+                }}>Message</button>
               </>
             )}
           </div>

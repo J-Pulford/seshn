@@ -213,7 +213,16 @@
       );
     }
 
-    function ApplicationStatus({ application, onWithdrawn }) {
+    async function openDM(otherUserId) {
+      try {
+        const cid = await window.seshn.getOrCreateConversation(otherUserId);
+        window.location.href = "inbox.html?c=" + encodeURIComponent(cid);
+      } catch (e) {
+        alert((e && e.message) || "Couldn't open a DM.");
+      }
+    }
+
+    function ApplicationStatus({ application, owner, onWithdrawn }) {
       const [busy, setBusy] = React.useState(false);
       const [err, setErr] = React.useState("");
       const status = application.status;
@@ -265,13 +274,18 @@
               </a>
             )}
           </div>
-          {status === "pending" && (
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 12 }}>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
+            {status === "accepted" && owner && owner.id && (
+              <button className="btn primary sm" onClick={() => openDM(owner.id)}>
+                Message {(owner.display_name || "").split(" ")[0] || "owner"}
+              </button>
+            )}
+            {status === "pending" && (
               <button className="btn sm" onClick={withdraw} disabled={busy}>
                 {busy ? "…" : "Withdraw application"}
               </button>
-            </div>
-          )}
+            )}
+          </div>
           {err && <div style={{ fontSize: 12, color: "var(--cherry, #c43d3f)", marginTop: 8 }}>{err}</div>}
         </div>
       );
@@ -330,7 +344,7 @@
               {app.attachment_url}
             </a>
           )}
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1px solid var(--line-soft)" }}>
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1px solid var(--line-soft)", flexWrap: "wrap" }}>
             <a href={profileHref} className="btn sm">View profile</a>
             {app.status === "pending" && (
               <>
@@ -338,8 +352,11 @@
                 <button className="btn primary sm" onClick={() => setStatus("accepted")} disabled={busy}>Accept</button>
               </>
             )}
-            {app.status === "accepted" && (
-              <button className="btn sm" onClick={() => setStatus("pending")} disabled={busy}>Undo accept</button>
+            {app.status === "accepted" && a.id && (
+              <>
+                <button className="btn sm" onClick={() => setStatus("pending")} disabled={busy}>Undo accept</button>
+                <button className="btn primary sm" onClick={() => openDM(a.id)}>Message</button>
+              </>
             )}
             {app.status === "rejected" && (
               <button className="btn sm" onClick={() => setStatus("pending")} disabled={busy}>Undo pass</button>
@@ -513,7 +530,7 @@
                   <div className="t-meta">Checking…</div>
                 </div>
               ) : myApp ? (
-                <ApplicationStatus application={myApp} onWithdrawn={setMyApp} />
+                <ApplicationStatus application={myApp} owner={owner} onWithdrawn={setMyApp} />
               ) : (
                 <ApplyForm gig={gig} owner={owner} onApplied={setMyApp} />
               )}
