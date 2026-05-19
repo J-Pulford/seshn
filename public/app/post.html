@@ -105,18 +105,20 @@
     ];
 
     function PostPage() {
+      const [step, setStep] = React.useState(1);
       const [title, setTitle] = React.useState("");
       const [description, setDescription] = React.useState("");
-      const [selRole, setSelRole] = React.useState("Topline writer");
+      const [selRole, setSelRole] = React.useState("");
       const [selGenres, setSelGenres] = React.useState(new Set());
-      const [selComp, setSelComp] = React.useState("paid");
+      const [selComp, setSelComp] = React.useState("");
       const [amount, setAmount] = React.useState("");
       const [deadline, setDeadline] = React.useState("");
-      const [location, setLocation] = React.useState("Remote");
+      const [location, setLocation] = React.useState("");
       const [me, setMe] = React.useState(null);
-      const [authState, setAuthState] = React.useState("checking"); // checking | ready | unauthed
+      const [authState, setAuthState] = React.useState("checking");
       const [publishing, setPublishing] = React.useState(false);
       const [err, setErr] = React.useState("");
+      const [tried, setTried] = React.useState(false); // whether user has tried to advance
 
       React.useEffect(() => {
         if (!window.seshn) { setErr("Supabase client failed to load."); return; }
@@ -139,12 +141,34 @@
         });
       };
 
+      // ── Per-field validation ────────────────────────────────────
       const titleValid = title.trim().length >= 4 && title.trim().length <= 140;
-      const compValid = selComp !== "paid" || (amount && Number(amount) > 0);
-      const canPublish = authState === "ready" && titleValid && selRole && compValid && !publishing;
+      const descValid  = description.trim().length >= 20;
+      const roleValid  = !!selRole;
+      const genresValid = selGenres.size >= 1 && selGenres.size <= 3;
+      const compValid  = !!selComp;
+      const amountValid = selComp !== "paid" || (amount && Number(amount) > 0);
+      const locationValid = location.trim().length > 0;
+      const today = new Date(); today.setHours(0,0,0,0);
+      const deadlineValid = !!deadline && new Date(deadline) >= today;
+
+      const step1Valid = titleValid && descValid;
+      const step2Valid = roleValid && genresValid && compValid && amountValid && locationValid && deadlineValid;
+      const allValid = step1Valid && step2Valid && authState === "ready";
+
+      function goNext() {
+        setTried(true);
+        if (step === 1 && step1Valid) { setStep(2); setTried(false); }
+        else if (step === 2 && step2Valid) { setStep(3); setTried(false); }
+      }
+      function goPrev() {
+        setTried(false);
+        setStep(s => Math.max(1, s - 1));
+      }
 
       async function onPublish() {
-        if (!canPublish) return;
+        setTried(true);
+        if (!allValid || publishing) return;
         setPublishing(true); setErr("");
         try {
           const payload = {
@@ -155,19 +179,29 @@
             comp: selComp,
             pay_amount: selComp === "paid" ? Number(amount) : null,
             pay_currency: "USD",
-            deadline: deadline ? deadline : null,
-            location: location.trim() || "Remote"
+            deadline: deadline,
+            location: location.trim()
           };
           const gig = await window.seshn.createGig(payload);
           window.location.href = "gig.html?id=" + encodeURIComponent(gig.id);
         } catch (e) {
           console.error("[seshn] createGig error:", e);
-          if (e && e.code === "42P01") setErr("The gigs table doesn't exist yet. Run migration 0002_gigs.sql in your Supabase dashboard.");
-          else if (e && e.code === "PGRST205") setErr("The gigs table doesn't exist yet. Run migration 0002_gigs.sql in your Supabase dashboard.");
+          if (e && (e.code === "42P01" || e.code === "PGRST205")) setErr("The gigs table doesn't exist yet. Run migration 0002_gigs.sql in your Supabase dashboard.");
           else setErr(e && e.message ? e.message : "Couldn't publish the gig.");
           setPublishing(false);
         }
       }
+
+      // ── Helpers ─────────────────────────────────────────────────
+      const errText = (valid) => (tried && !valid) ? { color: "var(--danger)", fontSize: 11.5, marginTop: 6, fontFamily: "var(--font-display)" } : { display: "none" };
+      const showCompLabel = () => {
+        if (selComp === "paid" && amount) return "Paid · $" + amount;
+        if (selComp === "paid") return "Paid";
+        if (selComp === "split") return "Split";
+        if (selComp === "trade") return "Trade";
+        if (selComp === "unpaid") return "Unpaid";
+        return "—";
+      };
 
       return (
         <div className="page">
@@ -186,19 +220,19 @@
           <div className="content">
             {/* Left: form */}
             <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-              {/* Progress */}
+              {/* Progress — step <= n highlighted, completed steps get a check */}
               <div className="progress">
-                {[1, 2, 3].map((n, idx) => (
+                {[1, 2, 3].map((n) => (
                   <React.Fragment key={n}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <div className="step-node" style={{
-                        background: n <= 2 ? "var(--ink)" : "transparent",
-                        border: "1px solid " + (n <= 2 ? "var(--ink)" : "var(--line)"),
-                        color: n <= 2 ? "var(--frame)" : "var(--ink-3)",
+                        background: n <= step ? "var(--ink)" : "transparent",
+                        border: "1px solid " + (n <= step ? "var(--ink)" : "var(--line)"),
+                        color: n <= step ? "var(--frame)" : "var(--ink-3)",
                       }}>
-                        {n < 2 ? "✓" : n}
+                        {n < step ? "✓" : n}
                       </div>
-                      <span style={{ fontFamily: "var(--font-display)", fontSize: 12, fontWeight: 500, color: n <= 2 ? "var(--ink)" : "var(--ink-3)" }}>
+                      <span style={{ fontFamily: "var(--font-display)", fontSize: 12, fontWeight: 500, color: n <= step ? "var(--ink)" : "var(--ink-3)" }}>
                         {["Brief", "Details", "Review"][n - 1]}
                       </span>
                     </div>
@@ -208,114 +242,182 @@
               </div>
 
               <div>
-                <div className="step-label">Post a gig</div>
-                <h1>What do you need.</h1>
+                <div className="step-label">Step {step} of 3</div>
+                <h1>{step === 1 ? "The brief." : step === 2 ? "The details." : "Review and publish."}</h1>
               </div>
 
-              {/* Title */}
-              <div>
-                <div className="section-label">Title <span className="t-meta">· what role + project, in plain words</span></div>
-                <input
-                  className="input-field"
-                  placeholder="e.g. Topline writer wanted for an Afrobeats demo"
-                  value={title}
-                  onChange={e => setTitle(e.target.value)}
-                  maxLength={140}
-                />
-                {!titleValid && title.length > 0 && (
-                  <div className="t-meta" style={{ marginTop: 6, color: "var(--ink-3)" }}>4–140 characters.</div>
-                )}
-              </div>
-
-              {/* Description */}
-              <div>
-                <div className="section-label">Brief <span className="t-meta">· references, vibe, what you've got so far</span></div>
-                <textarea
-                  className="input-field"
-                  placeholder="What's the song / project about? Drop references, any tracks you've got so far, what you'd like the collaborator to bring."
-                  value={description}
-                  onChange={e => setDescription(e.target.value)}
-                  maxLength={4000}
-                  style={{ minHeight: 120, resize: "vertical", fontFamily: "var(--font-body)", lineHeight: 1.5 }}
-                />
-              </div>
-
-              {/* Role */}
-              <div>
-                <div className="section-label">Role needed</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {ROLES.map(r => (
-                    <span key={r} className={`pill ${r === selRole ? "solid" : ""}`} onClick={() => setSelRole(r)}>
-                      {r === selRole && "✓ "}{r}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Genres */}
-              <div>
-                <div className="section-label">
-                  Genre tags <span className="t-meta">· up to 3</span>
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {GENRES.map(g => (
-                    <span key={g} className={`pill ${selGenres.has(g) ? "accent" : ""}`} onClick={() => toggleGenre(g)}>
-                      {selGenres.has(g) && "✓ "}{g}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Compensation */}
-              <div>
-                <div className="section-label">Compensation</div>
-                <div className="comp-grid">
-                  {COMP_OPTIONS.map(c => (
-                    <div key={c.id} className={`comp-card ${selComp === c.id ? "selected" : ""}`} onClick={() => setSelComp(c.id)}>
-                      <div className="title">{selComp === c.id && "✓ "}{c.label}</div>
-                      <div className="sub">{c.sub}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {selComp === "paid" && (
-                  <div className="amount-row">
-                    <input className="input-field" type="number" min="1" placeholder="$ Amount" value={amount} onChange={e => setAmount(e.target.value)} style={{ maxWidth: 160 }} />
-                    <input className="input-field" placeholder="USD" defaultValue="USD" style={{ maxWidth: 100 }} readOnly />
+              {/* ─────────────────────── Step 1: Brief ─────────────────────── */}
+              {step === 1 && (
+                <>
+                  <div>
+                    <div className="section-label">Title <span style={{ color: "var(--accent-d)" }}>*</span> <span className="t-meta">· what role + project, in plain words</span></div>
+                    <input
+                      className="input-field"
+                      placeholder="e.g. Topline writer wanted for an Afrobeats demo"
+                      value={title}
+                      onChange={e => setTitle(e.target.value)}
+                      maxLength={140}
+                    />
+                    <div style={errText(titleValid)}>Title must be 4–140 characters.</div>
                   </div>
-                )}
-              </div>
 
-              {/* Location + Deadline */}
-              <div>
-                <div className="section-label">Where & when <span className="t-meta">· optional</span></div>
-                <div className="amount-row">
-                  <input
-                    className="input-field"
-                    placeholder="Location (e.g. NYC, Remote)"
-                    value={location}
-                    onChange={e => setLocation(e.target.value)}
-                    style={{ maxWidth: 220 }}
-                  />
-                  <input
-                    className="input-field"
-                    type="date"
-                    value={deadline}
-                    onChange={e => setDeadline(e.target.value)}
-                    style={{ maxWidth: 220 }}
-                  />
+                  <div>
+                    <div className="section-label">Brief <span style={{ color: "var(--accent-d)" }}>*</span> <span className="t-meta">· references, vibe, what you've got so far ({description.trim().length} / 20+ chars)</span></div>
+                    <textarea
+                      className="input-field"
+                      placeholder="What's the song / project about? Drop references, any tracks you've got so far, what you'd like the collaborator to bring."
+                      value={description}
+                      onChange={e => setDescription(e.target.value)}
+                      maxLength={4000}
+                      style={{ minHeight: 140, resize: "vertical", fontFamily: "var(--font-body)", lineHeight: 1.5 }}
+                    />
+                    <div style={errText(descValid)}>Brief must be at least 20 characters.</div>
+                  </div>
+                </>
+              )}
+
+              {/* ─────────────────────── Step 2: Details ─────────────────────── */}
+              {step === 2 && (
+                <>
+                  <div>
+                    <div className="section-label">Role needed <span style={{ color: "var(--accent-d)" }}>*</span></div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {ROLES.map(r => (
+                        <span key={r} className={`pill ${r === selRole ? "solid" : ""}`} onClick={() => setSelRole(r)}>
+                          {r === selRole && "✓ "}{r}
+                        </span>
+                      ))}
+                    </div>
+                    <div style={errText(roleValid)}>Pick a role.</div>
+                  </div>
+
+                  <div>
+                    <div className="section-label">Genre tags <span style={{ color: "var(--accent-d)" }}>*</span> <span className="t-meta">· 1–3</span></div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {GENRES.map(g => (
+                        <span key={g} className={`pill ${selGenres.has(g) ? "accent" : ""}`} onClick={() => toggleGenre(g)}>
+                          {selGenres.has(g) && "✓ "}{g}
+                        </span>
+                      ))}
+                    </div>
+                    <div style={errText(genresValid)}>Pick at least one genre (up to three).</div>
+                  </div>
+
+                  <div>
+                    <div className="section-label">Compensation <span style={{ color: "var(--accent-d)" }}>*</span></div>
+                    <div className="comp-grid">
+                      {COMP_OPTIONS.map(c => (
+                        <div key={c.id} className={`comp-card ${selComp === c.id ? "selected" : ""}`} onClick={() => setSelComp(c.id)}>
+                          <div className="title">{selComp === c.id && "✓ "}{c.label}</div>
+                          <div className="sub">{c.sub}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={errText(compValid)}>Pick a compensation type.</div>
+                    {selComp === "paid" && (
+                      <div className="amount-row" style={{ marginTop: 12 }}>
+                        <input className="input-field" type="number" min="1" placeholder="$ Amount" value={amount} onChange={e => setAmount(e.target.value)} style={{ maxWidth: 200 }} />
+                        <input className="input-field" defaultValue="USD" style={{ maxWidth: 100 }} readOnly />
+                      </div>
+                    )}
+                    {selComp === "paid" && <div style={errText(amountValid)}>Enter an amount greater than 0.</div>}
+                  </div>
+
+                  <div>
+                    <div className="section-label">Location <span style={{ color: "var(--accent-d)" }}>*</span></div>
+                    <input
+                      className="input-field"
+                      placeholder="e.g. Remote, NYC, London"
+                      value={location}
+                      onChange={e => setLocation(e.target.value)}
+                      style={{ maxWidth: 360 }}
+                    />
+                    <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+                      {["Remote", "NYC", "LA", "London", "Berlin"].map(q => (
+                        <span key={q} className="pill" style={{ cursor: "pointer", opacity: location === q ? 1 : 0.7 }} onClick={() => setLocation(q)}>
+                          {q}
+                        </span>
+                      ))}
+                    </div>
+                    <div style={errText(locationValid)}>Enter a location (or 'Remote').</div>
+                  </div>
+
+                  <div>
+                    <div className="section-label">Deadline <span style={{ color: "var(--accent-d)" }}>*</span></div>
+                    <input
+                      className="input-field"
+                      type="date"
+                      value={deadline}
+                      min={new Date().toISOString().slice(0, 10)}
+                      onChange={e => setDeadline(e.target.value)}
+                      style={{ maxWidth: 240 }}
+                    />
+                    <div style={errText(deadlineValid)}>Pick a deadline today or in the future.</div>
+                  </div>
+                </>
+              )}
+
+              {/* ─────────────────────── Step 3: Review ─────────────────────── */}
+              {step === 3 && (
+                <div className="card" style={{ padding: 20 }}>
+                  <div className="t-eyebrow" style={{ marginBottom: 14 }}>Summary</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "10px 20px", fontSize: 13.5, lineHeight: 1.5 }}>
+                    <span className="t-meta">Title</span>
+                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>{title}</span>
+
+                    <span className="t-meta">Brief</span>
+                    <span style={{ whiteSpace: "pre-wrap" }}>{description}</span>
+
+                    <span className="t-meta">Role</span>
+                    <span>{selRole}</span>
+
+                    <span className="t-meta">Genres</span>
+                    <span style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>{[...selGenres].map(g => <span key={g} className="pill">{g}</span>)}</span>
+
+                    <span className="t-meta">Comp</span>
+                    <span>{showCompLabel()}</span>
+
+                    <span className="t-meta">Location</span>
+                    <span>{location}</span>
+
+                    <span className="t-meta">Deadline</span>
+                    <span>{deadline ? new Date(deadline).toLocaleDateString(undefined, { weekday: "short", year: "numeric", month: "short", day: "numeric" }) : "—"}</span>
+                  </div>
+                  <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--line-soft)", fontSize: 12, color: "var(--ink-3)", lineHeight: 1.5 }}>
+                    Once you publish, your gig appears in the public feed. You can edit or close it any time from your profile.
+                  </div>
                 </div>
-              </div>
+              )}
 
               {err && (
                 <div style={{ padding: "10px 14px", borderRadius: 8, border: "1px solid var(--danger)", background: "rgba(192,57,43,0.06)", color: "var(--danger)", fontSize: 13, fontFamily: "var(--font-display)" }}>{err}</div>
               )}
 
+              {/* ─────────────────────── Actions ─────────────────────── */}
               <div className="actions">
-                <a href="feed.html" className="btn">← Cancel</a>
-                <button className="btn primary lg" disabled={!canPublish} onClick={onPublish} style={!canPublish ? { opacity: 0.5, cursor: "not-allowed" } : null}>
-                  {publishing ? "Publishing…" : "Publish gig →"}
-                </button>
+                {step === 1 ? (
+                  <a href="feed.html" className="btn">← Cancel</a>
+                ) : (
+                  <button className="btn" onClick={goPrev}>← Back · {step === 2 ? "Brief" : "Details"}</button>
+                )}
+                {step < 3 ? (
+                  <button
+                    className="btn primary lg"
+                    onClick={goNext}
+                    style={(step === 1 ? !step1Valid : !step2Valid) ? { opacity: 0.5, cursor: "not-allowed" } : null}
+                  >
+                    Continue → {step === 1 ? "Details" : "Review"}
+                  </button>
+                ) : (
+                  <button
+                    className="btn primary lg"
+                    onClick={onPublish}
+                    disabled={!allValid || publishing}
+                    style={(!allValid || publishing) ? { opacity: 0.5, cursor: "not-allowed" } : null}
+                  >
+                    {publishing ? "Publishing…" : "Publish gig →"}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -336,8 +438,8 @@
                       <span className="t-meta">just now</span>
                     </div>
                     <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                      <span className="pill accent">{selRole} needed</span>
-                      <span className="t-meta">· {selComp === "paid" && amount ? `Paid · $${amount}` : selComp === "paid" ? "Paid" : selComp === "split" ? "Split" : selComp === "trade" ? "Trade" : "Unpaid"}</span>
+                      <span className="pill accent">{selRole || "Role"} needed</span>
+                      <span className="t-meta">· {showCompLabel()}</span>
                     </div>
                   </div>
                 </div>
@@ -346,7 +448,7 @@
                   {[...selGenres].map(t => <span key={t} className="pill">{t}</span>)}
                 </div>
                 <div className="gig-foot">
-                  <span className="t-meta">0 applied · closing Jun 14</span>
+                  <span className="t-meta">0 applied{deadline ? " · closing " + new Date(deadline).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : ""}</span>
                   <div style={{ display: "flex", gap: 8 }}>
                     <button className="btn sm">View</button>
                     <button className="btn sm primary">Apply</button>
@@ -355,16 +457,16 @@
               </div>
 
               <div className="card hairline" style={{ padding: 12 }}>
-                <div className="eyebrow" style={{ marginBottom: 8 }}>Visibility</div>
+                <div className="eyebrow" style={{ marginBottom: 8 }}>Status</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 12, color: "var(--ink-2)" }}>
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <span style={{ color: "var(--accent-d)" }}>✓</span> Posted to public feed
+                    <span style={{ color: step1Valid ? "var(--accent-d)" : "var(--ink-4)" }}>{step1Valid ? "✓" : "○"}</span> Brief
                   </div>
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <span style={{ color: "var(--accent-d)" }}>✓</span> Matches ~142 {selRole.toLowerCase()}s
+                    <span style={{ color: step2Valid ? "var(--accent-d)" : "var(--ink-4)" }}>{step2Valid ? "✓" : "○"}</span> Details
                   </div>
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <span style={{ color: "var(--accent-d)" }}>✓</span> Notifications to 12 suggested
+                    <span style={{ color: step === 3 && allValid ? "var(--accent-d)" : "var(--ink-4)" }}>{step === 3 && allValid ? "✓" : "○"}</span> Review & publish
                   </div>
                 </div>
               </div>
