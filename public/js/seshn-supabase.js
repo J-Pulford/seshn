@@ -155,6 +155,17 @@
     return sb.auth.signOut();
   }
 
+  // Start an OAuth sign-in. The user is redirected to the provider; on
+  // return, Supabase-js exchanges the code automatically (we set
+  // detectSessionInUrl: true above) and our onAuthStateChange listeners fire.
+  async function signInWithGoogle(redirectTo) {
+    var url = redirectTo || (window.location.origin + "/app/auth.html");
+    return sb.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: url }
+    });
+  }
+
   // Request an email change. Supabase sends a confirmation link to BOTH the
   // current address and the new one; the change only takes effect once the
   // user clicks the link from the NEW address (and, depending on project
@@ -634,13 +645,20 @@
     return function () { sb.removeChannel(channel); };
   }
 
-  // After auth, route based on whether profile exists.
+  // After auth, route based on whether profile exists and an optional
+  // ?next= param. `next` must be a same-app path (starts with "/app/") to
+  // avoid open-redirect bugs — anything else falls through to the default.
   async function routeAfterAuth() {
     var u = await getUser();
     if (!u) return;
     var p = await getProfile({ id: u.id });
-    if (p && p.username) window.location.href = "/app/profile.html?u=" + encodeURIComponent(p.username);
-    else window.location.href = "/app/onboarding.html";
+    if (!p || !p.username) { window.location.href = "/app/onboarding.html"; return; }
+    var next = new URLSearchParams(window.location.search).get("next");
+    if (next && /^\/app\/[A-Za-z0-9_./?=&%-]*$/.test(next)) {
+      window.location.href = next;
+      return;
+    }
+    window.location.href = "/app/profile.html?u=" + encodeURIComponent(p.username);
   }
 
   // Gate every signed-in page that requires a complete profile.
@@ -682,6 +700,7 @@
     uploadAvatar: uploadAvatar,
     uploadCover: uploadCover,
     sendMagicLink: sendMagicLink,
+    signInWithGoogle: signInWithGoogle,
     updateMyEmail: updateMyEmail,
     updateNotificationPrefs: updateNotificationPrefs,
     deleteMyAccount: deleteMyAccount,
