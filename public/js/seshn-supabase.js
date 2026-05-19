@@ -171,12 +171,33 @@
       .from("gigs")
       .select("*, owner:profiles!owner_id(id, username, display_name, is_pro, avatar_url)")
       .eq("status", "open")
-      .order("boosted_until", { ascending: false, nullsFirst: false })
-      .order("created_at", { ascending: false })
       .limit(opts.limit || 30);
+
+    // Filtering
     if (opts.role) q = q.eq("role", opts.role);
+    if (opts.roles && opts.roles.length) q = q.in("role", opts.roles);
     if (opts.ownerId) q = q.eq("owner_id", opts.ownerId);
     if (opts.genre) q = q.contains("genres", [opts.genre]);
+    if (opts.genres && opts.genres.length) q = q.overlaps("genres", opts.genres);
+    if (opts.comps && opts.comps.length) q = q.in("comp", opts.comps);
+    if (opts.location && opts.location.trim()) {
+      var loc = opts.location.trim().replace(/[%_]/g, "");
+      q = q.ilike("location", "%" + loc + "%");
+    }
+    if (opts.search && opts.search.trim()) {
+      // Strip SQL wildcards and commas (commas break PostgREST's or= syntax).
+      var s = opts.search.trim().replace(/[%_,]/g, "");
+      if (s) q = q.ilike("title", "%" + s + "%");
+    }
+
+    // Sorting
+    if (opts.sort === "newest") {
+      q = q.order("created_at", { ascending: false });
+    } else {
+      q = q.order("boosted_until", { ascending: false, nullsFirst: false })
+           .order("created_at", { ascending: false });
+    }
+
     var res = await q;
     if (res.error) { console.error("[seshn] listGigs error", res.error); return []; }
     return res.data || [];

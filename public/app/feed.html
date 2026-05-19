@@ -379,25 +379,26 @@
     const TopNav = () => <SeshnAppNav active="feed" />;
 
     // ——— Filter Group ———
-    const FilterGroup = ({ title, items, radio }) => (
+    // items is now [[label, value], ...]. Selected is a Set of values.
+    // onToggle(value) is called when an item is clicked.
+    const FilterGroup = ({ title, items, selected, onToggle }) => (
       <div className="col" style={{ gap:8 }}>
         <span className="t-eyebrow">{title}</span>
         <div className="col" style={{ gap:2 }}>
-          {items.map(([label, count, sel]) => (
-            <label key={label} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"5px 0", cursor:"pointer" }}>
-              <div className="row" style={{ gap:8 }}>
-                {radio ? (
-                  <span className={"radio-btn" + (sel ? " checked" : "")} />
-                ) : (
+          {items.map(([label, value]) => {
+            const sel = selected.has(value);
+            return (
+              <label key={value} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"5px 0", cursor:"pointer", userSelect:"none" }}
+                     onClick={() => onToggle(value)}>
+                <div className="row" style={{ gap:8 }}>
                   <span className={"check-box" + (sel ? " checked" : "")}>
                     {sel && <Icon kind="check" size={9} style={{ color:"var(--frame)" }} />}
                   </span>
-                )}
-                <span style={{ fontSize:12.5, color:sel?"var(--ink)":"var(--ink-2)" }}>{label}</span>
-              </div>
-              {count && <span className="t-meta">{count}</span>}
-            </label>
-          ))}
+                  <span style={{ fontSize:12.5, color:sel?"var(--ink)":"var(--ink-2)" }}>{label}</span>
+                </div>
+              </label>
+            );
+          })}
         </div>
       </div>
     );
@@ -495,18 +496,60 @@
       );
     };
 
+    // Canonical filter vocabularies. The DB stores `comp` as the enum
+    // value, so the UI label/value pairs map label → enum.
+    const FEED_ROLES  = ["Vocalist", "Producer", "Mixing eng.", "Mastering", "Drummer", "Songwriter", "Guitarist", "Bassist", "Keys", "Rapper", "DJ", "Composer", "Engineer", "A&R"];
+    const FEED_GENRES = ["Pop", "Hip-Hop", "R&B", "Afrobeats", "Soul", "Electronic", "House", "Techno", "Indie", "Rock", "Alt", "Jazz", "Country", "Latin", "Folk", "Ambient", "K-pop", "Reggaeton", "Drill", "Funk"];
+    const FEED_COMPS  = [["Paid", "paid"], ["Split / royalty", "split"], ["Trade / barter", "trade"], ["Unpaid", "unpaid"]];
+
     // ——— Main Feed App ———
     const FeedApp = () => {
       const [gigs, setGigs] = React.useState(null); // null = loading
       const [suggested, setSuggested] = React.useState(null);
       const [err, setErr] = React.useState("");
 
+      const [roles, setRoles]     = React.useState(new Set());
+      const [genres, setGenres]   = React.useState(new Set());
+      const [comps, setComps]     = React.useState(new Set());
+      const [location, setLocation] = React.useState("");
+      const [search, setSearch]   = React.useState("");
+      const [sort, setSort]       = React.useState("default"); // "default" | "newest"
+
+      const toggleIn = (setter) => (value) => {
+        setter(prev => {
+          const next = new Set(prev);
+          if (next.has(value)) next.delete(value); else next.add(value);
+          return next;
+        });
+      };
+      const clearAll = () => {
+        setRoles(new Set()); setGenres(new Set()); setComps(new Set());
+        setLocation(""); setSearch("");
+      };
+      const activeFilterCount = roles.size + genres.size + comps.size + (location.trim() ? 1 : 0) + (search.trim() ? 1 : 0);
+
+      // Re-fetch gigs whenever filters change (debounced so typing in the
+      // location/search inputs doesn't slam the database).
       React.useEffect(() => {
         if (!window.seshn) { setErr("Supabase client failed to load."); setGigs([]); return; }
-        window.seshn.listGigs({ limit: 30 })
-          .then(list => setGigs(list))
-          .catch(e => { setErr(e.message || "Couldn't load feed."); setGigs([]); });
-        // Suggested artists: just pull a handful, excluding self.
+        setGigs(null); // show loading state while debouncing
+        const t = setTimeout(() => {
+          window.seshn.listGigs({
+            limit: 30,
+            roles: Array.from(roles),
+            genres: Array.from(genres),
+            comps: Array.from(comps),
+            location, search, sort
+          })
+            .then(list => setGigs(list))
+            .catch(e => { setErr(e.message || "Couldn't load feed."); setGigs([]); });
+        }, 220);
+        return () => clearTimeout(t);
+      }, [roles, genres, comps, location, search, sort]);
+
+      // Suggested artists (one-shot)
+      React.useEffect(() => {
+        if (!window.seshn) return;
         window.seshn.getUser().then(u => {
           window.seshn.listProfiles({ limit: 5, excludeId: u ? u.id : null })
             .then(list => setSuggested(list || []))
@@ -522,37 +565,50 @@
           {/* ——— Left Sidebar: Filters ——— */}
           <aside style={{ position:"sticky", top:82, height:"calc(100vh - 100px)", overflowY:"auto", paddingRight:4 }}>
             <div className="col" style={{ gap:22 }}>
-              <FilterGroup title="Role needed" items={[
-                ["Vocalist"], ["Producer"], ["Mixing engineer"],
-                ["Drummer"], ["Songwriter"], ["Guitarist"],
-              ]} />
+              <div className="col" style={{ gap:6 }}>
+                <span className="t-eyebrow">Search</span>
+                <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Title…"
+                  style={{ padding:"8px 12px", border:"1px solid var(--line)", borderRadius:8, fontFamily:"var(--font-body)", fontSize:13, background:"var(--surface)", color:"var(--ink)", outline:"none", width:"100%" }} />
+              </div>
+              <FilterGroup title="Role needed"
+                items={FEED_ROLES.map(r => [r, r])}
+                selected={roles} onToggle={toggleIn(setRoles)} />
               <div style={{ height:1, background:"var(--line-soft)" }} />
-              <FilterGroup title="Compensation" radio items={[
-                ["Paid"], ["Split / royalty"], ["Trade / barter"], ["Unpaid"],
-              ]} />
+              <FilterGroup title="Compensation"
+                items={FEED_COMPS}
+                selected={comps} onToggle={toggleIn(setComps)} />
               <div style={{ height:1, background:"var(--line-soft)" }} />
-              <FilterGroup title="Genre" items={[
-                ["R&B"], ["Afrobeats"], ["Hip-hop"], ["Indie"], ["Electronic"], ["Soul"],
-              ]} />
+              <FilterGroup title="Genre"
+                items={FEED_GENRES.map(g => [g, g])}
+                selected={genres} onToggle={toggleIn(setGenres)} />
               <div style={{ height:1, background:"var(--line-soft)" }} />
-              <FilterGroup title="Location" radio items={[
-                ["Remote OK"], ["Near me"], ["My city"],
-              ]} />
-              <span className="t-meta" style={{ fontSize:11, fontStyle:"italic", textAlign:"center" }}>Filters coming soon — try Browse for real filtering.</span>
+              <div className="col" style={{ gap:6 }}>
+                <span className="t-eyebrow">Location</span>
+                <input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="Remote, London…"
+                  style={{ padding:"8px 12px", border:"1px solid var(--line)", borderRadius:8, fontFamily:"var(--font-body)", fontSize:13, background:"var(--surface)", color:"var(--ink)", outline:"none", width:"100%" }} />
+              </div>
+              {activeFilterCount > 0 && (
+                <button className="btn" style={{ width:"100%" }} onClick={clearAll}>Clear all filters</button>
+              )}
             </div>
           </aside>
 
           {/* ——— Main Feed ——— */}
           <main style={{ minWidth:0 }}>
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16, gap:12, flexWrap:"wrap" }}>
               <div>
                 <h1 style={{ fontFamily:"var(--font-display)", fontWeight:600, fontSize:22, letterSpacing:"-0.02em" }}>
                   Live feed
+                  {gigs && <span style={{ fontSize:13, color:"var(--ink-3)", fontWeight:400, marginLeft:8 }}>· {gigs.length} {gigs.length === 1 ? "gig" : "gigs"}</span>}
                 </h1>
               </div>
               <div className="row" style={{ gap:6 }}>
-                <span className="pill ghost" style={{ cursor:"pointer" }}>Newest</span>
-                <span className="pill" style={{ background:"var(--ink)", color:"var(--frame)", borderColor:"transparent", cursor:"pointer" }}>Recommended</span>
+                <span className={"pill" + (sort === "default" ? "" : " ghost")}
+                      style={{ cursor:"pointer", background: sort === "default" ? "var(--ink)" : undefined, color: sort === "default" ? "var(--frame)" : undefined, borderColor: sort === "default" ? "transparent" : undefined }}
+                      onClick={() => setSort("default")}>Recommended</span>
+                <span className={"pill" + (sort === "newest" ? "" : " ghost")}
+                      style={{ cursor:"pointer", background: sort === "newest" ? "var(--ink)" : undefined, color: sort === "newest" ? "var(--frame)" : undefined, borderColor: sort === "newest" ? "transparent" : undefined }}
+                      onClick={() => setSort("newest")}>Newest</span>
               </div>
             </div>
             <div className="col" style={{ gap:14 }}>
@@ -561,12 +617,20 @@
                   Loading gigs…
                 </div>
               ) : gigs.length === 0 ? (
-                <div className="gig" style={{ alignItems: "center", textAlign: "center", padding: "40px 20px", gap: 12 }}>
-                  <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22, color: "var(--ink)" }}>Feed's quiet right now.</div>
-                  <div style={{ color: "var(--ink-3)", fontSize: 14, maxWidth: 380 }}>Be the first to post a brief — once others sign up and post, their gigs will show up here.</div>
-                  <a href="post.html" className="btn primary" style={{ marginTop: 6 }}>+ Post the first gig</a>
-                  {err && <div style={{ color: "var(--danger)", fontSize: 12, marginTop: 8 }}>{err}</div>}
-                </div>
+                activeFilterCount > 0 ? (
+                  <div className="gig" style={{ alignItems: "center", textAlign: "center", padding: "40px 20px", gap: 12 }}>
+                    <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 20, color: "var(--ink)" }}>No gigs match your filters.</div>
+                    <div style={{ color: "var(--ink-3)", fontSize: 14, maxWidth: 380 }}>Try widening the filters or clearing them.</div>
+                    <button className="btn" style={{ marginTop: 6 }} onClick={clearAll}>Clear all filters</button>
+                  </div>
+                ) : (
+                  <div className="gig" style={{ alignItems: "center", textAlign: "center", padding: "40px 20px", gap: 12 }}>
+                    <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22, color: "var(--ink)" }}>Feed's quiet right now.</div>
+                    <div style={{ color: "var(--ink-3)", fontSize: 14, maxWidth: 380 }}>Be the first to post a brief — once others sign up and post, their gigs will show up here.</div>
+                    <a href="post.html" className="btn primary" style={{ marginTop: 6 }}>+ Post the first gig</a>
+                    {err && <div style={{ color: "var(--danger)", fontSize: 12, marginTop: 8 }}>{err}</div>}
+                  </div>
+                )
               ) : (
                 gigs.map(g => {
                   const owner = g.owner || {};
