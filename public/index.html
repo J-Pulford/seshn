@@ -2159,13 +2159,7 @@ const Hero = () => (
           </p>
           <div className="cta-row">
             <a href="/app/auth.html" className="btn primary lg" style={{ textDecoration: "none" }}>Create your profile →</a>
-            <button className="btn lg">Watch a 60s demo</button>
-          </div>
-          <div className="stat-row">
-            <div className="stat"><b>2,841</b><span>artists on Seshn</span></div>
-            <div className="stat"><b>412</b><span>sessions this week</span></div>
-            <div className="stat"><b style={{ color: "var(--accent)" }}>$47k</b><span>paid out last month</span></div>
-            <div className="stat"><b>98</b><span>cities</span></div>
+            <a href="/app/feed.html" className="btn lg" style={{ textDecoration: "none" }}>Browse the feed</a>
           </div>
         </div>
         <div>
@@ -2188,14 +2182,12 @@ const TrustStrip = () => (
       background: "rgba(255,255,255,0.02)",
     }}
     items={[
-      "Maya O. is looking for a topline writer · 2h ago",
-      "Theo B. posted: live drummer, 3 NYC dates · 9h ago",
-      "Iván R. mixed 4 songs this week",
-      "Nia K. joined Seshn",
+      "Looking for a topline writer · 2h ago",
+      "Posted: live drummer, 3 NYC dates · 9h ago",
+      "Mixed 4 songs this week",
       "Sundowner EP just published a stem · 1h ago",
-      "Sam P. completed a session with Lina V.",
-      "412 sessions running right now",
-      "Robi K. released a demo from Seshn",
+      "Completed a session this morning",
+      "Released a demo from Seshn",
     ]}
   />
 );
@@ -2314,7 +2306,7 @@ const Steps = () => (
                 <li>Reach out free; Pro lets you message anyone first</li>
               </ul>
               <div style={{ marginTop: 24 }}>
-                <a href="/app/feed.html" className="btn" style={{ textDecoration: "none" }}>Browse 2,841 artists →</a>
+                <a href="/app/browse.html" className="btn" style={{ textDecoration: "none" }}>Browse artists →</a>
               </div>
             </div>
             <div className="anim"><MatchAnim /></div>
