@@ -229,18 +229,19 @@
     };
 
     // ——— Gig Card (read-only summary used on the profile) ———
-    const GigCard = ({ role="Vocalist", title="Gig title", tags=[], comp="Paid", time="2h", name="Artist", initials="A", roleTag="PRO" }) => (
-      <div className="gig">
+    const GigCard = ({ role="Vocalist", title="Gig title", tags=[], comp="Paid", time="2h", name="Artist", initials="A", roleTag="PRO", closed=false }) => (
+      <div className="gig" style={closed ? { opacity: 0.72 } : null}>
         <div className="row" style={{gap:10}}>
           <span className="avatar md" style={{background:"var(--ph-2)"}}>
             {initials}
             <span style={{position:"absolute",bottom:-2,right:-2,background:"var(--frame)",borderRadius:999,padding:"1px 4px",fontSize:7,fontFamily:"var(--font-display)",fontWeight:600,color:"var(--ink)",border:"1px solid var(--line)",lineHeight:1.4,textTransform:"uppercase"}}>{roleTag}</span>
           </span>
           <div className="col" style={{flex:1,gap:2,minWidth:0}}>
-            <div className="row" style={{gap:6}}>
+            <div className="row" style={{gap:6,alignItems:"center"}}>
               <span style={{fontWeight:600,fontFamily:"var(--font-display)",fontSize:13}}>{name}</span>
               <span className="dot"/>
               <span className="t-meta">{time} ago</span>
+              {closed && <span className="pill" style={{ marginLeft:"auto", background:"var(--ink)", color:"var(--frame)", borderColor:"transparent", fontSize:9 }}>Closed</span>}
             </div>
             <div className="row" style={{gap:6}}>
               <span className="pill accent">{role} needed</span>
@@ -644,6 +645,7 @@
                         initials={profileInitialsOf(profile.display_name)}
                         roleTag={profile.is_pro ? "PRO" : "ART"}
                         time={profileTimeAgo(g.created_at)}
+                        closed={g.status === "closed"}
                       />
                     </a>
                   ))
@@ -729,7 +731,13 @@
 
           // Fetch gigs after first render so the rest of the profile doesn't block on it.
           try {
-            const list = await window.seshn.listGigs({ ownerId: profile.id, limit: 8 });
+            const list = await window.seshn.listGigs({
+              ownerId: profile.id,
+              limit: 8,
+              // On the owner's own profile, include closed gigs so they can
+              // see them in the list (and reopen via the gig page).
+              statuses: isOwner ? ["open", "closed"] : ["open"]
+            });
             setState(s => ({ ...s, gigs: list }));
           } catch (e) {
             console.warn("[seshn] profile gigs fetch failed:", e);

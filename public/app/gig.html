@@ -409,13 +409,31 @@
       );
     }
 
-    function GigPage({ gig }) {
+    function GigPage({ gig: initialGig }) {
+      const [gig, setGig] = React.useState(initialGig);
       const owner = gig.owner || {};
       const isBoosted = gig.boosted_until && new Date(gig.boosted_until) > new Date();
       const body = (gig.description || "").split(/\n\n+/).filter(Boolean);
 
       const [me, setMe] = React.useState(undefined); // undefined = loading, null = not signed in
       const [myApp, setMyApp] = React.useState(undefined);
+      const [statusBusy, setStatusBusy] = React.useState(false);
+
+      async function toggleStatus() {
+        if (statusBusy) return;
+        const next = gig.status === "closed" ? "open" : "closed";
+        const verb = next === "closed" ? "close" : "reopen";
+        if (!window.confirm("Are you sure you want to " + verb + " this gig?" + (next === "closed" ? "\n\nIt will be hidden from the feed and stop accepting new applications." : ""))) return;
+        setStatusBusy(true);
+        try {
+          const updated = await window.seshn.setGigStatus(gig.id, next);
+          setGig(prev => Object.assign({}, prev, { status: updated.status }));
+        } catch (e) {
+          alert((e && e.message) || "Couldn't update the gig.");
+        } finally {
+          setStatusBusy(false);
+        }
+      }
 
       React.useEffect(() => {
         let cancelled = false;
@@ -446,12 +464,18 @@
             <div>
               <a href="feed.html" className="back-link">← Back to feed</a>
 
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-                {isBoosted && <span className="pill solid">★ Boosted</span>}
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16, alignItems: "center" }}>
+                {gig.status === "closed" && <span className="pill" style={{ background: "var(--ink)", color: "var(--frame)", borderColor: "transparent" }}>Closed</span>}
+                {isBoosted && gig.status !== "closed" && <span className="pill solid">★ Boosted</span>}
                 <span className="pill accent">{gig.role} needed</span>
                 <span className="pill">{gigCompLabel(gig)}</span>
                 {gig.location && <span className="pill">{gig.location}</span>}
                 {gig.deadline && <span className="pill">{gigDeadlineLabel(gig.deadline)}</span>}
+                {me && me.id === owner.id && (
+                  <button className="btn sm" style={{ marginLeft: "auto" }} onClick={toggleStatus} disabled={statusBusy}>
+                    {statusBusy ? "…" : (gig.status === "closed" ? "Reopen gig" : "Close gig")}
+                  </button>
+                )}
               </div>
 
               <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 40, lineHeight: 1.02, letterSpacing: "-0.025em", color: "var(--ink)", marginBottom: 20 }}>

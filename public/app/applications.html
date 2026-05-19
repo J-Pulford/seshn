@@ -110,7 +110,12 @@
                 )}
               </div>
             </div>
-            <span className={statusPillClass(app.status)}>{statusLabel(app.status)}</span>
+            <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+              {g.status === "closed" && (
+                <span className="pill" style={{ background: "var(--ink)", color: "var(--frame)", borderColor: "transparent" }}>Gig closed</span>
+              )}
+              <span className={statusPillClass(app.status)}>{statusLabel(app.status)}</span>
+            </div>
           </div>
           <p style={{ fontSize: 13, lineHeight: 1.5, color: "var(--ink-2)", whiteSpace: "pre-wrap", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{app.pitch}</p>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 10, borderTop: "1px solid var(--line-soft)" }}>

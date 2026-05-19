@@ -170,8 +170,15 @@
     var q = sb
       .from("gigs")
       .select("*, owner:profiles!owner_id(id, username, display_name, is_pro, avatar_url)")
-      .eq("status", "open")
       .limit(opts.limit || 30);
+
+    // Status filter. Defaults to ['open']; pass ['open','closed'] to include
+    // closed gigs (e.g. on the owner's own profile so they can reopen).
+    if (opts.statuses && opts.statuses.length) {
+      q = q.in("status", opts.statuses);
+    } else {
+      q = q.eq("status", "open");
+    }
 
     // Filtering
     if (opts.role) q = q.eq("role", opts.role);
@@ -210,6 +217,23 @@
       .eq("id", id)
       .maybeSingle();
     if (res.error) { console.error("[seshn] getGig error", res.error); return null; }
+    return res.data;
+  }
+
+  // Close or reopen a gig. Owner-only (enforced by gigs UPDATE policy).
+  async function setGigStatus(gigId, status) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    if (!gigId) throw new Error("Missing gig id");
+    if (status !== "open" && status !== "closed") throw new Error("Invalid status");
+    var res = await sb
+      .from("gigs")
+      .update({ status: status })
+      .eq("id", gigId)
+      .eq("owner_id", u.id)
+      .select()
+      .single();
+    if (res.error) throw res.error;
     return res.data;
   }
 
@@ -558,6 +582,7 @@
     createGig: createGig,
     listGigs: listGigs,
     getGig: getGig,
+    setGigStatus: setGigStatus,
     listProfiles: listProfiles,
     applyToGig: applyToGig,
     getMyApplication: getMyApplication,
