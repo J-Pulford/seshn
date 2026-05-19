@@ -464,7 +464,7 @@
         if (roles.size === 0) { setErr("Pick at least one role."); return; }
         setSaving(true); setErr("");
         try {
-          const updated = await window.seshn.upsertProfile({
+          const updated = await window.seshn.updateProfile({
             display_name: name,
             bio: bio.trim(),
             location: location.trim(),

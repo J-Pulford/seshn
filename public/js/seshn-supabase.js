@@ -45,6 +45,17 @@
     return res.data;
   }
 
+  // For editing an existing profile. Does NOT include immutable fields like
+  // username (which is set at onboarding). Using update() avoids tripping the
+  // NOT NULL constraints on a fresh-row INSERT that upsert() would prepare.
+  async function updateProfile(fields) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    var res = await sb.from("profiles").update(fields).eq("id", u.id).select().single();
+    if (res.error) throw res.error;
+    return res.data;
+  }
+
   // Upload an avatar image. Validates type/size, writes to the avatars bucket
   // at avatars/{uid}/avatar-<ts>.<ext>, deletes the previous file referenced
   // by the profile (best-effort), and returns the new public URL.
@@ -367,6 +378,7 @@
     getUser: getUser,
     getProfile: getProfile,
     upsertProfile: upsertProfile,
+    updateProfile: updateProfile,
     uploadAvatar: uploadAvatar,
     sendMagicLink: sendMagicLink,
     signOut: signOut,
