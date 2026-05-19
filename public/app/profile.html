@@ -562,8 +562,8 @@
             )}
             {isOwner ? (
               <>
-                <button className="btn" style={{backdropFilter:"blur(8px)",background:"rgba(255,255,255,0.9)"}} onClick={() => setEditing(true)}>Edit profile</button>
-                <button className="btn primary" onClick={async () => { await window.seshn.signOut(); window.location.href = "auth.html"; }}>Sign out</button>
+                <a className="btn" style={{backdropFilter:"blur(8px)",background:"rgba(255,255,255,0.9)"}} href="settings.html">Settings</a>
+                <button className="btn primary" onClick={() => setEditing(true)}>Edit profile</button>
               </>
             ) : (
               <>

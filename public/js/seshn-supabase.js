@@ -155,6 +155,35 @@
     return sb.auth.signOut();
   }
 
+  // Request an email change. Supabase sends a confirmation link to BOTH the
+  // current address and the new one; the change only takes effect once the
+  // user clicks the link from the NEW address (and, depending on project
+  // settings, also confirms from the old one).
+  async function updateMyEmail(newEmail) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    if (!newEmail || !newEmail.trim()) throw new Error("Missing email");
+    var res = await sb.auth.updateUser({ email: newEmail.trim() });
+    if (res.error) throw res.error;
+    return res.data;
+  }
+
+  // Save notification preferences (a plain { kind: bool } object) onto the
+  // current profile. Triggers respect these prefs server-side.
+  async function updateNotificationPrefs(prefs) {
+    return updateProfile({ notification_prefs: prefs });
+  }
+
+  // Permanently delete the current user's account. Cascades through every
+  // table that references profiles(id). Signs out locally afterwards.
+  async function deleteMyAccount() {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    var res = await sb.rpc("delete_my_account");
+    if (res.error) throw res.error;
+    await sb.auth.signOut();
+  }
+
   // ── Gigs ──────────────────────────────────────────────────────────
   async function createGig(fields) {
     var u = await getUser();
@@ -653,6 +682,9 @@
     uploadAvatar: uploadAvatar,
     uploadCover: uploadCover,
     sendMagicLink: sendMagicLink,
+    updateMyEmail: updateMyEmail,
+    updateNotificationPrefs: updateNotificationPrefs,
+    deleteMyAccount: deleteMyAccount,
     signOut: signOut,
     routeAfterAuth: routeAfterAuth,
     requireProfile: requireProfile,

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seshn — Settings</title>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=satoshi@400,500,600,700&display=swap" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f4f3ef; --frame: #ffffff; --surface: #ffffff; --surface-2: #f7f6f3;
+      --line: #d8d6d1; --line-soft: #ececea; --ink: #0d0d0d; --ink-2: #3a3a38;
+      --ink-3: #6e6c66; --ink-4: #a4a29c; --ph: #ececea;
+      --accent: #2CCB73; --accent-d: #1C8F56; --accent-bg: #A8EBC8;
+      --danger: #c43d3f; --danger-bg: #fbe9e9;
+      --r: 8px; --r-lg: 14px; --r-pill: 999px;
+      --font-display: "General Sans", ui-sans-serif, system-ui, sans-serif;
+      --font-body: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+    }
+    html, body { background: var(--bg); font-family: var(--font-body); -webkit-font-smoothing: antialiased; color: var(--ink); }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; border-radius: var(--r); font-size: 12px; font-weight: 600; font-family: var(--font-display); cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink); white-space: nowrap; text-decoration: none; }
+    .btn.primary { background: var(--accent); color: #062c19; border-color: transparent; }
+    .btn.danger  { background: var(--danger); color: #fff; border-color: transparent; }
+    .btn.sm { padding: 6px 10px; font-size: 11px; }
+    .btn:hover { opacity: 0.88; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 18px 20px; }
+    .card.danger { border-color: var(--danger); }
+
+    .page { max-width: 640px; margin: 0 auto; padding: 28px 24px 60px; display: flex; flex-direction: column; gap: 18px; }
+    .page-title { font-family: var(--font-display); font-weight: 700; font-size: 26px; letter-spacing: -0.02em; }
+    .section-title { font-family: var(--font-display); font-weight: 600; font-size: 15px; margin-bottom: 12px; }
+    .t-meta { font-size: 12px; color: var(--ink-3); line-height: 1.5; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field-label { font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--ink); }
+    .input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px;
+      font-family: var(--font-body); font-size: 13px; background: var(--surface); color: var(--ink); outline: none;
+    }
+    .input:focus { border-color: var(--ink-3); }
+
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; }
+    .row + .row { border-top: 1px solid var(--line-soft); }
+    .row-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .row-title { font-family: var(--font-display); font-weight: 600; font-size: 13px; color: var(--ink); }
+    .row-sub { font-size: 11.5px; color: var(--ink-3); }
+
+    /* Toggle */
+    .toggle { position: relative; width: 36px; height: 20px; background: var(--ph); border-radius: 999px; cursor: pointer; transition: background 0.15s; flex-shrink: 0; border: none; padding: 0; }
+    .toggle::before { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--frame); transition: transform 0.15s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .toggle.on { background: var(--accent); }
+    .toggle.on::before { transform: translateX(16px); }
+
+    .status-line { font-size: 12px; padding: 8px 10px; border-radius: 8px; }
+    .status-line.ok    { background: var(--accent-bg); color: var(--accent-d); }
+    .status-line.err   { background: var(--danger-bg); color: var(--danger); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/seshn-supabase.js"></script>
+  <script src="../js/seshn-nav.js"></script>
+
+  <script type="text/babel">
+    const NOTIF_KINDS = [
+      ["application_received", "New applications", "When someone applies to one of your gigs."],
+      ["application_accepted", "Application accepted", "When a poster accepts your application."],
+      ["application_rejected", "Application declined", "When a poster passes on your application."],
+      ["message_received",     "New messages",        "When someone sends you a DM."],
+    ];
+
+    function Section({ title, children }) {
+      return (
+        <div className="card">
+          <div className="section-title">{title}</div>
+          {children}
+        </div>
+      );
+    }
+
+    function AccountSection({ user, profile }) {
+      const [newEmail, setNewEmail] = React.useState("");
+      const [busy, setBusy] = React.useState(false);
+      const [status, setStatus] = React.useState(null); // { kind: 'ok' | 'err', text }
+
+      const trimmed = newEmail.trim();
+      const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed) && trimmed.toLowerCase() !== (user.email || "").toLowerCase();
+
+      async function changeEmail() {
+        if (!isValid || busy) return;
+        setBusy(true); setStatus(null);
+        try {
+          await window.seshn.updateMyEmail(trimmed);
+          setStatus({ kind: "ok", text: "Confirmation links sent — check both your current and new inboxes. The change takes effect after you confirm." });
+          setNewEmail("");
+        } catch (e) {
+          setStatus({ kind: "err", text: (e && e.message) || "Couldn't update email." });
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      return (
+        <Section title="Account">
+          <div className="field" style={{ marginBottom: 16 }}>
+            <span className="field-label">Current email</span>
+            <div style={{ padding: "10px 12px", background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 8, fontSize: 13, color: "var(--ink-2)" }}>
+              {user.email || <span style={{ color: "var(--ink-3)", fontStyle: "italic" }}>No email on file</span>}
+            </div>
+          </div>
+          <div className="field">
+            <label className="field-label" htmlFor="se-email">Change email</label>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input id="se-email" className="input" type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="new@email.com" />
+              <button className="btn primary" onClick={changeEmail} disabled={!isValid || busy}>
+                {busy ? "Sending…" : "Send confirmation"}
+              </button>
+            </div>
+            <span className="t-meta">You'll receive confirmation links at both your current and new addresses. The change only takes effect once you click the link.</span>
+            {status && <div className={"status-line " + status.kind} style={{ marginTop: 6 }}>{status.text}</div>}
+          </div>
+
+          <div style={{ height: 1, background: "var(--line-soft)", margin: "18px 0" }} />
+
+          <div className="row" style={{ padding: 0, borderTop: "none" }}>
+            <div className="row-text">
+              <span className="row-title">Profile</span>
+              <span className="row-sub">Name, bio, photo, roles and genres.</span>
+            </div>
+            <a className="btn" href={"profile.html?u=" + encodeURIComponent(profile.username)}>Go to profile</a>
+          </div>
+          <div className="row">
+            <div className="row-text">
+              <span className="row-title">Sign out</span>
+              <span className="row-sub">End this session on this device.</span>
+            </div>
+            <button className="btn" onClick={async () => {
+              await window.seshn.signOut();
+              window.location.href = "auth.html";
+            }}>Sign out</button>
+          </div>
+        </Section>
+      );
+    }
+
+    function NotificationsSection({ profile, onSaved }) {
+      const initial = profile.notification_prefs || {};
+      const [prefs, setPrefs] = React.useState(() => {
+        const p = {};
+        for (const [k] of NOTIF_KINDS) p[k] = initial[k] !== false; // default true
+        return p;
+      });
+      const [busy, setBusy] = React.useState(false);
+      const [status, setStatus] = React.useState(null);
+
+      const dirty = NOTIF_KINDS.some(([k]) => (initial[k] !== false) !== prefs[k]);
+
+      function toggle(kind) {
+        setPrefs(prev => Object.assign({}, prev, { [kind]: !prev[kind] }));
+      }
+
+      async function save() {
+        if (!dirty || busy) return;
+        setBusy(true); setStatus(null);
+        try {
+          const updated = await window.seshn.updateNotificationPrefs(prefs);
+          onSaved && onSaved(updated);
+          setStatus({ kind: "ok", text: "Preferences saved." });
+        } catch (e) {
+          setStatus({ kind: "err", text: (e && e.message) || "Couldn't save." });
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      return (
+        <Section title="Notifications">
+          <span className="t-meta" style={{ display: "block", marginBottom: 4 }}>
+            We won't insert notifications for kinds you turn off, so the bell stays quiet for them.
+          </span>
+          {NOTIF_KINDS.map(([k, title, sub]) => (
+            <div key={k} className="row">
+              <div className="row-text">
+                <span className="row-title">{title}</span>
+                <span className="row-sub">{sub}</span>
+              </div>
+              <button
+                type="button"
+                className={"toggle" + (prefs[k] ? " on" : "")}
+                aria-pressed={!!prefs[k]}
+                aria-label={(prefs[k] ? "Disable" : "Enable") + " " + title}
+                onClick={() => toggle(k)}
+              />
+            </div>
+          ))}
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 14, alignItems: "center" }}>
+            {status && <span className={"status-line " + status.kind}>{status.text}</span>}
+            <button className="btn primary" onClick={save} disabled={!dirty || busy}>
+              {busy ? "Saving…" : "Save changes"}
+            </button>
+          </div>
+        </Section>
+      );
+    }
+
+    function DangerSection({ profile }) {
+      const [confirmText, setConfirmText] = React.useState("");
+      const [busy, setBusy] = React.useState(false);
+      const [err, setErr] = React.useState("");
+
+      const expected = "delete " + profile.username;
+      const matched = confirmText.trim().toLowerCase() === expected.toLowerCase();
+
+      async function doDelete() {
+        if (!matched || busy) return;
+        if (!window.confirm("Final check: this permanently deletes your account, profile, gigs, applications, and conversations. There is no undo. Continue?")) return;
+        setBusy(true); setErr("");
+        try {
+          await window.seshn.deleteMyAccount();
+          window.location.href = "../index.html";
+        } catch (e) {
+          setErr((e && e.message) || "Couldn't delete the account. Please contact support.");
+          setBusy(false);
+        }
+      }
+
+      return (
+        <div className="card danger">
+          <div className="section-title" style={{ color: "var(--danger)" }}>Danger zone</div>
+          <span className="t-meta" style={{ display: "block", marginBottom: 12 }}>
+            Permanently delete your account. This removes your profile, gigs (and applications to them),
+            conversations and messages, and all notifications. There is no recovery.
+          </span>
+          <div className="field">
+            <label className="field-label" htmlFor="se-confirm">
+              Type <code style={{ background: "var(--danger-bg)", padding: "1px 5px", borderRadius: 3, fontSize: 12, color: "var(--danger)" }}>{expected}</code> to confirm
+            </label>
+            <input id="se-confirm" className="input" value={confirmText} onChange={e => setConfirmText(e.target.value)} placeholder={expected} autoComplete="off" />
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 14 }}>
+            <button className="btn danger" onClick={doDelete} disabled={!matched || busy}>
+              {busy ? "Deleting…" : "Delete my account"}
+            </button>
+          </div>
+          {err && <div className="status-line err" style={{ marginTop: 10 }}>{err}</div>}
+        </div>
+      );
+    }
+
+    function SettingsPage() {
+      const [state, setState] = React.useState({ status: "loading", user: null, profile: null });
+
+      React.useEffect(() => {
+        (async () => {
+          const r = await window.seshn.requireProfile();
+          if (!r) return; // redirected
+          setState({ status: "ready", user: r.user, profile: r.profile });
+        })();
+      }, []);
+
+      function onProfileUpdated(updated) {
+        setState(s => ({ ...s, profile: updated }));
+        window.seshn.emitProfileUpdated(updated);
+      }
+
+      if (state.status === "loading") {
+        return (
+          <div>
+            <SeshnAppNav active={null} />
+            <div className="page"><span className="t-meta">Loading…</span></div>
+          </div>
+        );
+      }
+
+      return (
+        <div>
+          <SeshnAppNav active={null} />
+          <div className="page">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h1 className="page-title">Settings</h1>
+              <a className="btn sm" href={"profile.html?u=" + encodeURIComponent(state.profile.username)}>← Profile</a>
+            </div>
+            <AccountSection user={state.user} profile={state.profile} />
+            <NotificationsSection profile={state.profile} onSaved={onProfileUpdated} />
+            <DangerSection profile={state.profile} />
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<SettingsPage />);
+  </script>
+</body>
+</html>
