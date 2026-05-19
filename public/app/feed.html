@@ -279,6 +279,7 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/seshn-supabase.js"></script>
+  <script src="../js/seshn-nav.js"></script>
 
   <script type="text/babel">
     // ——— Helpers ———
@@ -374,28 +375,8 @@
       return <span style={{ width:size, height:size, display:"inline-flex", alignItems:"center", justifyContent:"center", flexShrink:0, ...style }} dangerouslySetInnerHTML={{__html:svg}} />;
     };
 
-    // ——— Top Nav ———
-    const TopNav = () => (
-      <nav style={{ background:"var(--surface)", borderBottom:"1px solid var(--line)", padding:"0 28px", height:58, display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0, zIndex:100 }}>
-        <div className="row" style={{ gap:18, flex:1 }}>
-          <a href="feed.html" className="logo">Seshn</a>
-          <div style={{ flex:1, maxWidth:380, marginLeft:8 }}>
-            <div className="row" style={{ padding:"8px 13px", background:"var(--surface-2)", borderRadius:999, border:"1px solid var(--line)", gap:8, cursor:"text" }}>
-              <Icon kind="search" size={14} style={{ color:"var(--ink-3)" }} />
-              <span className="t-meta">Search artists, roles, genres…</span>
-            </div>
-          </div>
-        </div>
-        <div className="row" style={{ gap:14 }}>
-          <a href="post.html" className="btn primary sm">+ Post a gig</a>
-          <a href="inbox.html" style={{ display:"inline-flex", color:"var(--ink-2)" }}><Icon kind="message" size={18} /></a>
-          <span style={{ color:"var(--ink-2)", cursor:"pointer" }}><Icon kind="bell" size={18} /></span>
-          <a href="profile.html">
-            <span className="avatar md" style={{ background:"#d1f5e0", color:"var(--accent-d)", fontSize:12, fontFamily:"var(--font-display)", fontWeight:700 }}>YT</span>
-          </a>
-        </div>
-      </nav>
-    );
+    // TopNav now comes from window.SeshnAppNav (../js/seshn-nav.js).
+    const TopNav = () => <SeshnAppNav active="feed" />;
 
     // ——— Filter Group ———
     const FilterGroup = ({ title, items, radio }) => (
