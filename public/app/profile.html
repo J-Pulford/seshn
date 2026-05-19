@@ -84,6 +84,33 @@
     .avatar.md { width: 36px; height: 36px; font-size: 13px; }
     .avatar.lg { width: 56px; height: 56px; font-size: 18px; }
     .avatar.xl { width: 88px; height: 88px; font-size: 24px; }
+    .avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+
+    /* Edit-profile modal */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(13,13,13,0.5); z-index: 50; display: flex; align-items: flex-start; justify-content: center; padding: 60px 16px 16px; overflow-y: auto; }
+    .modal { background: var(--frame); border-radius: var(--r-lg); width: 100%; max-width: 560px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); display: flex; flex-direction: column; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--line); }
+    .modal-body { padding: 18px 22px; display: flex; flex-direction: column; gap: 16px; }
+    .modal-footer { padding: 14px 22px; border-top: 1px solid var(--line); display: flex; gap: 10px; justify-content: flex-end; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field-label { font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--ink); }
+    .field-hint { font-size: 11px; color: var(--ink-3); }
+    .input, .textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px;
+      font-family: var(--font-body); font-size: 13px; background: var(--surface); color: var(--ink); outline: none;
+    }
+    .textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+    .input:focus, .textarea:focus { border-color: var(--ink-3); }
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 6px 12px; border-radius: 999px; cursor: pointer; user-select: none;
+      border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+      font-family: var(--font-display); font-weight: 500; font-size: 12px;
+    }
+    .chip:hover { border-color: var(--ink-3); }
+    .chip.selected { background: var(--accent-bg); border-color: transparent; color: var(--accent-d); font-weight: 600; }
+    .chip.disabled { opacity: 0.4; cursor: not-allowed; }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
 
     .card {
       background: var(--surface); border: 1px solid var(--line);
@@ -365,8 +392,196 @@
       return "Unpaid";
     }
 
+    // ——— Edit Profile Modal ———
+    const EDIT_ROLES = [
+      "Producer", "Vocalist", "Songwriter", "Rapper", "Mixing eng.", "Mastering",
+      "Guitarist", "Drummer", "Bassist", "Keys", "DJ", "A&R", "Composer", "Engineer"
+    ];
+    const EDIT_GENRES = [
+      "Pop", "Hip-Hop", "R&B", "Afrobeats", "Soul", "Electronic", "House", "Techno",
+      "Indie", "Rock", "Alt", "Jazz", "Country", "Latin", "Folk", "Ambient", "K-pop",
+      "Reggaeton", "Drill", "Funk"
+    ];
+    const MAX_ROLES = 3;
+    const MAX_GENRES = 5;
+
+    function EditProfileModal({ profile, onClose, onSaved }) {
+      const [displayName, setDisplayName] = React.useState(profile.display_name || "");
+      const [bio, setBio] = React.useState(profile.bio || "");
+      const [location, setLocation] = React.useState(profile.location || "");
+      const [pronouns, setPronouns] = React.useState(profile.pronouns || "");
+      const [roles, setRoles] = React.useState(new Set(profile.roles || []));
+      const [genres, setGenres] = React.useState(new Set(profile.genres || []));
+      const [avatarUrl, setAvatarUrl] = React.useState(profile.avatar_url || "");
+      const [previewSrc, setPreviewSrc] = React.useState("");
+      const [saving, setSaving] = React.useState(false);
+      const [uploadBusy, setUploadBusy] = React.useState(false);
+      const [err, setErr] = React.useState("");
+      const fileInputRef = React.useRef(null);
+
+      const toggleRole = (r) => {
+        setRoles(prev => {
+          const next = new Set(prev);
+          if (next.has(r)) next.delete(r);
+          else if (next.size < MAX_ROLES) next.add(r);
+          return next;
+        });
+      };
+      const toggleGenre = (g) => {
+        setGenres(prev => {
+          const next = new Set(prev);
+          if (next.has(g)) next.delete(g);
+          else if (next.size < MAX_GENRES) next.add(g);
+          return next;
+        });
+      };
+
+      async function onPickAvatar(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        setErr("");
+        // Local preview while uploading.
+        const reader = new FileReader();
+        reader.onload = ev => setPreviewSrc(ev.target.result);
+        reader.readAsDataURL(file);
+        setUploadBusy(true);
+        try {
+          const url = await window.seshn.uploadAvatar(file);
+          setAvatarUrl(url);
+          setPreviewSrc("");
+        } catch (e2) {
+          setErr((e2 && e2.message) || "Couldn't upload that image.");
+          setPreviewSrc("");
+        } finally {
+          setUploadBusy(false);
+          if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+      }
+
+      async function save() {
+        const name = displayName.trim();
+        if (!name) { setErr("Display name is required."); return; }
+        if (roles.size === 0) { setErr("Pick at least one role."); return; }
+        setSaving(true); setErr("");
+        try {
+          const updated = await window.seshn.upsertProfile({
+            display_name: name,
+            bio: bio.trim(),
+            location: location.trim(),
+            pronouns: pronouns.trim(),
+            roles: Array.from(roles),
+            genres: Array.from(genres),
+            avatar_url: avatarUrl || ""
+          });
+          onSaved(updated);
+        } catch (e) {
+          setErr((e && e.message) || "Couldn't save.");
+        } finally {
+          setSaving(false);
+        }
+      }
+
+      const shownAvatar = previewSrc || avatarUrl;
+
+      return (
+        <div className="modal-backdrop" onClick={onClose}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <span className="t-h3">Edit profile</span>
+              <button className="btn sm" onClick={onClose} aria-label="Close">Close</button>
+            </div>
+            <div className="modal-body">
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <div className="avatar lg" style={{ background: "var(--ph-2)", overflow: "hidden", color: "var(--ink-3)" }}>
+                  {shownAvatar
+                    ? <img src={shownAvatar} alt="" />
+                    : <span style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>{initials(displayName)}</span>}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={onPickAvatar} style={{ display: "none" }} />
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button className="btn sm" disabled={uploadBusy} onClick={() => fileInputRef.current && fileInputRef.current.click()}>
+                      {uploadBusy ? "Uploading…" : (avatarUrl ? "Change photo" : "Upload photo")}
+                    </button>
+                    {avatarUrl && !uploadBusy && (
+                      <button className="btn sm" onClick={() => setAvatarUrl("")}>Remove</button>
+                    )}
+                  </div>
+                  <span className="field-hint">JPG/PNG/WebP, up to 5 MB.</span>
+                </div>
+              </div>
+
+              <div className="field">
+                <label className="field-label" htmlFor="ep-name">Display name</label>
+                <input id="ep-name" className="input" value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={80} placeholder="Your name" />
+              </div>
+
+              <div className="field">
+                <label className="field-label" htmlFor="ep-bio">Bio</label>
+                <textarea id="ep-bio" className="textarea" value={bio} onChange={e => setBio(e.target.value)} maxLength={2000} placeholder="What you're working on, what you're looking for, who you want to collaborate with." rows={4} />
+                <span className="field-hint">{bio.length}/2000</span>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div className="field">
+                  <label className="field-label" htmlFor="ep-loc">Location</label>
+                  <input id="ep-loc" className="input" value={location} onChange={e => setLocation(e.target.value)} maxLength={80} placeholder="London, UK" />
+                </div>
+                <div className="field">
+                  <label className="field-label" htmlFor="ep-pro">Pronouns</label>
+                  <input id="ep-pro" className="input" value={pronouns} onChange={e => setPronouns(e.target.value)} maxLength={30} placeholder="she/her" />
+                </div>
+              </div>
+
+              <div className="field">
+                <span className="field-label">Roles ({roles.size}/{MAX_ROLES})</span>
+                <div className="chip-row">
+                  {EDIT_ROLES.map(r => {
+                    const sel = roles.has(r);
+                    const cap = !sel && roles.size >= MAX_ROLES;
+                    return (
+                      <span key={r} className={`chip ${sel ? "selected" : ""} ${cap ? "disabled" : ""}`}
+                            onClick={() => !cap && toggleRole(r)}>
+                        {sel && "✓ "}{r}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="field">
+                <span className="field-label">Genres ({genres.size}/{MAX_GENRES})</span>
+                <div className="chip-row">
+                  {EDIT_GENRES.map(g => {
+                    const sel = genres.has(g);
+                    const cap = !sel && genres.size >= MAX_GENRES;
+                    return (
+                      <span key={g} className={`chip ${sel ? "selected" : ""} ${cap ? "disabled" : ""}`}
+                            onClick={() => !cap && toggleGenre(g)}>
+                        {sel && "✓ "}{g}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {err && <div style={{ color: "#c43d3f", fontSize: 12, fontFamily: "var(--font-display)" }}>{err}</div>}
+            </div>
+            <div className="modal-footer">
+              <button className="btn" onClick={onClose} disabled={saving}>Cancel</button>
+              <button className="btn primary" onClick={save} disabled={saving || uploadBusy}>
+                {saving ? "Saving…" : "Save changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     // ——— Profile App ———
-    const ProfileApp = ({ profile, isOwner, gigs }) => (
+    function ProfileApp({ profile, isOwner, gigs, onProfileUpdate }) {
+      const [editing, setEditing] = React.useState(false);
+      return (
       <div style={{minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column"}}>
         <TopNav/>
 
@@ -377,7 +592,11 @@
           {/* Avatar overlapping the cover */}
           <div style={{position:"absolute",left:36,bottom:-42,display:"flex",alignItems:"flex-end",gap:14}}>
             <div style={{background:"var(--frame)",padding:4,borderRadius:"50%",boxShadow:"0 0 0 1px var(--line)"}}>
-              <span className="avatar xl" style={{background:"linear-gradient(135deg,#a8ebc8,#2CCB73)",color:"#062c19",fontSize:26,fontFamily:"var(--font-display)",fontWeight:700}}>{initials(profile.display_name)}</span>
+              <span className="avatar xl" style={{background:profile.avatar_url?"var(--ph)":"linear-gradient(135deg,#a8ebc8,#2CCB73)",color:"#062c19",fontSize:26,fontFamily:"var(--font-display)",fontWeight:700,overflow:"hidden"}}>
+                {profile.avatar_url
+                  ? <img src={profile.avatar_url} alt="" />
+                  : initials(profile.display_name)}
+              </span>
             </div>
           </div>
 
@@ -393,7 +612,7 @@
             )}
             {isOwner ? (
               <>
-                <button className="btn" style={{backdropFilter:"blur(8px)",background:"rgba(255,255,255,0.9)"}} onClick={() => alert("Profile editing coming soon — for now you can re-run onboarding.")}>Edit profile</button>
+                <button className="btn" style={{backdropFilter:"blur(8px)",background:"rgba(255,255,255,0.9)"}} onClick={() => setEditing(true)}>Edit profile</button>
                 <button className="btn primary" onClick={async () => { await window.seshn.signOut(); window.location.href = "auth.html"; }}>Sign out</button>
               </>
             ) : (
@@ -604,8 +823,19 @@
             </div>
           </aside>
         </div>
+        {editing && (
+          <EditProfileModal
+            profile={profile}
+            onClose={() => setEditing(false)}
+            onSaved={(updated) => {
+              setEditing(false);
+              onProfileUpdate && onProfileUpdate(updated);
+            }}
+          />
+        )}
       </div>
-    );
+      );
+    }
 
     function ProfileLoader() {
       const [state, setState] = React.useState({ status: "loading", profile: null, isOwner: false, gigs: null });
@@ -668,7 +898,20 @@
           </div>
         );
       }
-      return <ProfileApp profile={state.profile} isOwner={state.isOwner} gigs={state.gigs}/>;
+      return <ProfileApp
+        profile={state.profile}
+        isOwner={state.isOwner}
+        gigs={state.gigs}
+        onProfileUpdate={(updated) => {
+          setState(s => ({ ...s, profile: updated }));
+          if (updated && updated.username) {
+            const u = new URL(window.location.href);
+            u.searchParams.set("u", updated.username);
+            window.history.replaceState({}, "", u.toString());
+            document.title = "Seshn — " + (updated.display_name || updated.username);
+          }
+        }}
+      />;
     }
 
     ReactDOM.createRoot(document.getElementById("root")).render(<ProfileLoader/>);

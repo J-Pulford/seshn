@@ -31,8 +31,9 @@
     .btn.sm { padding: 6px 10px; font-size: 11px; }
     .pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--r-pill); font-size: 11px; font-weight: 500; font-family: var(--font-display); white-space: nowrap; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); cursor: pointer; }
     .pill.solid { background: var(--ink); border-color: transparent; color: var(--frame); }
-    .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--ph); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--ink-3); flex-shrink: 0; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--ph); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--ink-3); flex-shrink: 0; overflow: hidden; }
     .avatar.md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
     .main { display: grid; grid-template-columns: 320px 1fr; flex: 1; overflow: hidden; }
 
@@ -128,7 +129,7 @@
       const sentByMe = convo.last_message_sender === convo.me_id;
       return (
         <div className={`convo-item ${isActive ? "active" : ""}`} onClick={onSelect}>
-          <div className="avatar">{initials(o.display_name)}</div>
+          <div className="avatar">{o.avatar_url ? <img src={o.avatar_url} alt="" /> : initials(o.display_name)}</div>
           <div className="convo-info">
             <div className="convo-name-row">
               <span className="convo-name">{o.display_name || o.username || "User"}</span>
@@ -180,7 +181,9 @@
         rendered.push(
           <div key={m.id} className={`msg-row ${mine ? "self" : ""}`}>
             <div className="avatar" style={mine ? { background: "var(--ink)", color: "var(--frame)" } : {}}>
-              {senderInitials}
+              {!mine && convo.other && convo.other.avatar_url
+                ? <img src={convo.other.avatar_url} alt="" />
+                : senderInitials}
             </div>
             <div className="msg-content">
               <div className="msg-meta" style={mine ? { flexDirection: "row-reverse" } : {}}>
@@ -286,7 +289,7 @@
           <div className="dm-header">
             <div className="dm-header-left">
               <a href={profileHref} className="avatar md" style={{ textDecoration: "none", color: "var(--ink-3)" }}>
-                {initials(o.display_name)}
+                {o.avatar_url ? <img src={o.avatar_url} alt="" /> : initials(o.display_name)}
               </a>
               <div>
                 <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 3 }}>

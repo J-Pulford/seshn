@@ -33,7 +33,8 @@
     .pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--r-pill); font-size: 11px; font-weight: 500; font-family: var(--font-display); white-space: nowrap; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); }
     .pill.accent { background: var(--accent-bg); border-color: transparent; color: var(--accent-d); }
     .pill.solid { background: var(--ink); border-color: transparent; color: var(--frame); }
-    .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--ph); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--ink-3); flex-shrink: 0; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--ph); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--ink-3); flex-shrink: 0; overflow: hidden; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .avatar.lg { width: 56px; height: 56px; font-size: 18px; }
     .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 16px; }
     .card.hairline { border-color: var(--line-soft); }
@@ -320,7 +321,7 @@
         <div className="card hairline" style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
             <a href={profileHref} className="avatar" style={{ width: 40, height: 40, textDecoration: "none", color: "var(--ink-3)" }}>
-              {applicantInitials(a.display_name)}
+              {a.avatar_url ? <img src={a.avatar_url} alt="" /> : applicantInitials(a.display_name)}
             </a>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
@@ -473,7 +474,7 @@
               {/* Poster */}
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
                 <a href={"profile.html?u=" + encodeURIComponent(owner.username || "")} className="avatar" style={{ width: 40, height: 40, fontSize: 14, position: "relative", textDecoration: "none", color: "var(--ink-3)" }}>
-                  {gigInitials(owner.display_name)}
+                  {owner.avatar_url ? <img src={owner.avatar_url} alt="" /> : gigInitials(owner.display_name)}
                   {owner.is_pro && <span style={{ position: "absolute", bottom: -2, right: -2, background: "var(--frame)", borderRadius: 999, padding: "2px 5px", fontSize: 8, fontFamily: "var(--font-display)", fontWeight: 600, color: "var(--ink)", border: "1px solid var(--line)", lineHeight: 1, textTransform: "uppercase" }}>PRO</span>}
                 </a>
                 <div>
@@ -541,7 +542,9 @@
               {/* Poster card */}
               <div className="card">
                 <div style={{ display: "flex", gap: 12, marginBottom: 14 }}>
-                  <a href={"profile.html?u=" + encodeURIComponent(owner.username || "")} className="avatar lg" style={{ textDecoration: "none", color: "var(--ink-3)" }}>{gigInitials(owner.display_name)}</a>
+                  <a href={"profile.html?u=" + encodeURIComponent(owner.username || "")} className="avatar lg" style={{ textDecoration: "none", color: "var(--ink-3)" }}>
+                    {owner.avatar_url ? <img src={owner.avatar_url} alt="" /> : gigInitials(owner.display_name)}
+                  </a>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 3 }}>
                       <a href={"profile.html?u=" + encodeURIComponent(owner.username || "")} style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: "var(--ink)", textDecoration: "none" }}>{owner.display_name || "Artist"}</a>

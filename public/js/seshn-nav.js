@@ -184,15 +184,18 @@
             {
               className: "avatar md",
               style: {
-                background: "linear-gradient(135deg,#a8ebc8,#2CCB73)",
+                background: me && me.avatar_url ? "var(--ph)" : "linear-gradient(135deg,#a8ebc8,#2CCB73)",
                 color: "#062c19",
                 fontSize: 12,
                 fontFamily: "var(--font-display)",
                 fontWeight: 700,
-                border: active === "profile" ? "2px solid var(--ink)" : "2px solid transparent"
+                border: active === "profile" ? "2px solid var(--ink)" : "2px solid transparent",
+                overflow: "hidden"
               }
             },
-            initials
+            me && me.avatar_url
+              ? React.createElement("img", { src: me.avatar_url, alt: "", style: { width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover", display: "block" } })
+              : initials
           )
         )
       )

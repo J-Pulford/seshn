@@ -45,6 +45,50 @@
     return res.data;
   }
 
+  // Upload an avatar image. Validates type/size, writes to the avatars bucket
+  // at avatars/{uid}/avatar-<ts>.<ext>, deletes the previous file referenced
+  // by the profile (best-effort), and returns the new public URL.
+  async function uploadAvatar(file) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    if (!file) throw new Error("No file");
+    if (!file.type || file.type.indexOf("image/") !== 0) {
+      throw new Error("Avatar must be an image (jpg, png, webp, gif).");
+    }
+    var MAX = 5 * 1024 * 1024;
+    if (file.size > MAX) throw new Error("Image is too large (max 5 MB).");
+
+    var ext = (file.name && file.name.split(".").pop() || "").toLowerCase();
+    if (!/^(jpg|jpeg|png|webp|gif)$/.test(ext)) {
+      // Fall back to MIME-derived extension if filename had none.
+      ext = file.type.split("/")[1] || "jpg";
+    }
+    var path = u.id + "/avatar-" + Date.now() + "." + ext;
+
+    var up = await sb.storage.from("avatars").upload(path, file, {
+      cacheControl: "31536000",
+      upsert: false,
+      contentType: file.type
+    });
+    if (up.error) throw up.error;
+
+    var pub = sb.storage.from("avatars").getPublicUrl(path);
+    var url = pub.data && pub.data.publicUrl;
+
+    // Best-effort cleanup of the previous avatar.
+    try {
+      var prev = await getProfile({ id: u.id });
+      if (prev && prev.avatar_url) {
+        var m = prev.avatar_url.match(/\/avatars\/(.+)$/);
+        if (m && m[1] && m[1] !== path) {
+          await sb.storage.from("avatars").remove([m[1]]);
+        }
+      }
+    } catch (e) { /* non-fatal */ }
+
+    return url;
+  }
+
   async function sendMagicLink(email, redirectTo) {
     return sb.auth.signInWithOtp({
       email: email,
@@ -73,7 +117,7 @@
     opts = opts || {};
     var q = sb
       .from("gigs")
-      .select("*, owner:profiles!owner_id(id, username, display_name, is_pro)")
+      .select("*, owner:profiles!owner_id(id, username, display_name, is_pro, avatar_url)")
       .eq("status", "open")
       .order("boosted_until", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
@@ -89,7 +133,7 @@
   async function getGig(id) {
     var res = await sb
       .from("gigs")
-      .select("*, owner:profiles!owner_id(id, username, display_name, is_pro, location, roles)")
+      .select("*, owner:profiles!owner_id(id, username, display_name, is_pro, location, roles, avatar_url, avatar_url)")
       .eq("id", id)
       .maybeSingle();
     if (res.error) { console.error("[seshn] getGig error", res.error); return null; }
@@ -151,7 +195,7 @@
     if (!gigId) return [];
     var res = await sb
       .from("applications")
-      .select("*, applicant:profiles!applicant_id(id, username, display_name, location, roles, genres, bio, is_pro)")
+      .select("*, applicant:profiles!applicant_id(id, username, display_name, location, roles, genres, bio, is_pro, avatar_url)")
       .eq("gig_id", gigId)
       .order("created_at", { ascending: false });
     if (res.error) { console.error("[seshn] listApplicationsForGig error", res.error); return []; }
@@ -163,7 +207,7 @@
     if (!u) return [];
     var res = await sb
       .from("applications")
-      .select("*, gig:gigs!gig_id(id, title, role, comp, pay_amount, pay_currency, location, status, owner:profiles!owner_id(id, username, display_name, is_pro))")
+      .select("*, gig:gigs!gig_id(id, title, role, comp, pay_amount, pay_currency, location, status, owner:profiles!owner_id(id, username, display_name, is_pro, avatar_url))")
       .eq("applicant_id", u.id)
       .order("created_at", { ascending: false });
     if (res.error) { console.error("[seshn] listMyApplications error", res.error); return []; }
@@ -200,8 +244,8 @@
       .from("conversations")
       .select(
         "id, user_a, user_b, last_message_at, last_message_preview, last_message_sender, " +
-        "user_a_profile:profiles!user_a(id, username, display_name, is_pro, location, roles), " +
-        "user_b_profile:profiles!user_b(id, username, display_name, is_pro, location, roles), " +
+        "user_a_profile:profiles!user_a(id, username, display_name, is_pro, location, roles, avatar_url), " +
+        "user_b_profile:profiles!user_b(id, username, display_name, is_pro, location, roles, avatar_url), " +
         "reads:conversation_reads(user_id, last_read_at)"
       )
       .order("last_message_at", { ascending: false, nullsFirst: false })
@@ -225,8 +269,8 @@
       .from("conversations")
       .select(
         "id, user_a, user_b, last_message_at, " +
-        "user_a_profile:profiles!user_a(id, username, display_name, is_pro, location, roles), " +
-        "user_b_profile:profiles!user_b(id, username, display_name, is_pro, location, roles)"
+        "user_a_profile:profiles!user_a(id, username, display_name, is_pro, location, roles, avatar_url), " +
+        "user_b_profile:profiles!user_b(id, username, display_name, is_pro, location, roles, avatar_url)"
       )
       .eq("id", conversationId)
       .maybeSingle();
@@ -323,6 +367,7 @@
     getUser: getUser,
     getProfile: getProfile,
     upsertProfile: upsertProfile,
+    uploadAvatar: uploadAvatar,
     sendMagicLink: sendMagicLink,
     signOut: signOut,
     routeAfterAuth: routeAfterAuth,
