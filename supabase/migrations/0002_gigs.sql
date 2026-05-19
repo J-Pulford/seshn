@@ -27,7 +27,7 @@ create index gigs_status_idx      on public.gigs (status);
 create index gigs_role_idx        on public.gigs (role);
 create index gigs_genres_idx      on public.gigs using gin (genres);
 create index gigs_created_at_idx  on public.gigs (created_at desc);
-create index gigs_boosted_idx     on public.gigs (boosted_until desc nulls last) where boosted_until > now();
+create index gigs_boosted_idx     on public.gigs (boosted_until desc nulls last);
 
 -- Reuse the updated_at trigger function from 0001_profiles.sql
 create trigger gigs_set_updated_at
