@@ -133,7 +133,7 @@
   async function getGig(id) {
     var res = await sb
       .from("gigs")
-      .select("*, owner:profiles!owner_id(id, username, display_name, is_pro, location, roles, avatar_url, avatar_url)")
+      .select("*, owner:profiles!owner_id(id, username, display_name, is_pro, location, roles, avatar_url)")
       .eq("id", id)
       .maybeSingle();
     if (res.error) { console.error("[seshn] getGig error", res.error); return null; }
