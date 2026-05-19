@@ -252,6 +252,184 @@
     );
   }
 
+  // Live-as-you-type search in the nav. Searches both profiles and gigs in
+  // parallel and shows up to ~5 of each in a single dropdown. Enter on a
+  // selected row navigates; clicking outside or pressing Escape closes.
+  function NavSearch() {
+    var q = React.useState("");
+    var query = q[0], setQuery = q[1];
+    var d = React.useState({ profiles: [], gigs: [], loading: false });
+    var data = d[0], setData = d[1];
+    var o = React.useState(false);
+    var open = o[0], setOpen = o[1];
+    var hi = React.useState(0);
+    var highlight = hi[0], setHighlight = hi[1];
+    var containerRef = React.useRef(null);
+    var inputRef = React.useRef(null);
+
+    // Debounced fetch
+    React.useEffect(function () {
+      var s = query.trim();
+      if (!s || s.length < 2) {
+        setData({ profiles: [], gigs: [], loading: false });
+        return;
+      }
+      setData(function (prev) { return { profiles: prev.profiles, gigs: prev.gigs, loading: true }; });
+      var t = setTimeout(function () {
+        if (!window.seshn) return;
+        Promise.all([
+          window.seshn.listProfiles({ search: s, limit: 5 }).catch(function () { return []; }),
+          window.seshn.listGigs({ search: s, limit: 5 }).catch(function () { return []; })
+        ]).then(function (r) {
+          setData({ profiles: r[0] || [], gigs: r[1] || [], loading: false });
+          setHighlight(0);
+        });
+      }, 180);
+      return function () { clearTimeout(t); };
+    }, [query]);
+
+    React.useEffect(function () {
+      if (!open) return;
+      function onDown(e) {
+        if (containerRef.current && !containerRef.current.contains(e.target)) setOpen(false);
+      }
+      document.addEventListener("mousedown", onDown);
+      return function () { document.removeEventListener("mousedown", onDown); };
+    }, [open]);
+
+    // Flat ordered list of items for keyboard nav.
+    var items = [];
+    (data.profiles || []).forEach(function (p) { items.push({ type: "profile", item: p }); });
+    (data.gigs || []).forEach(function (g) { items.push({ type: "gig", item: g }); });
+
+    function go(target) {
+      if (target.type === "profile") {
+        window.location.href = "profile.html?u=" + encodeURIComponent(target.item.username || "");
+      } else {
+        window.location.href = "gig.html?id=" + encodeURIComponent(target.item.id);
+      }
+    }
+
+    function onKey(e) {
+      if (e.key === "Escape") { setOpen(false); e.currentTarget.blur(); return; }
+      if (!open || items.length === 0) return;
+      if (e.key === "ArrowDown") { e.preventDefault(); setHighlight((highlight + 1) % items.length); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); setHighlight((highlight - 1 + items.length) % items.length); }
+      else if (e.key === "Enter") { e.preventDefault(); go(items[highlight]); }
+    }
+
+    return h("div", {
+      ref: containerRef,
+      style: { flex: 1, maxWidth: 360, marginLeft: 16, position: "relative" }
+    },
+      h("div", {
+        style: {
+          display: "flex", alignItems: "center", gap: 8,
+          padding: "8px 13px",
+          background: "var(--surface-2)",
+          borderRadius: 999, border: "1px solid " + (open ? "var(--ink-3)" : "var(--line)"),
+          color: "var(--ink-3)"
+        }
+      },
+        h(IconSvg, { kind: "search", size: 14 }),
+        h("input", {
+          ref: inputRef,
+          type: "text",
+          value: query,
+          placeholder: "Search artists, gigs…",
+          onChange: function (e) { setQuery(e.target.value); setOpen(true); },
+          onFocus: function () { setOpen(true); },
+          onKeyDown: onKey,
+          style: {
+            flex: 1, border: "none", outline: "none", background: "transparent",
+            fontSize: 12.5, fontFamily: "var(--font-body)", color: "var(--ink)", minWidth: 0
+          }
+        }),
+        query && h("button", {
+          type: "button",
+          onClick: function () { setQuery(""); setData({ profiles: [], gigs: [], loading: false }); if (inputRef.current) inputRef.current.focus(); },
+          style: { background: "transparent", border: "none", cursor: "pointer", color: "var(--ink-3)", padding: 0, fontSize: 16, lineHeight: 1 },
+          "aria-label": "Clear search"
+        }, "×")
+      ),
+      open && query.trim().length >= 2 && h("div", {
+        style: {
+          position: "absolute", left: 0, right: 0, top: "calc(100% + 6px)",
+          background: "var(--frame)", border: "1px solid var(--line)",
+          borderRadius: 12, boxShadow: "0 16px 36px rgba(0,0,0,0.14)",
+          maxHeight: 460, overflowY: "auto", zIndex: 110
+        }
+      },
+        data.loading && items.length === 0 && h("div", { style: { padding: 14, color: "var(--ink-3)", fontSize: 12 } }, "Searching…"),
+        !data.loading && items.length === 0 && h("div", { style: { padding: 14, color: "var(--ink-3)", fontSize: 12, textAlign: "center" } },
+          "No matches for \"" + query.trim() + "\""
+        ),
+        items.length > 0 && [
+          (data.profiles || []).length > 0 && h("div", {
+            key: "ph",
+            style: { padding: "10px 14px 4px", fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--ink-4)" }
+          }, "Artists"),
+          (data.profiles || []).map(function (p, i) {
+            var idx = i;
+            return h("button", {
+              key: "p-" + p.id,
+              onClick: function () { go({ type: "profile", item: p }); },
+              onMouseEnter: function () { setHighlight(idx); },
+              style: {
+                display: "flex", gap: 10, alignItems: "center", padding: "8px 12px",
+                width: "100%", border: "none", textAlign: "left", cursor: "pointer",
+                background: highlight === idx ? "var(--surface-2)" : "transparent",
+                fontFamily: "var(--font-body)"
+              }
+            },
+              h("span", {
+                style: {
+                  width: 28, height: 28, borderRadius: "50%", background: "var(--ph)", overflow: "hidden",
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 10, color: "var(--ink-3)", flexShrink: 0
+                }
+              },
+                p.avatar_url
+                  ? h("img", { src: p.avatar_url, alt: "", style: { width: "100%", height: "100%", objectFit: "cover", display: "block" } })
+                  : navInitials(p.display_name || p.username)
+              ),
+              h("span", { style: { flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 1 } },
+                h("span", { style: { fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, p.display_name || p.username),
+                h("span", { style: { fontSize: 11, color: "var(--ink-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } },
+                  "@" + (p.username || "") + ((p.roles && p.roles[0]) ? " · " + p.roles[0] : "") + (p.location ? " · " + p.location : "")
+                )
+              )
+            );
+          }),
+          (data.gigs || []).length > 0 && h("div", {
+            key: "gh",
+            style: { padding: "10px 14px 4px", fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--ink-4)", borderTop: (data.profiles || []).length > 0 ? "1px solid var(--line-soft)" : "none" }
+          }, "Gigs"),
+          (data.gigs || []).map(function (g, i) {
+            var idx = (data.profiles || []).length + i;
+            var owner = g.owner || {};
+            return h("button", {
+              key: "g-" + g.id,
+              onClick: function () { go({ type: "gig", item: g }); },
+              onMouseEnter: function () { setHighlight(idx); },
+              style: {
+                display: "flex", flexDirection: "column", gap: 2, padding: "10px 12px",
+                width: "100%", border: "none", textAlign: "left", cursor: "pointer",
+                background: highlight === idx ? "var(--surface-2)" : "transparent",
+                fontFamily: "var(--font-body)"
+              }
+            },
+              h("span", { style: { fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, g.title),
+              h("span", { style: { fontSize: 11, color: "var(--ink-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } },
+                (g.role || "Gig") + (owner.display_name ? " · by " + owner.display_name : "")
+              )
+            );
+          })
+        ]
+      )
+    );
+  }
+
   // SeshnAppNav — sticky top nav used on every signed-in page.
   // Props:
   //   active: "feed" | "browse" | "applications" | "inbox" | "profile" | null
@@ -328,19 +506,7 @@
           h("a", { href: "browse.html", style: navLinkStyle(active === "browse") }, "Browse"),
           h("a", { href: "applications.html", style: navLinkStyle(active === "applications") }, "Applications")
         ),
-        showSearch && h("div", {
-          style: {
-            flex: 1, maxWidth: 360, marginLeft: 16,
-            display: "flex", alignItems: "center", gap: 8,
-            padding: "8px 13px",
-            background: "var(--surface-2)",
-            borderRadius: 999, border: "1px solid var(--line)",
-            color: "var(--ink-3)", cursor: "text"
-          }
-        },
-          h(IconSvg, { kind: "search", size: 14 }),
-          h("span", { style: { fontSize: 12, fontFamily: "var(--font-display)" } }, "Search artists, roles, genres…")
-        )
+        showSearch && h(NavSearch)
       ),
       // Right: post button, inbox, bell, avatar
       h("div", { style: { display: "flex", alignItems: "center", gap: 10 } },
