@@ -248,65 +248,75 @@
     const TopNav = () => <SeshnAppNav active="browse" />;
 
     // ——— Artist Card ———
-    const ArtistCard = ({ name, ini, roles=[], sub, tags=[], active, verified }) => {
+    function browseInitialsOf(name) {
+      if (!name) return "··";
+      const parts = name.trim().split(/\s+/).filter(Boolean);
+      if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+      return (parts[0] || "··").slice(0, 2).toUpperCase();
+    }
+
+    const ArtistCard = ({ profile }) => {
       const bgColors = ["#f5e6d3","#d3e8f5","#e8d3f5","#d3f5e0","#f5d3d3","#f5f0d3","#d3d3f5"];
-      const h = _hash(ini);
-      const bg = bgColors[h % bgColors.length];
-      const textColor = "#3a3a38";
+      const ini = browseInitialsOf(profile.display_name);
+      const bg = bgColors[_hash(profile.username || ini) % bgColors.length];
+      const profileHref = "profile.html?u=" + encodeURIComponent(profile.username);
+      const sub = [profile.location, profile.pronouns].filter(Boolean).join(" · ") || "—";
       return (
         <div className="card" style={{ padding:16, display:"flex", flexDirection:"column", gap:11 }}>
           <div className="row" style={{ gap:12 }}>
-            <a href="profile.html">
-              <span className="avatar lg" style={{ background:bg, color:textColor, fontWeight:700, fontFamily:"var(--font-display)" }}>{ini}</span>
+            <a href={profileHref}>
+              <span className="avatar lg" style={{ background:bg, color:"#3a3a38", fontWeight:700, fontFamily:"var(--font-display)" }}>{ini}</span>
             </a>
             <div className="col" style={{ gap:3, flex:1, minWidth:0 }}>
               <div className="row" style={{ gap:6 }}>
-                <a href="profile.html" style={{ fontFamily:"var(--font-display)", fontWeight:600, fontSize:14, color:"var(--ink)", textDecoration:"none" }}>{name}</a>
-                {verified && <span className="pill solid" style={{ fontSize:9, padding:"2px 5px" }}>✓ Pro</span>}
+                <a href={profileHref} style={{ fontFamily:"var(--font-display)", fontWeight:600, fontSize:14, color:"var(--ink)", textDecoration:"none" }}>{profile.display_name}</a>
+                {profile.is_pro && <span className="pill solid" style={{ fontSize:9, padding:"2px 5px" }}>✓ Pro</span>}
               </div>
               <span className="t-meta">{sub}</span>
               <div className="row" style={{ gap:4, marginTop:3, flexWrap:"wrap" }}>
-                {roles.map(r => <span key={r} className="pill accent" style={{ fontSize:10 }}>{r}</span>)}
+                {(profile.roles || []).slice(0, 3).map(r => <span key={r} className="pill accent" style={{ fontSize:10 }}>{r}</span>)}
               </div>
             </div>
           </div>
-          {/* Bio placeholder lines */}
-          <div className="col" style={{ gap:5 }}>
-            <div className="ph-line" style={{ width:"100%" }} />
-            <div className="ph-line" style={{ width:"72%" }} />
-          </div>
-          {/* Genre tags */}
-          <div className="row" style={{ gap:4, flexWrap:"wrap" }}>
-            {tags.map(t => <span key={t} className="pill" style={{ fontSize:10 }}>{t}</span>)}
-          </div>
-          {/* Footer */}
+          {profile.bio ? (
+            <div style={{ fontSize:12.5, color:"var(--ink-2)", lineHeight:1.5, overflow:"hidden", display:"-webkit-box", WebkitLineClamp:2, WebkitBoxOrient:"vertical" }}>{profile.bio}</div>
+          ) : (
+            <div className="col" style={{ gap:5 }}>
+              <div className="ph-line" style={{ width:"100%" }} />
+              <div className="ph-line" style={{ width:"72%" }} />
+            </div>
+          )}
+          {(profile.genres || []).length > 0 && (
+            <div className="row" style={{ gap:4, flexWrap:"wrap" }}>
+              {profile.genres.slice(0, 4).map(t => <span key={t} className="pill" style={{ fontSize:10 }}>{t}</span>)}
+            </div>
+          )}
           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", paddingTop:10, borderTop:"1px solid var(--line-soft)" }}>
-            <span className="t-meta" style={{ display:"flex", alignItems:"center", gap:5 }}>
-              {active.includes("now") && <span style={{ width:7, height:7, background:"var(--accent)", borderRadius:"50%", display:"inline-block" }} />}
-              {active}
-            </span>
-            <a href="profile.html" className="btn sm">View profile</a>
+            <span className="t-meta">@{profile.username}</span>
+            <a href={profileHref} className="btn sm">View profile</a>
           </div>
         </div>
       );
     };
 
-    // ——— Filter Group ———
-    const CheckGroup = ({ title, items }) => (
+    // ——— Filter Group (controlled checkbox list) ———
+    const CheckGroup = ({ title, options, selected, onToggle }) => (
       <div className="col" style={{ gap:8 }}>
         <span className="t-eyebrow">{title}</span>
         <div className="col" style={{ gap:3 }}>
-          {items.map(([label, count, sel]) => (
-            <label key={label} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"5px 0", cursor:"pointer" }}>
-              <div className="row" style={{ gap:8 }}>
-                <span className={"check-box" + (sel?" checked":"")}>
-                  {sel && <Icon kind="check" size={9} style={{ color:"var(--frame)" }} />}
-                </span>
-                <span style={{ fontSize:12.5, color:sel?"var(--ink)":"var(--ink-2)" }}>{label}</span>
-              </div>
-              {count && <span className="t-meta">{count}</span>}
-            </label>
-          ))}
+          {options.map(label => {
+            const sel = selected.has(label);
+            return (
+              <label key={label} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"5px 0", cursor:"pointer" }} onClick={() => onToggle(label)}>
+                <div className="row" style={{ gap:8 }}>
+                  <span className={"check-box" + (sel?" checked":"")}>
+                    {sel && <Icon kind="check" size={9} style={{ color:"var(--frame)" }} />}
+                  </span>
+                  <span style={{ fontSize:12.5, color:sel?"var(--ink)":"var(--ink-2)" }}>{label}</span>
+                </div>
+              </label>
+            );
+          })}
         </div>
       </div>
     );
@@ -325,60 +335,154 @@
       </div>
     );
 
-    const [viewMode, setViewMode] = React.useState ? React.useState("grid") : [() => "grid", () => {}];
+    const ALL_ROLES = ["Producer", "Vocalist", "Songwriter", "Rapper", "Mixing eng.", "Mastering", "Guitarist", "Drummer", "Bassist", "Keys", "DJ", "A&R"];
+    const ALL_GENRES = ["R&B", "Pop", "Hip-hop", "Afrobeats", "Soul", "Indie", "Electronic", "Folk", "Jazz", "Rock", "Latin"];
+    const QUICK_LOCATIONS = ["Remote", "NYC", "LA", "London", "Berlin"];
 
     const BrowseApp = () => {
       const [view, setView] = React.useState("grid");
-      const [sortPill, setSort] = React.useState("recommended");
+      const [sort, setSort] = React.useState("newest");
+      const [selectedRoles, setSelectedRoles] = React.useState(new Set());
+      const [selectedGenres, setSelectedGenres] = React.useState(new Set());
+      const [location, setLocation] = React.useState("");
+      const [proOnly, setProOnly] = React.useState(false);
+      const [search, setSearch] = React.useState("");
+      const [profiles, setProfiles] = React.useState(null); // null = loading
+      const [meId, setMeId] = React.useState(null);
+      const [err, setErr] = React.useState("");
+
+      // Get current user id (to exclude self from results)
+      React.useEffect(() => {
+        if (!window.seshn) return;
+        window.seshn.getUser().then(u => { if (u) setMeId(u.id); });
+      }, []);
+
+      // Debounced fetch on any filter change
+      React.useEffect(() => {
+        if (!window.seshn) { setErr("Supabase client failed to load."); setProfiles([]); return; }
+        const t = setTimeout(() => {
+          window.seshn.listProfiles({
+            roles: Array.from(selectedRoles),
+            genres: Array.from(selectedGenres),
+            location,
+            search,
+            sort,
+            proOnly,
+            excludeId: meId,
+            limit: 60
+          })
+            .then(list => setProfiles(list))
+            .catch(e => { console.error(e); setProfiles([]); });
+        }, 250);
+        return () => clearTimeout(t);
+      }, [selectedRoles, selectedGenres, location, search, sort, proOnly, meId]);
+
+      const toggleRole = (r) => setSelectedRoles(prev => {
+        const next = new Set(prev);
+        if (next.has(r)) next.delete(r); else next.add(r);
+        return next;
+      });
+      const toggleGenre = (g) => setSelectedGenres(prev => {
+        const next = new Set(prev);
+        if (next.has(g)) next.delete(g); else next.add(g);
+        return next;
+      });
+      const clearAll = () => {
+        setSelectedRoles(new Set()); setSelectedGenres(new Set());
+        setLocation(""); setSearch(""); setProOnly(false);
+      };
+      const activeFilters = selectedRoles.size + selectedGenres.size + (location ? 1 : 0) + (search ? 1 : 0) + (proOnly ? 1 : 0);
 
       return (
         <div style={{ minHeight:"100vh", background:"var(--bg)", display:"flex", flexDirection:"column" }}>
           <TopNav />
           <div style={{ display:"grid", gridTemplateColumns:"240px 1fr", gap:24, padding:"24px 28px", flex:1, maxWidth:1400, margin:"0 auto", width:"100%" }}>
 
-            {/* ——— Left Sidebar: Filters ——— */}
+            {/* Left Sidebar: Filters */}
             <aside style={{ position:"sticky", top:82, height:"calc(100vh - 100px)", overflowY:"auto", paddingRight:4 }}>
               <div className="col" style={{ gap:22 }}>
-                <CheckGroup title="Roles" items={[
-                  ["Vocalist", 142, true],
-                  ["Producer", 88, true],
-                  ["Mixing engineer", 41, false],
-                  ["Drummer", 22, false],
-                  ["Songwriter", 67, false],
-                  ["Guitarist", 35, false],
-                  ["DJ", 18, false],
-                ]} />
+                <CheckGroup
+                  title="Roles"
+                  options={ALL_ROLES}
+                  selected={selectedRoles}
+                  onToggle={toggleRole}
+                />
+                <div style={{ height:1, background:"var(--line-soft)" }} />
+                <CheckGroup
+                  title="Genres"
+                  options={ALL_GENRES}
+                  selected={selectedGenres}
+                  onToggle={toggleGenre}
+                />
                 <div style={{ height:1, background:"var(--line-soft)" }} />
                 <div className="col" style={{ gap:8 }}>
                   <span className="t-eyebrow">Location</span>
-                  <input className="input" placeholder="City or 'Remote'" />
+                  <input
+                    className="input"
+                    placeholder="City or 'Remote'"
+                    value={location}
+                    onChange={e => setLocation(e.target.value)}
+                  />
                   <div className="row" style={{ gap:6, flexWrap:"wrap" }}>
-                    <span className="pill solid">Remote OK</span>
-                    <span className="pill">NYC</span>
-                    <span className="pill">LA</span>
-                    <span className="pill">+</span>
+                    {QUICK_LOCATIONS.map(loc => (
+                      <span key={loc}
+                        className={"pill" + (location === loc ? " solid" : "")}
+                        style={{ cursor:"pointer" }}
+                        onClick={() => setLocation(location === loc ? "" : loc)}>{loc}</span>
+                    ))}
                   </div>
                 </div>
                 <div style={{ height:1, background:"var(--line-soft)" }} />
-                <RadioGroup title="Availability" items={[
-                  ["Open to work", true],
-                  ["Open to projects", false],
-                  ["Busy", false],
-                ]} />
-                <button className="btn" style={{ width:"100%", marginTop:4 }}>Clear all filters</button>
+                <div className="col" style={{ gap:8 }}>
+                  <span className="t-eyebrow">Status</span>
+                  <label className="row" style={{ gap:8, cursor:"pointer", padding:"5px 0" }} onClick={() => setProOnly(p => !p)}>
+                    <span className={"check-box" + (proOnly?" checked":"")}>
+                      {proOnly && <Icon kind="check" size={9} style={{ color:"var(--frame)" }} />}
+                    </span>
+                    <span style={{ fontSize:12.5, color:proOnly?"var(--ink)":"var(--ink-2)" }}>Pro members only</span>
+                  </label>
+                </div>
+                <button
+                  className="btn"
+                  style={{ width:"100%", marginTop:4, opacity:activeFilters===0?0.5:1 }}
+                  onClick={clearAll}
+                  disabled={activeFilters === 0}
+                >
+                  Clear all filters {activeFilters > 0 && `(${activeFilters})`}
+                </button>
               </div>
             </aside>
 
-            {/* ——— Main Browse Grid ——— */}
+            {/* Main Browse Grid */}
             <main style={{ minWidth:0 }}>
+              {/* Search */}
+              <div style={{ marginBottom:18 }}>
+                <div className="row" style={{ gap:8, padding:"10px 14px", background:"var(--surface-2)", borderRadius:999, border:"1px solid var(--line)" }}>
+                  <Icon kind="search" size={15} style={{ color:"var(--ink-3)" }} />
+                  <input
+                    type="text"
+                    placeholder="Search by name, username, or bio…"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    style={{ flex:1, border:0, background:"transparent", outline:"none", fontSize:13, fontFamily:"var(--font-body)", color:"var(--ink)" }}
+                  />
+                  {search && (
+                    <span style={{ cursor:"pointer", color:"var(--ink-3)", fontSize:14 }} onClick={() => setSearch("")}>✕</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Header + sort + view toggle */}
               <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:18, gap:12 }}>
                 <div>
                   <h1 style={{ fontFamily:"var(--font-display)", fontWeight:600, fontSize:22, letterSpacing:"-0.02em" }}>Browse artists</h1>
-                  <span className="t-meta" style={{ fontSize:12 }}>1,284 artists match your filters</span>
+                  <span className="t-meta" style={{ fontSize:12 }}>
+                    {profiles === null ? "Loading…" : `${profiles.length} artist${profiles.length === 1 ? "" : "s"}${activeFilters > 0 ? " match your filters" : ""}`}
+                  </span>
                 </div>
                 <div className="row" style={{ gap:8, flexShrink:0 }}>
-                  {[["newest","Newest"],["active","Most active"],["recommended","Recommended"]].map(([k,label]) => (
-                    <span key={k} className={"pill" + (sortPill===k?" dark":"")} onClick={() => setSort(k)}>{label}</span>
+                  {[["newest","Newest"],["az","A–Z"]].map(([k,label]) => (
+                    <span key={k} className={"pill" + (sort===k?" dark":"")} style={{ cursor:"pointer" }} onClick={() => setSort(k)}>{label}</span>
                   ))}
                   <div style={{ width:1, height:20, background:"var(--line)", margin:"0 2px" }} />
                   <span onClick={() => setView("grid")} style={{ cursor:"pointer", color:view==="grid"?"var(--ink)":"var(--ink-4)" }}><Icon kind="grid" size={16} /></span>
@@ -386,22 +490,26 @@
                 </div>
               </div>
 
-              <div style={{ display:"grid", gridTemplateColumns:view==="grid"?"repeat(3, 1fr)":"1fr", gap:14 }}>
-                <ArtistCard name="Nia Kassim" ini="NK" roles={["Vocalist"]} sub="London · she/her" tags={["R&B","Soul","Gospel"]} active="Active now" verified />
-                <ArtistCard name="Sam Park" ini="SP" roles={["Mixing eng."]} sub="Los Angeles · he/him" tags={["Indie","Shoegaze","Post-rock"]} active="Active 3h ago" />
-                <ArtistCard name="Lina Vega" ini="LV" roles={["Producer"]} sub="Mexico City · she/her" tags={["Electronic","Latin","Pop"]} active="Active 1d ago" />
-                <ArtistCard name="Mo Daniels" ini="MD" roles={["Drummer"]} sub="NYC · he/him" tags={["Soul","Funk","Jazz"]} active="Active 2h ago" verified />
-                <ArtistCard name="Robi K." ini="RK" roles={["Songwriter"]} sub="Berlin · they/them" tags={["Pop","Electronic","Synth"]} active="Active 5h ago" />
-                <ArtistCard name="Iván Reyes" ini="IR" roles={["Vocalist","Guitarist"]} sub="Mexico City · he/him" tags={["Indie","Folk","Alt"]} active="Active 8h ago" />
-                <ArtistCard name="Theo Brooks" ini="TB" roles={["Drummer"]} sub="NYC · he/him" tags={["Soul","R&B","Hip-hop"]} active="Active now" verified />
-                <ArtistCard name="Amaya Laurent" ini="AL" roles={["Songwriter"]} sub="Paris · she/her" tags={["Pop","French","R&B"]} active="Active 4h ago" />
-                <ArtistCard name="James Osei" ini="JO" roles={["Producer"]} sub="London · he/him" tags={["Afrobeats","Dancehall","R&B"]} active="Active 12h ago" />
-              </div>
-
-              {/* Load more */}
-              <div style={{ display:"flex", justifyContent:"center", marginTop:28 }}>
-                <button className="btn" style={{ padding:"10px 32px" }}>Load more artists</button>
-              </div>
+              {profiles === null ? (
+                <div style={{ padding:"60px 0", textAlign:"center", color:"var(--ink-3)", fontFamily:"var(--font-display)", fontSize:13 }}>
+                  Loading artists…
+                </div>
+              ) : profiles.length === 0 ? (
+                <div className="card" style={{ padding:"40px 20px", textAlign:"center", display:"flex", flexDirection:"column", gap:12, alignItems:"center" }}>
+                  <div style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:22, color:"var(--ink)" }}>
+                    {activeFilters > 0 ? "No artists match your filters." : "No artists on Seshn yet."}
+                  </div>
+                  <div style={{ color:"var(--ink-3)", fontSize:14, maxWidth:380 }}>
+                    {activeFilters > 0 ? "Try removing some filters or broadening your search." : "Be the first to invite people. As folks join and complete their profiles, they'll show up here."}
+                  </div>
+                  {activeFilters > 0 && <button className="btn" onClick={clearAll} style={{ marginTop:6 }}>Clear all filters</button>}
+                  {err && <div style={{ color:"var(--danger)", fontSize:12 }}>{err}</div>}
+                </div>
+              ) : (
+                <div style={{ display:"grid", gridTemplateColumns: view === "grid" ? "repeat(3, 1fr)" : "1fr", gap:14 }}>
+                  {profiles.map(p => <ArtistCard key={p.id} profile={p} />)}
+                </div>
+              )}
             </main>
           </div>
         </div>

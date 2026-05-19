@@ -96,6 +96,28 @@
     return res.data;
   }
 
+  // ── Profiles browse ───────────────────────────────────────────────
+  async function listProfiles(opts) {
+    opts = opts || {};
+    var q = sb.from("profiles").select("id, username, display_name, bio, location, pronouns, roles, genres, is_pro, created_at");
+    if (opts.roles && opts.roles.length) q = q.overlaps("roles", opts.roles);
+    if (opts.genres && opts.genres.length) q = q.overlaps("genres", opts.genres);
+    if (opts.location && opts.location.trim()) q = q.ilike("location", "%" + opts.location.trim() + "%");
+    if (opts.search && opts.search.trim()) {
+      var s = opts.search.trim().replace(/[%,]/g, "");
+      q = q.or("display_name.ilike.%" + s + "%,username.ilike.%" + s + "%,bio.ilike.%" + s + "%");
+    }
+    if (opts.excludeId) q = q.neq("id", opts.excludeId);
+    if (opts.proOnly) q = q.eq("is_pro", true);
+    var sort = opts.sort || "newest";
+    if (sort === "newest") q = q.order("created_at", { ascending: false });
+    else q = q.order("display_name", { ascending: true });
+    q = q.limit(opts.limit || 60);
+    var res = await q;
+    if (res.error) { console.error("[seshn] listProfiles error", res.error); return []; }
+    return res.data || [];
+  }
+
   // After auth, route based on whether profile exists.
   async function routeAfterAuth() {
     var u = await getUser();
@@ -115,6 +137,7 @@
     routeAfterAuth: routeAfterAuth,
     createGig: createGig,
     listGigs: listGigs,
-    getGig: getGig
+    getGig: getGig,
+    listProfiles: listProfiles
   };
 })();
