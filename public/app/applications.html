@@ -134,12 +134,14 @@
       const [tab, setTab] = React.useState("active");
 
       React.useEffect(() => {
-        window.seshn.getUser().then(async (u) => {
-          if (!u) { setMe(null); return; }
-          setMe(u);
+        (async () => {
+          const r = await window.seshn.requireProfile({ allowAnon: true });
+          if (!r) return; // redirected
+          if (!r.user) { setMe(null); return; }
+          setMe(r.user);
           const list = await window.seshn.listMyApplications();
           setApps(list);
-        });
+        })();
       }, []);
 
       const updateOne = (next) => {

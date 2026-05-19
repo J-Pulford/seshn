@@ -42,6 +42,12 @@
     React.useEffect(function () {
       if (!window.seshn) return;
       window.seshn.getProfile().then(function (p) { setMe(p); }).catch(function () {});
+      function onUpdate(e) {
+        if (e && e.detail) setMe(e.detail);
+        else window.seshn.getProfile().then(function (p) { setMe(p); }).catch(function () {});
+      }
+      window.addEventListener("seshn:profile-updated", onUpdate);
+      return function () { window.removeEventListener("seshn:profile-updated", onUpdate); };
     }, []);
 
     React.useEffect(function () {

@@ -338,9 +338,11 @@
       React.useEffect(() => {
         let unsub = function () {};
         (async () => {
-          const u = await window.seshn.getUser();
-          setMe(u || null);
-          if (!u) return;
+          const r = await window.seshn.requireProfile({ allowAnon: true });
+          if (!r) return; // redirected
+          if (!r.user) { setMe(null); return; }
+          const u = r.user;
+          setMe(u);
           const list = await refresh();
           // Resolve initial active conversation from ?c=...
           const initialId = new URLSearchParams(window.location.search).get("c");
@@ -352,6 +354,11 @@
             if (c) {
               setConvos(prev => (prev || []).concat([Object.assign({}, c, { unread: false, me_id: u.id })]));
               setActiveId(initialId);
+            } else {
+              // Bad/inaccessible conversation id — clean it from the URL.
+              const url = new URL(window.location.href);
+              url.searchParams.delete("c");
+              window.history.replaceState({}, "", url.toString());
             }
           }
           unsub = await window.seshn.subscribeToMyConversations(() => { refresh(); });

@@ -435,7 +435,7 @@
     }
 
     // ——— Gig Card ———
-    const GigCard = ({ gig, boost, art, role="Vocalist", title="Gig title", desc, tags=[], comp="Paid", time="2h", name="Artist", initials="A", roleTag="PRO", applied=0 }) => (
+    const GigCard = ({ gig, boost, art, role="Vocalist", title="Gig title", desc, tags=[], comp="Paid", time="2h", name="Artist", initials="A", roleTag="PRO" }) => (
       <div className={"gig" + (boost?" boost":"")}>
         <div className="row" style={{ gap:10 }}>
           <span className="avatar md" style={{ background:"var(--ph-2)" }}>
@@ -464,7 +464,7 @@
           {tags.map(t => <span key={t} className="pill">{t}</span>)}
         </div>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, paddingTop:10, borderTop:"1px solid var(--line-soft)" }}>
-          <span className="t-meta">{applied} applied · {gig ? deadlineLabel(gig.deadline) : "3 days left"}</span>
+          <span className="t-meta">{gig ? deadlineLabel(gig.deadline) : ""}</span>
           <div className="row" style={{ gap:8 }}>
             <a href={gig ? "gig.html?id=" + encodeURIComponent(gig.id) : "gig.html"} className="btn sm">View</a>
             <a href={gig ? "gig.html?id=" + encodeURIComponent(gig.id) : "gig.html"} className="btn primary sm">Apply</a>
@@ -474,22 +474,31 @@
     );
 
     // ——— Right Rail Suggestion ———
-    const SuggestedArtist = ({ name, initials, sub, tag }) => (
-      <div className="row" style={{ gap:10 }}>
-        <a href="profile.html">
-          <span className="avatar md" style={{ background:"var(--ph-2)" }}>{initials}</span>
-        </a>
-        <div className="col" style={{ gap:1, flex:1, minWidth:0 }}>
-          <a href="profile.html" style={{ fontFamily:"var(--font-display)", fontSize:12.5, fontWeight:600, color:"var(--ink)", textDecoration:"none" }}>{name}</a>
-          <span className="t-meta">{sub}</span>
+    const SuggestedArtist = ({ profile }) => {
+      const href = "profile.html?u=" + encodeURIComponent(profile.username || "");
+      const sub = [(profile.roles && profile.roles[0]), profile.location].filter(Boolean).join(" · ");
+      return (
+        <div className="row" style={{ gap:10 }}>
+          <a href={href}>
+            <span className="avatar md" style={{ background:"var(--ph-2)", overflow:"hidden" }}>
+              {profile.avatar_url
+                ? <img src={profile.avatar_url} alt="" style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }} />
+                : initialsOf(profile.display_name)}
+            </span>
+          </a>
+          <div className="col" style={{ gap:1, flex:1, minWidth:0 }}>
+            <a href={href} style={{ fontFamily:"var(--font-display)", fontSize:12.5, fontWeight:600, color:"var(--ink)", textDecoration:"none" }}>{profile.display_name || profile.username}</a>
+            <span className="t-meta" style={{ overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{sub || "—"}</span>
+          </div>
+          <a href={href} className="btn sm">View</a>
         </div>
-        <button className="btn sm">Follow</button>
-      </div>
-    );
+      );
+    };
 
     // ——— Main Feed App ———
     const FeedApp = () => {
       const [gigs, setGigs] = React.useState(null); // null = loading
+      const [suggested, setSuggested] = React.useState(null);
       const [err, setErr] = React.useState("");
 
       React.useEffect(() => {
@@ -497,6 +506,12 @@
         window.seshn.listGigs({ limit: 30 })
           .then(list => setGigs(list))
           .catch(e => { setErr(e.message || "Couldn't load feed."); setGigs([]); });
+        // Suggested artists: just pull a handful, excluding self.
+        window.seshn.getUser().then(u => {
+          window.seshn.listProfiles({ limit: 5, excludeId: u ? u.id : null })
+            .then(list => setSuggested(list || []))
+            .catch(() => setSuggested([]));
+        });
       }, []);
 
       return (
@@ -508,36 +523,22 @@
           <aside style={{ position:"sticky", top:82, height:"calc(100vh - 100px)", overflowY:"auto", paddingRight:4 }}>
             <div className="col" style={{ gap:22 }}>
               <FilterGroup title="Role needed" items={[
-                ["Vocalist", 142, true],
-                ["Producer", 88, false],
-                ["Mixing engineer", 41, true],
-                ["Drummer", 22, false],
-                ["Songwriter", 67, false],
-                ["Guitarist", 35, false],
+                ["Vocalist"], ["Producer"], ["Mixing engineer"],
+                ["Drummer"], ["Songwriter"], ["Guitarist"],
               ]} />
               <div style={{ height:1, background:"var(--line-soft)" }} />
               <FilterGroup title="Compensation" radio items={[
-                ["Paid", 218, true],
-                ["Split / royalty", 84, false],
-                ["Trade / barter", 19, false],
-                ["Unpaid", 12, false],
+                ["Paid"], ["Split / royalty"], ["Trade / barter"], ["Unpaid"],
               ]} />
               <div style={{ height:1, background:"var(--line-soft)" }} />
               <FilterGroup title="Genre" items={[
-                ["R&B", 92, true],
-                ["Afrobeats", 38, true],
-                ["Hip-hop", 121, false],
-                ["Indie", 88, false],
-                ["Electronic", 57, false],
-                ["Soul", 44, false],
+                ["R&B"], ["Afrobeats"], ["Hip-hop"], ["Indie"], ["Electronic"], ["Soul"],
               ]} />
               <div style={{ height:1, background:"var(--line-soft)" }} />
               <FilterGroup title="Location" radio items={[
-                ["Remote OK", 184, true],
-                ["Near me", 47, false],
-                ["My city", 12, false],
+                ["Remote OK"], ["Near me"], ["My city"],
               ]} />
-              <button className="btn" style={{ width:"100%", marginTop:4 }}>Clear all filters</button>
+              <span className="t-meta" style={{ fontSize:11, fontStyle:"italic", textAlign:"center" }}>Filters coming soon — try Browse for real filtering.</span>
             </div>
           </aside>
 
@@ -546,7 +547,7 @@
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
               <div>
                 <h1 style={{ fontFamily:"var(--font-display)", fontWeight:600, fontSize:22, letterSpacing:"-0.02em" }}>
-                  Live feed <span style={{ fontSize:13, color:"var(--ink-3)", fontWeight:400 }}>· 24 new today</span>
+                  Live feed
                 </h1>
               </div>
               <div className="row" style={{ gap:6 }}>
@@ -585,7 +586,6 @@
                       initials={initialsOf(owner.display_name)}
                       roleTag={owner.is_pro ? "PRO" : "ART"}
                       time={timeAgo(g.created_at)}
-                      applied={0}
                     />
                   );
                 })
@@ -600,13 +600,13 @@
               <div>
                 <div style={{ fontFamily:"var(--font-display)", fontSize:10, fontWeight:500, letterSpacing:"0.14em", textTransform:"uppercase", color:"var(--ink-3)", marginBottom:12 }}>Suggested for you</div>
                 <div className="col" style={{ gap:12 }}>
-                  <SuggestedArtist name="Nia Kassim" initials="NK" sub="Vocalist · London" tag="R&B" />
-                  <SuggestedArtist name="Sam Park" initials="SP" sub="Mixing eng. · LA" tag="Indie" />
-                  <SuggestedArtist name="Lina Vega" initials="LV" sub="Producer · CDMX" tag="Electronic" />
-                  <SuggestedArtist name="Mo Daniels" initials="MD" sub="Drummer · NYC" tag="Soul" />
-                  <SuggestedArtist name="Robi K." initials="RK" sub="Songwriter · Berlin" tag="Pop" />
+                  {suggested === null
+                    ? <span className="t-meta">Loading…</span>
+                    : suggested.length === 0
+                      ? <span className="t-meta">No suggestions yet — check back soon.</span>
+                      : suggested.map(p => <SuggestedArtist key={p.id} profile={p} />)}
                 </div>
-                <button className="btn ghost" style={{ marginTop:10, fontSize:11, padding:"4px 0", color:"var(--ink-3)" }}>See all suggestions →</button>
+                <a href="browse.html" className="btn ghost" style={{ marginTop:10, fontSize:11, padding:"4px 0", color:"var(--ink-3)", textDecoration:"none", display:"block" }}>See all artists →</a>
               </div>
 
               <div style={{ height:1, background:"var(--line-soft)" }} />
@@ -617,7 +617,7 @@
                 <div style={{ fontFamily:"var(--font-display)", fontWeight:600, fontSize:14, color:"var(--accent-d)", lineHeight:1.3, marginBottom:10 }}>
                   Message anyone first, unlock analytics, get the verified badge.
                 </div>
-                <button className="btn dark sm">Upgrade — $5/mo</button>
+                <a href="pro.html" className="btn dark sm" style={{ textDecoration:"none" }}>Learn more</a>
               </div>
 
               <div style={{ height:1, background:"var(--line-soft)" }} />

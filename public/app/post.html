@@ -123,11 +123,9 @@
       React.useEffect(() => {
         if (!window.seshn) { setErr("Supabase client failed to load."); return; }
         (async () => {
-          const u = await window.seshn.getUser();
-          if (!u) { window.location.href = "auth.html"; return; }
-          const p = await window.seshn.getProfile({ id: u.id });
-          if (!p) { window.location.href = "onboarding.html"; return; }
-          setMe(p);
+          const r = await window.seshn.requireProfile();
+          if (!r) return; // redirected to auth or onboarding
+          setMe(r.profile);
           setAuthState("ready");
         })();
       }, []);

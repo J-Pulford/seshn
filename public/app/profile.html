@@ -179,36 +179,10 @@
   <script src="../js/seshn-nav.js"></script>
 
   <script type="text/babel">
-    // ——— Procedural helpers ———
+    // ——— Procedural helpers (used by the generated cover pattern fallback) ———
     function _hash(s){let h=2166136261>>>0;s=String(s||"x");for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
-    function _rng(seed){let s=seed>>>0;return()=>{s=(s+0x6D2B79F5)>>>0;let t=s;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
     const V_PAL={cream:"#f0e8d6",bone:"#f4f1e9",rust:"#d96e3f",plum:"#5b3858",forest:"#2a4d3a",ink:"#0d0d0d",navy:"#1f3a5f",mint:"#a8ebc8",lime:"#c4e83a",cherry:"#c43d3f",green:"#2CCB73",deep:"#1C8F56",butter:"#f6d36b",fog:"#c9d3d2"};
     const COVER_PALETTES=[[V_PAL.plum,V_PAL.cream,V_PAL.rust],[V_PAL.cream,V_PAL.ink,V_PAL.rust],[V_PAL.forest,V_PAL.mint,V_PAL.butter],[V_PAL.navy,V_PAL.bone,V_PAL.butter],[V_PAL.ink,V_PAL.lime,V_PAL.mint],[V_PAL.cherry,V_PAL.cream,V_PAL.ink],[V_PAL.bone,V_PAL.plum,V_PAL.rust],[V_PAL.rust,V_PAL.cream,V_PAL.ink],[V_PAL.green,V_PAL.ink,V_PAL.bone],[V_PAL.mint,V_PAL.forest,V_PAL.ink]];
-
-    // ——— AlbumArt ———
-    const AlbumArt = ({ seed="track", size=56, variant, radius=6, style }) => {
-      const h=_hash(seed);const v=variant!=null?variant:h%8;const pal=COVER_PALETTES[((h>>>3)%COVER_PALETTES.length)];const [bg,fg,ac]=pal;const rng=_rng(h);
-      const wrap={width:size,height:size,borderRadius:radius,overflow:"hidden",flexShrink:0,display:"inline-block",...style};
-      let inner;
-      if(v===0){const cy=38+(rng()-0.5)*16;inner=<svg viewBox="0 0 100 100"width="100%"height="100%"><rect width="100"height="100"fill={bg}/><circle cx="50"cy={cy}r="26"fill={ac}/><rect x="0"y="68"width="100"height="6"fill={fg}/></svg>;}
-      else if(v===1){const dots=[];for(let y=0;y<10;y++)for(let x=0;x<10;x++){const d=(x+y)/18;const r=Math.max(0.4,4.2*(1-d)+rng()*0.4);dots.push(<circle key={x+"_"+y}cx={5+x*10}cy={5+y*10}r={r}fill={fg}/>);}inner=<svg viewBox="0 0 100 100"width="100%"height="100%"><rect width="100"height="100"fill={bg}/>{dots}</svg>;}
-      else if(v===2){const letter=(seed[0]||"S").toUpperCase();inner=<svg viewBox="0 0 100 100"width="100%"height="100%"><rect width="100"height="100"fill={bg}/><text x="50"y="72"textAnchor="middle"fontFamily="General Sans,sans-serif"fontWeight="700"fontSize="86"letterSpacing="-3"fill={fg}>{letter}</text><rect x="14"y="84"width="72"height="4"fill={ac}/></svg>;}
-      else if(v===3){const bars=[];for(let i=0;i<28;i++){const t=i/27;const env=Math.sin(t*Math.PI)**0.6;const a=10+rng()*80*env;bars.push(<rect key={i}x={5+i*3.4}y={50-a/2}width="2"height={a}fill={fg}rx="1"/>);}inner=<svg viewBox="0 0 100 100"width="100%"height="100%"><rect width="100"height="100"fill={bg}/>{bars}</svg>;}
-      else if(v===4){inner=<svg viewBox="0 0 100 100"width="100%"height="100%"><rect width="100"height="100"fill={bg}/><polygon points="0,0 100,0 0,100"fill={fg}/><circle cx="50"cy="50"r="18"fill={ac}/></svg>;}
-      else if(v===5){inner=<svg viewBox="0 0 100 100"width="100%"height="100%"><rect width="100"height="100"fill={bg}/>{[36,26,16].map((r,i)=><circle key={i}cx="50"cy="50"r={r}fill="none"stroke={fg}strokeWidth={i===1?2:1.2}opacity={0.85-i*0.1}/>)}<circle cx={50+36*Math.cos(((h>>>5)%360)*Math.PI/180)}cy={50+36*Math.sin(((h>>>5)%360)*Math.PI/180)}r="5"fill={ac}/></svg>;}
-      else if(v===6){inner=<svg viewBox="0 0 100 100"width="100%"height="100%"><rect width="100"height="100"fill={bg}/><rect x="18"y="22"width="58"height="58"fill={ac}/><rect x="26"y="30"width="58"height="58"fill={fg}opacity="0.85"/><rect x="34"y="38"width="58"height="58"fill={ac}opacity="0.6"/></svg>;}
-      else{inner=<svg viewBox="0 0 100 100"width="100%"height="100%"><rect width="100"height="55"fill={bg}/><rect y="55"width="100"height="45"fill={fg}/><circle cx="50"cy="55"r="20"fill={ac}/></svg>;}
-      return <div style={wrap}>{inner}</div>;
-    };
-
-    // ——— Waveform ———
-    const Waveform = ({ seed="wf", height=22, bars=56, progress=0.32, style }) => {
-      const h=_hash(seed);const rng=_rng(h);const arr=[];
-      for(let i=0;i<bars;i++){const t=i/(bars-1);const env=0.35+0.65*(Math.sin(t*Math.PI)**0.6);arr.push((0.18+0.82*rng())*env);}
-      const W=bars*3;const gap=1.2;const bw=(W/bars)-gap;
-      return <svg viewBox={`0 0 ${W} ${height}`}preserveAspectRatio="none"width="100%"height={height}style={{display:"block",...style}}>
-        {arr.map((a,i)=>{const x=i*(W/bars);const bh=Math.max(2,a*height);const y=(height-bh)/2;const isPlayed=(i/bars)<progress;return <rect key={i}x={x}y={y}width={bw}height={bh}fill={isPlayed?"var(--ink)":"rgba(0,0,0,0.16)"}rx={bw/2}/>;})}</svg>;
-    };
 
     // ——— CoverHeader ———
     // If imageUrl is provided, renders that as the cover (object-fit: cover).
@@ -254,83 +228,8 @@
       return <span style={{width:size,height:size,display:"inline-flex",alignItems:"center",justifyContent:"center",flexShrink:0,...style}} dangerouslySetInnerHTML={{__html:svg}}/>;
     };
 
-    // ——— Star Rating ———
-    const StarRow = ({ value=0, size=13, color="var(--ink)" }) => {
-      const stars=[];
-      for(let i=1;i<=5;i++){
-        const fill=Math.min(1,Math.max(0,value-(i-1)));
-        stars.push(
-          <span key={i} style={{position:"relative",width:size,height:size,display:"inline-block"}}>
-            <svg viewBox="0 0 24 24"width={size}height={size}style={{position:"absolute",inset:0}}>
-              <path d="M12 3l2.7 6 6.3.6-4.8 4.2L17.6 20 12 16.7 6.4 20l1.5-6.2L3 9.6 9.3 9z"fill="none"stroke={color}strokeWidth="1.5"/>
-            </svg>
-            <span style={{position:"absolute",inset:0,overflow:"hidden",width:`${fill*100}%`}}>
-              <svg viewBox="0 0 24 24"width={size}height={size}>
-                <path d="M12 3l2.7 6 6.3.6-4.8 4.2L17.6 20 12 16.7 6.4 20l1.5-6.2L3 9.6 9.3 9z"fill={color}/>
-              </svg>
-            </span>
-          </span>
-        );
-      }
-      return <span style={{display:"inline-flex",gap:2}}>{stars}</span>;
-    };
-
-    const Rating = ({ value, count, size=13 }) => (
-      <span style={{display:"inline-flex",alignItems:"center",gap:6}}>
-        <StarRow value={value} size={size}/>
-        <b style={{fontFamily:"var(--font-display)",fontWeight:600,fontSize:size}}>{value.toFixed(1)}</b>
-        {count!=null && <span style={{fontSize:size-2,color:"var(--ink-3)"}}>· {count} reviews</span>}
-      </span>
-    );
-
-    // ——— Testimonial Card ———
-    const Testimonial = ({ name, ini, role, rating, quote, project, date }) => {
-      const bgColors=["#f5e6d3","#d3e8f5","#e8d3f5","#d3f5e0","#f5d3d3","#f5f0d3"];
-      const bg=bgColors[_hash(ini)%bgColors.length];
-      return (
-        <div className="card" style={{padding:18,display:"flex",flexDirection:"column",gap:10,borderRadius:12}}>
-          <div className="row" style={{gap:10}}>
-            <span className="avatar sm" style={{background:bg,color:"#3a3a38",fontFamily:"var(--font-display)",fontWeight:700,fontSize:10}}>{ini}</span>
-            <div className="col" style={{gap:1,flex:1,minWidth:0}}>
-              <div className="row" style={{gap:6}}>
-                <span style={{fontFamily:"var(--font-display)",fontWeight:600,fontSize:13}}>{name}</span>
-                <span className="t-meta">· {role}</span>
-              </div>
-              <StarRow value={rating} size={11}/>
-            </div>
-            <span className="t-meta" style={{fontSize:10.5,flexShrink:0}}>{date}</span>
-          </div>
-          <div style={{fontSize:13.5,lineHeight:1.55,color:"var(--ink-2)"}}>
-            <span style={{color:"var(--accent-d)",fontFamily:"var(--font-display)",fontWeight:700,fontSize:18,marginRight:4}}>"</span>
-            {quote}
-          </div>
-          {project && (
-            <div className="row" style={{gap:6,paddingTop:8,borderTop:"1px solid var(--line-soft)"}}>
-              <span className="pill" style={{fontSize:10}}>Project · {project}</span>
-            </div>
-          )}
-        </div>
-      );
-    };
-
-    // ——— Audio Player ———
-    const AudioPlayer = ({ title, artist, source, seed, playing, progress=0 }) => (
-      <div className="audio">
-        <AlbumArt seed={seed||title} size={42} radius={6}/>
-        <button className={"play-btn" + (playing?" playing":"")} />
-        <div className="col" style={{flex:1,gap:3,minWidth:0}}>
-          <div className="row" style={{justifyContent:"space-between",alignItems:"baseline"}}>
-            <b style={{fontFamily:"var(--font-display)",fontSize:12,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{title}</b>
-            <span style={{fontSize:10.5,color:"var(--ink-3)",flexShrink:0,marginLeft:8}}>{source}</span>
-          </div>
-          <Waveform seed={seed||title} height={22} progress={progress||0.12}/>
-          <span style={{fontSize:10.5,color:"var(--ink-3)"}}>{artist}</span>
-        </div>
-      </div>
-    );
-
-    // ——— Gig Card ———
-    const GigCard = ({ role="Vocalist", title="Gig title", tags=[], comp="Paid", time="2h", name="Artist", initials="A", roleTag="PRO", applied=12 }) => (
+    // ——— Gig Card (read-only summary used on the profile) ———
+    const GigCard = ({ role="Vocalist", title="Gig title", tags=[], comp="Paid", time="2h", name="Artist", initials="A", roleTag="PRO" }) => (
       <div className="gig">
         <div className="row" style={{gap:10}}>
           <span className="avatar md" style={{background:"var(--ph-2)"}}>
@@ -350,16 +249,11 @@
           </div>
         </div>
         <div style={{fontFamily:"var(--font-display)",fontWeight:600,fontSize:16,letterSpacing:"-0.012em",lineHeight:1.2}}>{title}</div>
-        <div className="row" style={{gap:6,flexWrap:"wrap"}}>
-          {tags.map(t=><span key={t} className="pill">{t}</span>)}
-        </div>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,paddingTop:10,borderTop:"1px solid var(--line-soft)"}}>
-          <span className="t-meta">{applied} applied · 3 days left</span>
-          <div className="row" style={{gap:8}}>
-            <button className="btn sm">View</button>
-            <button className="btn primary sm">Apply</button>
+        {tags.length > 0 && (
+          <div className="row" style={{gap:6,flexWrap:"wrap"}}>
+            {tags.map(t=><span key={t} className="pill">{t}</span>)}
           </div>
-        </div>
+        )}
       </div>
     );
 
@@ -507,6 +401,7 @@
             avatar_url: avatarUrl || "",
             cover_url: coverUrl || ""
           });
+          window.seshn.emitProfileUpdated(updated);
           onSaved(updated);
         } catch (e) {
           setErr((e && e.message) || "Couldn't save.");
@@ -671,7 +566,6 @@
               </>
             ) : (
               <>
-                <button className="btn" style={{backdropFilter:"blur(8px)",background:"rgba(255,255,255,0.9)"}}>Invite to project</button>
                 <button className="btn primary" onClick={async () => {
                   try {
                     const me = await window.seshn.getUser();
@@ -696,12 +590,10 @@
             <h1 className="t-h1" style={{fontSize:30}}>{profile.display_name}</h1>
           </div>
           <div className="row" style={{gap:14,marginBottom:10,flexWrap:"wrap"}}>
-            <Rating value={0} count={0} size={13}/>
-            {profile.location && <><span className="dot"/>
-            <span className="t-meta" style={{display:"flex",alignItems:"center",gap:5}}>
+            {profile.location && <span className="t-meta" style={{display:"flex",alignItems:"center",gap:5}}>
               <Icon kind="pin" size={12}/> {profile.location}
-            </span></>}
-            <span className="dot"/>
+            </span>}
+            {profile.location && <span className="dot"/>}
             <span className="t-meta">
               <span style={{width:7,height:7,background:"var(--accent)",borderRadius:"50%",display:"inline-block",marginRight:5}}/>
               New on Seshn
@@ -725,56 +617,6 @@
               <p style={{fontSize:14,lineHeight:1.65,color:"var(--ink-2)",maxWidth:680,whiteSpace:"pre-wrap"}}>
                 {profile.bio || <span style={{color:"var(--ink-3)",fontStyle:"italic"}}>No bio yet{isOwner ? " — add one in your profile settings." : "."}</span>}
               </p>
-            </section>
-
-            {/* Portfolio */}
-            <section>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-                <div className="row" style={{gap:10,alignItems:"baseline"}}>
-                  <div className="t-eyebrow">Portfolio</div>
-                  <span className="pill solid" style={{fontSize:9}}>▶ now playing · v3 topline</span>
-                </div>
-                <span className="t-meta">6 tracks</span>
-              </div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-                <AudioPlayer title="Sunday Drives" artist="Maya O. ft. Lojay · 3:24" source="SoundCloud" seed="sunday-drives" playing progress={0.42}/>
-                <AudioPlayer title="Coast (demo)" artist="Maya O. · 2:51" source="Spotify" seed="coast-demo" progress={0}/>
-                <AudioPlayer title="Hold The Line" artist="prod. Maya O. · 4:02" source="YouTube" seed="hold-the-line" progress={0}/>
-                <AudioPlayer title="Morning Light" artist="Maya O. · 3:18" source="SoundCloud" seed="morning-light" progress={0}/>
-              </div>
-            </section>
-
-            {/* Testimonials */}
-            <section>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-                <div className="row" style={{gap:12,alignItems:"center"}}>
-                  <div className="t-eyebrow">From collaborators</div>
-                  <Rating value={4.9} size={12}/>
-                </div>
-                <span className="t-meta" style={{cursor:"pointer"}}>See all 28 →</span>
-              </div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-                <Testimonial
-                  name="Nia Kassim" ini="NK" role="Vocalist" rating={5}
-                  date="May 2026" project="Sundowner EP"
-                  quote="Maya turned a sketch into a full record in two sessions. Knows when to push and when to let the song breathe."
-                />
-                <Testimonial
-                  name="Theo Brooks" ini="TB" role="Drummer" rating={5}
-                  date="Apr 2026" project="Live run · NYC"
-                  quote="Studio brain, performer ear. Sent stems on time and the notes were always musical, never vague."
-                />
-                <Testimonial
-                  name="Sam Park" ini="SP" role="Mixing eng." rating={4.5}
-                  date="Mar 2026" project="Coast (demo)"
-                  quote="Best client communicator on Seshn full stop. Clear references, clear budget, paid early."
-                />
-                <Testimonial
-                  name="Iván Reyes" ini="IR" role="Producer" rating={5}
-                  date="Feb 2026" project="Hold The Line"
-                  quote="We're already booking the next one. That's the highest review I can give."
-                />
-              </div>
             </section>
 
             {/* Recent posts */}
@@ -802,7 +644,6 @@
                         initials={profileInitialsOf(profile.display_name)}
                         roleTag={profile.is_pro ? "PRO" : "ART"}
                         time={profileTimeAgo(g.created_at)}
-                        applied={0}
                       />
                     </a>
                   ))
@@ -814,59 +655,27 @@
           {/* ——— Right Sidebar ——— */}
           <aside className="col" style={{gap:16,position:"sticky",top:82,height:"fit-content"}}>
 
-            {/* Looking for */}
-            <div className="card" style={{padding:18}}>
-              <div className="t-eyebrow" style={{marginBottom:12}}>Looking for</div>
-              <div className="col" style={{gap:12}}>
-                {[
-                  ["Mixing engineers","for an EP coming in Q3"],
-                  ["Co-writers","R&B / soul-leaning"],
-                  ["Session bassists","NYC, paid sessions"],
-                ].map(([t,s]) => (
-                  <div key={t} className="row" style={{gap:10,alignItems:"flex-start"}}>
-                    <span style={{width:7,height:7,borderRadius:"50%",background:"var(--accent)",marginTop:5,flexShrink:0}}/>
-                    <div className="col" style={{gap:2}}>
-                      <span style={{fontFamily:"var(--font-display)",fontWeight:600,fontSize:13}}>{t}</span>
-                      <span className="t-meta" style={{fontSize:11}}>{s}</span>
+            {/* Roles + genres */}
+            {((profile.roles && profile.roles.length) || (profile.genres && profile.genres.length)) ? (
+              <div className="card" style={{padding:18}}>
+                {profile.roles && profile.roles.length > 0 && (
+                  <div style={{marginBottom: profile.genres && profile.genres.length ? 14 : 0}}>
+                    <div className="t-eyebrow" style={{marginBottom:8}}>Roles</div>
+                    <div className="row" style={{gap:6,flexWrap:"wrap"}}>
+                      {profile.roles.map(r => <span key={r} className="pill accent">{r}</span>)}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* On Seshn stats */}
-            <div className="card" style={{padding:18}}>
-              <div className="t-eyebrow" style={{marginBottom:12}}>On Seshn</div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
-                {[
-                  ["Projects","12"],
-                  ["Collaborators","38"],
-                  ["Response time","~4h"],
-                  ["Member since","2024"],
-                ].map(([k,v]) => (
-                  <div key={k} className="col" style={{gap:2}}>
-                    <span className="t-meta">{k}</span>
-                    <span style={{fontFamily:"var(--font-display)",fontWeight:600,fontSize:20,letterSpacing:"-0.01em"}}>{v}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Links */}
-            <div className="card hairline" style={{padding:18}}>
-              <div className="t-eyebrow" style={{marginBottom:12}}>Links</div>
-              <div className="col" style={{gap:10}}>
-                {["Instagram","SoundCloud","Spotify for Artists"].map(l => (
-                  <div key={l} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"4px 0"}}>
-                    <div className="row" style={{gap:8}}>
-                      <span style={{width:7,height:7,borderRadius:2,background:"var(--ph-2)",display:"inline-block"}}/>
-                      <span style={{fontSize:13}}>{l}</span>
+                )}
+                {profile.genres && profile.genres.length > 0 && (
+                  <div>
+                    <div className="t-eyebrow" style={{marginBottom:8}}>Genres</div>
+                    <div className="row" style={{gap:6,flexWrap:"wrap"}}>
+                      {profile.genres.map(g => <span key={g} className="pill">{g}</span>)}
                     </div>
-                    <Icon kind="chevron" size={13} style={{color:"var(--ink-3)"}}/>
                   </div>
-                ))}
+                )}
               </div>
-            </div>
+            ) : null}
 
             {/* Share / contact CTA */}
             <div style={{padding:"14px 0",borderTop:"1px solid var(--line-soft)"}}>

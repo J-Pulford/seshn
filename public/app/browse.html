@@ -355,10 +355,13 @@
       const [meId, setMeId] = React.useState(null);
       const [err, setErr] = React.useState("");
 
-      // Get current user id (to exclude self from results)
+      // Auth gate: signed-out users can browse; signed-in users without a
+      // profile get sent to onboarding so they can fill it in first.
       React.useEffect(() => {
         if (!window.seshn) return;
-        window.seshn.getUser().then(u => { if (u) setMeId(u.id); });
+        window.seshn.requireProfile({ allowAnon: true }).then(r => {
+          if (r && r.user) setMeId(r.user.id);
+        });
       }, []);
 
       // Debounced fetch on any filter change

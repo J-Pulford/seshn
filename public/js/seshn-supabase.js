@@ -414,6 +414,36 @@
     else window.location.href = "/app/onboarding.html";
   }
 
+  // Gate every signed-in page that requires a complete profile.
+  // - Returns { user, profile } when ready.
+  // - Returns null + redirects when missing auth (-> auth.html?next=...) or
+  //   missing profile (-> onboarding.html).
+  // Pass { allowAnon: true } to fetch the user/profile without redirecting
+  // when signed out (useful for pages that have a public read view).
+  async function requireProfile(opts) {
+    opts = opts || {};
+    var u = await getUser();
+    if (!u) {
+      if (opts.allowAnon) return { user: null, profile: null };
+      var next = window.location.pathname + window.location.search;
+      window.location.href = "auth.html?next=" + encodeURIComponent(next);
+      return null;
+    }
+    var p = await getProfile({ id: u.id });
+    if (!p || !p.username) {
+      window.location.href = "onboarding.html";
+      return null;
+    }
+    return { user: u, profile: p };
+  }
+
+  // Notify any listening UI (e.g. the nav) that the current user's profile
+  // row has changed (avatar, name, etc.) so they can re-render without
+  // requiring a page reload.
+  function emitProfileUpdated(profile) {
+    try { window.dispatchEvent(new CustomEvent("seshn:profile-updated", { detail: profile })); } catch (e) {}
+  }
+
   window.seshn = {
     sb: sb,
     getUser: getUser,
@@ -425,6 +455,8 @@
     sendMagicLink: sendMagicLink,
     signOut: signOut,
     routeAfterAuth: routeAfterAuth,
+    requireProfile: requireProfile,
+    emitProfileUpdated: emitProfileUpdated,
     createGig: createGig,
     listGigs: listGigs,
     getGig: getGig,
