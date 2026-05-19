@@ -137,10 +137,285 @@
       return "Deadline · " + new Date(date).toLocaleDateString(undefined, { month: "short", day: "numeric" });
     }
 
+    function statusPillClass(status) {
+      if (status === "accepted") return "pill accent";
+      if (status === "rejected") return "pill";
+      if (status === "withdrawn") return "pill";
+      return "pill solid";
+    }
+    function statusLabel(status) {
+      return status ? status.charAt(0).toUpperCase() + status.slice(1) : "";
+    }
+
+    function ApplyForm({ gig, owner, onApplied }) {
+      const [pitch, setPitch] = React.useState("");
+      const [link, setLink] = React.useState("");
+      const [submitting, setSubmitting] = React.useState(false);
+      const [err, setErr] = React.useState("");
+      const canSubmit = pitch.trim().length >= 10 && !submitting;
+
+      const submit = async () => {
+        setErr("");
+        setSubmitting(true);
+        try {
+          var app = await window.seshn.applyToGig(gig.id, {
+            pitch: pitch.trim(),
+            attachment_url: link.trim() || null
+          });
+          onApplied(app);
+        } catch (e) {
+          if (e && e.code === "23505") setErr("You've already applied to this gig.");
+          else setErr((e && e.message) || "Couldn't send application.");
+        } finally {
+          setSubmitting(false);
+        }
+      };
+
+      return (
+        <div className="apply-section" style={{ marginBottom: 28 }}>
+          <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, marginBottom: 6 }}>Apply</div>
+          <div className="t-meta" style={{ marginBottom: 16 }}>
+            {(owner.display_name || "The poster").split(" ")[0]} sees your pitch and any attached link.
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <textarea
+              className="input-field"
+              rows={5}
+              placeholder="Short pitch — what you'd bring, references, turnaround time… (min 10 chars)"
+              value={pitch}
+              onChange={e => setPitch(e.target.value)}
+              maxLength={2000}
+              disabled={submitting}
+            />
+            <input
+              className="input-field"
+              style={{ resize: "none", height: 38 }}
+              placeholder="Optional: link to a portfolio track (SoundCloud, Drive, Dropbox…)"
+              value={link}
+              onChange={e => setLink(e.target.value)}
+              maxLength={500}
+              disabled={submitting}
+            />
+            {err && <div style={{ fontSize: 12, color: "var(--cherry, #c43d3f)" }}>{err}</div>}
+            <div style={{ display: "flex", gap: 10, alignItems: "center", justifyContent: "space-between" }}>
+              <span className="t-meta">{pitch.length}/2000</span>
+              <button
+                className="btn primary lg"
+                onClick={submit}
+                disabled={!canSubmit}
+                style={{ opacity: canSubmit ? 1 : 0.5, cursor: canSubmit ? "pointer" : "not-allowed" }}
+              >
+                {submitting ? "Sending…" : "Send application"}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function ApplicationStatus({ application, onWithdrawn }) {
+      const [busy, setBusy] = React.useState(false);
+      const [err, setErr] = React.useState("");
+      const status = application.status;
+      const withdraw = async () => {
+        if (!confirm("Withdraw your application? You can re-apply only by contacting the poster.")) return;
+        setBusy(true); setErr("");
+        try {
+          const updated = await window.seshn.updateApplicationStatus(application.id, "withdrawn");
+          onWithdrawn(updated);
+        } catch (e) {
+          setErr((e && e.message) || "Couldn't withdraw.");
+        } finally {
+          setBusy(false);
+        }
+      };
+
+      const headline = {
+        pending:   "Your application is in.",
+        accepted:  "You're in — accepted!",
+        rejected:  "Not this time.",
+        withdrawn: "You withdrew your application."
+      }[status] || "Application sent.";
+
+      const sub = {
+        pending:   "The poster will be in touch if you're a fit.",
+        accepted:  "The poster accepted. Open a DM to take it from here.",
+        rejected:  "The poster passed on this one. Keep going — there's more.",
+        withdrawn: "This gig is closed for you. You can apply to others freely."
+      }[status] || "";
+
+      return (
+        <div className="apply-section" style={{ marginBottom: 28 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18 }}>{headline}</div>
+            <span className={statusPillClass(status)}>{statusLabel(status)}</span>
+          </div>
+          <div className="t-meta" style={{ marginBottom: 14, fontSize: 12.5 }}>{sub}</div>
+          <div className="card hairline" style={{ background: "var(--surface)", padding: 14 }}>
+            <div className="t-eyebrow" style={{ marginBottom: 8 }}>Your pitch</div>
+            <p style={{ fontSize: 13, lineHeight: 1.55, color: "var(--ink-2)", whiteSpace: "pre-wrap" }}>{application.pitch}</p>
+            {application.attachment_url && (
+              <a
+                href={application.attachment_url}
+                target="_blank"
+                rel="noopener"
+                style={{ display: "inline-block", marginTop: 10, fontSize: 12, color: "var(--ink)", textDecoration: "underline" }}
+              >
+                {application.attachment_url}
+              </a>
+            )}
+          </div>
+          {status === "pending" && (
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 12 }}>
+              <button className="btn sm" onClick={withdraw} disabled={busy}>
+                {busy ? "…" : "Withdraw application"}
+              </button>
+            </div>
+          )}
+          {err && <div style={{ fontSize: 12, color: "var(--cherry, #c43d3f)", marginTop: 8 }}>{err}</div>}
+        </div>
+      );
+    }
+
+    function applicantInitials(name) {
+      if (!name) return "··";
+      const parts = name.trim().split(/\s+/).filter(Boolean);
+      if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+      return (parts[0] || "··").slice(0, 2).toUpperCase();
+    }
+
+    function OwnerApplicationCard({ app, onChange }) {
+      const a = app.applicant || {};
+      const [busy, setBusy] = React.useState(false);
+      const [err, setErr] = React.useState("");
+      const profileHref = "profile.html?u=" + encodeURIComponent(a.username || "");
+
+      const setStatus = async (next) => {
+        setBusy(true); setErr("");
+        try {
+          const updated = await window.seshn.updateApplicationStatus(app.id, next);
+          onChange(updated);
+        } catch (e) {
+          setErr((e && e.message) || "Couldn't update.");
+        } finally {
+          setBusy(false);
+        }
+      };
+
+      return (
+        <div className="card hairline" style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+            <a href={profileHref} className="avatar" style={{ width: 40, height: 40, textDecoration: "none", color: "var(--ink-3)" }}>
+              {applicantInitials(a.display_name)}
+            </a>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <a href={profileHref} style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14, color: "var(--ink)", textDecoration: "none" }}>
+                  {a.display_name || "Applicant"}
+                </a>
+                {a.is_pro && <span className="pill solid" style={{ fontSize: 9, padding: "2px 6px" }}>✓ Pro</span>}
+                <span className={statusPillClass(app.status)} style={{ fontSize: 10 }}>{statusLabel(app.status)}</span>
+              </div>
+              <div className="t-meta" style={{ marginTop: 2 }}>
+                @{a.username || "—"}
+                {a.location && " · " + a.location}
+                {a.roles && a.roles.length > 0 && " · " + a.roles.slice(0, 2).join(" · ")}
+                {" · Applied " + new Date(app.created_at).toLocaleDateString()}
+              </div>
+            </div>
+          </div>
+          <p style={{ fontSize: 13, lineHeight: 1.55, color: "var(--ink-2)", whiteSpace: "pre-wrap" }}>{app.pitch}</p>
+          {app.attachment_url && (
+            <a href={app.attachment_url} target="_blank" rel="noopener" style={{ fontSize: 12, color: "var(--ink)", textDecoration: "underline", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {app.attachment_url}
+            </a>
+          )}
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 8, borderTop: "1px solid var(--line-soft)" }}>
+            <a href={profileHref} className="btn sm">View profile</a>
+            {app.status === "pending" && (
+              <>
+                <button className="btn sm" onClick={() => setStatus("rejected")} disabled={busy}>Pass</button>
+                <button className="btn primary sm" onClick={() => setStatus("accepted")} disabled={busy}>Accept</button>
+              </>
+            )}
+            {app.status === "accepted" && (
+              <button className="btn sm" onClick={() => setStatus("pending")} disabled={busy}>Undo accept</button>
+            )}
+            {app.status === "rejected" && (
+              <button className="btn sm" onClick={() => setStatus("pending")} disabled={busy}>Undo pass</button>
+            )}
+          </div>
+          {err && <div style={{ fontSize: 11, color: "var(--cherry, #c43d3f)" }}>{err}</div>}
+        </div>
+      );
+    }
+
+    function OwnerApplicationsList({ gig }) {
+      const [apps, setApps] = React.useState(null);
+
+      React.useEffect(() => {
+        window.seshn.listApplicationsForGig(gig.id).then(setApps);
+      }, [gig.id]);
+
+      const updateOne = (updated) => {
+        setApps(prev => prev.map(a => a.id === updated.id ? Object.assign({}, a, updated) : a));
+      };
+
+      const pendingCount = (apps || []).filter(a => a.status === "pending").length;
+      const acceptedCount = (apps || []).filter(a => a.status === "accepted").length;
+
+      return (
+        <div className="apply-section" style={{ marginBottom: 28 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18 }}>
+              Applications {apps && `(${apps.length})`}
+            </div>
+            {apps && apps.length > 0 && (
+              <span className="t-meta">{pendingCount} pending · {acceptedCount} accepted</span>
+            )}
+          </div>
+          <div className="t-meta" style={{ marginBottom: 16 }}>You're the owner — these are people who pitched themselves for this gig.</div>
+          {apps === null ? (
+            <div className="t-meta">Loading applications…</div>
+          ) : apps.length === 0 ? (
+            <div className="card hairline" style={{ padding: 18, textAlign: "center" }}>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14, color: "var(--ink)", marginBottom: 4 }}>No applications yet.</div>
+              <div className="t-meta">Share the link or boost the gig to get pitches faster.</div>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {apps.map(a => <OwnerApplicationCard key={a.id} app={a} onChange={updateOne} />)}
+            </div>
+          )}
+        </div>
+      );
+    }
+
     function GigPage({ gig }) {
       const owner = gig.owner || {};
       const isBoosted = gig.boosted_until && new Date(gig.boosted_until) > new Date();
       const body = (gig.description || "").split(/\n\n+/).filter(Boolean);
+
+      const [me, setMe] = React.useState(undefined); // undefined = loading, null = not signed in
+      const [myApp, setMyApp] = React.useState(undefined);
+
+      React.useEffect(() => {
+        let cancelled = false;
+        window.seshn.getUser().then(async (u) => {
+          if (cancelled) return;
+          setMe(u || null);
+          if (u && u.id !== owner.id) {
+            const a = await window.seshn.getMyApplication(gig.id);
+            if (!cancelled) setMyApp(a || null);
+          } else {
+            setMyApp(null);
+          }
+        });
+        return () => { cancelled = true; };
+      }, [gig.id, owner.id]);
+
+      const isOwner = !!(me && me.id === owner.id);
+      const isClosed = gig.status === "closed";
 
       return (
         <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
@@ -215,21 +490,33 @@
                 </div>
               )}
 
-              {/* Apply */}
-              <div className="apply-section" style={{ marginBottom: 28 }}>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, marginBottom: 6 }}>Apply</div>
-                <div className="t-meta" style={{ marginBottom: 16 }}>{(owner.display_name || "The poster").split(" ")[0]} sees your pitch + 1 attached track.</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <textarea className="input-field" rows={5} placeholder="Short pitch — what you'd bring, references, turnaround time…" />
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <div className="attach-box" style={{ flex: 1 }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m21 12-8.5 8.5a5 5 0 1 1-7-7L14 5a3 3 0 1 1 4 4l-9 9a1 1 0 1 1-1.5-1.5L15 8"/></svg>
-                      Attach a portfolio track →
-                    </div>
-                    <button className="btn primary lg" onClick={() => alert("Applications are coming in the next slice — for now, message " + (owner.display_name || "the poster") + " directly.")}>Send application</button>
-                  </div>
+              {/* Apply / Owner view / Sign-in CTA */}
+              {me === undefined ? (
+                <div className="apply-section" style={{ marginBottom: 28 }}>
+                  <div className="t-meta">Loading…</div>
                 </div>
-              </div>
+              ) : isOwner ? (
+                <OwnerApplicationsList gig={gig} />
+              ) : me === null ? (
+                <div className="apply-section" style={{ marginBottom: 28, textAlign: "center" }}>
+                  <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, marginBottom: 6 }}>Sign in to apply</div>
+                  <div className="t-meta" style={{ marginBottom: 14 }}>You'll need a Seshn account to send a pitch to {(owner.display_name || "the poster").split(" ")[0]}.</div>
+                  <a href={"auth.html?next=" + encodeURIComponent(window.location.pathname + window.location.search)} className="btn primary lg">Sign in to apply</a>
+                </div>
+              ) : isClosed ? (
+                <div className="apply-section" style={{ marginBottom: 28, textAlign: "center" }}>
+                  <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, marginBottom: 6 }}>This gig is closed</div>
+                  <div className="t-meta">{(owner.display_name || "The poster").split(" ")[0]} is no longer taking applications.</div>
+                </div>
+              ) : myApp === undefined ? (
+                <div className="apply-section" style={{ marginBottom: 28 }}>
+                  <div className="t-meta">Checking…</div>
+                </div>
+              ) : myApp ? (
+                <ApplicationStatus application={myApp} onWithdrawn={setMyApp} />
+              ) : (
+                <ApplyForm gig={gig} owner={owner} onApplied={setMyApp} />
+              )}
             </div>
 
             {/* Right sidebar */}
@@ -280,11 +567,30 @@
                 </div>
               </div>
 
-              {/* Apply CTA repeated */}
-              <button className="btn primary" style={{ padding: "14px 20px", fontSize: 14, borderRadius: 10 }}>Apply to this gig →</button>
+              {/* Apply CTA repeated — only shown when applying makes sense */}
+              {!isOwner && !isClosed && myApp === null && me !== null && (
+                <button
+                  className="btn primary"
+                  style={{ padding: "14px 20px", fontSize: 14, borderRadius: 10 }}
+                  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                >
+                  Apply to this gig →
+                </button>
+              )}
+              {!isOwner && myApp && (
+                <div className="card hairline" style={{ textAlign: "center", padding: 14 }}>
+                  <span className={statusPillClass(myApp.status)}>{statusLabel(myApp.status)}</span>
+                  <div className="t-meta" style={{ marginTop: 6 }}>Your application</div>
+                </div>
+              )}
+              {isOwner && (
+                <a href="applications.html" className="btn" style={{ padding: "12px 16px", fontSize: 13, justifyContent: "center" }}>
+                  Manage all your gigs
+                </a>
+              )}
 
               <div style={{ textAlign: "center", fontSize: 11, color: "var(--ink-4)" }}>
-                Free to apply · no account required to browse
+                {isOwner ? "You own this gig" : "Free to apply · no account required to browse"}
               </div>
             </div>
           </div>

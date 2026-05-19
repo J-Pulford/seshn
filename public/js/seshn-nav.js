@@ -1,6 +1,6 @@
 // Seshn — shared top nav for the in-app pages.
 // Loaded as type="text/babel" AFTER seshn-supabase.js. Defines window.SeshnAppNav.
-// Pages then do: <SeshnAppNav active="feed" /> (or "browse" | "inbox" | "profile" | null).
+// Pages then do: <SeshnAppNav active="feed" /> (or "browse" | "applications" | "inbox" | "profile" | null).
 
 (function () {
   function navInitials(name) {
@@ -25,7 +25,7 @@
 
   // SeshnAppNav — sticky top nav used on every signed-in page.
   // Props:
-  //   active: "feed" | "browse" | "inbox" | "profile" | null
+  //   active: "feed" | "browse" | "applications" | "inbox" | "profile" | null
   //   showSearch: bool (default true)
   //   showPostButton: bool (default true)
   function SeshnAppNav(props) {
@@ -102,7 +102,8 @@
           "div",
           { style: { display: "flex", alignItems: "center", gap: 4, marginLeft: 6 } },
           React.createElement("a", { href: "feed.html", style: navLinkStyle(active === "feed") }, "Feed"),
-          React.createElement("a", { href: "browse.html", style: navLinkStyle(active === "browse") }, "Browse")
+          React.createElement("a", { href: "browse.html", style: navLinkStyle(active === "browse") }, "Browse"),
+          React.createElement("a", { href: "applications.html", style: navLinkStyle(active === "applications") }, "Applications")
         ),
 
         // Search bar
