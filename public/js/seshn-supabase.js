@@ -390,17 +390,95 @@
     return res.data || [];
   }
 
-  async function sendMessage(conversationId, body) {
+  // Send a message. body may be empty IFF attachment is provided.
+  // attachment shape: { url, name, kind, size_bytes, duration_ms?, mime }
+  async function sendMessage(conversationId, body, attachment) {
     var u = await getUser();
     if (!u) throw new Error("Not signed in");
-    if (!conversationId || !body || !body.trim()) throw new Error("Empty message");
-    var res = await sb
-      .from("messages")
-      .insert({ conversation_id: conversationId, sender_id: u.id, body: body.trim() })
-      .select("*")
-      .single();
+    if (!conversationId) throw new Error("Missing conversation");
+    var trimmed = (body || "").trim();
+    if (!trimmed && !attachment) throw new Error("Empty message");
+    var row = { conversation_id: conversationId, sender_id: u.id, body: trimmed };
+    if (attachment) {
+      row.attachment_url         = attachment.url;
+      row.attachment_name        = attachment.name || null;
+      row.attachment_kind        = attachment.kind || "file";
+      row.attachment_size_bytes  = attachment.size_bytes != null ? attachment.size_bytes : null;
+      row.attachment_duration_ms = attachment.duration_ms != null ? attachment.duration_ms : null;
+      row.attachment_mime        = attachment.mime || null;
+    }
+    var res = await sb.from("messages").insert(row).select("*").single();
     if (res.error) throw res.error;
     return res.data;
+  }
+
+  // Upload a DM attachment to dm-attachments/{uid}/<ts>-<safeName>. Validates
+  // mime/size. For audio files, probes duration client-side via <audio>.
+  // Returns { url, name, kind, size_bytes, duration_ms?, mime }.
+  async function uploadDmAttachment(file) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    if (!file) throw new Error("No file");
+    var MAX = 50 * 1024 * 1024;
+    if (file.size > MAX) throw new Error("File is too large (max 50 MB).");
+
+    var mime = file.type || "application/octet-stream";
+    var kind = mime.indexOf("audio/") === 0 ? "audio" : "file";
+
+    // Sanitize the filename for the storage path. Keep something human in the
+    // URL but strip unsafe chars; the displayed name uses the original.
+    var safe = (file.name || "file")
+      .replace(/[^a-zA-Z0-9._-]+/g, "_")
+      .replace(/^_+|_+$/g, "")
+      .slice(0, 100) || "file";
+    var path = u.id + "/" + Date.now() + "-" + safe;
+
+    var up = await sb.storage.from("dm-attachments").upload(path, file, {
+      cacheControl: "31536000",
+      upsert: false,
+      contentType: mime
+    });
+    if (up.error) throw up.error;
+
+    var pub = sb.storage.from("dm-attachments").getPublicUrl(path);
+    var url = pub.data && pub.data.publicUrl;
+
+    var duration_ms = null;
+    if (kind === "audio") {
+      duration_ms = await probeAudioDuration(file);
+    }
+
+    return {
+      url: url,
+      name: file.name || safe,
+      kind: kind,
+      size_bytes: file.size,
+      duration_ms: duration_ms,
+      mime: mime
+    };
+  }
+
+  function probeAudioDuration(file) {
+    return new Promise(function (resolve) {
+      var url;
+      try { url = URL.createObjectURL(file); } catch (e) { resolve(null); return; }
+      var audio = new Audio();
+      audio.preload = "metadata";
+      var done = false;
+      function finish(ms) {
+        if (done) return; done = true;
+        try { URL.revokeObjectURL(url); } catch (e) {}
+        resolve(ms);
+      }
+      audio.onloadedmetadata = function () {
+        var d = audio.duration;
+        finish(isFinite(d) && d > 0 ? Math.round(d * 1000) : null);
+      };
+      audio.onerror = function () { finish(null); };
+      // Safety timeout — some formats never fire loadedmetadata reliably.
+      setTimeout(function () { finish(null); }, 5000);
+      audio.src = url;
+    });
   }
 
   async function markConversationRead(conversationId) {
@@ -594,6 +672,7 @@
     getConversation: getConversation,
     listMessages: listMessages,
     sendMessage: sendMessage,
+    uploadDmAttachment: uploadDmAttachment,
     markConversationRead: markConversationRead,
     subscribeToMessages: subscribeToMessages,
     subscribeToMyConversations: subscribeToMyConversations,
