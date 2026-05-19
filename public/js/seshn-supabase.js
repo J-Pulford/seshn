@@ -645,6 +645,169 @@
     return function () { sb.removeChannel(channel); };
   }
 
+  // ── Connected accounts ─────────────────────────────────────────────
+  // Public Spotify client ID for the PKCE flow. PKCE doesn't require a
+  // client secret (that's the whole point), so this is safe to ship.
+  // Paste your Spotify Developer Dashboard client ID here, and add the
+  // redirect URI in Spotify's dashboard:
+  //   https://<your-domain>/app/settings.html
+  // Until that's done, clicking 'Connect Spotify' will error gracefully.
+  var SPOTIFY_CLIENT_ID = "";
+
+  function spotifyRedirectUri() {
+    return window.location.origin + "/app/settings.html";
+  }
+
+  function randomString(len) {
+    var arr = new Uint8Array(len);
+    crypto.getRandomValues(arr);
+    var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+    var out = "";
+    for (var i = 0; i < arr.length; i++) out += alphabet[arr[i] % alphabet.length];
+    return out;
+  }
+
+  async function sha256Base64Url(input) {
+    var bytes = new TextEncoder().encode(input);
+    var digest = await crypto.subtle.digest("SHA-256", bytes);
+    var b64 = btoa(String.fromCharCode.apply(null, new Uint8Array(digest)));
+    return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+
+  // Kick off the Spotify PKCE flow. Stores the code_verifier + a CSRF
+  // state token in sessionStorage and redirects to Spotify. The user lands
+  // back on /app/settings.html with ?code=... ?state=... — completeSpotifyConnect
+  // there finishes the exchange.
+  async function startSpotifyConnect() {
+    if (!SPOTIFY_CLIENT_ID) {
+      throw new Error("Spotify is not configured yet — set SPOTIFY_CLIENT_ID in seshn-supabase.js.");
+    }
+    var verifier = randomString(96);
+    var state = randomString(32);
+    var challenge = await sha256Base64Url(verifier);
+    sessionStorage.setItem("seshn_spotify_verifier", verifier);
+    sessionStorage.setItem("seshn_spotify_state", state);
+    var params = new URLSearchParams({
+      client_id: SPOTIFY_CLIENT_ID,
+      response_type: "code",
+      redirect_uri: spotifyRedirectUri(),
+      // Public profile info only — enough for display name + followers.
+      scope: "user-read-private user-read-email user-top-read",
+      code_challenge_method: "S256",
+      code_challenge: challenge,
+      state: state
+    });
+    window.location.href = "https://accounts.spotify.com/authorize?" + params.toString();
+  }
+
+  // Called on /app/settings.html when we detect ?code=...&state=... in the URL.
+  // Exchanges the code for an access token, fetches the user's Spotify profile
+  // + headline stats, persists them to connected_accounts, then drops the token.
+  async function completeSpotifyConnect(code, state) {
+    var verifier = sessionStorage.getItem("seshn_spotify_verifier");
+    var expectedState = sessionStorage.getItem("seshn_spotify_state");
+    sessionStorage.removeItem("seshn_spotify_verifier");
+    sessionStorage.removeItem("seshn_spotify_state");
+    if (!verifier) throw new Error("Spotify connection expired — try again.");
+    if (!expectedState || expectedState !== state) throw new Error("Spotify state mismatch — try again.");
+
+    var tokenRes = await fetch("https://accounts.spotify.com/api/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "authorization_code",
+        code: code,
+        redirect_uri: spotifyRedirectUri(),
+        client_id: SPOTIFY_CLIENT_ID,
+        code_verifier: verifier
+      }).toString()
+    });
+    if (!tokenRes.ok) {
+      var t = await tokenRes.text();
+      throw new Error("Spotify token exchange failed: " + t.slice(0, 200));
+    }
+    var token = (await tokenRes.json()).access_token;
+    if (!token) throw new Error("Spotify returned no access token.");
+
+    // Fetch the user's profile (followers, country, product, profile URL).
+    var meRes = await fetch("https://api.spotify.com/v1/me", {
+      headers: { Authorization: "Bearer " + token }
+    });
+    if (!meRes.ok) throw new Error("Couldn't read your Spotify profile.");
+    var me = await meRes.json();
+
+    // Also fetch top artists for a bit of credibility signal (genres).
+    var topGenres = [];
+    try {
+      var topRes = await fetch("https://api.spotify.com/v1/me/top/artists?limit=10&time_range=long_term", {
+        headers: { Authorization: "Bearer " + token }
+      });
+      if (topRes.ok) {
+        var top = await topRes.json();
+        var counts = {};
+        (top.items || []).forEach(function (a) {
+          (a.genres || []).forEach(function (g) { counts[g] = (counts[g] || 0) + 1; });
+        });
+        topGenres = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; }).slice(0, 5);
+      }
+    } catch (e) { /* genres are optional */ }
+
+    var stats = {
+      followers: me.followers ? me.followers.total : null,
+      country: me.country || null,
+      product: me.product || null,
+      genres: topGenres
+    };
+
+    return saveConnectedAccount({
+      provider: "spotify",
+      external_id: me.id,
+      display_name: me.display_name || me.id,
+      profile_url: (me.external_urls && me.external_urls.spotify) || null,
+      stats: stats
+    });
+  }
+
+  async function listConnectedAccounts(userId) {
+    var uid = userId;
+    if (!uid) {
+      var u = await getUser();
+      if (!u) return [];
+      uid = u.id;
+    }
+    var res = await sb
+      .from("connected_accounts")
+      .select("*")
+      .eq("user_id", uid)
+      .order("connected_at", { ascending: true });
+    if (res.error) { console.error("[seshn] listConnectedAccounts error", res.error); return []; }
+    return res.data || [];
+  }
+
+  async function saveConnectedAccount(fields) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    var row = Object.assign({ user_id: u.id }, fields);
+    var res = await sb
+      .from("connected_accounts")
+      .upsert(row, { onConflict: "user_id,provider" })
+      .select()
+      .single();
+    if (res.error) throw res.error;
+    return res.data;
+  }
+
+  async function disconnectAccount(provider) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    var res = await sb
+      .from("connected_accounts")
+      .delete()
+      .eq("user_id", u.id)
+      .eq("provider", provider);
+    if (res.error) throw res.error;
+  }
+
   // After auth, route based on whether profile exists and an optional
   // ?next= param. `next` must be a same-app path (starts with "/app/") to
   // avoid open-redirect bugs — anything else falls through to the default.
@@ -704,6 +867,10 @@
     updateMyEmail: updateMyEmail,
     updateNotificationPrefs: updateNotificationPrefs,
     deleteMyAccount: deleteMyAccount,
+    startSpotifyConnect: startSpotifyConnect,
+    completeSpotifyConnect: completeSpotifyConnect,
+    listConnectedAccounts: listConnectedAccounts,
+    disconnectAccount: disconnectAccount,
     signOut: signOut,
     routeAfterAuth: routeAfterAuth,
     requireProfile: requireProfile,

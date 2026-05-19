@@ -211,6 +211,90 @@
       );
     }
 
+    const PROVIDERS = [
+      { key: "spotify",    label: "Spotify",    available: true,  blurb: "Show your followers and top genres as credibility on your profile." },
+      { key: "soundcloud", label: "SoundCloud", available: false, blurb: "Coming soon — connect your SoundCloud once their API access lands." },
+      { key: "instagram",  label: "Instagram",  available: false, blurb: "Coming soon — link your IG so collaborators see your reach." },
+      { key: "youtube",    label: "YouTube",    available: false, blurb: "Coming soon — show your channel and subscriber count." }
+    ];
+
+    function ConnectedAccountsSection({ accounts, onChange }) {
+      const [busy, setBusy] = React.useState({});
+      const [err, setErr] = React.useState("");
+
+      async function connectSpotify() {
+        setErr("");
+        try {
+          await window.seshn.startSpotifyConnect();
+        } catch (e) {
+          setErr((e && e.message) || "Couldn't start Spotify connection.");
+        }
+      }
+
+      async function disconnect(provider) {
+        if (!window.confirm("Disconnect " + provider + "?")) return;
+        setBusy(prev => Object.assign({}, prev, { [provider]: true }));
+        try {
+          await window.seshn.disconnectAccount(provider);
+          onChange();
+        } catch (e) {
+          setErr((e && e.message) || "Couldn't disconnect.");
+        } finally {
+          setBusy(prev => Object.assign({}, prev, { [provider]: false }));
+        }
+      }
+
+      function summary(acc) {
+        if (!acc) return null;
+        const s = acc.stats || {};
+        const parts = [];
+        if (acc.display_name) parts.push(acc.display_name);
+        if (s.followers != null) parts.push(s.followers.toLocaleString() + " followers");
+        if (s.product) parts.push(s.product === "premium" ? "Premium" : null);
+        return parts.filter(Boolean).join(" · ");
+      }
+
+      return (
+        <Section title="Connected accounts">
+          <span className="t-meta" style={{ display: "block", marginBottom: 4 }}>
+            Connect your streaming and social accounts so collaborators can see your reach at a glance.
+          </span>
+          {PROVIDERS.map(({ key, label, available, blurb }) => {
+            const acc = (accounts || []).find(a => a.provider === key);
+            const isBusy = !!busy[key];
+            return (
+              <div key={key} className="row">
+                <div className="row-text">
+                  <span className="row-title">
+                    {label}
+                    {acc && (
+                      <span className="pill" style={{ marginLeft: 8, background: "var(--accent-bg)", borderColor: "transparent", color: "var(--accent-d)", fontSize: 9 }}>Connected</span>
+                    )}
+                  </span>
+                  <span className="row-sub">
+                    {acc ? summary(acc) : blurb}
+                  </span>
+                </div>
+                {acc ? (
+                  <div style={{ display: "flex", gap: 6 }}>
+                    {acc.profile_url && <a className="btn sm" href={acc.profile_url} target="_blank" rel="noopener noreferrer">View</a>}
+                    <button className="btn sm" onClick={() => disconnect(key)} disabled={isBusy}>
+                      {isBusy ? "…" : "Disconnect"}
+                    </button>
+                  </div>
+                ) : available ? (
+                  <button className="btn primary sm" onClick={connectSpotify}>Connect</button>
+                ) : (
+                  <button className="btn sm" disabled style={{ opacity: 0.55, cursor: "not-allowed" }}>Coming soon</button>
+                )}
+              </div>
+            );
+          })}
+          {err && <div className="status-line err" style={{ marginTop: 10 }}>{err}</div>}
+        </Section>
+      );
+    }
+
     function DangerSection({ profile }) {
       const [confirmText, setConfirmText] = React.useState("");
       const [busy, setBusy] = React.useState(false);
@@ -257,12 +341,48 @@
 
     function SettingsPage() {
       const [state, setState] = React.useState({ status: "loading", user: null, profile: null });
+      const [accounts, setAccounts] = React.useState([]);
+      const [connectStatus, setConnectStatus] = React.useState(null); // { kind, text } | null
+
+      async function refreshAccounts(userId) {
+        const list = await window.seshn.listConnectedAccounts(userId);
+        setAccounts(list);
+      }
 
       React.useEffect(() => {
         (async () => {
           const r = await window.seshn.requireProfile();
           if (!r) return; // redirected
           setState({ status: "ready", user: r.user, profile: r.profile });
+          refreshAccounts(r.user.id);
+
+          // Handle the Spotify OAuth callback if we just came back from one.
+          const params = new URLSearchParams(window.location.search);
+          const code = params.get("code");
+          const oauthState = params.get("state");
+          if (code && oauthState) {
+            // Clean the URL whether the exchange succeeds or fails.
+            const clean = new URL(window.location.href);
+            clean.searchParams.delete("code");
+            clean.searchParams.delete("state");
+            clean.searchParams.delete("error");
+            window.history.replaceState({}, "", clean.toString());
+            setConnectStatus({ kind: "ok", text: "Finishing Spotify connection…" });
+            try {
+              await window.seshn.completeSpotifyConnect(code, oauthState);
+              await refreshAccounts(r.user.id);
+              setConnectStatus({ kind: "ok", text: "Spotify connected — your stats now show on your profile." });
+            } catch (e) {
+              setConnectStatus({ kind: "err", text: (e && e.message) || "Spotify connection failed." });
+            }
+          } else if (params.get("error")) {
+            setConnectStatus({ kind: "err", text: "Spotify connection was cancelled or denied." });
+            const clean = new URL(window.location.href);
+            clean.searchParams.delete("error");
+            clean.searchParams.delete("state");
+            clean.searchParams.delete("error_description");
+            window.history.replaceState({}, "", clean.toString());
+          }
         })();
       }, []);
 
@@ -288,7 +408,11 @@
               <h1 className="page-title">Settings</h1>
               <a className="btn sm" href={"profile.html?u=" + encodeURIComponent(state.profile.username)}>← Profile</a>
             </div>
+            {connectStatus && (
+              <div className={"status-line " + connectStatus.kind}>{connectStatus.text}</div>
+            )}
             <AccountSection user={state.user} profile={state.profile} />
+            <ConnectedAccountsSection accounts={accounts} onChange={() => refreshAccounts(state.user.id)} />
             <NotificationsSection profile={state.profile} onSaved={onProfileUpdated} />
             <DangerSection profile={state.profile} />
           </div>

@@ -531,6 +531,13 @@
     // ——— Profile App ———
     function ProfileApp({ profile, isOwner, gigs, onProfileUpdate }) {
       const [editing, setEditing] = React.useState(false);
+      const [connected, setConnected] = React.useState(null);
+
+      React.useEffect(() => {
+        if (!window.seshn || !window.seshn.listConnectedAccounts) return;
+        window.seshn.listConnectedAccounts(profile.id).then(setConnected).catch(() => setConnected([]));
+      }, [profile.id]);
+
       return (
       <div style={{minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column"}}>
         <TopNav/>
@@ -619,6 +626,42 @@
                 {profile.bio || <span style={{color:"var(--ink-3)",fontStyle:"italic"}}>No bio yet{isOwner ? " — add one in your profile settings." : "."}</span>}
               </p>
             </section>
+
+            {/* Connected accounts */}
+            {connected && connected.length > 0 && (
+              <section>
+                <div className="t-eyebrow" style={{marginBottom:10}}>Elsewhere</div>
+                <div className="row" style={{gap:10,flexWrap:"wrap"}}>
+                  {connected.map(acc => {
+                    const stats = acc.stats || {};
+                    const label = acc.display_name || acc.provider;
+                    const followers = stats.followers != null
+                      ? stats.followers.toLocaleString() + " followers"
+                      : null;
+                    const inner = (
+                      <span style={{
+                        display:"inline-flex",alignItems:"center",gap:8,
+                        padding:"8px 12px",borderRadius:999,
+                        background:"var(--surface)",border:"1px solid var(--line)",
+                        fontFamily:"var(--font-display)",fontWeight:600,fontSize:12,
+                        color:"var(--ink)"
+                      }}>
+                        <span style={{textTransform:"capitalize",color:"var(--ink-2)"}}>{acc.provider}</span>
+                        <span style={{color:"var(--ink-4)"}}>·</span>
+                        <span>{label}</span>
+                        {followers && <>
+                          <span style={{color:"var(--ink-4)"}}>·</span>
+                          <span style={{color:"var(--accent-d)"}}>{followers}</span>
+                        </>}
+                      </span>
+                    );
+                    return acc.profile_url
+                      ? <a key={acc.provider} href={acc.profile_url} target="_blank" rel="noopener noreferrer" style={{textDecoration:"none"}}>{inner}</a>
+                      : <span key={acc.provider}>{inner}</span>;
+                  })}
+                </div>
+              </section>
+            )}
 
             {/* Recent posts */}
             <section>
