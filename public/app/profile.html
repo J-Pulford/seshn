@@ -211,7 +211,16 @@
     };
 
     // ——— CoverHeader ———
-    const CoverHeader = ({ height=150, seed="cover", style }) => {
+    // If imageUrl is provided, renders that as the cover (object-fit: cover).
+    // Otherwise generates a deterministic abstract pattern from `seed`.
+    const CoverHeader = ({ height=150, seed="cover", imageUrl, style }) => {
+      if (imageUrl) {
+        return (
+          <div style={{height,position:"relative",overflow:"hidden",background:"var(--ph)",...style}}>
+            <img src={imageUrl} alt="" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} />
+          </div>
+        );
+      }
       const h=_hash(seed);const pal=COVER_PALETTES[h%COVER_PALETTES.length];const [bg,fg,ac]=pal;
       const NOISE_SVG=`<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.45 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>`;
       const GRAIN_URL=`url("data:image/svg+xml;utf8,${NOISE_SVG}")`;
@@ -413,11 +422,15 @@
       const [roles, setRoles] = React.useState(new Set(profile.roles || []));
       const [genres, setGenres] = React.useState(new Set(profile.genres || []));
       const [avatarUrl, setAvatarUrl] = React.useState(profile.avatar_url || "");
+      const [coverUrl, setCoverUrl] = React.useState(profile.cover_url || "");
       const [previewSrc, setPreviewSrc] = React.useState("");
+      const [coverPreviewSrc, setCoverPreviewSrc] = React.useState("");
       const [saving, setSaving] = React.useState(false);
       const [uploadBusy, setUploadBusy] = React.useState(false);
+      const [coverBusy, setCoverBusy] = React.useState(false);
       const [err, setErr] = React.useState("");
       const fileInputRef = React.useRef(null);
+      const coverInputRef = React.useRef(null);
 
       const toggleRole = (r) => {
         setRoles(prev => {
@@ -440,7 +453,6 @@
         const file = e.target.files && e.target.files[0];
         if (!file) return;
         setErr("");
-        // Local preview while uploading.
         const reader = new FileReader();
         reader.onload = ev => setPreviewSrc(ev.target.result);
         reader.readAsDataURL(file);
@@ -458,6 +470,27 @@
         }
       }
 
+      async function onPickCover(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        setErr("");
+        const reader = new FileReader();
+        reader.onload = ev => setCoverPreviewSrc(ev.target.result);
+        reader.readAsDataURL(file);
+        setCoverBusy(true);
+        try {
+          const url = await window.seshn.uploadCover(file);
+          setCoverUrl(url);
+          setCoverPreviewSrc("");
+        } catch (e2) {
+          setErr((e2 && e2.message) || "Couldn't upload that image.");
+          setCoverPreviewSrc("");
+        } finally {
+          setCoverBusy(false);
+          if (coverInputRef.current) coverInputRef.current.value = "";
+        }
+      }
+
       async function save() {
         const name = displayName.trim();
         if (!name) { setErr("Display name is required."); return; }
@@ -471,7 +504,8 @@
             pronouns: pronouns.trim(),
             roles: Array.from(roles),
             genres: Array.from(genres),
-            avatar_url: avatarUrl || ""
+            avatar_url: avatarUrl || "",
+            cover_url: coverUrl || ""
           });
           onSaved(updated);
         } catch (e) {
@@ -509,6 +543,26 @@
                   </div>
                   <span className="field-hint">JPG/PNG/WebP, up to 5 MB.</span>
                 </div>
+              </div>
+
+              <div className="field">
+                <span className="field-label">Cover photo</span>
+                <div style={{ position: "relative", borderRadius: 10, overflow: "hidden", border: "1px solid var(--line)", background: "var(--ph)", aspectRatio: "4 / 1", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {(coverPreviewSrc || coverUrl)
+                    ? <img src={coverPreviewSrc || coverUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                    : <span className="field-hint" style={{ padding: 12, textAlign: "center" }}>No cover yet — a generated pattern is shown on your profile.</span>}
+                  {coverBusy && <div style={{ position: "absolute", inset: 0, background: "rgba(13,13,13,0.4)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13 }}>Uploading…</div>}
+                </div>
+                <input ref={coverInputRef} type="file" accept="image/*" onChange={onPickCover} style={{ display: "none" }} />
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button className="btn sm" disabled={coverBusy} onClick={() => coverInputRef.current && coverInputRef.current.click()}>
+                    {coverBusy ? "Uploading…" : (coverUrl ? "Change cover" : "Upload cover")}
+                  </button>
+                  {coverUrl && !coverBusy && (
+                    <button className="btn sm" onClick={() => setCoverUrl("")}>Remove</button>
+                  )}
+                </div>
+                <span className="field-hint">Wide images work best (about 4:1). JPG/PNG/WebP, up to 8 MB.</span>
               </div>
 
               <div className="field">
@@ -569,7 +623,7 @@
             </div>
             <div className="modal-footer">
               <button className="btn" onClick={onClose} disabled={saving}>Cancel</button>
-              <button className="btn primary" onClick={save} disabled={saving || uploadBusy}>
+              <button className="btn primary" onClick={save} disabled={saving || uploadBusy || coverBusy}>
                 {saving ? "Saving…" : "Save changes"}
               </button>
             </div>
@@ -587,7 +641,7 @@
 
         {/* ——— Cover + Avatar Header ——— */}
         <div style={{position:"relative",background:"var(--surface)"}}>
-          <CoverHeader seed={profile.username || "seshn-cover"} height={180}/>
+          <CoverHeader seed={profile.username || "seshn-cover"} imageUrl={profile.cover_url} height={180}/>
 
           {/* Avatar overlapping the cover */}
           <div style={{position:"absolute",left:36,bottom:-42,display:"flex",alignItems:"flex-end",gap:14}}>

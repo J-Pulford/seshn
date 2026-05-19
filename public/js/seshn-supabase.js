@@ -100,6 +100,47 @@
     return url;
   }
 
+  // Upload a cover image. Reuses the avatars bucket under
+  // avatars/{uid}/cover-<ts>.<ext>. Cover photos are larger than avatars,
+  // so we allow up to 8 MB.
+  async function uploadCover(file) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    if (!file) throw new Error("No file");
+    if (!file.type || file.type.indexOf("image/") !== 0) {
+      throw new Error("Cover must be an image (jpg, png, webp, gif).");
+    }
+    var MAX = 8 * 1024 * 1024;
+    if (file.size > MAX) throw new Error("Image is too large (max 8 MB).");
+
+    var ext = (file.name && file.name.split(".").pop() || "").toLowerCase();
+    if (!/^(jpg|jpeg|png|webp|gif)$/.test(ext)) ext = file.type.split("/")[1] || "jpg";
+    var path = u.id + "/cover-" + Date.now() + "." + ext;
+
+    var up = await sb.storage.from("avatars").upload(path, file, {
+      cacheControl: "31536000",
+      upsert: false,
+      contentType: file.type
+    });
+    if (up.error) throw up.error;
+
+    var pub = sb.storage.from("avatars").getPublicUrl(path);
+    var url = pub.data && pub.data.publicUrl;
+
+    // Best-effort cleanup of the previous cover.
+    try {
+      var prev = await getProfile({ id: u.id });
+      if (prev && prev.cover_url) {
+        var m = prev.cover_url.match(/\/avatars\/(.+)$/);
+        if (m && m[1] && m[1] !== path) {
+          await sb.storage.from("avatars").remove([m[1]]);
+        }
+      }
+    } catch (e) { /* non-fatal */ }
+
+    return url;
+  }
+
   async function sendMagicLink(email, redirectTo) {
     return sb.auth.signInWithOtp({
       email: email,
@@ -380,6 +421,7 @@
     upsertProfile: upsertProfile,
     updateProfile: updateProfile,
     uploadAvatar: uploadAvatar,
+    uploadCover: uploadCover,
     sendMagicLink: sendMagicLink,
     signOut: signOut,
     routeAfterAuth: routeAfterAuth,
