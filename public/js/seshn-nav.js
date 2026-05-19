@@ -3,6 +3,8 @@
 // Pages then do: <SeshnAppNav active="feed" /> (or "browse" | "applications" | "inbox" | "profile" | null).
 
 (function () {
+  var h = React.createElement;
+
   function navInitials(name) {
     if (!name) return "··";
     var parts = name.trim().split(/\s+/).filter(Boolean);
@@ -15,12 +17,239 @@
     var size = props.size || 18;
     var common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", style: { display: "block" } };
     if (props.kind === "search")
-      return React.createElement("svg", common, React.createElement("circle", { cx: 11, cy: 11, r: 7 }), React.createElement("path", { d: "m20 20-3.5-3.5" }));
+      return h("svg", common, h("circle", { cx: 11, cy: 11, r: 7 }), h("path", { d: "m20 20-3.5-3.5" }));
     if (props.kind === "message")
-      return React.createElement("svg", common, React.createElement("path", { d: "M21 12a8 8 0 0 1-12 7l-5 1 1-5a8 8 0 1 1 16-3z" }));
+      return h("svg", common, h("path", { d: "M21 12a8 8 0 0 1-12 7l-5 1 1-5a8 8 0 1 1 16-3z" }));
     if (props.kind === "bell")
-      return React.createElement("svg", common, React.createElement("path", { d: "M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" }), React.createElement("path", { d: "M10 21a2 2 0 0 0 4 0" }));
+      return h("svg", common, h("path", { d: "M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" }), h("path", { d: "M10 21a2 2 0 0 0 4 0" }));
     return null;
+  }
+
+  function relativeTime(iso) {
+    if (!iso) return "";
+    var t = new Date(iso).getTime();
+    var diff = Date.now() - t;
+    var s = Math.round(diff / 1000);
+    if (s < 60) return "just now";
+    var m = Math.round(s / 60);
+    if (m < 60) return m + "m";
+    var hrs = Math.round(m / 60);
+    if (hrs < 24) return hrs + "h";
+    var d = Math.round(hrs / 24);
+    if (d < 7) return d + "d";
+    return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+
+  function notifText(n) {
+    var actor = (n.actor && (n.actor.display_name || n.actor.username)) || "Someone";
+    var gigTitle = (n.gig && (n.gig.title || n.gig.role)) || "your gig";
+    if (n.kind === "application_received") return actor + " applied to " + gigTitle;
+    if (n.kind === "application_accepted") return actor + " accepted your application to " + gigTitle;
+    if (n.kind === "application_rejected") return actor + " passed on your application to " + gigTitle;
+    if (n.kind === "message_received")    return actor + " sent you a message";
+    return "New activity";
+  }
+
+  function notifHref(n) {
+    if (n.kind === "application_received" && n.gig_id) return "gig.html?id=" + encodeURIComponent(n.gig_id);
+    if ((n.kind === "application_accepted" || n.kind === "application_rejected") && n.gig_id) return "gig.html?id=" + encodeURIComponent(n.gig_id);
+    if (n.kind === "message_received" && n.conversation_id) return "inbox.html?c=" + encodeURIComponent(n.conversation_id);
+    return null;
+  }
+
+  function iconBtnStyle(isActive) {
+    return {
+      display: "inline-flex", alignItems: "center", justifyContent: "center",
+      width: 34, height: 34, borderRadius: 8,
+      color: isActive ? "var(--accent-d)" : "var(--ink-2)",
+      background: isActive ? "var(--accent-bg)" : "transparent",
+      textDecoration: "none", cursor: "pointer", border: "none",
+      position: "relative"
+    };
+  }
+
+  function navBadge(count) {
+    return h("span", {
+      style: {
+        position: "absolute", top: 4, right: 4,
+        minWidth: 16, height: 16, padding: "0 4px",
+        borderRadius: 999,
+        background: "var(--accent)", color: "#062c19",
+        fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 10,
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        border: "2px solid var(--frame)", boxSizing: "content-box", lineHeight: 1
+      }
+    }, count > 9 ? "9+" : String(count));
+  }
+
+  function NotificationRow(props) {
+    var n = props.notif;
+    var actor = n.actor || {};
+    var href = notifHref(n);
+    var unread = !n.read_at;
+    return h("button", {
+      onClick: function () { props.onClick(n); },
+      style: {
+        display: "flex", gap: 10, alignItems: "flex-start",
+        padding: "12px 14px",
+        background: unread ? "var(--accent-bg)" : "transparent",
+        border: "none", borderBottom: "1px solid var(--line-soft)",
+        textAlign: "left", cursor: href ? "pointer" : "default",
+        width: "100%", fontFamily: "var(--font-body)", color: "var(--ink)",
+        opacity: unread ? 1 : 0.85
+      }
+    },
+      h("span", {
+        style: {
+          width: 32, height: 32, borderRadius: "50%",
+          background: "var(--ph)", overflow: "hidden", flexShrink: 0,
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
+          fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 11, color: "var(--ink-3)"
+        }
+      },
+        actor.avatar_url
+          ? h("img", { src: actor.avatar_url, alt: "", style: { width: "100%", height: "100%", objectFit: "cover", display: "block" } })
+          : navInitials(actor.display_name || actor.username)
+      ),
+      h("span", { style: { flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 } },
+        h("span", { style: { fontSize: 12.5, lineHeight: 1.4, color: "var(--ink)" } }, notifText(n)),
+        h("span", { style: { fontSize: 11, color: "var(--ink-3)" } }, relativeTime(n.created_at))
+      ),
+      unread && h("span", { style: { width: 8, height: 8, borderRadius: "50%", background: "var(--accent-d)", flexShrink: 0, marginTop: 6 } })
+    );
+  }
+
+  // Bell + dropdown panel. Manages its own open state, unread count, and items.
+  function NotificationsBell() {
+    var openState = React.useState(false);
+    var open = openState[0], setOpen = openState[1];
+    var itemsState = React.useState(null); // null until first open
+    var items = itemsState[0], setItems = itemsState[1];
+    var unreadState = React.useState(0);
+    var unread = unreadState[0], setUnread = unreadState[1];
+    var containerRef = React.useRef(null);
+
+    // Initial unread fetch + realtime subscription (run while signed in).
+    React.useEffect(function () {
+      if (!window.seshn || !window.seshn.getUnreadNotificationCount) return;
+      var cancelled = false;
+      var unsub = function () {};
+      function refreshCount() {
+        window.seshn.getUnreadNotificationCount().then(function (n) {
+          if (!cancelled) setUnread(n);
+        }).catch(function () {});
+      }
+      window.seshn.getUser().then(function (u) {
+        if (!u || cancelled) return;
+        refreshCount();
+        window.seshn.subscribeToNotifications(function () {
+          refreshCount();
+          // If the panel is already open, refetch so the new row appears.
+          setItems(function (prev) {
+            if (prev === null) return prev;
+            window.seshn.listNotifications({ limit: 30 }).then(function (list) {
+              if (!cancelled) setItems(list);
+            }).catch(function () {});
+            return prev;
+          });
+        }).then(function (u2) { if (cancelled) u2(); else unsub = u2; });
+      });
+      return function () { cancelled = true; try { unsub(); } catch (e) {} };
+    }, []);
+
+    // Close on outside click / Escape.
+    React.useEffect(function () {
+      if (!open) return;
+      function onClick(e) {
+        if (containerRef.current && !containerRef.current.contains(e.target)) setOpen(false);
+      }
+      function onKey(e) { if (e.key === "Escape") setOpen(false); }
+      document.addEventListener("mousedown", onClick);
+      document.addEventListener("keydown", onKey);
+      return function () {
+        document.removeEventListener("mousedown", onClick);
+        document.removeEventListener("keydown", onKey);
+      };
+    }, [open]);
+
+    function toggle() {
+      if (!open) {
+        // Lazy-load on first open, and re-fetch every open to stay current.
+        window.seshn.listNotifications({ limit: 30 }).then(setItems).catch(function () { setItems([]); });
+      }
+      setOpen(!open);
+    }
+
+    function onClickItem(n) {
+      if (!n.read_at) {
+        window.seshn.markNotificationsRead([n.id]);
+        setUnread(function (x) { return Math.max(0, x - 1); });
+        setItems(function (prev) {
+          if (!prev) return prev;
+          return prev.map(function (x) {
+            return x.id === n.id ? Object.assign({}, x, { read_at: new Date().toISOString() }) : x;
+          });
+        });
+      }
+      var href = notifHref(n);
+      if (href) window.location.href = href;
+    }
+
+    function markAll() {
+      window.seshn.markAllNotificationsRead().then(function () {
+        setUnread(0);
+        setItems(function (prev) {
+          if (!prev) return prev;
+          var ts = new Date().toISOString();
+          return prev.map(function (x) { return x.read_at ? x : Object.assign({}, x, { read_at: ts }); });
+        });
+      });
+    }
+
+    return h("div", { ref: containerRef, style: { position: "relative" } },
+      h("button", {
+        type: "button",
+        onClick: toggle,
+        style: iconBtnStyle(open),
+        "aria-label": "Notifications" + (unread > 0 ? " (" + unread + " unread)" : ""),
+        "aria-expanded": open
+      },
+        h(IconSvg, { kind: "bell", size: 18 }),
+        unread > 0 && navBadge(unread)
+      ),
+      open && h("div", {
+        style: {
+          position: "absolute", right: 0, top: "calc(100% + 8px)",
+          width: 360, maxHeight: 520, overflowY: "auto",
+          background: "var(--frame)", border: "1px solid var(--line)",
+          borderRadius: 12, boxShadow: "0 20px 48px rgba(0,0,0,0.18)",
+          zIndex: 110, display: "flex", flexDirection: "column"
+        }
+      },
+        h("div", {
+          style: {
+            padding: "14px 16px", borderBottom: "1px solid var(--line)",
+            display: "flex", alignItems: "center", justifyContent: "space-between"
+          }
+        },
+          h("span", { style: { fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14 } }, "Notifications"),
+          unread > 0 && h("button", {
+            onClick: markAll,
+            style: { border: "none", background: "transparent", cursor: "pointer", color: "var(--ink-3)", fontSize: 11, fontFamily: "var(--font-display)", fontWeight: 600 }
+          }, "Mark all read")
+        ),
+        items === null
+          ? h("div", { style: { padding: 20, textAlign: "center", color: "var(--ink-3)", fontSize: 12 } }, "Loading…")
+          : items.length === 0
+            ? h("div", { style: { padding: "32px 20px", textAlign: "center", color: "var(--ink-3)" } },
+                h("div", { style: { fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14, color: "var(--ink-2)", marginBottom: 4 } }, "All caught up"),
+                h("div", { style: { fontSize: 12 } }, "We'll let you know when something happens.")
+              )
+            : h("div", { style: { display: "flex", flexDirection: "column" } },
+                items.map(function (n) { return h(NotificationRow, { key: n.id, notif: n, onClick: onClickItem }); })
+              )
+      )
+    );
   }
 
   // SeshnAppNav — sticky top nav used on every signed-in page.
@@ -36,8 +265,8 @@
     var meState = React.useState(null);
     var me = meState[0], setMe = meState[1];
 
-    var unreadState = React.useState(0);
-    var unread = unreadState[0], setUnread = unreadState[1];
+    var unreadConvosState = React.useState(0);
+    var unreadConvos = unreadConvosState[0], setUnreadConvos = unreadConvosState[1];
 
     React.useEffect(function () {
       if (!window.seshn) return;
@@ -55,7 +284,7 @@
       var cancelled = false;
       var unsub = function () {};
       function refresh() {
-        window.seshn.getUnreadCount().then(function (n) { if (!cancelled) setUnread(n); }).catch(function () {});
+        window.seshn.getUnreadCount().then(function (n) { if (!cancelled) setUnreadConvos(n); }).catch(function () {});
       }
       window.seshn.getUser().then(function (u) {
         if (!u || cancelled) return;
@@ -73,134 +302,71 @@
 
     function navLinkStyle(isActive) {
       return {
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "6px 10px",
-        borderRadius: 8,
+        display: "inline-flex", alignItems: "center", gap: 6,
+        padding: "6px 10px", borderRadius: 8,
         color: isActive ? "var(--ink)" : "var(--ink-2)",
         background: isActive ? "var(--surface-2)" : "transparent",
         textDecoration: "none",
-        fontFamily: "var(--font-display)",
-        fontWeight: 500,
-        fontSize: 13
+        fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 13
       };
     }
 
-    function iconBtnStyle(isActive) {
-      return {
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: 34, height: 34, borderRadius: 8,
-        color: isActive ? "var(--accent-d)" : "var(--ink-2)",
-        background: isActive ? "var(--accent-bg)" : "transparent",
-        textDecoration: "none",
-        cursor: "pointer"
-      };
-    }
-
-    return React.createElement(
-      "nav",
-      {
-        style: {
-          background: "var(--surface)",
-          borderBottom: "1px solid var(--line)",
-          padding: "0 28px",
-          height: 58,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          position: "sticky",
-          top: 0,
-          zIndex: 100
-        }
-      },
-
-      // Left: logo + search + tab links
-      React.createElement(
-        "div",
-        { style: { display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 } },
-        React.createElement("a", { href: "feed.html", className: "logo", style: { textDecoration: "none" } }, "Seshn"),
-
-        // Primary nav links
-        React.createElement(
-          "div",
-          { style: { display: "flex", alignItems: "center", gap: 4, marginLeft: 6 } },
-          React.createElement("a", { href: "feed.html", style: navLinkStyle(active === "feed") }, "Feed"),
-          React.createElement("a", { href: "browse.html", style: navLinkStyle(active === "browse") }, "Browse"),
-          React.createElement("a", { href: "applications.html", style: navLinkStyle(active === "applications") }, "Applications")
+    return h("nav", {
+      style: {
+        background: "var(--surface)",
+        borderBottom: "1px solid var(--line)",
+        padding: "0 28px", height: 58,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        position: "sticky", top: 0, zIndex: 100
+      }
+    },
+      // Left: logo + tabs + search
+      h("div", { style: { display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 } },
+        h("a", { href: "feed.html", className: "logo", style: { textDecoration: "none" } }, "Seshn"),
+        h("div", { style: { display: "flex", alignItems: "center", gap: 4, marginLeft: 6 } },
+          h("a", { href: "feed.html", style: navLinkStyle(active === "feed") }, "Feed"),
+          h("a", { href: "browse.html", style: navLinkStyle(active === "browse") }, "Browse"),
+          h("a", { href: "applications.html", style: navLinkStyle(active === "applications") }, "Applications")
         ),
-
-        // Search bar
-        showSearch && React.createElement(
-          "div",
-          {
-            style: {
-              flex: 1, maxWidth: 360, marginLeft: 16,
-              display: "flex", alignItems: "center", gap: 8,
-              padding: "8px 13px",
-              background: "var(--surface-2)",
-              borderRadius: 999,
-              border: "1px solid var(--line)",
-              color: "var(--ink-3)",
-              cursor: "text"
-            }
-          },
-          React.createElement(IconSvg, { kind: "search", size: 14 }),
-          React.createElement("span", { style: { fontSize: 12, fontFamily: "var(--font-display)" } }, "Search artists, roles, genres…")
+        showSearch && h("div", {
+          style: {
+            flex: 1, maxWidth: 360, marginLeft: 16,
+            display: "flex", alignItems: "center", gap: 8,
+            padding: "8px 13px",
+            background: "var(--surface-2)",
+            borderRadius: 999, border: "1px solid var(--line)",
+            color: "var(--ink-3)", cursor: "text"
+          }
+        },
+          h(IconSvg, { kind: "search", size: 14 }),
+          h("span", { style: { fontSize: 12, fontFamily: "var(--font-display)" } }, "Search artists, roles, genres…")
         )
       ),
-
       // Right: post button, inbox, bell, avatar
-      React.createElement(
-        "div",
-        { style: { display: "flex", alignItems: "center", gap: 10 } },
-        showPostButton && React.createElement("a", { href: "post.html", className: "btn primary sm" }, "+ Post a gig"),
-
-        React.createElement(
-          "a",
-          { href: "inbox.html", style: Object.assign({ position: "relative" }, iconBtnStyle(active === "inbox")), "aria-label": "Inbox" + (unread > 0 ? " (" + unread + " unread)" : "") },
-          React.createElement(IconSvg, { kind: "message", size: 18 }),
-          unread > 0 && React.createElement(
-            "span",
-            {
-              style: {
-                position: "absolute", top: 4, right: 4,
-                minWidth: 16, height: 16, padding: "0 4px",
-                borderRadius: 999,
-                background: "var(--accent)", color: "#062c19",
-                fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 10,
-                display: "inline-flex", alignItems: "center", justifyContent: "center",
-                border: "2px solid var(--frame)", boxSizing: "content-box", lineHeight: 1
-              }
-            },
-            unread > 9 ? "9+" : String(unread)
-          )
+      h("div", { style: { display: "flex", alignItems: "center", gap: 10 } },
+        showPostButton && h("a", { href: "post.html", className: "btn primary sm" }, "+ Post a gig"),
+        h("a", {
+          href: "inbox.html",
+          style: iconBtnStyle(active === "inbox"),
+          "aria-label": "Inbox" + (unreadConvos > 0 ? " (" + unreadConvos + " unread)" : "")
+        },
+          h(IconSvg, { kind: "message", size: 18 }),
+          unreadConvos > 0 && navBadge(unreadConvos)
         ),
-
-        React.createElement("span", { style: iconBtnStyle(false), "aria-label": "Notifications" },
-          React.createElement(IconSvg, { kind: "bell", size: 18 })),
-
-        React.createElement(
-          "a",
-          { href: profileHref, style: { textDecoration: "none" }, "aria-label": "Your profile" },
-          React.createElement(
-            "span",
-            {
-              className: "avatar md",
-              style: {
-                background: me && me.avatar_url ? "var(--ph)" : "linear-gradient(135deg,#a8ebc8,#2CCB73)",
-                color: "#062c19",
-                fontSize: 12,
-                fontFamily: "var(--font-display)",
-                fontWeight: 700,
-                border: active === "profile" ? "2px solid var(--ink)" : "2px solid transparent",
-                overflow: "hidden"
-              }
-            },
+        h(NotificationsBell),
+        h("a", { href: profileHref, style: { textDecoration: "none" }, "aria-label": "Your profile" },
+          h("span", {
+            className: "avatar md",
+            style: {
+              background: me && me.avatar_url ? "var(--ph)" : "linear-gradient(135deg,#a8ebc8,#2CCB73)",
+              color: "#062c19", fontSize: 12,
+              fontFamily: "var(--font-display)", fontWeight: 700,
+              border: active === "profile" ? "2px solid var(--ink)" : "2px solid transparent",
+              overflow: "hidden"
+            }
+          },
             me && me.avatar_url
-              ? React.createElement("img", { src: me.avatar_url, alt: "", style: { width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover", display: "block" } })
+              ? h("img", { src: me.avatar_url, alt: "", style: { width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover", display: "block" } })
               : initials
           )
         )

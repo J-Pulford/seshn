@@ -368,6 +368,14 @@
         { onConflict: "conversation_id,user_id" }
       );
     if (res.error) console.error("[seshn] markConversationRead error", res.error);
+    // Also clear any unread notifications tied to this conversation.
+    var nres = await sb
+      .from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .eq("user_id", u.id)
+      .eq("conversation_id", conversationId)
+      .is("read_at", null);
+    if (nres.error) console.warn("[seshn] markConversationRead (notifications) error", nres.error);
   }
 
   // Subscribe to new messages in a conversation. Returns an unsubscribe fn.
@@ -403,6 +411,75 @@
   async function getUnreadCount() {
     var convos = await listMyConversations();
     return convos.filter(function (c) { return c.unread; }).length;
+  }
+
+  // ── Notifications ─────────────────────────────────────────────────
+  async function listNotifications(opts) {
+    opts = opts || {};
+    var u = await getUser();
+    if (!u) return [];
+    var res = await sb
+      .from("notifications")
+      .select(
+        "id, kind, created_at, read_at, gig_id, application_id, conversation_id, " +
+        "actor:profiles!actor_id(id, username, display_name, avatar_url), " +
+        "gig:gigs!gig_id(id, title, role)"
+      )
+      .eq("user_id", u.id)
+      .order("created_at", { ascending: false })
+      .limit(opts.limit || 50);
+    if (res.error) { console.error("[seshn] listNotifications error", res.error); return []; }
+    return res.data || [];
+  }
+
+  async function getUnreadNotificationCount() {
+    var u = await getUser();
+    if (!u) return 0;
+    var res = await sb
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", u.id)
+      .is("read_at", null);
+    if (res.error) { console.error("[seshn] getUnreadNotificationCount error", res.error); return 0; }
+    return res.count || 0;
+  }
+
+  async function markNotificationsRead(ids) {
+    var u = await getUser();
+    if (!u) return;
+    if (!ids || !ids.length) return;
+    var res = await sb
+      .from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .in("id", ids)
+      .is("read_at", null);
+    if (res.error) console.error("[seshn] markNotificationsRead error", res.error);
+  }
+
+  async function markAllNotificationsRead() {
+    var u = await getUser();
+    if (!u) return;
+    var res = await sb
+      .from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .eq("user_id", u.id)
+      .is("read_at", null);
+    if (res.error) console.error("[seshn] markAllNotificationsRead error", res.error);
+  }
+
+  // Subscribe to new notification rows for the current user.
+  async function subscribeToNotifications(onInsert) {
+    var u = await getUser();
+    if (!u) return function () {};
+    var channel = sb
+      .channel("notifications:" + u.id)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications", filter: "user_id=eq." + u.id },
+        function (payload) { onInsert(payload.new); }
+      )
+      .subscribe();
+    return function () { sb.removeChannel(channel); };
   }
 
   // After auth, route based on whether profile exists.
@@ -474,6 +551,11 @@
     markConversationRead: markConversationRead,
     subscribeToMessages: subscribeToMessages,
     subscribeToMyConversations: subscribeToMyConversations,
-    getUnreadCount: getUnreadCount
+    getUnreadCount: getUnreadCount,
+    listNotifications: listNotifications,
+    getUnreadNotificationCount: getUnreadNotificationCount,
+    markNotificationsRead: markNotificationsRead,
+    markAllNotificationsRead: markAllNotificationsRead,
+    subscribeToNotifications: subscribeToNotifications
   };
 })();
