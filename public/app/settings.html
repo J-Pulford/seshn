@@ -57,6 +57,15 @@
     .status-line { font-size: 12px; padding: 8px 10px; border-radius: 8px; }
     .status-line.ok    { background: var(--accent-bg); color: var(--accent-d); }
     .status-line.err   { background: var(--danger-bg); color: var(--danger); }
+
+    @media (max-width: 720px) {
+      .page { padding: 18px 14px 40px !important; gap: 14px !important; }
+      .card { padding: 16px !important; }
+      .page-title { font-size: 22px !important; }
+      .input { font-size: 16px !important; }
+      .field input + button { font-size: 11px; padding: 8px 10px; }
+      .row { padding: 12px 0; flex-wrap: wrap; }
+    }
   </style>
 </head>
 <body>

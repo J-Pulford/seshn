@@ -77,6 +77,12 @@
       .preview-section { position: static; }
       .comp-grid { grid-template-columns: repeat(2, 1fr); }
     }
+    @media (max-width: 720px) {
+      .content { padding: 16px 14px 32px; gap: 14px; }
+      .comp-grid { grid-template-columns: 1fr !important; }
+      input[type="text"], input[type="number"], textarea, select { font-size: 16px !important; }
+      h1, .t-h1 { font-size: 24px !important; }
+    }
   </style>
 </head>
 <body>

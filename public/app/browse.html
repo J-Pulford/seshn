@@ -191,6 +191,21 @@
     /* Active status dot */
     .active-now::before { content:""; display:inline-block; width:7px; height:7px; background:var(--accent); border-radius:50%; margin-right:5px; }
     .active-pro::before { content:""; display:inline-block; width:7px; height:7px; background:var(--accent); border-radius:50%; margin-right:5px; }
+
+    /* Mobile */
+    .browse-grid { display: grid; grid-template-columns: 240px 1fr; gap: 24px; padding: 24px 28px; flex: 1; max-width: 1400px; margin: 0 auto; width: 100%; }
+    .browse-filters-toggle { display: none; }
+    .browse-filters-drawer { display: contents; }
+    @media (max-width: 720px) {
+      .browse-grid { grid-template-columns: 1fr; padding: 14px; gap: 14px; }
+      .browse-filters-toggle { display: inline-flex; }
+      .browse-filters-drawer { display: none; position: fixed; inset: 0; z-index: 200; background: var(--bg); overflow-y: auto; padding: 16px; }
+      .browse-filters-drawer.open { display: block; }
+      .browse-filters-drawer .browse-filters-aside { position: static !important; height: auto !important; max-height: none !important; overflow: visible !important; }
+      .browse-filters-drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); }
+      .browse-cards-grid { grid-template-columns: 1fr !important; }
+      input[type="text"], input[type="search"] { font-size: 16px !important; }
+    }
   </style>
 </head>
 <body>
@@ -354,6 +369,7 @@
       const [profiles, setProfiles] = React.useState(null); // null = loading
       const [meId, setMeId] = React.useState(null);
       const [err, setErr] = React.useState("");
+      const [filtersOpen, setFiltersOpen] = React.useState(false);
 
       // Auth gate: signed-out users can browse; signed-in users without a
       // profile get sent to onboarding so they can fill it in first.
@@ -403,10 +419,15 @@
       return (
         <div style={{ minHeight:"100vh", background:"var(--bg)", display:"flex", flexDirection:"column" }}>
           <TopNav />
-          <div style={{ display:"grid", gridTemplateColumns:"240px 1fr", gap:24, padding:"24px 28px", flex:1, maxWidth:1400, margin:"0 auto", width:"100%" }}>
+          <div className="browse-grid">
 
             {/* Left Sidebar: Filters */}
-            <aside style={{ position:"sticky", top:82, height:"calc(100vh - 100px)", overflowY:"auto", paddingRight:4 }}>
+            <div className={"browse-filters-drawer" + (filtersOpen ? " open" : "")}>
+              <div className="browse-filters-drawer-header">
+                <span style={{ fontFamily:"var(--font-display)", fontWeight:700, fontSize:18 }}>Filters</span>
+                <button className="btn sm" onClick={() => setFiltersOpen(false)}>Done</button>
+              </div>
+            <aside className="browse-filters-aside" style={{ position:"sticky", top:82, height:"calc(100vh - 100px)", overflowY:"auto", paddingRight:4 }}>
               <div className="col" style={{ gap:22 }}>
                 <CheckGroup
                   title="Roles"
@@ -459,6 +480,7 @@
                 </button>
               </div>
             </aside>
+            </div>
 
             {/* Main Browse Grid */}
             <main style={{ minWidth:0 }}>
@@ -487,7 +509,10 @@
                     {profiles === null ? "Loading…" : `${profiles.length} artist${profiles.length === 1 ? "" : "s"}${activeFilters > 0 ? " match your filters" : ""}`}
                   </span>
                 </div>
-                <div className="row" style={{ gap:8, flexShrink:0 }}>
+                <div className="row" style={{ gap:8, flexShrink:0, flexWrap:"wrap" }}>
+                  <button className="browse-filters-toggle btn sm" onClick={() => setFiltersOpen(true)}>
+                    Filters{activeFilters > 0 ? " · " + activeFilters : ""}
+                  </button>
                   {[["newest","Newest"],["az","A–Z"]].map(([k,label]) => (
                     <span key={k} className={"pill" + (sort===k?" dark":"")} style={{ cursor:"pointer" }} onClick={() => setSort(k)}>{label}</span>
                   ))}
@@ -513,7 +538,7 @@
                   {err && <div style={{ color:"var(--danger)", fontSize:12 }}>{err}</div>}
                 </div>
               ) : (
-                <div style={{ display:"grid", gridTemplateColumns: view === "grid" ? "repeat(3, 1fr)" : "1fr", gap:14 }}>
+                <div className="browse-cards-grid" style={{ display:"grid", gridTemplateColumns: view === "grid" ? "repeat(3, 1fr)" : "1fr", gap:14 }}>
                   {profiles.map(p => <ArtistCard key={p.id} profile={p} />)}
                 </div>
               )}
