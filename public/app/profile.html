@@ -166,6 +166,25 @@
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+
+    /* Mobile */
+    .profile-name-block { padding: 52px 36px 20px 140px; }
+    .profile-grid       { display: grid; grid-template-columns: 1fr 320px; gap: 24px; padding: 24px 32px; max-width: 1300px; margin: 0 auto; width: 100%; }
+    .profile-actions    { position: absolute; right: 32px; bottom: 18px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; max-width: 60%; }
+    .profile-avatar-wrap { position: absolute; left: 36px; bottom: -42px; display: flex; align-items: flex-end; gap: 14px; }
+    @media (max-width: 720px) {
+      .profile-grid { grid-template-columns: 1fr !important; gap: 18px !important; padding: 18px 16px !important; }
+      .profile-name-block { padding: 60px 18px 16px 18px !important; }
+      .profile-actions { position: static !important; padding: 12px 18px 0; max-width: 100% !important; justify-content: flex-start; }
+      .profile-avatar-wrap { left: 18px !important; bottom: -36px !important; }
+      .profile-avatar-wrap .avatar.xl { width: 72px !important; height: 72px !important; font-size: 22px !important; }
+      .profile-cover { height: 130px !important; }
+      .profile-name-block h1 { font-size: 24px !important; }
+      .modal { max-width: 100% !important; border-radius: 14px 14px 0 0 !important; }
+      .modal-backdrop { padding: 0 !important; align-items: flex-end !important; }
+      .modal { max-height: 92vh; overflow-y: auto; }
+      .input, .textarea { font-size: 16px !important; } /* prevent iOS zoom */
+    }
   </style>
 </head>
 <body>
@@ -544,10 +563,12 @@
 
         {/* ——— Cover + Avatar Header ——— */}
         <div style={{position:"relative",background:"var(--surface)"}}>
-          <CoverHeader seed={profile.username || "seshn-cover"} imageUrl={profile.cover_url} height={180}/>
+          <div className="profile-cover">
+            <CoverHeader seed={profile.username || "seshn-cover"} imageUrl={profile.cover_url} height={180}/>
+          </div>
 
           {/* Avatar overlapping the cover */}
-          <div style={{position:"absolute",left:36,bottom:-42,display:"flex",alignItems:"flex-end",gap:14}}>
+          <div className="profile-avatar-wrap">
             <div style={{background:"var(--frame)",padding:4,borderRadius:"50%",boxShadow:"0 0 0 1px var(--line)"}}>
               <span className="avatar xl" style={{background:profile.avatar_url?"var(--ph)":"linear-gradient(135deg,#a8ebc8,#2CCB73)",color:"#062c19",fontSize:26,fontFamily:"var(--font-display)",fontWeight:700,overflow:"hidden"}}>
                 {profile.avatar_url
@@ -558,7 +579,7 @@
           </div>
 
           {/* Action buttons + sticker overlay */}
-          <div style={{position:"absolute",right:32,bottom:18,display:"flex",gap:10,alignItems:"center"}}>
+          <div className="profile-actions">
             {profile.is_pro && (
               <span style={{
                 display:"inline-block",transform:"rotate(-4deg)",padding:"5px 11px",borderRadius:4,
@@ -593,7 +614,7 @@
         </div>
 
         {/* ——— Name + meta ——— */}
-        <div style={{background:"var(--surface)",borderBottom:"1px solid var(--line)",padding:"52px 36px 20px 140px"}}>
+        <div className="profile-name-block" style={{background:"var(--surface)",borderBottom:"1px solid var(--line)"}}>
           <div className="row" style={{gap:10,marginBottom:5,flexWrap:"wrap"}}>
             <h1 className="t-h1" style={{fontSize:30}}>{profile.display_name}</h1>
           </div>
@@ -614,7 +635,7 @@
         </div>
 
         {/* ——— Two-column body ——— */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 320px",gap:24,padding:"24px 32px",maxWidth:1300,margin:"0 auto",width:"100%"}}>
+        <div className="profile-grid">
 
           {/* ——— Left: Bio, Portfolio, Testimonials, Recent posts ——— */}
           <div className="col" style={{gap:28,minWidth:0}}>
