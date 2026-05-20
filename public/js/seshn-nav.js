@@ -5,6 +5,27 @@
 (function () {
   var h = React.createElement;
 
+  // ── Mobile CSS injection ──────────────────────────────────────────
+  // Inline styles can't express media queries, so the nav ships its own
+  // stylesheet that handles the desktop → mobile collapse.
+  if (typeof document !== "undefined" && !document.getElementById("seshn-nav-css")) {
+    var navCss = document.createElement("style");
+    navCss.id = "seshn-nav-css";
+    navCss.textContent = [
+      ".seshn-nav-hamburger { display: none; }",
+      ".seshn-nav-mobile-menu { display: none; }",
+      "@media (max-width: 720px) {",
+      "  .seshn-nav-root { padding: 0 14px !important; gap: 4px; }",
+      "  .seshn-nav-links, .seshn-nav-search { display: none !important; }",
+      "  .seshn-nav-hamburger { display: inline-flex; }",
+      "  .seshn-nav-post-text { display: none; }",
+      "  .seshn-notifications-panel { width: calc(100vw - 28px) !important; right: -8px !important; }",
+      "  .seshn-nav-mobile-menu.open { display: flex; }",
+      "}"
+    ].join("\n");
+    document.head.appendChild(navCss);
+  }
+
   function navInitials(name) {
     if (!name) return "··";
     var parts = name.trim().split(/\s+/).filter(Boolean);
@@ -218,6 +239,7 @@
         unread > 0 && navBadge(unread)
       ),
       open && h("div", {
+        className: "seshn-notifications-panel",
         style: {
           position: "absolute", right: 0, top: "calc(100% + 8px)",
           width: 360, maxHeight: 520, overflowY: "auto",
@@ -474,6 +496,9 @@
       return function () { cancelled = true; try { unsub(); } catch (e) {} };
     }, []);
 
+    var menuState = React.useState(false);
+    var menuOpen = menuState[0], setMenuOpen = menuState[1];
+
     var displayName = me && me.display_name ? me.display_name : "";
     var initials = navInitials(displayName);
     var profileHref = me && me.username ? "profile.html?u=" + encodeURIComponent(me.username) : "profile.html";
@@ -489,53 +514,105 @@
       };
     }
 
-    return h("nav", {
-      style: {
-        background: "var(--surface)",
-        borderBottom: "1px solid var(--line)",
-        padding: "0 28px", height: 58,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        position: "sticky", top: 0, zIndex: 100
-      }
-    },
-      // Left: logo + tabs + search
-      h("div", { style: { display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 } },
-        h("a", { href: "feed.html", className: "logo", style: { textDecoration: "none" } }, "Seshn"),
-        h("div", { style: { display: "flex", alignItems: "center", gap: 4, marginLeft: 6 } },
-          h("a", { href: "feed.html", style: navLinkStyle(active === "feed") }, "Feed"),
-          h("a", { href: "browse.html", style: navLinkStyle(active === "browse") }, "Browse"),
-          h("a", { href: "applications.html", style: navLinkStyle(active === "applications") }, "Applications")
+    function mobileMenuLinkStyle(isActive) {
+      return {
+        display: "block",
+        padding: "14px 18px",
+        borderBottom: "1px solid var(--line-soft)",
+        color: isActive ? "var(--accent-d)" : "var(--ink)",
+        background: isActive ? "var(--accent-bg)" : "transparent",
+        textDecoration: "none",
+        fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15
+      };
+    }
+
+    return h(React.Fragment, null,
+      h("nav", {
+        className: "seshn-nav-root",
+        style: {
+          background: "var(--surface)",
+          borderBottom: "1px solid var(--line)",
+          padding: "0 28px", height: 58,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          position: "sticky", top: 0, zIndex: 100
+        }
+      },
+        // Left: logo + tabs + search
+        h("div", { style: { display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 } },
+          h("a", { href: "feed.html", className: "logo", style: { textDecoration: "none" } }, "Seshn"),
+          h("div", { className: "seshn-nav-links", style: { display: "flex", alignItems: "center", gap: 4, marginLeft: 6 } },
+            h("a", { href: "feed.html", style: navLinkStyle(active === "feed") }, "Feed"),
+            h("a", { href: "browse.html", style: navLinkStyle(active === "browse") }, "Browse"),
+            h("a", { href: "applications.html", style: navLinkStyle(active === "applications") }, "Applications")
+          ),
+          showSearch && h("div", { className: "seshn-nav-search", style: { display: "contents" } }, h(NavSearch))
         ),
-        showSearch && h(NavSearch)
-      ),
-      // Right: post button, inbox, bell, avatar
-      h("div", { style: { display: "flex", alignItems: "center", gap: 10 } },
-        showPostButton && h("a", { href: "post.html", className: "btn primary sm" }, "+ Post a gig"),
-        h("a", {
-          href: "inbox.html",
-          style: iconBtnStyle(active === "inbox"),
-          "aria-label": "Inbox" + (unreadConvos > 0 ? " (" + unreadConvos + " unread)" : "")
-        },
-          h(IconSvg, { kind: "message", size: 18 }),
-          unreadConvos > 0 && navBadge(unreadConvos)
-        ),
-        h(NotificationsBell),
-        h("a", { href: profileHref, style: { textDecoration: "none" }, "aria-label": "Your profile" },
-          h("span", {
-            className: "avatar md",
-            style: {
-              background: me && me.avatar_url ? "var(--ph)" : "linear-gradient(135deg,#a8ebc8,#2CCB73)",
-              color: "#062c19", fontSize: 12,
-              fontFamily: "var(--font-display)", fontWeight: 700,
-              border: active === "profile" ? "2px solid var(--ink)" : "2px solid transparent",
-              overflow: "hidden"
-            }
+        // Right: post button, inbox, bell, avatar, hamburger
+        h("div", { style: { display: "flex", alignItems: "center", gap: 8 } },
+          showPostButton && h("a", { href: "post.html", className: "btn primary sm" },
+            h("span", { className: "seshn-nav-post-text" }, "+ Post a gig"),
+            h("span", { className: "seshn-nav-post-icon", style: { display: "none" } }, "+")
+          ),
+          h("a", {
+            href: "inbox.html",
+            style: iconBtnStyle(active === "inbox"),
+            "aria-label": "Inbox" + (unreadConvos > 0 ? " (" + unreadConvos + " unread)" : "")
           },
-            me && me.avatar_url
-              ? h("img", { src: me.avatar_url, alt: "", style: { width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover", display: "block" } })
-              : initials
+            h(IconSvg, { kind: "message", size: 18 }),
+            unreadConvos > 0 && navBadge(unreadConvos)
+          ),
+          h(NotificationsBell),
+          h("a", { href: profileHref, style: { textDecoration: "none" }, "aria-label": "Your profile" },
+            h("span", {
+              className: "avatar md",
+              style: {
+                background: me && me.avatar_url ? "var(--ph)" : "linear-gradient(135deg,#a8ebc8,#2CCB73)",
+                color: "#062c19", fontSize: 12,
+                fontFamily: "var(--font-display)", fontWeight: 700,
+                border: active === "profile" ? "2px solid var(--ink)" : "2px solid transparent",
+                overflow: "hidden",
+                width: 32, height: 32, display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "50%"
+              }
+            },
+              me && me.avatar_url
+                ? h("img", { src: me.avatar_url, alt: "", style: { width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover", display: "block" } })
+                : initials
+            )
+          ),
+          // Hamburger: hidden on desktop via CSS, shown on mobile.
+          h("button", {
+            type: "button",
+            className: "seshn-nav-hamburger",
+            onClick: function () { setMenuOpen(!menuOpen); },
+            style: Object.assign({}, iconBtnStyle(false), {
+              alignItems: "center", justifyContent: "center"
+            }),
+            "aria-label": menuOpen ? "Close menu" : "Open menu",
+            "aria-expanded": menuOpen
+          },
+            menuOpen
+              ? h("svg", { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" },
+                  h("path", { d: "M6 6l12 12M18 6L6 18" }))
+              : h("svg", { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" },
+                  h("path", { d: "M4 7h16M4 12h16M4 17h16" }))
           )
         )
+      ),
+      // Mobile menu — full-width drop-down with the same links + search.
+      h("div", {
+        className: "seshn-nav-mobile-menu" + (menuOpen ? " open" : ""),
+        style: {
+          flexDirection: "column",
+          background: "var(--surface)",
+          borderBottom: "1px solid var(--line)",
+          position: "sticky", top: 58, zIndex: 99
+        }
+      },
+        h("a", { href: "feed.html",         style: mobileMenuLinkStyle(active === "feed"),         onClick: function () { setMenuOpen(false); } }, "Feed"),
+        h("a", { href: "browse.html",       style: mobileMenuLinkStyle(active === "browse"),       onClick: function () { setMenuOpen(false); } }, "Browse"),
+        h("a", { href: "applications.html", style: mobileMenuLinkStyle(active === "applications"), onClick: function () { setMenuOpen(false); } }, "Applications"),
+        h("a", { href: "settings.html",     style: mobileMenuLinkStyle(false),                     onClick: function () { setMenuOpen(false); } }, "Settings"),
+        showSearch && h("div", { style: { padding: "12px 14px" } }, h(NavSearch))
       )
     );
   }
