@@ -87,8 +87,11 @@
     .avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
 
     /* Edit-profile modal */
-    .modal-backdrop { position: fixed; inset: 0; background: rgba(13,13,13,0.5); z-index: 50; display: flex; align-items: flex-start; justify-content: center; padding: 60px 16px 16px; overflow-y: auto; }
-    .modal { background: var(--frame); border-radius: var(--r-lg); width: 100%; max-width: 560px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); display: flex; flex-direction: column; }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(13,13,13,0.5); z-index: 50; display: flex; align-items: flex-start; justify-content: center; padding: 60px 16px 16px; overflow-y: auto; animation: seshn-modal-fade 0.16s ease; }
+    .modal { background: var(--frame); border-radius: var(--r-lg); width: 100%; max-width: 560px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); display: flex; flex-direction: column; animation: seshn-modal-rise 0.2s cubic-bezier(.2,.7,.2,1); }
+    @keyframes seshn-modal-fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes seshn-modal-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes seshn-modal-sheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
     .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--line); }
     .modal-body { padding: 18px 22px; display: flex; flex-direction: column; gap: 16px; }
     .modal-footer { padding: 14px 22px; border-top: 1px solid var(--line); display: flex; gap: 10px; justify-content: flex-end; }
@@ -180,9 +183,8 @@
       .profile-avatar-wrap .avatar.xl { width: 72px !important; height: 72px !important; font-size: 22px !important; }
       .profile-cover { height: 130px !important; }
       .profile-name-block h1 { font-size: 24px !important; }
-      .modal { max-width: 100% !important; border-radius: 14px 14px 0 0 !important; }
+      .modal { max-width: 100% !important; border-radius: 14px 14px 0 0 !important; max-height: 92vh; overflow-y: auto; animation: seshn-modal-sheet 0.24s cubic-bezier(.2,.7,.2,1) !important; }
       .modal-backdrop { padding: 0 !important; align-items: flex-end !important; }
-      .modal { max-height: 92vh; overflow-y: auto; }
       .input, .textarea { font-size: 16px !important; } /* prevent iOS zoom */
     }
   </style>
@@ -786,7 +788,8 @@
               window.history.replaceState({}, "", u.toString());
             }
           } else {
-            window.location.href = "auth.html"; return;
+            window.location.href = "auth.html?next=" + encodeURIComponent(window.location.pathname + window.location.search);
+            return;
           }
           if (!profile) { setState({ status: "notfound", profile: null, isOwner: false, gigs: null }); return; }
           document.title = "Seshn — " + (profile.display_name || profile.username);

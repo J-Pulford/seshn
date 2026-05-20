@@ -217,6 +217,9 @@
       async function onGoogle() {
         setErrMsg(""); setStatus("sending");
         const next = new URLSearchParams(window.location.search).get("next");
+        // Stash in sessionStorage as a backup — some OAuth implementations
+        // strip query params from the return URL during code exchange.
+        if (next) sessionStorage.setItem("seshn_auth_next", next);
         const redirect = window.location.origin + "/app/auth.html" +
           (next ? "?next=" + encodeURIComponent(next) : "");
         try {
@@ -236,6 +239,8 @@
           setErrMsg("Please enter a valid email."); setStatus("error"); return;
         }
         setStatus("sending"); setErrMsg("");
+        const next = new URLSearchParams(window.location.search).get("next");
+        if (next) sessionStorage.setItem("seshn_auth_next", next);
         try {
           const { error } = await window.seshn.sendMagicLink(email);
           if (error) throw error;

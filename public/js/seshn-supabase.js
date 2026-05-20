@@ -811,12 +811,19 @@
   // After auth, route based on whether profile exists and an optional
   // ?next= param. `next` must be a same-app path (starts with "/app/") to
   // avoid open-redirect bugs — anything else falls through to the default.
+  // Reads ?next= from the URL first, then falls back to sessionStorage
+  // (set by the auth page before OAuth, since some providers strip URL
+  // query params from the return URL during code exchange).
   async function routeAfterAuth() {
     var u = await getUser();
     if (!u) return;
     var p = await getProfile({ id: u.id });
     if (!p || !p.username) { window.location.href = "/app/onboarding.html"; return; }
     var next = new URLSearchParams(window.location.search).get("next");
+    if (!next) {
+      try { next = sessionStorage.getItem("seshn_auth_next"); } catch (e) {}
+    }
+    try { sessionStorage.removeItem("seshn_auth_next"); } catch (e) {}
     if (next && /^\/app\/[A-Za-z0-9_./?=&%-]*$/.test(next)) {
       window.location.href = next;
       return;
