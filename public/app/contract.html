@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seshn — Contract</title>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=satoshi@400,500,600,700&display=swap" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f4f3ef; --frame: #ffffff; --surface: #ffffff; --surface-2: #f7f6f3;
+      --line: #d8d6d1; --line-soft: #ececea; --ink: #0d0d0d; --ink-2: #3a3a38;
+      --ink-3: #6e6c66; --ink-4: #a4a29c;
+      --accent: #2CCB73; --accent-d: #1C8F56; --accent-bg: #A8EBC8;
+      --cherry: #c43d3f; --amber: #d48f1a; --amber-bg: #f5e7c5;
+      --r: 8px; --r-lg: 14px; --r-pill: 999px;
+      --font-display: "General Sans", ui-sans-serif, system-ui, sans-serif;
+      --font-body: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+    }
+    html, body { background: var(--bg); font-family: var(--font-body); -webkit-font-smoothing: antialiased; color: var(--ink); }
+
+    .logo { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.04em; font-size: 20px; color: var(--ink); display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+    .logo::before { content: ""; width: 14px; height: 14px; border-radius: 3px; background: var(--accent); display: inline-block; box-shadow: 0 0 0 2px var(--frame), 0 0 0 3px var(--ink); margin-right: 2px; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; border-radius: var(--r); font-size: 12px; font-weight: 600; font-family: var(--font-display); cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink); white-space: nowrap; text-decoration: none; }
+    .btn.primary { background: var(--accent); color: #062c19; border-color: transparent; }
+    .btn.primary:disabled, .btn.primary[aria-disabled="true"] { background: var(--line); color: var(--ink-3); cursor: not-allowed; }
+    .btn.danger { color: var(--cherry); border-color: var(--cherry); background: var(--surface); }
+    .btn.sm { padding: 6px 10px; font-size: 11px; }
+    .btn.lg { padding: 12px 20px; font-size: 14px; border-radius: 10px; }
+
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--r-pill); font-size: 11px; font-weight: 500; font-family: var(--font-display); white-space: nowrap; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); }
+    .pill.accent { background: var(--accent-bg); border-color: transparent; color: var(--accent-d); }
+    .pill.solid { background: var(--ink); border-color: transparent; color: var(--frame); }
+    .pill.amber { background: var(--amber-bg); border-color: transparent; color: #6e4a06; }
+    .pill.cherry { background: #f3d9d9; border-color: transparent; color: #7a1f21; }
+
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 16px; }
+    .card.hairline { border-color: var(--line-soft); }
+
+    .page { max-width: 1180px; margin: 0 auto; padding: 22px 28px 60px; }
+    .t-meta { font-size: 11px; color: var(--ink-3); }
+    .t-eyebrow { font-family: var(--font-display); font-weight: 500; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+
+    .grid { display: grid; grid-template-columns: 1fr 320px; gap: 22px; align-items: start; }
+
+    /* The contract document looks like paper: white card, serif-ish nothing-fancy
+       body type, generous spacing. Distinct from the app chrome around it. */
+    .doc { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 36px 44px; position: relative; }
+    .doc-title { font-family: var(--font-display); font-weight: 600; font-size: 22px; letter-spacing: -0.01em; text-transform: uppercase; }
+    .doc-meta { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 26px; padding-bottom: 18px; border-bottom: 1px solid var(--line-soft); font-size: 11px; color: var(--ink-3); font-family: var(--font-display); }
+    .doc-meta b { color: var(--ink-2); font-weight: 600; }
+    .doc-section { margin-top: 22px; }
+    .doc-section h3 { font-family: var(--font-display); font-weight: 600; font-size: 14px; margin-bottom: 10px; color: var(--ink); letter-spacing: 0.005em; }
+    .doc-section p, .doc-section li { font-size: 13.5px; line-height: 1.65; color: var(--ink-2); margin-bottom: 8px; }
+    .doc-section ol, .doc-section ul { padding-left: 24px; margin: 4px 0 10px; }
+    .doc-section ul { list-style-type: disc; }
+    .doc-section ol.letters { list-style-type: lower-alpha; }
+    .doc-blockquote { border-left: 3px solid var(--accent); background: var(--surface-2); padding: 12px 16px; margin: 8px 0 12px; font-size: 13.5px; line-height: 1.55; color: var(--ink); white-space: pre-wrap; }
+    .doc-party { display: grid; grid-template-columns: 100px 1fr; gap: 6px 16px; padding: 8px 0 12px; border-bottom: 1px dashed var(--line-soft); font-size: 13.5px; line-height: 1.5; margin-bottom: 4px; }
+    .doc-party .doc-party-role { font-family: var(--font-display); font-weight: 600; color: var(--ink); }
+    .doc-splits { background: var(--surface-2); border: 1px solid var(--line-soft); border-radius: var(--r); padding: 12px 14px; margin: 6px 0 12px; }
+    .doc-splits-label { font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--ink); margin-bottom: 6px; }
+    .doc-splits-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 13px; color: var(--ink-2); }
+
+    .sig-block { margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--ink); }
+    .sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .sig-card { padding: 12px 0; }
+    .sig-card .sig-role { font-family: var(--font-display); font-weight: 500; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
+    .sig-card .sig-name { font-family: var(--font-display); font-weight: 600; font-size: 14px; color: var(--ink); }
+    .sig-card .sig-handle { font-size: 12px; color: var(--ink-3); margin-top: 1px; }
+    .sig-card .sig-when { font-size: 11px; color: var(--ink-3); margin-top: 10px; font-family: ui-monospace, SFMono-Regular, monospace; }
+    .sig-card .sig-hash { font-size: 10px; color: var(--ink-4); margin-top: 4px; font-family: ui-monospace, SFMono-Regular, monospace; word-break: break-all; }
+    .sig-card .sig-pending { font-size: 12px; color: var(--ink-3); font-style: italic; margin-top: 10px; }
+
+    /* Sidebar with status + actions */
+    .sidebar { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 22px; }
+    .status-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line-soft); font-size: 13px; }
+    .status-row:last-child { border-bottom: none; }
+    .status-row .who { display: flex; flex-direction: column; }
+    .status-row .who-name { font-family: var(--font-display); font-weight: 500; font-size: 13px; }
+    .status-row .who-meta { font-size: 11px; color: var(--ink-3); margin-top: 1px; }
+    .status-row .when { font-size: 11px; color: var(--ink-3); font-family: ui-monospace, monospace; }
+    .tick { display: inline-flex; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); color: #062c19; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ink-4); }
+
+    .sign-bar { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 16px; margin-top: 22px; }
+    .sign-bar.sticky-bottom { position: sticky; bottom: 0; box-shadow: 0 -4px 24px rgba(0,0,0,0.04); }
+    .ack-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 13px; color: var(--ink-2); cursor: pointer; line-height: 1.5; }
+    .ack-row input[type="checkbox"] { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--accent-d); cursor: pointer; }
+    .ack-row.disabled { opacity: 0.5; cursor: default; }
+    .sign-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .sign-disclaimer { font-size: 11px; color: var(--ink-3); margin-top: 10px; line-height: 1.5; }
+
+    .banner { padding: 12px 16px; border-radius: var(--r); margin-bottom: 14px; font-size: 13px; line-height: 1.5; border: 1px solid; }
+    .banner.amber { background: var(--amber-bg); border-color: #e5c47a; color: #6e4a06; }
+    .banner.green { background: var(--accent-bg); border-color: #94d8b5; color: var(--accent-d); }
+    .banner.cherry { background: #f3d9d9; border-color: #d59c9d; color: #7a1f21; }
+
+    /* Editor modal for owner draft */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; padding: 22px; z-index: 50; }
+    .modal { background: var(--surface); border-radius: var(--r-lg); max-width: 560px; width: 100%; max-height: 92vh; overflow-y: auto; padding: 24px; }
+    .modal h2 { font-family: var(--font-display); font-weight: 600; font-size: 18px; margin-bottom: 16px; }
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .field label { font-family: var(--font-display); font-weight: 500; font-size: 12px; color: var(--ink); }
+    .field input, .field textarea, .field select { font-family: var(--font-body); font-size: 14px; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); color: var(--ink); }
+    .field textarea { min-height: 70px; resize: vertical; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field-hint { font-size: 11px; color: var(--ink-3); }
+
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .doc { padding: 26px 22px; }
+      .sig-grid { grid-template-columns: 1fr; gap: 12px; }
+    }
+    @media (max-width: 720px) {
+      .page { padding: 16px 14px 40px !important; }
+      .doc { padding: 22px 18px !important; }
+      .doc-section h3 { font-size: 13.5px !important; }
+      .doc-section p, .doc-section li { font-size: 13px !important; }
+      .field input, .field textarea, .field select { font-size: 16px !important; }
+      .modal { padding: 18px; max-height: 92vh; border-radius: 16px 16px 0 0; align-self: flex-end; }
+      .modal-backdrop { padding: 0; align-items: flex-end; }
+      .field-row { grid-template-columns: 1fr; }
+    }
+
+    /* Print: hide everything except the document so browser print-to-PDF
+       yields a clean contract artifact. */
+    @media print {
+      body { background: white; }
+      .no-print { display: none !important; }
+      .page { padding: 0 !important; max-width: none; }
+      .grid { display: block; }
+      .doc { border: none; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/seshn-supabase.js"></script>
+  <script src="../js/seshn-nav.js"></script>
+  <script src="../js/contract-template.js"></script>
+
+  <script type="text/babel">
+    // ── helpers ──────────────────────────────────────────────────────
+    function getContractIdFromUrl() {
+      var p = new URLSearchParams(window.location.search);
+      return p.get("id");
+    }
+    function statusLabel(s) {
+      if (s === "draft") return "Draft";
+      if (s === "awaiting_signatures") return "Awaiting signatures";
+      if (s === "active") return "Active";
+      if (s === "completed") return "Completed";
+      if (s === "cancelled") return "Cancelled";
+      return s || "";
+    }
+    function statusPillClass(s) {
+      if (s === "active" || s === "completed") return "pill accent";
+      if (s === "cancelled") return "pill cherry";
+      if (s === "awaiting_signatures") return "pill amber";
+      return "pill";
+    }
+    function fmtDateTime(iso) {
+      if (!iso) return "—";
+      try {
+        return new Date(iso).toLocaleString("en-AU", {
+          day: "numeric", month: "short", year: "numeric",
+          hour: "2-digit", minute: "2-digit"
+        });
+      } catch (e) { return iso; }
+    }
+
+    // ── Contract document renderer ───────────────────────────────────
+    // Renders a SeshnContract.render() result as HTML. Pure presentation.
+    function ContractDocument({ doc, onScrolledBottom }) {
+      var ref = React.useRef(null);
+      React.useEffect(() => {
+        if (!onScrolledBottom) return;
+        var el = ref.current;
+        if (!el) return;
+        var seen = false;
+        function check() {
+          if (seen) return;
+          // We consider 'read' when the bottom of the doc is within 80px
+          // of the viewport bottom. (Catches users who don't scroll the
+          // last micro-bit but visibly reached the signature block.)
+          var rect = el.getBoundingClientRect();
+          if (rect.bottom - window.innerHeight < 80) {
+            seen = true;
+            onScrolledBottom();
+            window.removeEventListener("scroll", check, true);
+            window.removeEventListener("resize", check, true);
+          }
+        }
+        window.addEventListener("scroll", check, true);
+        window.addEventListener("resize", check, true);
+        check();
+        return () => {
+          window.removeEventListener("scroll", check, true);
+          window.removeEventListener("resize", check, true);
+        };
+      }, [doc, onScrolledBottom]);
+
+      function renderParagraph(p, i) {
+        if (typeof p === "string") return <p key={i}>{p}</p>;
+        if (p.kind === "blockquote") return <div key={i} className="doc-blockquote">{p.text}</div>;
+        if (p.kind === "list-bullet") return (
+          <ul key={i}>
+            {p.items.map((it, j) => <li key={j}>{it}</li>)}
+          </ul>
+        );
+        if (p.kind === "list-letter") return (
+          <ol key={i} className="letters">
+            {p.items.map((it, j) => <li key={j}>{it}</li>)}
+          </ol>
+        );
+        if (p.kind === "party") return (
+          <div key={i} className="doc-party">
+            <div className="doc-party-role">{p.role}</div>
+            <div>
+              <div>{p.name}</div>
+              <div className="t-meta">{p.handle} · {p.country}</div>
+            </div>
+          </div>
+        );
+        if (p.kind === "splits-block") return (
+          <div key={i} className="doc-splits">
+            <div className="doc-splits-label">{p.label}</div>
+            {p.rows.map((r, j) => (
+              <div key={j} className="doc-splits-row">
+                <span>{r.handle}</span><span>{r.pct}</span>
+              </div>
+            ))}
+          </div>
+        );
+        return null;
+      }
+
+      function renderSignatureBlock(s) {
+        function block(role, info) {
+          return (
+            <div className="sig-card">
+              <div className="sig-role">{role}</div>
+              <div className="sig-name">{info.party.name}</div>
+              <div className="sig-handle">{info.party.handle}</div>
+              {info.signed_at ? (
+                <>
+                  <div className="sig-when">Signed {fmtDateTime(info.signed_at)}</div>
+                  {info.evidence && info.evidence.agreement_hash && (
+                    <div className="sig-hash">sha256: {info.evidence.agreement_hash}</div>
+                  )}
+                </>
+              ) : (
+                <div className="sig-pending">Awaiting signature</div>
+              )}
+            </div>
+          );
+        }
+        return (
+          <div className="sig-block">
+            <div className="t-eyebrow" style={{ marginBottom: 12 }}>Signatures</div>
+            <div className="sig-grid">
+              {block("Owner", s.owner)}
+              {block("Collaborator", s.collaborator)}
+            </div>
+            <div style={{ marginTop: 18, paddingTop: 14, borderTop: "1px solid var(--line-soft)", fontSize: 11, color: "var(--ink-3)", lineHeight: 1.5 }}>
+              <div>Witnessed by <b>{s.witness.entity}</b>.</div>
+              <div>Contract ID: <span style={{ fontFamily: "ui-monospace, monospace" }}>{s.witness.contract_id}</span></div>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="doc" ref={ref}>
+          <div className="doc-title">{doc.title}</div>
+          <div className="doc-meta">
+            <span><b>Contract</b> {doc.header.contract_id}</span>
+            {doc.header.created_at && <span><b>Drafted</b> {fmtDateTime(doc.header.created_at)}</span>}
+            <span><b>Template</b> {doc.version}</span>
+          </div>
+
+          {doc.sections.map(s => (
+            <div key={s.number} className="doc-section">
+              <h3>{s.number}. {s.title}</h3>
+              {s.paragraphs.map(renderParagraph)}
+            </div>
+          ))}
+
+          {renderSignatureBlock(doc.signatures)}
+        </div>
+      );
+    }
+
+    // ── Status sidebar ───────────────────────────────────────────────
+    function StatusSidebar({ contract, me, onOpenEditor, onSend, onSignReady, onDecline, onCancel, busy }) {
+      var isOwner = contract.owner_id === me.id;
+      var t = contract.terms || {};
+      var amount = SeshnContract.fmtMoney(t.fee_cents, t.currency || "AUD");
+      var days = t.approval_window_days || 7;
+
+      return (
+        <div className="sidebar no-print">
+          <div className="card">
+            <div className="t-eyebrow" style={{ marginBottom: 6 }}>Status</div>
+            <span className={statusPillClass(contract.status)}>{statusLabel(contract.status)}</span>
+
+            <div style={{ marginTop: 14 }}>
+              <div className="status-row">
+                <div className="who">
+                  <span className="who-name">{contract.owner && contract.owner.display_name || "Owner"}</span>
+                  <span className="who-meta">@{contract.owner && contract.owner.username} · owner</span>
+                </div>
+                {contract.owner_signed_at
+                  ? <span className="tick" title={fmtDateTime(contract.owner_signed_at)}>✓</span>
+                  : <span className="dot" title="not yet"></span>}
+              </div>
+              <div className="status-row">
+                <div className="who">
+                  <span className="who-name">{contract.collaborator && contract.collaborator.display_name || "Collaborator"}</span>
+                  <span className="who-meta">@{contract.collaborator && contract.collaborator.username} · collaborator</span>
+                </div>
+                {contract.collaborator_signed_at
+                  ? <span className="tick" title={fmtDateTime(contract.collaborator_signed_at)}>✓</span>
+                  : <span className="dot" title="not yet"></span>}
+              </div>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="t-eyebrow" style={{ marginBottom: 8 }}>Money</div>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 22, color: "var(--ink)" }}>
+              {amount}
+            </div>
+            <div className="t-meta" style={{ marginTop: 6, lineHeight: 1.5 }}>
+              Held in escrow until the owner approves the delivery,
+              or {days} days pass after delivery, or a dispute is opened.
+            </div>
+          </div>
+
+          {t.splits && (
+            <div className="card">
+              <div className="t-eyebrow" style={{ marginBottom: 8 }}>Splits</div>
+              <div style={{ fontSize: 12, color: "var(--ink-2)", lineHeight: 1.7 }}>
+                <div><b>Master</b> &nbsp; {t.splits.master_owner_pct}% / {t.splits.master_collaborator_pct}%</div>
+                <div><b>Publishing</b> &nbsp; {t.splits.publishing_owner_pct}% / {t.splits.publishing_collaborator_pct}%</div>
+                <div className="t-meta" style={{ marginTop: 6 }}>
+                  Effective on full release of payment.
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Action card: which actions show depends on status + role. */}
+          {contract.status === "draft" && isOwner && (
+            <div className="card">
+              <div className="t-eyebrow" style={{ marginBottom: 8 }}>Actions</div>
+              <button className="btn primary" style={{ width: "100%", marginBottom: 8 }} onClick={onOpenEditor} disabled={busy}>
+                Edit terms
+              </button>
+              <button className="btn" style={{ width: "100%", marginBottom: 8 }} onClick={onSend} disabled={busy}>
+                {busy ? "…" : "Send to collaborator"}
+              </button>
+              <button className="btn danger" style={{ width: "100%" }} onClick={onCancel} disabled={busy}>
+                Cancel contract
+              </button>
+              <div className="t-meta" style={{ marginTop: 8, lineHeight: 1.5 }}>
+                Once you send this contract, terms are locked until both parties sign or it's declined.
+              </div>
+            </div>
+          )}
+
+          {contract.status === "awaiting_signatures" && (
+            <div className="card">
+              <div className="t-eyebrow" style={{ marginBottom: 8 }}>What's next</div>
+              {isOwner && contract.owner_signed_at && !contract.collaborator_signed_at && (
+                <div className="t-meta" style={{ lineHeight: 1.5 }}>
+                  Waiting on @{contract.collaborator && contract.collaborator.username} to sign.
+                  We'll notify you when they do.
+                </div>
+              )}
+              {!isOwner && !contract.collaborator_signed_at && (
+                <div className="t-meta" style={{ lineHeight: 1.5 }}>
+                  Read the document, then sign or decline below.
+                </div>
+              )}
+              {isOwner && (
+                <button className="btn danger" style={{ width: "100%", marginTop: 10 }} onClick={onCancel} disabled={busy}>
+                  Cancel contract
+                </button>
+              )}
+              {!isOwner && (
+                <button className="btn" style={{ width: "100%", marginTop: 10 }} onClick={onDecline} disabled={busy}>
+                  Decline & ask to renegotiate
+                </button>
+              )}
+            </div>
+          )}
+
+          {contract.status === "active" && (
+            <div className="card">
+              <div className="t-eyebrow" style={{ marginBottom: 8 }}>Next step</div>
+              {isOwner ? (
+                <>
+                  <button className="btn primary" style={{ width: "100%" }} disabled>
+                    Fund escrow ({amount})
+                  </button>
+                  <div className="t-meta" style={{ marginTop: 8, lineHeight: 1.5 }}>
+                    Funding goes live once Stripe Connect is wired up. For now this contract sits active.
+                  </div>
+                </>
+              ) : (
+                <div className="t-meta" style={{ lineHeight: 1.5 }}>
+                  Waiting on @{contract.owner && contract.owner.username} to fund the escrow.
+                  Once funded, you can start delivering.
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="card hairline">
+            <div className="t-meta" style={{ lineHeight: 1.5 }}>
+              <a href={"gig.html?id=" + encodeURIComponent(contract.gig_id)} style={{ color: "var(--ink-2)" }}>
+                ← Back to gig
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Terms editor modal (owner, draft only) ───────────────────────
+    function TermsEditor({ contract, onClose, onSave }) {
+      var t0 = contract.terms || {};
+      var d0 = t0.deliverable || {};
+      var s0 = t0.splits || {};
+      var c0 = t0.credits || {};
+      var [fee, setFee] = React.useState(((t0.fee_cents || 0) / 100).toString());
+      var [currency, setCurrency] = React.useState(t0.currency || "AUD");
+      var [desc, setDesc] = React.useState(d0.description || "");
+      var [fmt, setFmt] = React.useState(d0.format_notes || "");
+      var [deliverBy, setDeliverBy] = React.useState(d0.deliver_by || "");
+      var [approvalDays, setApprovalDays] = React.useState((t0.approval_window_days || 7).toString());
+      var [masterOwner, setMasterOwner] = React.useState((s0.master_owner_pct != null ? s0.master_owner_pct : 50).toString());
+      var [pubOwner, setPubOwner] = React.useState((s0.publishing_owner_pct != null ? s0.publishing_owner_pct : 50).toString());
+      var [credits, setCredits] = React.useState(c0.text || "");
+      var [saving, setSaving] = React.useState(false);
+      var [err, setErr] = React.useState("");
+
+      async function save() {
+        setErr("");
+        var feeCents = Math.round(parseFloat(fee || "0") * 100);
+        if (!feeCents || feeCents < 100) { setErr("Fee must be at least $1."); return; }
+        if (!desc.trim()) { setErr("Deliverable description is required."); return; }
+        if (!deliverBy) { setErr("Delivery deadline is required."); return; }
+        var mO = parseInt(masterOwner, 10), pO = parseInt(pubOwner, 10);
+        if (isNaN(mO) || mO < 0 || mO > 100) { setErr("Master split owner % must be 0-100."); return; }
+        if (isNaN(pO) || pO < 0 || pO > 100) { setErr("Publishing split owner % must be 0-100."); return; }
+        var aw = parseInt(approvalDays, 10);
+        if (isNaN(aw) || aw < 1 || aw > 30) { setErr("Approval window must be 1-30 days."); return; }
+
+        var terms = {
+          template_version: SeshnContract.version,
+          fee_cents: feeCents,
+          currency: currency,
+          platform_fee_pct: 8,
+          approval_window_days: aw,
+          deliverable: { description: desc.trim(), format_notes: fmt.trim(), deliver_by: deliverBy },
+          splits: {
+            master_owner_pct: mO, master_collaborator_pct: 100 - mO,
+            publishing_owner_pct: pO, publishing_collaborator_pct: 100 - pO
+          },
+          credits: { text: credits.trim() }
+        };
+        setSaving(true);
+        try {
+          var updated = await window.seshn.updateContractTerms(contract.id, terms);
+          onSave(updated);
+        } catch (e) {
+          setErr((e && e.message) || "Could not save terms.");
+        } finally {
+          setSaving(false);
+        }
+      }
+
+      return (
+        <div className="modal-backdrop" onClick={onClose}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h2>Edit contract terms</h2>
+            <div className="field-row">
+              <div className="field">
+                <label>Fee</label>
+                <input type="number" min="1" step="0.01" value={fee} onChange={e => setFee(e.target.value)} />
+              </div>
+              <div className="field">
+                <label>Currency</label>
+                <select value={currency} onChange={e => setCurrency(e.target.value)}>
+                  <option value="AUD">AUD</option>
+                  <option value="USD">USD</option>
+                  <option value="GBP">GBP</option>
+                  <option value="EUR">EUR</option>
+                </select>
+              </div>
+            </div>
+            <div className="field">
+              <label>Deliverable description</label>
+              <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="e.g. Two mixed and mastered audio stems for the chorus and bridge." />
+            </div>
+            <div className="field-row">
+              <div className="field">
+                <label>Format notes</label>
+                <input type="text" value={fmt} onChange={e => setFmt(e.target.value)} placeholder="e.g. 24-bit WAV, 48 kHz" />
+              </div>
+              <div className="field">
+                <label>Deliver by</label>
+                <input type="date" value={deliverBy} onChange={e => setDeliverBy(e.target.value)} />
+              </div>
+            </div>
+            <div className="field">
+              <label>Approval window (days)</label>
+              <input type="number" min="1" max="30" value={approvalDays} onChange={e => setApprovalDays(e.target.value)} />
+              <span className="field-hint">Days after delivery before funds auto-release if the owner doesn't act.</span>
+            </div>
+            <div className="field-row">
+              <div className="field">
+                <label>Master split — owner %</label>
+                <input type="number" min="0" max="100" value={masterOwner} onChange={e => setMasterOwner(e.target.value)} />
+                <span className="field-hint">Collaborator gets {Math.max(0, 100 - parseInt(masterOwner || "0", 10))}%.</span>
+              </div>
+              <div className="field">
+                <label>Publishing split — owner %</label>
+                <input type="number" min="0" max="100" value={pubOwner} onChange={e => setPubOwner(e.target.value)} />
+                <span className="field-hint">Collaborator gets {Math.max(0, 100 - parseInt(pubOwner || "0", 10))}%.</span>
+              </div>
+            </div>
+            <div className="field">
+              <label>Credit text</label>
+              <textarea value={credits} onChange={e => setCredits(e.target.value)} placeholder='e.g. Produced by Sam Lee. Co-produced by Jo Park.' />
+            </div>
+            {err && <div className="banner cherry">{err}</div>}
+            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+              <button className="btn primary" onClick={save} disabled={saving}>{saving ? "Saving…" : "Save terms"}</button>
+              <button className="btn" onClick={onClose} disabled={saving}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Decline modal ────────────────────────────────────────────────
+    function DeclineModal({ onClose, onSubmit, busy }) {
+      var [reason, setReason] = React.useState("");
+      return (
+        <div className="modal-backdrop" onClick={onClose}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 460 }}>
+            <h2>Decline & ask to renegotiate</h2>
+            <p style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.6, marginBottom: 14 }}>
+              The contract goes back to draft. The owner can edit terms and resend. Both signatures (yours and theirs) will be cleared.
+            </p>
+            <div className="field">
+              <label>What needs to change? (optional)</label>
+              <textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. The deadline is too tight, can we push to July 15?" />
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button className="btn primary" onClick={() => onSubmit(reason)} disabled={busy}>{busy ? "…" : "Decline"}</button>
+              <button className="btn" onClick={onClose} disabled={busy}>Keep reviewing</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Sign bar ─────────────────────────────────────────────────────
+    function SignBar({ contract, me, readToBottom, onSign, busy }) {
+      var [ack, setAck] = React.useState(false);
+      var isOwner = contract.owner_id === me.id;
+      var myHandle = isOwner
+        ? (contract.owner && contract.owner.username)
+        : (contract.collaborator && contract.collaborator.username);
+      var alreadySigned = isOwner ? !!contract.owner_signed_at : !!contract.collaborator_signed_at;
+
+      if (alreadySigned) {
+        return (
+          <div className="sign-bar no-print">
+            <div className="banner green" style={{ margin: 0 }}>
+              You signed this contract on {fmtDateTime(isOwner ? contract.owner_signed_at : contract.collaborator_signed_at)}.
+              {!contract.fully_signed_at && " Waiting on the other party."}
+            </div>
+          </div>
+        );
+      }
+
+      var canSign = readToBottom && ack && !busy;
+      return (
+        <div className="sign-bar sticky-bottom no-print">
+          <label className={"ack-row" + (readToBottom ? "" : " disabled")} title={readToBottom ? "" : "Scroll to the bottom of the agreement first."}>
+            <input
+              type="checkbox"
+              checked={ack}
+              onChange={e => setAck(e.target.checked)}
+              disabled={!readToBottom}
+            />
+            <span>
+              I have read this agreement and agree to its terms. I confirm I am @{myHandle || "—"} and I intend to sign this contract.
+            </span>
+          </label>
+          <div className="sign-actions">
+            <button
+              className="btn primary lg"
+              onClick={onSign}
+              disabled={!canSign}
+              aria-disabled={!canSign}
+            >
+              {busy ? "Signing…" : "Sign contract"}
+            </button>
+          </div>
+          <div className="sign-disclaimer">
+            By signing, you confirm your identity as @{myHandle} and consent to Seshn recording your
+            signing time, browser, and a cryptographic hash of this agreement as proof of signature.
+            This is a binding electronic signature under the Electronic Transactions Act 1999 (Cth).
+            {!readToBottom && <span style={{ display: "block", marginTop: 6, color: "var(--ink-2)" }}>Scroll the agreement to the bottom to enable signing.</span>}
+          </div>
+        </div>
+      );
+    }
+
+    // ── Page ─────────────────────────────────────────────────────────
+    function ContractPage() {
+      var [me, setMe] = React.useState(undefined);
+      var [contract, setContract] = React.useState(undefined);
+      var [doc, setDoc] = React.useState(null);
+      var [agreementHash, setAgreementHash] = React.useState(null);
+      var [readToBottom, setReadToBottom] = React.useState(false);
+      var [busy, setBusy] = React.useState(false);
+      var [err, setErr] = React.useState("");
+      var [showEditor, setShowEditor] = React.useState(false);
+      var [showDecline, setShowDecline] = React.useState(false);
+
+      var contractId = getContractIdFromUrl();
+
+      // Load contract + check access. Re-render the doc when contract data
+      // changes, and re-hash on each load so we attest to the exact text
+      // shown at sign time.
+      React.useEffect(() => {
+        (async () => {
+          var r = await window.seshn.requireProfile({ allowAnon: true });
+          if (!r) return;
+          if (!r.user) { setMe(null); return; }
+          setMe(r.user);
+          if (!contractId) { setContract(null); return; }
+          try {
+            var c = await window.seshn.getContract(contractId);
+            if (!c) { setContract(null); return; }
+            setContract(c);
+          } catch (e) {
+            setErr((e && e.message) || "Could not load contract.");
+            setContract(null);
+          }
+        })();
+      }, [contractId]);
+
+      React.useEffect(() => {
+        if (!contract) return;
+        var rendered = SeshnContract.render(contract, contract.owner, contract.collaborator, contract.gig);
+        setDoc(rendered);
+        SeshnContract.hashAgreement(rendered).then(setAgreementHash).catch(() => setAgreementHash(null));
+        setReadToBottom(false);
+      }, [contract]);
+
+      async function refresh() {
+        var c = await window.seshn.getContract(contractId);
+        setContract(c);
+      }
+
+      async function doSend() {
+        if (!confirm("Send this contract to @" + (contract.collaborator && contract.collaborator.username) + " for signing? Terms will lock once sent.")) return;
+        setBusy(true); setErr("");
+        try { await window.seshn.sendContract(contract.id); await refresh(); }
+        catch (e) { setErr((e && e.message) || "Could not send contract."); }
+        finally { setBusy(false); }
+      }
+      async function doSign() {
+        if (!agreementHash) { setErr("Agreement hash not ready yet — try again in a moment."); return; }
+        setBusy(true); setErr("");
+        try { await window.seshn.signContract(contract.id, agreementHash); await refresh(); }
+        catch (e) { setErr((e && e.message) || "Could not sign contract."); }
+        finally { setBusy(false); }
+      }
+      async function doDecline(reason) {
+        setBusy(true); setErr("");
+        try { await window.seshn.declineContract(contract.id, reason); setShowDecline(false); await refresh(); }
+        catch (e) { setErr((e && e.message) || "Could not decline."); }
+        finally { setBusy(false); }
+      }
+      async function doCancel() {
+        var reason = prompt("Cancel this contract? Optional: why?");
+        if (reason === null) return;
+        setBusy(true); setErr("");
+        try { await window.seshn.cancelContract(contract.id, reason); await refresh(); }
+        catch (e) { setErr((e && e.message) || "Could not cancel."); }
+        finally { setBusy(false); }
+      }
+
+      if (me === undefined || contract === undefined) {
+        return (
+          <div>
+            <SeshnAppNav active={null} />
+            <div className="page"><div className="t-meta">Loading…</div></div>
+          </div>
+        );
+      }
+      if (me === null) {
+        return (
+          <div>
+            <SeshnAppNav active={null} showPostButton={false} />
+            <div className="page" style={{ textAlign: "center", paddingTop: 60 }}>
+              <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 26 }}>Sign in to view this contract</h1>
+              <p style={{ color: "var(--ink-3)", marginTop: 8, marginBottom: 18 }}>Only the two named parties can read or sign a contract.</p>
+              <a href={"auth.html?next=" + encodeURIComponent("/app/contract.html?id=" + encodeURIComponent(contractId || ""))} className="btn primary lg">Sign in</a>
+            </div>
+          </div>
+        );
+      }
+      if (contract === null) {
+        return (
+          <div>
+            <SeshnAppNav active={null} />
+            <div className="page" style={{ textAlign: "center", paddingTop: 60 }}>
+              <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 24 }}>Contract not found</h1>
+              <p style={{ color: "var(--ink-3)", marginTop: 8 }}>
+                {err || "Either it doesn't exist or you're not a party to it."}
+              </p>
+              <a href="applications.html" className="btn" style={{ marginTop: 14 }}>Back to applications</a>
+            </div>
+          </div>
+        );
+      }
+
+      var isOwner = contract.owner_id === me.id;
+      var canSign = contract.status === "awaiting_signatures"
+                 && (isOwner ? !contract.owner_signed_at : !contract.collaborator_signed_at);
+
+      return (
+        <div>
+          <div className="no-print"><SeshnAppNav active={null} /></div>
+          <div className="page">
+            <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, flexWrap: "wrap", gap: 10 }}>
+              <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 22, letterSpacing: "-0.01em" }}>
+                Contract with @{isOwner ? (contract.collaborator && contract.collaborator.username) : (contract.owner && contract.owner.username)}
+              </h1>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button className="btn sm" onClick={() => window.print()}>Print / save PDF</button>
+              </div>
+            </div>
+
+            {/* Status banners */}
+            {contract.status === "draft" && isOwner && (
+              <div className="banner amber no-print">
+                This contract is a draft. Edit the terms, then send it to @{contract.collaborator && contract.collaborator.username} for signing.
+              </div>
+            )}
+            {contract.status === "draft" && !isOwner && (
+              <div className="banner amber no-print">
+                @{contract.owner && contract.owner.username} is still drafting this contract. You'll see it here once they send it.
+              </div>
+            )}
+            {contract.status === "cancelled" && (
+              <div className="banner cherry no-print">
+                This contract was cancelled.
+              </div>
+            )}
+            {contract.status === "active" && (
+              <div className="banner green no-print">
+                Both parties signed. Contract is active. Next step: owner funds the escrow.
+              </div>
+            )}
+            {contract.status === "completed" && (
+              <div className="banner green no-print">
+                Contract completed — funds released, splits effective.
+              </div>
+            )}
+            {err && <div className="banner cherry no-print">{err}</div>}
+
+            <div className="grid">
+              <div>
+                {doc && <ContractDocument doc={doc} onScrolledBottom={canSign ? () => setReadToBottom(true) : null} />}
+                {canSign && (
+                  <SignBar
+                    contract={contract}
+                    me={me}
+                    readToBottom={readToBottom}
+                    onSign={doSign}
+                    busy={busy}
+                  />
+                )}
+              </div>
+              {contract && (
+                <StatusSidebar
+                  contract={contract}
+                  me={me}
+                  onOpenEditor={() => setShowEditor(true)}
+                  onSend={doSend}
+                  onSignReady={null}
+                  onDecline={() => setShowDecline(true)}
+                  onCancel={doCancel}
+                  busy={busy}
+                />
+              )}
+            </div>
+          </div>
+
+          {showEditor && (
+            <TermsEditor
+              contract={contract}
+              onClose={() => setShowEditor(false)}
+              onSave={(updated) => { setShowEditor(false); setContract(updated); refresh(); }}
+            />
+          )}
+          {showDecline && (
+            <DeclineModal
+              onClose={() => setShowDecline(false)}
+              onSubmit={doDecline}
+              busy={busy}
+            />
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<ContractPage />);
+  </script>
+</body>
+</html>

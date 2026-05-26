@@ -861,6 +861,147 @@
     try { window.dispatchEvent(new CustomEvent("seshn:profile-updated", { detail: profile })); } catch (e) {}
   }
 
+  // ── Contracts ─────────────────────────────────────────────────────
+  // Contracts go through four states: draft → awaiting_signatures →
+  // active (both signed) → completed (on escrow release). cancelled
+  // is a side-state from draft/awaiting_signatures.
+  //
+  // The status-changing transitions (send, sign, decline, cancel) are
+  // RPC calls so the audit_log row lands atomically with the status
+  // change. Plain SELECT/INSERT/UPDATE are direct table access under
+  // the RLS in 0012_escrow.sql.
+
+  var CONTRACT_FIELDS = "id, gig_id, application_id, owner_id, collaborator_id, status, terms, " +
+                        "governing_law, language, signing_provider_ref, pdf_url, " +
+                        "owner_signed_at, collaborator_signed_at, fully_signed_at, " +
+                        "created_at, updated_at";
+
+  async function listMyContracts() {
+    var res = await sb
+      .from("contracts")
+      .select(
+        CONTRACT_FIELDS +
+        ", owner:profiles!owner_id(id, username, display_name, avatar_url, is_pro)" +
+        ", collaborator:profiles!collaborator_id(id, username, display_name, avatar_url, is_pro)" +
+        ", gig:gigs(id, title, role)"
+      )
+      .order("updated_at", { ascending: false });
+    if (res.error) { console.error("[seshn] listMyContracts error", res.error); return []; }
+    return res.data || [];
+  }
+
+  async function getContract(id) {
+    if (!id) throw new Error("Missing contract id");
+    var res = await sb
+      .from("contracts")
+      .select(
+        CONTRACT_FIELDS +
+        ", owner:profiles!owner_id(id, username, display_name, avatar_url, is_pro, location, stripe_country)" +
+        ", collaborator:profiles!collaborator_id(id, username, display_name, avatar_url, is_pro, location, stripe_country)" +
+        ", gig:gigs(id, title, role, genres, comp, pay_amount, pay_currency)"
+      )
+      .eq("id", id)
+      .maybeSingle();
+    if (res.error) { console.error("[seshn] getContract error", res.error); return null; }
+    return res.data;
+  }
+
+  // Owner drafts a new contract from an accepted application. Inserted
+  // directly under the existing RLS in 0012 (which validates that the
+  // application is accepted and that the applicant matches the named
+  // collaborator).
+  async function createContract(application, terms) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    if (!application || !application.id || !application.gig_id || !application.applicant_id) {
+      throw new Error("Missing application info");
+    }
+    if (application.status !== "accepted") {
+      throw new Error("Application must be accepted before drafting a contract");
+    }
+    var row = {
+      gig_id: application.gig_id,
+      application_id: application.id,
+      owner_id: u.id,
+      collaborator_id: application.applicant_id,
+      terms: Object.assign({ template_version: (window.SeshnContract && window.SeshnContract.version) || null }, terms || {})
+    };
+    var res = await sb.from("contracts").insert(row).select(CONTRACT_FIELDS).single();
+    if (res.error) throw res.error;
+    return res.data;
+  }
+
+  // Owner updates draft terms (status=draft enforced by RLS).
+  async function updateContractTerms(contractId, terms) {
+    if (!contractId) throw new Error("Missing contract id");
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    var res = await sb
+      .from("contracts")
+      .update({ terms: terms })
+      .eq("id", contractId)
+      .eq("owner_id", u.id)
+      .select(CONTRACT_FIELDS)
+      .single();
+    if (res.error) throw res.error;
+    return res.data;
+  }
+
+  // RPC: owner moves draft → awaiting_signatures. Atomic with the
+  // audit_log 'contract_sent' write.
+  async function sendContract(contractId) {
+    if (!contractId) throw new Error("Missing contract id");
+    var res = await sb.rpc("send_contract", { p_contract_id: contractId });
+    if (res.error) throw res.error;
+    // RPC returns the row as a JSONB-encoded record; PostgREST flattens it.
+    return Array.isArray(res.data) ? res.data[0] : res.data;
+  }
+
+  // RPC: record the caller's signature. agreementHash must be the
+  // 64-char sha256 hex of the canonical rendered agreement (computed
+  // client-side via SeshnContract.hashAgreement).
+  //
+  // IP is intentionally null in v1 — the client can't reliably learn
+  // its own egress IP, and trusting a client-attested IP would weaken
+  // the audit trail. A future Edge Function can intercept this call,
+  // capture the real X-Forwarded-For from the request, and pass it
+  // through. For now we record only the user-agent.
+  async function signContract(contractId, agreementHash) {
+    if (!contractId) throw new Error("Missing contract id");
+    if (!agreementHash || agreementHash.length !== 64) {
+      throw new Error("Agreement hash must be a 64-char sha256 hex");
+    }
+    var ua = (typeof navigator !== "undefined" && navigator.userAgent) || "";
+    var res = await sb.rpc("sign_contract", {
+      p_contract_id: contractId,
+      p_agreement_hash: agreementHash,
+      p_ip: "",
+      p_user_agent: ua
+    });
+    if (res.error) throw res.error;
+    return Array.isArray(res.data) ? res.data[0] : res.data;
+  }
+
+  async function declineContract(contractId, reason) {
+    if (!contractId) throw new Error("Missing contract id");
+    var res = await sb.rpc("decline_contract", {
+      p_contract_id: contractId,
+      p_reason: reason || ""
+    });
+    if (res.error) throw res.error;
+    return Array.isArray(res.data) ? res.data[0] : res.data;
+  }
+
+  async function cancelContract(contractId, reason) {
+    if (!contractId) throw new Error("Missing contract id");
+    var res = await sb.rpc("cancel_contract", {
+      p_contract_id: contractId,
+      p_reason: reason || ""
+    });
+    if (res.error) throw res.error;
+    return Array.isArray(res.data) ? res.data[0] : res.data;
+  }
+
   window.seshn = {
     sb: sb,
     getUser: getUser,
@@ -906,6 +1047,14 @@
     getUnreadNotificationCount: getUnreadNotificationCount,
     markNotificationsRead: markNotificationsRead,
     markAllNotificationsRead: markAllNotificationsRead,
-    subscribeToNotifications: subscribeToNotifications
+    subscribeToNotifications: subscribeToNotifications,
+    listMyContracts: listMyContracts,
+    getContract: getContract,
+    createContract: createContract,
+    updateContractTerms: updateContractTerms,
+    sendContract: sendContract,
+    signContract: signContract,
+    declineContract: declineContract,
+    cancelContract: cancelContract
   };
 })();
