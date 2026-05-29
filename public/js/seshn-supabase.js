@@ -389,10 +389,22 @@
     var q = sb.from("profiles").select("id, username, display_name, bio, location, pronouns, roles, genres, is_pro, created_at");
     if (opts.roles && opts.roles.length) q = q.overlaps("roles", opts.roles);
     if (opts.genres && opts.genres.length) q = q.overlaps("genres", opts.genres);
-    if (opts.location && opts.location.trim()) q = q.ilike("location", "%" + opts.location.trim() + "%");
+    if (opts.location && opts.location.trim()) {
+      // Strip LIKE wildcards so a stray % or _ can't widen the match.
+      var ploc = opts.location.trim().replace(/[%_]/g, "");
+      if (ploc) q = q.ilike("location", "%" + ploc + "%");
+    }
     if (opts.search && opts.search.trim()) {
-      var s = opts.search.trim().replace(/[%,]/g, "");
-      q = q.or("display_name.ilike.%" + s + "%,username.ilike.%" + s + "%,bio.ilike.%" + s + "%");
+      // Search name / username / bio. This goes through a PostgREST or= filter
+      // whose grammar treats , . ( ) as structural — so we strip the LIKE
+      // wildcards (% _) and double-quote each value, which is PostgREST's
+      // supported way to embed reserved characters. Names like "J.Cole" or
+      // "drum (live)" then match instead of breaking the query.
+      var s = opts.search.trim().replace(/[%_]/g, "").replace(/["\\]/g, "");
+      if (s) {
+        var pat = '"%' + s + '%"';
+        q = q.or("display_name.ilike." + pat + ",username.ilike." + pat + ",bio.ilike." + pat);
+      }
     }
     if (opts.excludeId) q = q.neq("id", opts.excludeId);
     if (opts.proOnly) q = q.eq("is_pro", true);
