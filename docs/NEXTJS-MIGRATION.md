@@ -61,31 +61,51 @@ We keep the legacy files until their replacement route is verified, then remove 
 
 ## Phases
 
-### Phase 0 — Scaffold + shared foundation  ⬅ START HERE
+> **Re-sequenced 2026-05-29:** the landing page (was Phase 1) is deferred to
+> **last** — the founder is reworking its design/content separately. The
+> scaffold home placeholder stays at `/` on the branch until then. We proceed
+> with the app pages first.
+
+### Phase 0 — Scaffold + shared foundation  ✅ DONE (2026-05-29)
 - [ ] Next.js + TS + ESLint scaffold at repo root (manual, so it doesn't clobber `public/`)
 - [ ] `app/globals.css` — port the shared CSS custom-property palette + base resets that
       every page currently re-declares in its own `<style>` block
-- [ ] `lib/seshn/client.ts` — browser Supabase client (keeps current localStorage auth)
-- [ ] `lib/seshn/server.ts` — server Supabase client (anon, read-only) for SSR pages
-- [ ] `lib/seshn/types.ts` — DB row types (Profile, Gig, Application, Conversation, …)
-- [ ] `components/visual/` — shared `AlbumArt`, `Vinyl`, `Grain`, `Icon` (deduped from
-      the copies currently inlined in nearly every page)
-- [ ] `next build` passes with a placeholder home route
-- [ ] Vercel picks up the Next.js build (confirm a preview deploy renders)
+- [x] `lib/seshn/client.ts` — browser Supabase client (keeps current localStorage auth)
+- [x] `lib/seshn/server.ts` — server Supabase client (anon, read-only) for SSR pages
+- [x] `lib/seshn/types.ts` — DB row types (Profile, Gig, Application, Conversation, …)
+- [x] `lib/seshn/constants.ts` — typed role/genre/comp vocabularies (single source)
+- [x] `components/visual/` — shared `AlbumArt`, `Vinyl`, `Grain`
+- [x] `next build` passes with a placeholder home route
+- [x] Vercel preview renders + coexistence confirmed (`/` new, `/app/*.html` legacy)
 
-### Phase 1 — Landing page (first real slice, SSR)
-- [ ] Port `public/index.html` → `app/page.tsx` (server component for the static content)
-- [ ] Waitlist form → `app/api/waitlist/route.ts` (server action / route handler)
-- [ ] `metadata` export for OG tags + crawlability (the SEO win)
-- [ ] Verify pixel parity against the live landing page
-- [ ] Delete `public/index.html`
-
-### Phase 2 — Auth + shared app chrome
-- [ ] `lib/seshn/auth.ts` — typed port of sign-in/up/reset/verify helpers
+### Phase 2 — Data layer + auth + shared app chrome  ⬅ IN PROGRESS
+- [~] `lib/seshn/` — typed port of the seshn-supabase.js data layer, split by domain:
+      - [x] `profiles.ts` (getUser, getProfile, upsert/update, image uploads, listProfiles)
+      - [x] `auth.ts` (sign-in/up/reset/verify helpers, routeAfterAuth, requireProfile)
+      - [ ] gigs, applications, messaging, notifications, connected accounts,
+            contracts, trust-safety
+- [x] `app/auth/page.tsx` — auth.html ported (magic / password / recovery / verify),
+      coexists with legacy auth.html (kept alive: Supabase email links + legacy
+      pages still point at /app/auth.html). `next build` + smoke test pass.
+- [x] guard helpers — `requireProfile` / `routeAfterAuth` ported with email-verify gate.
+      Redirect targets centralised in auth.ts ROUTES (some still legacy until ported).
 - [ ] `components/Nav.tsx` — port `seshn-nav.js` (incl. the global NavSearch)
-- [ ] `app/auth/page.tsx` — port auth.html (magic link, password, recovery, verify modes)
-- [ ] `middleware.ts` or a client guard — port `requireProfile` / `routeAfterAuth`
-      semantics (incl. the email-verification gate)
+
+### Phase 3 — Core marketplace pages (client-rendered)
+Port in dependency order, deleting each legacy file as its route is verified:
+- [ ] feed → browse → gig → profile → post → applications → onboarding → settings
+
+### Phase 4 — Messaging + contracts
+- [ ] inbox (realtime messages), contract, project, pro
+
+### Phase 5 — Landing page (LAST — founder reworking design) + cleanup
+- [ ] Port the (redesigned) landing → `app/page.tsx` SSR + `metadata` for SEO
+- [ ] Waitlist form → `app/api/waitlist/route.ts`
+- [ ] Remove the last legacy `.html` + the three `public/js/*.js` files
+- [ ] Strip Babel/CDN script tags everywhere (now compiled at build time)
+- [ ] Confirm all internal links use Next routes; add redirects for any old
+      `/app/*.html` URLs that may be linked externally (email links, etc.)
+- [ ] Lighthouse/SEO check on the landing page
 
 ### Phase 3 — Core marketplace pages (client-rendered)
 Port in dependency order, deleting each legacy file as its route is verified:

@@ -16,8 +16,21 @@ export interface Profile {
   genres: string[];
   is_pro: boolean;
   avatar_url: string;
+  cover_url?: string;
+  notification_prefs?: Record<string, boolean>;
+  // 0012 additions (escrow / trust & safety); optional on read.
+  stripe_account_id?: string | null;
+  stripe_account_status?: "pending" | "verified" | "restricted" | null;
+  locale?: string;
+  restrictions?: Record<string, string>;
   created_at: string;
   updated_at: string;
+}
+
+/** Options for looking up a single profile. */
+export interface GetProfileOpts {
+  id?: string;
+  username?: string;
 }
 
 /** Trimmed profile as embedded on a gig's owner join. */
