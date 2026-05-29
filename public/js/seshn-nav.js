@@ -580,13 +580,18 @@
             )
           ),
           // Hamburger: hidden on desktop via CSS, shown on mobile.
+          // We deliberately avoid inheriting iconBtnStyle's `display: inline-flex`,
+          // since an inline style would override the CSS `display: none` rule.
           h("button", {
             type: "button",
             className: "seshn-nav-hamburger",
             onClick: function () { setMenuOpen(!menuOpen); },
-            style: Object.assign({}, iconBtnStyle(false), {
+            style: {
+              width: 34, height: 34, borderRadius: 8,
+              color: "var(--ink-2)", background: "transparent",
+              textDecoration: "none", cursor: "pointer", border: "none",
               alignItems: "center", justifyContent: "center"
-            }),
+            },
             "aria-label": menuOpen ? "Close menu" : "Open menu",
             "aria-expanded": menuOpen
           },

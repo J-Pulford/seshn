@@ -177,6 +177,18 @@
       flex-direction: column;
       gap: 10px;
     }
+    /* Card-grid view: auto-fit so the column count scales with the
+       available main-area width (3 on wide desktop, 2 on laptop,
+       1 on phone). minmax(260px, 1fr) sets the per-card floor. */
+    .feed-cards { display: flex; flex-direction: column; gap: 14px; }
+    .feed-cards.grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    @media (max-width: 720px) {
+      .feed-cards.grid { grid-template-columns: 1fr !important; }
+    }
     .gig.boost {
       border-color: var(--accent-d);
       background: linear-gradient(180deg, color-mix(in srgb, var(--accent-bg) 40%, var(--surface)) 0%, var(--surface) 60%);
@@ -471,7 +483,10 @@
               <span className="t-meta">· {comp}</span>
             </div>
           </div>
-          {art && <AlbumArt seed={art===true?title:art} size={48} radius={6} />}
+          {(gig && gig.cover_url)
+            ? <img src={gig.cover_url} alt=""
+                   style={{ width: 48, height: 48, borderRadius: 6, objectFit: "cover", display: "block", flex: "0 0 auto" }} />
+            : (art && <AlbumArt seed={art===true?title:art} size={48} radius={6} />)}
         </div>
         <div style={{ fontFamily:"var(--font-display)", fontWeight:600, fontSize:16, letterSpacing:"-0.012em", lineHeight:1.2 }}>{title}</div>
         {desc !== false && desc && (
@@ -531,6 +546,14 @@
       const [location, setLocation] = React.useState("");
       const [search, setSearch]   = React.useState("");
       const [sort, setSort]       = React.useState("default"); // "default" | "newest"
+      // View preference persists across reloads via localStorage.
+      const [view, setView] = React.useState(() => {
+        try { return localStorage.getItem("seshn:feed_view") === "list" ? "list" : "grid"; }
+        catch (e) { return "grid"; }
+      });
+      React.useEffect(() => {
+        try { localStorage.setItem("seshn:feed_view", view); } catch (e) {}
+      }, [view]);
 
       const toggleIn = (setter) => (value) => {
         setter(prev => {
@@ -637,9 +660,35 @@
                 <span className={"pill" + (sort === "newest" ? "" : " ghost")}
                       style={{ cursor:"pointer", background: sort === "newest" ? "var(--ink)" : undefined, color: sort === "newest" ? "var(--frame)" : undefined, borderColor: sort === "newest" ? "transparent" : undefined }}
                       onClick={() => setSort("newest")}>Newest</span>
+                <div style={{ width:1, height:20, background:"var(--line)", margin:"0 2px" }} />
+                <button
+                  type="button"
+                  onClick={() => setView("grid")}
+                  aria-label="Card view"
+                  aria-pressed={view === "grid"}
+                  style={{ background:"none", border:"none", padding:4, cursor:"pointer",
+                           color: view === "grid" ? "var(--ink)" : "var(--ink-4)",
+                           display:"inline-flex", alignItems:"center" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
+                    <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setView("list")}
+                  aria-label="List view"
+                  aria-pressed={view === "list"}
+                  style={{ background:"none", border:"none", padding:4, cursor:"pointer",
+                           color: view === "list" ? "var(--ink)" : "var(--ink-4)",
+                           display:"inline-flex", alignItems:"center" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+                  </svg>
+                </button>
               </div>
             </div>
-            <div className="col" style={{ gap:14 }}>
+            <div className={"feed-cards" + (gigs && gigs.length > 0 && view === "grid" ? " grid" : "")}>
               {gigs === null ? (
                 <div style={{ padding: "60px 0", textAlign: "center", color: "var(--ink-3)", fontFamily: "var(--font-display)", fontSize: 13 }}>
                   Loading gigs…

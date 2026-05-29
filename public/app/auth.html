@@ -195,24 +195,39 @@
     // ── App ──────────────────────────────────────────────────────
     function AuthPage() {
       const [email, setEmail] = React.useState("");
+      const [password, setPassword] = React.useState("");
+      // mode: "magic" (default — magic link) | "password" (email + password)
+      const [mode, setMode] = React.useState("magic");
       const [status, setStatus] = React.useState("idle"); // idle | sending | sent | error | checking
       const [errMsg, setErrMsg] = React.useState("");
+      // The recovery flow sends users back to /app/auth.html?recover=1 with
+      // a session already established. We also accept type=recovery in the
+      // URL hash (Supabase puts it there by default) as a fallback — that
+      // way the right form shows even if the redirect URL ever drops the
+      // query param.
+      const recoverMode = typeof window !== "undefined" && (
+        new URLSearchParams(window.location.search).get("recover") === "1" ||
+        /(^|&)type=recovery(&|$)/.test((window.location.hash || "").replace(/^#/, ""))
+      );
 
       React.useEffect(() => {
         // If we returned from a magic-link click, Supabase JS auto-exchanges
         // the token. Subscribe to auth state and route appropriately.
         if (!window.seshn) return;
         setStatus("checking");
-        // Honor existing session immediately
+        // Honor existing session immediately — except when arriving from a
+        // password reset link, where we want the user to set a new password
+        // before routing on.
         window.seshn.getUser().then(u => {
-          if (u) window.seshn.routeAfterAuth();
+          if (u && !recoverMode) window.seshn.routeAfterAuth();
           else setStatus("idle");
         });
         const { data } = window.sb.auth.onAuthStateChange((event, session) => {
-          if (event === "SIGNED_IN" && session) window.seshn.routeAfterAuth();
+          if (event === "PASSWORD_RECOVERY") return; // stay on the recover form
+          if (event === "SIGNED_IN" && session && !recoverMode) window.seshn.routeAfterAuth();
         });
         return () => { data && data.subscription && data.subscription.unsubscribe(); };
-      }, []);
+      }, [recoverMode]);
 
       async function onGoogle() {
         setErrMsg(""); setStatus("sending");
@@ -250,6 +265,56 @@
         }
       }
 
+      async function onSignInPassword(e) {
+        e && e.preventDefault();
+        if (!email || !email.includes("@")) {
+          setErrMsg("Please enter a valid email."); setStatus("error"); return;
+        }
+        if (!password) {
+          setErrMsg("Please enter your password."); setStatus("error"); return;
+        }
+        setStatus("sending"); setErrMsg("");
+        const next = new URLSearchParams(window.location.search).get("next");
+        if (next) sessionStorage.setItem("seshn_auth_next", next);
+        try {
+          const { error } = await window.seshn.signInWithPassword(email, password);
+          if (error) throw error;
+          // routeAfterAuth fires via onAuthStateChange when the session lands.
+        } catch (err) {
+          setErrMsg(err.message || "Couldn't sign in."); setStatus("error");
+        }
+      }
+
+      async function onSendReset() {
+        if (!email || !email.includes("@")) {
+          setErrMsg("Enter your email above first."); setStatus("error"); return;
+        }
+        setStatus("sending"); setErrMsg("");
+        try {
+          const { error } = await window.seshn.sendPasswordReset(email);
+          if (error) throw error;
+          setStatus("sent");
+        } catch (err) {
+          setErrMsg(err.message || "Couldn't send the reset email."); setStatus("error");
+        }
+      }
+
+      async function onSetNewPassword(e) {
+        e && e.preventDefault();
+        if (!password || password.length < 8) {
+          setErrMsg("Password must be at least 8 characters."); setStatus("error"); return;
+        }
+        setStatus("sending"); setErrMsg("");
+        try {
+          await window.seshn.setMyPassword(password);
+          // Clear the recover flag from the URL and route on.
+          window.history.replaceState({}, "", window.location.pathname);
+          window.seshn.routeAfterAuth();
+        } catch (err) {
+          setErrMsg(err.message || "Couldn't set password."); setStatus("error");
+        }
+      }
+
       return (
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg)" }}>
           {/* Nav */}
@@ -268,51 +333,124 @@
               <h1>Make your first<br />session.</h1>
               <p className="sub">Create a profile, post a brief, find your collaborators. Free forever — no follower counts, no noise.</p>
 
-              <form className="form-stack" onSubmit={onSendMagic}>
-                <button
-                  type="button"
-                  className="btn-oauth"
-                  onClick={onGoogle}
-                  disabled={status === "sending" || status === "checking"}
-                >
-                  <GoogleIcon />
-                  Continue with Google
-                </button>
-
-                <div className="divider"><span>or with email</span></div>
-
-                {status === "sent" ? (
-                  <div style={{
-                    padding: "16px 18px", borderRadius: 12, border: "1px solid var(--accent-d)",
-                    background: "var(--accent-bg)", color: "var(--accent-d)",
-                    fontFamily: "var(--font-display)", fontSize: 13, lineHeight: 1.45
-                  }}>
-                    <strong>Check your inbox.</strong> We sent a magic link to <b>{email}</b>. Open it on this device to sign in.
+              {recoverMode ? (
+                /* Password recovery — user just clicked a reset link. */
+                <form className="form-stack" onSubmit={onSetNewPassword}>
+                  <div style={{ padding: "14px 16px", borderRadius: 10, background: "var(--surface-2)",
+                                fontFamily: "var(--font-display)", fontSize: 13, color: "var(--ink-2)" }}>
+                    You're signed in. Set a new password below to finish recovery.
                   </div>
-                ) : (
-                  <>
-                    <input
-                      type="email"
-                      className="input-field"
-                      placeholder="you@artist.fm"
-                      value={email}
-                      onChange={e => { setEmail(e.target.value); if (status === "error") setStatus("idle"); }}
-                      disabled={status === "sending" || status === "checking"}
-                      autoComplete="email"
-                    />
-                    <button
-                      type="submit"
-                      className="btn-primary"
-                      disabled={status === "sending" || status === "checking" || !email}
-                    >
-                      {status === "checking" ? "Loading…" : status === "sending" ? "Sending link…" : "Send magic link →"}
-                    </button>
-                    {errMsg && (
-                      <div style={{ color: "var(--danger)", fontSize: 12, fontFamily: "var(--font-display)", marginTop: -4 }}>{errMsg}</div>
-                    )}
-                  </>
-                )}
-              </form>
+                  <input
+                    type="password"
+                    className="input-field"
+                    placeholder="New password (min 8 characters)"
+                    value={password}
+                    onChange={e => { setPassword(e.target.value); if (status === "error") setStatus("idle"); }}
+                    disabled={status === "sending"}
+                    autoComplete="new-password"
+                    autoFocus
+                  />
+                  <button
+                    type="submit"
+                    className="btn-primary"
+                    disabled={status === "sending" || !password}
+                  >
+                    {status === "sending" ? "Saving…" : "Set new password →"}
+                  </button>
+                  {errMsg && (
+                    <div style={{ color: "var(--cherry)", fontSize: 12, fontFamily: "var(--font-display)" }}>{errMsg}</div>
+                  )}
+                </form>
+              ) : (
+                <form
+                  className="form-stack"
+                  onSubmit={mode === "password" ? onSignInPassword : onSendMagic}
+                >
+                  <button
+                    type="button"
+                    className="btn-oauth"
+                    onClick={onGoogle}
+                    disabled={status === "sending" || status === "checking"}
+                  >
+                    <GoogleIcon />
+                    Continue with Google
+                  </button>
+
+                  <div className="divider"><span>or with email</span></div>
+
+                  {status === "sent" ? (
+                    <div style={{
+                      padding: "16px 18px", borderRadius: 12, border: "1px solid var(--accent-d)",
+                      background: "var(--accent-bg)", color: "var(--accent-d)",
+                      fontFamily: "var(--font-display)", fontSize: 13, lineHeight: 1.45
+                    }}>
+                      <strong>Check your inbox.</strong> We sent {mode === "password" ? "a reset link" : "a magic link"} to <b>{email}</b>. Open it on this device to continue.
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type="email"
+                        className="input-field"
+                        placeholder="you@artist.fm"
+                        value={email}
+                        onChange={e => { setEmail(e.target.value); if (status === "error") setStatus("idle"); }}
+                        disabled={status === "sending" || status === "checking"}
+                        autoComplete="email"
+                      />
+                      {mode === "password" && (
+                        <input
+                          type="password"
+                          className="input-field"
+                          placeholder="Password"
+                          value={password}
+                          onChange={e => { setPassword(e.target.value); if (status === "error") setStatus("idle"); }}
+                          disabled={status === "sending" || status === "checking"}
+                          autoComplete="current-password"
+                        />
+                      )}
+                      <button
+                        type="submit"
+                        className="btn-primary"
+                        disabled={status === "sending" || status === "checking" || !email || (mode === "password" && !password)}
+                      >
+                        {status === "checking"
+                          ? "Loading…"
+                          : status === "sending"
+                            ? (mode === "password" ? "Signing in…" : "Sending link…")
+                            : (mode === "password" ? "Sign in →" : "Send magic link →")}
+                      </button>
+                      {errMsg && (
+                        <div style={{ color: "var(--cherry)", fontSize: 12, fontFamily: "var(--font-display)", marginTop: -4 }}>{errMsg}</div>
+                      )}
+
+                      {/* Mode toggle + (in password mode) forgot link */}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4, gap: 12, flexWrap: "wrap" }}>
+                        <button
+                          type="button"
+                          onClick={() => { setMode(mode === "password" ? "magic" : "password"); setErrMsg(""); setStatus("idle"); }}
+                          style={{ background: "none", border: "none", padding: 0, cursor: "pointer",
+                                   fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 12,
+                                   color: "var(--ink-3)", textDecoration: "underline" }}
+                        >
+                          {mode === "password" ? "Use a magic link instead" : "Use a password instead"}
+                        </button>
+                        {mode === "password" && (
+                          <button
+                            type="button"
+                            onClick={onSendReset}
+                            disabled={status === "sending"}
+                            style={{ background: "none", border: "none", padding: 0, cursor: "pointer",
+                                     fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 12,
+                                     color: "var(--ink-3)", textDecoration: "underline" }}
+                          >
+                            Forgot password?
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </form>
+              )}
 
               <p className="tos">
                 By signing up you agree to Seshn's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.

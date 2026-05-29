@@ -488,11 +488,20 @@
                 {gig.title}
               </h1>
 
-              {/* Cover art header */}
+              {/* Cover art header — uploaded cover_url if present, else the algorithmic CoverHeader. */}
               <div style={{ position: "relative", marginBottom: 20 }}>
-                <CoverHeader seed={gig.id || gig.title} height={160} />
+                {gig.cover_url
+                  ? <div style={{ height: 160, borderRadius: 12, overflow: "hidden", background: "var(--ph)" }}>
+                      <img src={gig.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                    </div>
+                  : <CoverHeader seed={gig.id || gig.title} height={160} />
+                }
                 <div style={{ position: "absolute", left: 18, bottom: 14, display: "flex", gap: 12, alignItems: "center" }}>
-                  <AlbumArt seed={gig.title} size={64} radius={6} />
+                  {gig.cover_url
+                    ? <img src={gig.cover_url} alt=""
+                           style={{ width: 64, height: 64, borderRadius: 6, objectFit: "cover", display: "block",
+                                    border: "2px solid var(--frame)", boxShadow: "0 4px 12px rgba(0,0,0,0.18)" }} />
+                    : <AlbumArt seed={gig.title} size={64} radius={6} />}
                 </div>
                 {gig.genres && gig.genres.length > 0 && (
                   <div style={{ position: "absolute", top: 14, right: 14 }}>

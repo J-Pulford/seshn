@@ -141,6 +141,46 @@
     return url;
   }
 
+  // Upload a custom cover for a gig. Mirrors uploadCover (avatars bucket,
+  // user-scoped folder); the caller passes the previous cover_url (if any)
+  // so we can best-effort delete the orphan. Path:
+  //   avatars/{user_id}/gig-cover-<ts>.<ext>
+  async function uploadGigCover(file, previousUrl) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    if (!file) throw new Error("No file");
+    if (!file.type || file.type.indexOf("image/") !== 0) {
+      throw new Error("Cover must be an image (jpg, png, webp, gif).");
+    }
+    var MAX = 8 * 1024 * 1024;
+    if (file.size > MAX) throw new Error("Image is too large (max 8 MB).");
+
+    var ext = (file.name && file.name.split(".").pop() || "").toLowerCase();
+    if (!/^(jpg|jpeg|png|webp|gif)$/.test(ext)) ext = file.type.split("/")[1] || "jpg";
+    var path = u.id + "/gig-cover-" + Date.now() + "." + ext;
+
+    var up = await sb.storage.from("avatars").upload(path, file, {
+      cacheControl: "31536000",
+      upsert: false,
+      contentType: file.type
+    });
+    if (up.error) throw up.error;
+
+    var pub = sb.storage.from("avatars").getPublicUrl(path);
+    var url = pub.data && pub.data.publicUrl;
+
+    if (previousUrl) {
+      try {
+        var m = previousUrl.match(/\/avatars\/(.+)$/);
+        if (m && m[1] && m[1] !== path) {
+          await sb.storage.from("avatars").remove([m[1]]);
+        }
+      } catch (e) { /* non-fatal */ }
+    }
+
+    return url;
+  }
+
   async function sendMagicLink(email, redirectTo) {
     return sb.auth.signInWithOtp({
       email: email,
@@ -153,6 +193,51 @@
 
   async function signOut() {
     return sb.auth.signOut();
+  }
+
+  // Email + password sign-in. The account must already exist (created via
+  // magic link or via signUpWithPassword) and must have a password set.
+  // Supabase responds with the same generic "Invalid login credentials"
+  // for unknown email, wrong password, or unverified email — by design,
+  // since exposing which one would let attackers enumerate accounts.
+  async function signInWithPassword(email, password) {
+    if (!email || !password) throw new Error("Email and password required");
+    return sb.auth.signInWithPassword({ email: email.trim(), password: password });
+  }
+
+  // Sign up with email + password. Supabase sends a confirmation email;
+  // the account stays in a pending state until the user clicks the link.
+  async function signUpWithPassword(email, password, redirectTo) {
+    if (!email || !password) throw new Error("Email and password required");
+    if (password.length < 8) throw new Error("Password must be at least 8 characters");
+    return sb.auth.signUp({
+      email: email.trim(),
+      password: password,
+      options: {
+        emailRedirectTo: redirectTo || (window.location.origin + "/app/auth.html")
+      }
+    });
+  }
+
+  // Set or change the current user's password. Used by the settings page
+  // when an existing magic-link user wants to add a password to their
+  // account.
+  async function setMyPassword(newPassword) {
+    if (!newPassword) throw new Error("Missing password");
+    if (newPassword.length < 8) throw new Error("Password must be at least 8 characters");
+    var res = await sb.auth.updateUser({ password: newPassword });
+    if (res.error) throw res.error;
+    return res.data;
+  }
+
+  // Send a password reset email. Supabase mails a recovery link; on click,
+  // the user lands on /app/auth.html with a recovery token in the URL,
+  // which we exchange for a session and then prompt for a new password.
+  async function sendPasswordReset(email, redirectTo) {
+    if (!email) throw new Error("Missing email");
+    return sb.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: redirectTo || (window.location.origin + "/app/auth.html?recover=1")
+    });
   }
 
   // Start an OAuth sign-in. The user is redirected to the provider; on
@@ -1010,7 +1095,12 @@
     updateProfile: updateProfile,
     uploadAvatar: uploadAvatar,
     uploadCover: uploadCover,
+    uploadGigCover: uploadGigCover,
     sendMagicLink: sendMagicLink,
+    signInWithPassword: signInWithPassword,
+    signUpWithPassword: signUpWithPassword,
+    setMyPassword: setMyPassword,
+    sendPasswordReset: sendPasswordReset,
     signInWithGoogle: signInWithGoogle,
     updateMyEmail: updateMyEmail,
     updateNotificationPrefs: updateNotificationPrefs,
