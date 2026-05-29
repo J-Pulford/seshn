@@ -137,6 +137,15 @@ export interface Notification {
   gig?: { id: string; title: string; role: string } | null;
 }
 
+export interface ConnectedAccount {
+  user_id: string;
+  provider: string;
+  display_name: string | null;
+  profile_url: string | null;
+  stats: { followers?: number } | null;
+  connected_at: string;
+}
+
 /** A DM attachment descriptor (return of uploadDmAttachment). */
 export interface DmAttachment {
   url: string | undefined;

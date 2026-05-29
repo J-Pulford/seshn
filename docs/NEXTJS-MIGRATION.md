@@ -111,7 +111,12 @@ until the legacy auth.html is retired in Phase 5); new routes coexist.
       owner applications list (accept/pass/undo, message), close/reopen, cover
       header, poster card, gig details, report modal. Feed/browse/applications/
       nav gig links now point at /gig/[id].
-- [ ] profile → post → settings
+- [x] profile (`/profile/[username]`) — dynamic route. Cover+avatar header,
+      bio, connected accounts, recent posts, roles/genres rail; owner edit modal
+      (avatar/cover upload, chips); non-owner message + report/block controls.
+      All profile links across nav/feed/browse/gig/applications now point at
+      /profile/[username]. Added lib/seshn/connected-accounts.ts.
+- [ ] post → settings
 
 ### Phase 4 — Messaging + contracts
 - [ ] inbox (realtime messages), contract, project, pro

@@ -16,7 +16,7 @@ import "./gig.css";
 const R = {
   feed: "/feed",
   applications: "/applications",
-  profile: (u?: string) => `/app/profile.html?u=${encodeURIComponent(u || "")}`,
+  profile: (u?: string) => `/profile/${encodeURIComponent(u || "")}`,
   inboxConvo: (id: string) => `/app/inbox.html?c=${encodeURIComponent(id)}`,
 };
 

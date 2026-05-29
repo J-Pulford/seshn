@@ -11,7 +11,7 @@ import type { Application, Gig } from "@/lib/seshn/types";
 type MyApplication = Application & { gig?: Gig };
 
 const gigHref = (id?: string) => `/gig/${encodeURIComponent(id || "")}`;
-const profileHref = (u?: string) => `/app/profile.html?u=${encodeURIComponent(u || "")}`;
+const profileHref = (u?: string) => `/profile/${encodeURIComponent(u || "")}`;
 
 function statusPillClass(status: string) {
   if (status === "accepted") return "pill accent";

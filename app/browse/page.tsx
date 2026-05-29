@@ -9,7 +9,7 @@ import type { Profile } from "@/lib/seshn/types";
 import "./browse.css";
 
 const QUICK_LOCATIONS = ["Remote", "NYC", "LA", "London", "Berlin"];
-const profileHref = (u: string) => `/app/profile.html?u=${encodeURIComponent(u || "")}`;
+const profileHref = (u: string) => `/profile/${encodeURIComponent(u || "")}`;
 
 function _hash(s: string) {
   let h = 2166136261 >>> 0;
