@@ -651,9 +651,74 @@
               <div style={{ textAlign: "center", fontSize: 11, color: "var(--ink-4)" }}>
                 {isOwner ? "You own this gig" : "Free to apply · no account required to browse"}
               </div>
+              {!isOwner && (
+                <div style={{ textAlign: "center", marginTop: 2 }}>
+                  <GigReport gigId={gig.id} />
+                </div>
+              )}
             </div>
           </div>
         </div>
+      );
+    }
+
+    // ——— Report this gig ———
+    const GIG_REPORT_REASONS = ["Spam or scam", "Misleading or fake", "Inappropriate content", "Asking to pay off-platform", "Something else"];
+    function GigReport({ gigId }) {
+      const [open, setOpen] = React.useState(false);
+      const [reason, setReason] = React.useState("");
+      const [details, setDetails] = React.useState("");
+      const [state, setState] = React.useState("idle"); // idle | sending | done | error
+      const [err, setErr] = React.useState("");
+      function close() { setOpen(false); setReason(""); setDetails(""); setState("idle"); setErr(""); }
+      async function submit() {
+        if (!reason) { setErr("Pick a reason."); return; }
+        setState("sending"); setErr("");
+        try { await window.seshn.reportGig(gigId, reason, details); setState("done"); }
+        catch (e) { setErr((e && e.message) || "Couldn't send the report."); setState("error"); }
+      }
+      return (
+        <>
+          <button onClick={() => setOpen(true)}
+            style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 11.5, color: "var(--ink-4)", textDecoration: "underline" }}>
+            Report this gig
+          </button>
+          {open && (
+            <div onClick={close} style={{ position: "fixed", inset: 0, background: "rgba(13,13,13,0.5)", zIndex: 60, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "60px 16px 16px", overflowY: "auto" }}>
+              <div onClick={e => e.stopPropagation()} style={{ background: "var(--surface, #fff)", borderRadius: 14, border: "1px solid var(--line)", width: "100%", maxWidth: 440, padding: 24 }}>
+                {state === "done" ? (
+                  <>
+                    <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 20, marginBottom: 8 }}>Report received</div>
+                    <p style={{ fontSize: 13, color: "var(--ink-3)", lineHeight: 1.5, marginBottom: 20 }}>Thanks for flagging this. Our team reviews every report — we won't share that it came from you.</p>
+                    <button className="btn primary" style={{ width: "100%" }} onClick={close}>Done</button>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 20, marginBottom: 4 }}>Report this gig</div>
+                    <p style={{ fontSize: 13, color: "var(--ink-3)", lineHeight: 1.5, marginBottom: 16 }}>What's going on? This goes to our team — it's confidential.</p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
+                      {GIG_REPORT_REASONS.map(r => (
+                        <label key={r} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 8, border: "1px solid " + (reason === r ? "var(--accent-d)" : "var(--line)"), background: reason === r ? "var(--accent-bg)" : "var(--surface)", cursor: "pointer", fontSize: 14, fontFamily: "var(--font-display)", fontWeight: 500 }}>
+                          <input type="radio" name="gig-reason" checked={reason === r} onChange={() => { setReason(r); setErr(""); }} />
+                          {r}
+                        </label>
+                      ))}
+                    </div>
+                    <textarea value={details} onChange={e => setDetails(e.target.value)} placeholder="Add any detail that helps us (optional)" maxLength={2000}
+                      style={{ width: "100%", minHeight: 80, padding: "10px 12px", borderRadius: 8, border: "1px solid var(--line)", fontFamily: "var(--font-body)", fontSize: 14, resize: "vertical", marginBottom: 12 }} />
+                    {err && <div style={{ color: "var(--cherry, #c43d3f)", fontSize: 13, marginBottom: 10 }}>{err}</div>}
+                    <div style={{ display: "flex", gap: 10 }}>
+                      <button className="btn" style={{ flex: 1 }} onClick={close} disabled={state === "sending"}>Cancel</button>
+                      <button className="btn primary" style={{ flex: 1 }} onClick={submit} disabled={state === "sending" || !reason}>
+                        {state === "sending" ? "Sending…" : "Submit report"}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </>
       );
     }
 

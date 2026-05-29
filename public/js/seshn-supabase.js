@@ -301,6 +301,88 @@
     await sb.auth.signOut();
   }
 
+  // ── Trust & safety ────────────────────────────────────────────────
+  // Reports are insert-only for users; triage happens out-of-band. A 23505
+  // (unique violation) means they already reported this target — we surface
+  // that as a friendly message rather than an error.
+  function reportRow(extra, reason, details, uid) {
+    return Object.assign({
+      reporter_id: uid,
+      reason: String(reason || "").trim().slice(0, 80),
+      details: String(details || "").trim().slice(0, 2000)
+    }, extra);
+  }
+
+  async function reportUser(targetUserId, reason, details) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    if (!targetUserId) throw new Error("Missing user to report");
+    if (!reason || !reason.trim()) throw new Error("Pick a reason");
+    var res = await sb.from("reports").insert(
+      reportRow({ target_type: "user", target_user_id: targetUserId }, reason, details, u.id)
+    );
+    if (res.error) {
+      if (res.error.code === "23505") throw new Error("You've already reported this. Thanks — we're looking into it.");
+      throw res.error;
+    }
+    return true;
+  }
+
+  async function reportGig(targetGigId, reason, details) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    if (!targetGigId) throw new Error("Missing gig to report");
+    if (!reason || !reason.trim()) throw new Error("Pick a reason");
+    var res = await sb.from("reports").insert(
+      reportRow({ target_type: "gig", target_gig_id: targetGigId }, reason, details, u.id)
+    );
+    if (res.error) {
+      if (res.error.code === "23505") throw new Error("You've already reported this. Thanks — we're looking into it.");
+      throw res.error;
+    }
+    return true;
+  }
+
+  async function blockUser(userId) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    if (!userId) throw new Error("Missing user");
+    if (userId === u.id) throw new Error("You can't block yourself");
+    var res = await sb.from("blocks").insert({ blocker_id: u.id, blocked_id: userId });
+    // 23505 = already blocked; treat as success (idempotent).
+    if (res.error && res.error.code !== "23505") throw res.error;
+    return true;
+  }
+
+  async function unblockUser(userId) {
+    var u = await getUser();
+    if (!u) throw new Error("Not signed in");
+    if (!userId) throw new Error("Missing user");
+    var res = await sb.from("blocks").delete().eq("blocker_id", u.id).eq("blocked_id", userId);
+    if (res.error) throw res.error;
+    return true;
+  }
+
+  async function isUserBlocked(userId) {
+    var u = await getUser();
+    if (!u || !userId) return false;
+    var res = await sb.from("blocks").select("blocked_id")
+      .eq("blocker_id", u.id).eq("blocked_id", userId).maybeSingle();
+    if (res.error) { console.error("[seshn] isUserBlocked error", res.error); return false; }
+    return !!res.data;
+  }
+
+  async function listMyBlocks() {
+    var u = await getUser();
+    if (!u) return [];
+    var res = await sb.from("blocks")
+      .select("blocked_id, created_at, blocked:profiles!blocked_id(id, username, display_name, avatar_url)")
+      .eq("blocker_id", u.id)
+      .order("created_at", { ascending: false });
+    if (res.error) { console.error("[seshn] listMyBlocks error", res.error); return []; }
+    return res.data || [];
+  }
+
   // ── Gigs ──────────────────────────────────────────────────────────
   async function createGig(fields) {
     var u = await getUser();
@@ -1156,6 +1238,12 @@
     updateMyEmail: updateMyEmail,
     updateNotificationPrefs: updateNotificationPrefs,
     deleteMyAccount: deleteMyAccount,
+    reportUser: reportUser,
+    reportGig: reportGig,
+    blockUser: blockUser,
+    unblockUser: unblockUser,
+    isUserBlocked: isUserBlocked,
+    listMyBlocks: listMyBlocks,
     startSpotifyConnect: startSpotifyConnect,
     completeSpotifyConnect: completeSpotifyConnect,
     listConnectedAccounts: listConnectedAccounts,

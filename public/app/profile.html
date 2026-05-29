@@ -243,6 +243,9 @@
       pin:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M12 22s-7-7.5-7-13a7 7 0 1 1 14 0c0 5.5-7 13-7 13z'/><circle cx='12' cy='9' r='2.5'/></svg>`,
       star:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='m12 3 2.7 6 6.3.6-4.8 4.2L17.6 20 12 16.7 6.4 20l1.5-6.2L3 9.6 9.3 9z'/></svg>`,
       link:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg>`,
+      flag:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z'/><line x1='4' y1='22' x2='4' y2='15'/></svg>`,
+      ban:`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><circle cx='12' cy='12' r='9'/><line x1='5.6' y1='5.6' x2='18.4' y2='18.4'/></svg>`,
+      more:`<svg viewBox='0 0 24 24' fill='currentColor'><circle cx='5' cy='12' r='1.8'/><circle cx='12' cy='12' r='1.8'/><circle cx='19' cy='12' r='1.8'/></svg>`,
     };
     const Icon = ({ kind, size=16, style={} }) => {
       const svg=SVGS[kind]||SVGS.star;
@@ -549,6 +552,114 @@
       );
     }
 
+    // ——— Report modal (reused for users and gigs) ———
+    const REPORT_REASONS = {
+      user: ["Spam or scam", "Harassment or abuse", "Impersonation", "Inappropriate content", "Something else"],
+      gig:  ["Spam or scam", "Misleading or fake", "Inappropriate content", "Asking to pay off-platform", "Something else"],
+    };
+    function ReportModal({ targetType, targetId, targetName, onClose }) {
+      const [reason, setReason] = React.useState("");
+      const [details, setDetails] = React.useState("");
+      const [state, setState] = React.useState("idle"); // idle | sending | done | error
+      const [err, setErr] = React.useState("");
+      const reasons = REPORT_REASONS[targetType] || REPORT_REASONS.user;
+      async function submit() {
+        if (!reason) { setErr("Pick a reason."); return; }
+        setState("sending"); setErr("");
+        try {
+          if (targetType === "gig") await window.seshn.reportGig(targetId, reason, details);
+          else await window.seshn.reportUser(targetId, reason, details);
+          setState("done");
+        } catch (e) { setErr((e && e.message) || "Couldn't send the report."); setState("error"); }
+      }
+      return (
+        <div className="modal-backdrop" onClick={onClose}>
+          <div onClick={e => e.stopPropagation()} style={{background:"var(--surface)",borderRadius:14,border:"1px solid var(--line)",width:"100%",maxWidth:440,padding:24}}>
+            {state === "done" ? (
+              <>
+                <h2 className="t-h2" style={{fontSize:20,marginBottom:8}}>Report received</h2>
+                <p className="t-meta" style={{lineHeight:1.5,marginBottom:20}}>Thanks for flagging this. Our team reviews every report — we won't share that it came from you.</p>
+                <button className="btn primary" style={{width:"100%"}} onClick={onClose}>Done</button>
+              </>
+            ) : (
+              <>
+                <h2 className="t-h2" style={{fontSize:20,marginBottom:4}}>Report {targetType === "gig" ? "this gig" : targetName || "this user"}</h2>
+                <p className="t-meta" style={{lineHeight:1.5,marginBottom:16}}>What's going on? This goes to our team — it's confidential.</p>
+                <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:14}}>
+                  {reasons.map(r => (
+                    <label key={r} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:8,border:"1px solid "+(reason===r?"var(--accent-d)":"var(--line)"),background:reason===r?"var(--accent-bg)":"var(--surface)",cursor:"pointer",fontSize:14,fontFamily:"var(--font-display)",fontWeight:500}}>
+                      <input type="radio" name="reason" checked={reason===r} onChange={()=>{setReason(r);setErr("");}} />
+                      {r}
+                    </label>
+                  ))}
+                </div>
+                <textarea value={details} onChange={e=>setDetails(e.target.value)} placeholder="Add any detail that helps us (optional)" maxLength={2000}
+                  style={{width:"100%",minHeight:80,padding:"10px 12px",borderRadius:8,border:"1px solid var(--line)",fontFamily:"var(--font-body)",fontSize:14,resize:"vertical",marginBottom:12}} />
+                {err && <div style={{color:"var(--cherry, #c43d3f)",fontSize:13,marginBottom:10}}>{err}</div>}
+                <div style={{display:"flex",gap:10}}>
+                  <button className="btn" style={{flex:1}} onClick={onClose} disabled={state==="sending"}>Cancel</button>
+                  <button className="btn primary" style={{flex:1}} onClick={submit} disabled={state==="sending"||!reason}>
+                    {state==="sending"?"Sending…":"Submit report"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ——— Report + block controls for someone else's profile ———
+    function SafetyControls({ profile }) {
+      const [open, setOpen] = React.useState(false);
+      const [reporting, setReporting] = React.useState(false);
+      const [blocked, setBlocked] = React.useState(false);
+      const [busy, setBusy] = React.useState(false);
+      const menuRef = React.useRef(null);
+      React.useEffect(() => {
+        let alive = true;
+        window.seshn.isUserBlocked(profile.id).then(b => { if (alive) setBlocked(b); });
+        return () => { alive = false; };
+      }, [profile.id]);
+      React.useEffect(() => {
+        if (!open) return;
+        function onDown(e){ if (menuRef.current && !menuRef.current.contains(e.target)) setOpen(false); }
+        document.addEventListener("mousedown", onDown);
+        return () => document.removeEventListener("mousedown", onDown);
+      }, [open]);
+      async function toggleBlock() {
+        setOpen(false);
+        const name = profile.display_name || "this user";
+        if (!blocked && !window.confirm("Block " + name + "? They won't be able to message you or apply to your gigs, and you won't be able to message them.")) return;
+        setBusy(true);
+        try {
+          if (blocked) { await window.seshn.unblockUser(profile.id); setBlocked(false); }
+          else { await window.seshn.blockUser(profile.id); setBlocked(true); }
+        } catch (e) { alert((e && e.message) || "Couldn't update block."); }
+        finally { setBusy(false); }
+      }
+      return (
+        <div ref={menuRef} style={{position:"relative"}}>
+          <button className="btn" aria-label="More options" disabled={busy}
+            style={{backdropFilter:"blur(8px)",background:"rgba(255,255,255,0.9)",padding:"0 12px"}}
+            onClick={()=>setOpen(o=>!o)}><Icon kind="more" size={16}/></button>
+          {open && (
+            <div style={{position:"absolute",right:0,top:"calc(100% + 6px)",background:"var(--surface)",border:"1px solid var(--line)",borderRadius:10,boxShadow:"0 8px 24px rgba(0,0,0,0.12)",padding:6,minWidth:180,zIndex:40}}>
+              <button onClick={()=>{setOpen(false);setReporting(true);}}
+                style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"9px 10px",border:"none",background:"none",cursor:"pointer",borderRadius:6,fontFamily:"var(--font-display)",fontWeight:500,fontSize:13.5,color:"var(--ink)",textAlign:"left"}}>
+                <Icon kind="flag" size={15}/> Report
+              </button>
+              <button onClick={toggleBlock}
+                style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"9px 10px",border:"none",background:"none",cursor:"pointer",borderRadius:6,fontFamily:"var(--font-display)",fontWeight:500,fontSize:13.5,color:"var(--cherry, #c43d3f)",textAlign:"left"}}>
+                <Icon kind="ban" size={15}/> {blocked ? "Unblock" : "Block"}
+              </button>
+            </div>
+          )}
+          {reporting && <ReportModal targetType="user" targetId={profile.id} targetName={profile.display_name} onClose={()=>setReporting(false)} />}
+        </div>
+      );
+    }
+
     // ——— Profile App ———
     function ProfileApp({ profile, isOwner, gigs, onProfileUpdate }) {
       const [editing, setEditing] = React.useState(false);
@@ -610,6 +721,7 @@
                     alert((e && e.message) || "Couldn't start a conversation.");
                   }
                 }}>Message</button>
+                <SafetyControls profile={profile} />
               </>
             )}
           </div>
