@@ -10,7 +10,7 @@ import type { Application, Gig } from "@/lib/seshn/types";
 // listMyApplications embeds the gig (+ its owner).
 type MyApplication = Application & { gig?: Gig };
 
-const gigHref = (id?: string) => `/app/gig.html?id=${encodeURIComponent(id || "")}`;
+const gigHref = (id?: string) => `/gig/${encodeURIComponent(id || "")}`;
 const profileHref = (u?: string) => `/app/profile.html?u=${encodeURIComponent(u || "")}`;
 
 function statusPillClass(status: string) {

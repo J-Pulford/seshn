@@ -107,7 +107,11 @@ until the legacy auth.html is retired in Phase 5); new routes coexist.
 - [x] applications (`/applications`) — my applications, active/archived tabs,
       withdraw. Signed-out CTA. Nav links for feed/browse/applications now point
       at the ported routes.
-- [ ] gig → profile → post → settings
+- [x] gig (`/gig/[id]`) — dynamic route. Apply form, my-application status,
+      owner applications list (accept/pass/undo, message), close/reopen, cover
+      header, poster card, gig details, report modal. Feed/browse/applications/
+      nav gig links now point at /gig/[id].
+- [ ] profile → post → settings
 
 ### Phase 4 — Messaging + contracts
 - [ ] inbox (realtime messages), contract, project, pro

@@ -11,7 +11,7 @@ import "./feed.css";
 
 // Legacy link targets — flip to Next routes as each page is ported.
 const R = {
-  gig: (id?: string) => (id ? `/app/gig.html?id=${encodeURIComponent(id)}` : "/app/gig.html"),
+  gig: (id?: string) => (id ? `/gig/${encodeURIComponent(id)}` : "/feed"),
   profile: (u?: string) => `/app/profile.html?u=${encodeURIComponent(u || "")}`,
   post: "/app/post.html",
   browse: "/browse",
