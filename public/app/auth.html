@@ -194,12 +194,20 @@
 
     // ── App ──────────────────────────────────────────────────────
     function AuthPage() {
-      const [email, setEmail] = React.useState("");
+      const initialEmail = typeof window !== "undefined"
+        ? (new URLSearchParams(window.location.search).get("email") || "")
+        : "";
+      const [email, setEmail] = React.useState(initialEmail);
       const [password, setPassword] = React.useState("");
       // mode: "magic" (default — magic link) | "password" (email + password)
       const [mode, setMode] = React.useState("magic");
       const [status, setStatus] = React.useState("idle"); // idle | sending | sent | error | checking
       const [errMsg, setErrMsg] = React.useState("");
+      // verifyMode: the user is signed in but hasn't confirmed their email.
+      // We park them here with a resend button instead of letting them into
+      // the app. Set via ?verify=1 by the routing gate in seshn-supabase.js.
+      const verifyMode = typeof window !== "undefined" &&
+        new URLSearchParams(window.location.search).get("verify") === "1";
       // The recovery flow sends users back to /app/auth.html?recover=1 with
       // a session already established. We also accept type=recovery in the
       // URL hash (Supabase puts it there by default) as a fallback — that
@@ -219,15 +227,28 @@
         // password reset link, where we want the user to set a new password
         // before routing on.
         window.seshn.getUser().then(u => {
-          if (u && !recoverMode) window.seshn.routeAfterAuth();
-          else setStatus("idle");
+          if (!u || recoverMode) { setStatus("idle"); return; }
+          if (window.seshn.isEmailVerified(u)) { window.seshn.routeAfterAuth(); return; }
+          // Signed in but unverified: park on the verify screen. routeAfterAuth
+          // would send us right back here, so we never call it for an
+          // unverified user — that would be a reload loop.
+          if (!verifyMode) {
+            window.location.href = "auth.html?verify=1" +
+              (u.email ? "&email=" + encodeURIComponent(u.email) : "");
+            return;
+          }
+          if (u.email) setEmail(u.email);
+          setStatus("idle");
         });
         const { data } = window.sb.auth.onAuthStateChange((event, session) => {
           if (event === "PASSWORD_RECOVERY") return; // stay on the recover form
-          if (event === "SIGNED_IN" && session && !recoverMode) window.seshn.routeAfterAuth();
+          if (event === "SIGNED_IN" && session && !recoverMode &&
+              window.seshn.isEmailVerified(session.user)) {
+            window.seshn.routeAfterAuth();
+          }
         });
         return () => { data && data.subscription && data.subscription.unsubscribe(); };
-      }, [recoverMode]);
+      }, [recoverMode, verifyMode]);
 
       async function onGoogle() {
         setErrMsg(""); setStatus("sending");
@@ -315,6 +336,36 @@
         }
       }
 
+      async function onResendVerification() {
+        if (!email || !email.includes("@")) {
+          setErrMsg("We don't have your email — try signing in again."); setStatus("error"); return;
+        }
+        setStatus("sending"); setErrMsg("");
+        try {
+          const { error } = await window.seshn.resendVerificationEmail(email);
+          if (error) throw error;
+          setStatus("sent");
+        } catch (err) {
+          setErrMsg(err.message || "Couldn't resend the email."); setStatus("error");
+        }
+      }
+
+      async function onCheckVerified() {
+        setStatus("checking"); setErrMsg("");
+        try {
+          const u = await window.seshn.getUser();
+          if (u && window.seshn.isEmailVerified(u)) {
+            window.seshn.routeAfterAuth();
+            return;
+          }
+          setStatus("idle");
+          setErrMsg("Still not confirmed — open the link in the email (check spam too).");
+        } catch (err) {
+          setStatus("idle");
+          setErrMsg("Couldn't check just yet — give it a moment and try again.");
+        }
+      }
+
       return (
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg)" }}>
           {/* Nav */}
@@ -333,7 +384,42 @@
               <h1>Make your first<br />session.</h1>
               <p className="sub">Create a profile, post a brief, find your collaborators. Free forever — no follower counts, no noise.</p>
 
-              {recoverMode ? (
+              {verifyMode ? (
+                /* Email confirmation holding screen — signed in but unverified. */
+                <div className="form-stack">
+                  <div style={{ padding: "16px 18px", borderRadius: 12, border: "1px solid var(--accent-d)",
+                                background: "var(--accent-bg)", color: "var(--accent-d)",
+                                fontFamily: "var(--font-display)", fontSize: 13, lineHeight: 1.5 }}>
+                    <strong>Confirm your email to continue.</strong> We sent a confirmation link
+                    {email ? <> to <b>{email}</b></> : ""}. Open it, then come back here.
+                  </div>
+                  {status === "sent" ? (
+                    <div style={{ fontSize: 13, color: "var(--ink-2)", fontFamily: "var(--font-display)" }}>
+                      Sent again — give it a minute, then check your inbox (and spam).
+                    </div>
+                  ) : (
+                    <button type="button" className="btn-primary" onClick={onResendVerification}
+                            disabled={status === "sending"}>
+                      {status === "sending" ? "Resending…" : "Resend confirmation email"}
+                    </button>
+                  )}
+                  <button type="button" onClick={onCheckVerified} disabled={status === "checking"}
+                          style={{ background: "none", border: "none", padding: 0, cursor: "pointer",
+                                   fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 12,
+                                   color: "var(--ink-3)", textDecoration: "underline", alignSelf: "flex-start" }}>
+                    {status === "checking" ? "Checking…" : "I've confirmed — continue"}
+                  </button>
+                  {errMsg && (
+                    <div style={{ color: "var(--cherry)", fontSize: 12, fontFamily: "var(--font-display)" }}>{errMsg}</div>
+                  )}
+                  <button type="button" onClick={() => window.seshn.signOut().then(() => window.location.href = "auth.html")}
+                          style={{ background: "none", border: "none", padding: 0, cursor: "pointer",
+                                   fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 12,
+                                   color: "var(--ink-4)", textDecoration: "underline", alignSelf: "flex-start", marginTop: 4 }}>
+                    Use a different account
+                  </button>
+                </div>
+              ) : recoverMode ? (
                 /* Password recovery — user just clicked a reset link. */
                 <form className="form-stack" onSubmit={onSetNewPassword}>
                   <div style={{ padding: "14px 16px", borderRadius: 10, background: "var(--surface-2)",

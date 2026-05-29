@@ -240,6 +240,27 @@
     });
   }
 
+  // True once the user has confirmed their email address. Magic-link and
+  // Google sign-ins set this on first use (clicking the link / completing
+  // OAuth IS the confirmation), so this is only ever false for accounts
+  // created with a password while email confirmations are required and the
+  // user hasn't clicked the link yet. `confirmed_at` is Supabase's alias
+  // for the oldest of email/phone confirmation — we accept either.
+  function isEmailVerified(u) {
+    return !!(u && (u.email_confirmed_at || u.confirmed_at));
+  }
+
+  // Re-send the signup confirmation email for an address that hasn't been
+  // verified yet. Used by the "confirm your email" holding screen.
+  async function resendVerificationEmail(email, redirectTo) {
+    if (!email || !email.trim()) throw new Error("Missing email");
+    return sb.auth.resend({
+      type: "signup",
+      email: email.trim(),
+      options: { emailRedirectTo: redirectTo || (window.location.origin + "/app/auth.html") }
+    });
+  }
+
   // Start an OAuth sign-in. The user is redirected to the provider; on
   // return, Supabase-js exchanges the code automatically (we set
   // detectSessionInUrl: true above) and our onAuthStateChange listeners fire.
@@ -902,6 +923,14 @@
   async function routeAfterAuth() {
     var u = await getUser();
     if (!u) return;
+    // Gate unverified emails before they reach any in-app page. Sends them to
+    // the confirm-your-email holding screen with the address pre-filled so the
+    // resend button works without re-typing.
+    if (!isEmailVerified(u)) {
+      window.location.href = "/app/auth.html?verify=1" +
+        (u.email ? "&email=" + encodeURIComponent(u.email) : "");
+      return;
+    }
     var p = await getProfile({ id: u.id });
     if (!p || !p.username) { window.location.href = "/app/onboarding.html"; return; }
     var next = new URLSearchParams(window.location.search).get("next");
@@ -929,6 +958,14 @@
       if (opts.allowAnon) return { user: null, profile: null };
       var next = window.location.pathname + window.location.search;
       window.location.href = "auth.html?next=" + encodeURIComponent(next);
+      return null;
+    }
+    // Defense-in-depth: an unverified session must never reach a protected
+    // page, even if it somehow gets one. Anon-allowed pages skip the gate so
+    // their public read view still renders.
+    if (!isEmailVerified(u) && !opts.allowAnon) {
+      window.location.href = "auth.html?verify=1" +
+        (u.email ? "&email=" + encodeURIComponent(u.email) : "");
       return null;
     }
     var p = await getProfile({ id: u.id });
@@ -1101,6 +1138,8 @@
     signUpWithPassword: signUpWithPassword,
     setMyPassword: setMyPassword,
     sendPasswordReset: sendPasswordReset,
+    isEmailVerified: isEmailVerified,
+    resendVerificationEmail: resendVerificationEmail,
     signInWithGoogle: signInWithGoogle,
     updateMyEmail: updateMyEmail,
     updateNotificationPrefs: updateNotificationPrefs,
