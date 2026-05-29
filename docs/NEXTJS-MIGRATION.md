@@ -80,10 +80,13 @@ We keep the legacy files until their replacement route is verified, then remove 
 
 ### Phase 2 — Data layer + auth + shared app chrome  ⬅ IN PROGRESS
 - [~] `lib/seshn/` — typed port of the seshn-supabase.js data layer, split by domain:
-      - [x] `profiles.ts` (getUser, getProfile, upsert/update, image uploads, listProfiles)
-      - [x] `auth.ts` (sign-in/up/reset/verify helpers, routeAfterAuth, requireProfile)
-      - [ ] gigs, applications, messaging, notifications, connected accounts,
-            contracts, trust-safety
+      - [x] `profiles.ts`, `auth.ts`, `gigs.ts`, `applications.ts`,
+            `notifications.ts`, `messaging.ts`, `trust-safety.ts`
+      - [ ] connected accounts + contracts (port with the settings/contract pages)
+- [x] `components/Nav.tsx` — `seshn-nav.js` ported (global NavSearch, notifications
+      bell + realtime, inbox badge, mobile menu). Nav link targets centralised in an
+      `R` map (legacy /app/*.html until each page is ported). + `components/nav.css`,
+      + shared design-system atoms (.btn/.pill/.avatar/.logo/.card/…) added to globals.css.
 - [x] `app/auth/page.tsx` — auth.html ported (magic / password / recovery / verify),
       coexists with legacy auth.html (kept alive: Supabase email links + legacy
       pages still point at /app/auth.html). `next build` + smoke test pass.

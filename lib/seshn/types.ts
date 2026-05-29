@@ -115,3 +115,34 @@ export interface Block {
   blocked_id: string;
   created_at: string;
 }
+
+/** Conversation decorated with the other participant + unread flag. */
+export interface ConversationWithMeta extends Conversation {
+  user_a_profile?: GigOwner;
+  user_b_profile?: GigOwner;
+  other?: GigOwner;
+  unread?: boolean;
+  me_id?: string;
+}
+
+export interface Notification {
+  id: string;
+  kind: string;
+  created_at: string;
+  read_at: string | null;
+  gig_id: string | null;
+  application_id: string | null;
+  conversation_id: string | null;
+  actor?: { id: string; username: string; display_name: string; avatar_url: string } | null;
+  gig?: { id: string; title: string; role: string } | null;
+}
+
+/** A DM attachment descriptor (return of uploadDmAttachment). */
+export interface DmAttachment {
+  url: string | undefined;
+  name: string;
+  kind: "audio" | "file";
+  size_bytes: number;
+  duration_ms: number | null;
+  mime: string;
+}

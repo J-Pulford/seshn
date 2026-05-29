@@ -1,0 +1,14 @@
+/* Top-nav responsive behaviour. Ported from the runtime <style> injection in
+ * seshn-nav.js (inline styles can't express media queries). */
+
+.seshn-nav-hamburger { display: none; }
+.seshn-nav-mobile-menu { display: none; }
+
+@media (max-width: 720px) {
+  .seshn-nav-root { padding: 0 14px !important; gap: 4px; }
+  .seshn-nav-links, .seshn-nav-search { display: none !important; }
+  .seshn-nav-hamburger { display: inline-flex; }
+  .seshn-nav-post-text { display: none; }
+  .seshn-notifications-panel { width: calc(100vw - 28px) !important; right: -8px !important; }
+  .seshn-nav-mobile-menu.open { display: flex; }
+}
