@@ -13,6 +13,39 @@ Your stated strategy — **collect a waitlist pre-launch, let them in en masse o
 
 ---
 
+## ⚠️ Architecture decision that sits UNDER everything below
+
+This checklist is a **feature / launch-readiness** list. It assumes the current
+codebase is the thing we keep shipping. But the repo's original `README.md` is
+explicit that `public/` is a **design prototype** (HTML/CSS/JS + React-via-CDN),
+handed off to be "recreated in whatever technology makes sense — React, Vue,
+native". Reality has drifted: the prototype got promoted to production and is
+live on Vercel with real users.
+
+So there are TWO interpretations of "make it a functional app", and they are
+**not** the same work:
+
+- **(A) Launch readiness** — the features / legal / infra below. This is what
+  the rest of this doc covers.
+- **(B) Technical migration to Next.js** — porting every prototype page to real
+  React components, moving the Supabase client into server components where it
+  helps, gaining SSR (SEO for the landing page), real routing, and a build step
+  that kills the manual cache-busting class of bug (e.g. the stale-JS issue that
+  broke the password-reset redirect on 2026-05-29). **No plan for this exists
+  yet — it's a separate ~1–3 week effort, not a checklist item.**
+
+These can be sequenced either way:
+- **Ship on the prototype, migrate post-PMF** — fastest to a soft launch; accept
+  the architecture's costs (no SSR, manual cache-busting, awkward server-side
+  webhooks for Stripe/escrow) until the loop is proven.
+- **Migrate first, then resume the list below** — cleaner foundation, but delays
+  launch by weeks before you've validated demand.
+
+Recommendation: ship the waitlist + soft-launch on the current stack, decide on
+the Next.js migration once the core loop is proven. Don't rewrite pre-PMF.
+
+---
+
 ## Phase 0 — Pre-signup waitlist (collect users before signup is open)
 
 The goal: get 200–2000 emails of musicians who want in, segmented by what role they'd play on the platform, before you've built / fully polished the rest.
@@ -48,8 +81,8 @@ Everything below must work before you let waitlist users in. Grouped by **critic
 
 - [x] Magic link sign-in
 - [x] Google OAuth sign-in
-- [ ] **Password sign-in** (your dev request — also a real user need)
-- [ ] **Password reset flow** (if doing passwords)
+- [x] **Password sign-in** (your dev request — also a real user need)
+- [x] **Password reset flow** (verified end-to-end 2026-05-29: forgot → email → recovery page → new password → sign-in. Required Supabase Site URL + www-aware redirect allow-list + disabling "require current password")
 - [x] Onboarding (username, display name, roles, genres, location)
 - [ ] **Onboarding explanation step** — first page after signup that explains what Seshn is, before they're dropped into the feed
 - [ ] **Email verification** — currently we trust unverified email addresses; need to gate signup completion on email confirmation
@@ -67,7 +100,7 @@ Everything below must work before you let waitlist users in. Grouped by **critic
 - [x] Connected accounts (Spotify / SoundCloud / Instagram / YouTube)
 - [x] DMs (1-to-1 conversations)
 - [x] Notifications (bell + counters)
-- [ ] **Customisable gig cover photos** (currently random — replace)
+- [x] **Customisable gig cover photos** (upload picker in post flow; falls back to algorithmic cover)
 - [ ] **Feed filters that actually filter** — current filter UI exists; verify all filter combinations narrow results
 - [ ] **Search works** — gig title search, profile name/username search
 - [ ] **Mobile responsiveness sweep** — every page on iPhone, every page on small Android. Most pages done per commit history; needs final pass on the new contract + verification pages.
@@ -132,11 +165,11 @@ If you ARE shipping contracts at launch:
 - [ ] **Email notifications (opt-in)** — at minimum: "you got a new application", "your application was accepted", "new DM". Settings page already has the toggles; backend doesn't actually send yet.
 - [ ] **Settings: account deletion** — UI exists; needs the actual delete worker
 - [ ] **Settings: email / password change** — UI for email change (currently no UI for it)
-- [ ] **Card view vs list view on feed** — your specific ask. Mirror the `browse.html` pattern.
-- [ ] **3-column responsive feed** with dynamic sizing
+- [x] **Card view vs list view on feed** — your specific ask. Toggle persists in localStorage.
+- [x] **3-column responsive feed** with dynamic sizing (auto-fit grid, collapses to 1 col on mobile)
 - [ ] **Gig page that's shareable** — already exists (`gig.html?id=…`); confirm it has OpenGraph tags so links unfurl on Twitter/iMessage/etc.
 - [ ] **Profile page shareable** — same, with OG tags.
-- [ ] **Hamburger menu fix on desktop** — your specific ask.
+- [x] **Hamburger menu fix on desktop** — your specific ask. (inline display no longer overrides the hide-on-desktop CSS)
 - [ ] **Boosted gigs UI / monetization** — schema supports `boosted_until`; needs purchase flow.
 
 ### Nice-to-have (defer to post-launch)
