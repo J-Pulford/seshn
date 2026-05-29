@@ -134,9 +134,13 @@ applications, gig, profile, post, settings). All inter-page links on the new sta
 - [x] project (`/project`) — project-room mockup (static; no data wiring in the
       prototype either).
 - [x] contracts data layer (`lib/seshn/contracts.ts`) — completes lib/seshn.
-- [ ] contract page (`/contract/[id]`) — the one remaining port. Needs
-      contract-template.js → lib/contract-template.ts (agreement render + sha256
-      hash) + the 840-line UI. Launch-deferred feature; gets a dedicated pass.
+- [x] contract page (`/contract/[id]`) — full sign flow: document renderer,
+      status sidebar, terms editor (owner/draft), decline + cancel, scroll-to-
+      sign gate, sha256 agreement hash. + lib/contract-template.ts (typed port
+      of contract-template.js; hash is byte-identical to the prototype).
+
+**Phase 4 complete.** Every prototype page is now ported (14 routes). The whole
+app runs on Next.js, coexisting with the legacy files.
 
 ### Phase 5 — Landing page (LAST — founder reworking design) + cleanup
 - [ ] Port the (redesigned) landing → `app/page.tsx` SSR + `metadata` for SEO
