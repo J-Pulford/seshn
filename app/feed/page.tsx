@@ -15,7 +15,7 @@ const R = {
   profile: (u?: string) => `/profile/${encodeURIComponent(u || "")}`,
   post: "/post",
   browse: "/browse",
-  pro: "/app/pro.html",
+  pro: "/pro",
 };
 
 const FEED_COMPS: [string, string][] = [

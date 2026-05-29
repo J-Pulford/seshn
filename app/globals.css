@@ -87,6 +87,7 @@ html, body {
 .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-2); }
 .btn.sm { padding: 6px 10px; font-size: 11px; }
 .btn.lg { padding: 12px 20px; font-size: 14px; }
+.btn.block { width: 100%; }
 .btn:hover { opacity: 0.88; }
 
 .avatar { border-radius: 50%; background: var(--ph); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 600; color: var(--ink-3); flex-shrink: 0; position: relative; }

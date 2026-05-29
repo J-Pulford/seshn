@@ -102,6 +102,30 @@ export interface Message {
   attachment_mime?: string | null;
 }
 
+export type ContractStatus = "draft" | "awaiting_signatures" | "active" | "completed" | "cancelled";
+
+export interface Contract {
+  id: string;
+  gig_id: string;
+  application_id: string;
+  owner_id: string;
+  collaborator_id: string;
+  status: ContractStatus;
+  terms: Record<string, unknown>;
+  governing_law: string | null;
+  language: string | null;
+  signing_provider_ref: string | null;
+  pdf_url: string | null;
+  owner_signed_at: string | null;
+  collaborator_signed_at: string | null;
+  fully_signed_at: string | null;
+  created_at: string;
+  updated_at: string;
+  owner?: GigOwner & { location?: string; stripe_country?: string | null };
+  collaborator?: GigOwner & { location?: string; stripe_country?: string | null };
+  gig?: { id: string; title: string; role: string; genres?: string[]; comp?: string; pay_amount?: number | null; pay_currency?: string };
+}
+
 export type ReportTarget = "user" | "gig";
 export type ReportStatus = "open" | "reviewing" | "actioned" | "dismissed";
 
