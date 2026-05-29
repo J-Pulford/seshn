@@ -99,8 +99,10 @@ Port in dependency order. Legacy files are NOT deleted yet (kept for coexistence
 until the legacy auth.html is retired in Phase 5); new routes coexist.
 - [x] onboarding (`/onboarding`) — standalone, no nav. routeAfterAuth/requireProfile
       now target it. Build + verified.
-- [ ] feed → browse → gig → profile → post → applications → settings
-      (these need `components/Nav.tsx` first)
+- [x] feed (`/feed`) — full port: filter sidebar (role/comp/genre/location/search),
+      sort pills, grid/list view toggle (localStorage), GigCard, suggested artists,
+      Pro upsell. First page to render the new Nav. Build + smoke test pass.
+- [ ] browse → gig → profile → post → applications → settings
 
 ### Phase 4 — Messaging + contracts
 - [ ] inbox (realtime messages), contract, project, pro
