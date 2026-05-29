@@ -27,7 +27,7 @@ const R = {
   applications: "/applications",
   post: "/post",
   inbox: "/app/inbox.html",
-  settings: "/app/settings.html",
+  settings: "/settings",
   profile: (username?: string) => (username ? `/profile/${encodeURIComponent(username)}` : "/feed"),
   gig: (id: string) => `/gig/${encodeURIComponent(id)}`,
   inboxConvo: (id: string) => `/app/inbox.html?c=${encodeURIComponent(id)}`,

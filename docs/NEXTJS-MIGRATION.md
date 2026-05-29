@@ -116,7 +116,13 @@ until the legacy auth.html is retired in Phase 5); new routes coexist.
       (avatar/cover upload, chips); non-owner message + report/block controls.
       All profile links across nav/feed/browse/gig/applications now point at
       /profile/[username]. Added lib/seshn/connected-accounts.ts.
-- [ ] post → settings
+- [x] post (`/post`) — 3-step gig form, cover upload, live preview, createGig.
+- [x] settings (`/settings`) — account/email change, notification prefs,
+      connected accounts (Spotify PKCE connect/disconnect), account deletion.
+      Added the Spotify connect flow + save/disconnect to connected-accounts.ts.
+
+**Phase 3 complete** — all 8 marketplace pages ported (onboarding, feed, browse,
+applications, gig, profile, post, settings). All inter-page links on the new stack.
 
 ### Phase 4 — Messaging + contracts
 - [ ] inbox (realtime messages), contract, project, pro

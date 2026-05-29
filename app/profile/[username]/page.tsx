@@ -12,7 +12,7 @@ import type { ConnectedAccount, Gig, Profile } from "@/lib/seshn/types";
 import "./profile.css";
 
 const R = {
-  settings: "/app/settings.html",
+  settings: "/settings",
   post: "/post",
   gig: (id: string) => `/gig/${encodeURIComponent(id)}`,
   inboxConvo: (id: string) => `/app/inbox.html?c=${encodeURIComponent(id)}`,
