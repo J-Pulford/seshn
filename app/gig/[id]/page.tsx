@@ -17,7 +17,7 @@ const R = {
   feed: "/feed",
   applications: "/applications",
   profile: (u?: string) => `/profile/${encodeURIComponent(u || "")}`,
-  inboxConvo: (id: string) => `/app/inbox.html?c=${encodeURIComponent(id)}`,
+  inboxConvo: (id: string) => `/inbox?c=${encodeURIComponent(id)}`,
 };
 
 type OwnerApp = Application & { applicant?: GigOwner & { location?: string; roles?: string[]; bio?: string } };

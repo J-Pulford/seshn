@@ -15,7 +15,7 @@ const R = {
   settings: "/settings",
   post: "/post",
   gig: (id: string) => `/gig/${encodeURIComponent(id)}`,
-  inboxConvo: (id: string) => `/app/inbox.html?c=${encodeURIComponent(id)}`,
+  inboxConvo: (id: string) => `/inbox?c=${encodeURIComponent(id)}`,
 };
 
 const EDIT_ROLES = ["Producer", "Vocalist", "Songwriter", "Rapper", "Mixing eng.", "Mastering", "Guitarist", "Drummer", "Bassist", "Keys", "DJ", "A&R", "Composer", "Engineer"];

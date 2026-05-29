@@ -93,6 +93,13 @@ export interface Message {
   sender_id: string;
   body: string;
   created_at: string;
+  // 0009_dm_attachments (optional)
+  attachment_url?: string | null;
+  attachment_name?: string | null;
+  attachment_kind?: "audio" | "file" | null;
+  attachment_size_bytes?: number | null;
+  attachment_duration_ms?: number | null;
+  attachment_mime?: string | null;
 }
 
 export type ReportTarget = "user" | "gig";

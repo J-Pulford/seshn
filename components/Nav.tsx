@@ -26,11 +26,11 @@ const R = {
   browse: "/browse",
   applications: "/applications",
   post: "/post",
-  inbox: "/app/inbox.html",
+  inbox: "/inbox",
   settings: "/settings",
   profile: (username?: string) => (username ? `/profile/${encodeURIComponent(username)}` : "/feed"),
   gig: (id: string) => `/gig/${encodeURIComponent(id)}`,
-  inboxConvo: (id: string) => `/app/inbox.html?c=${encodeURIComponent(id)}`,
+  inboxConvo: (id: string) => `/inbox?c=${encodeURIComponent(id)}`,
 };
 
 function navInitials(name?: string) {
