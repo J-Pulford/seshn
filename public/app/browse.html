@@ -355,8 +355,15 @@
       </div>
     );
 
+    // These filter profiles by exact value (roles via overlaps(), genres via
+    // overlaps()), so they MUST match the strings written when a profile is
+    // created/edited. ALL_ROLES mirrors onboarding.html's ROLES; ALL_GENRES
+    // mirrors profile.html's EDIT_GENRES. (Previously ALL_GENRES used the
+    // shorter "Hip-hop" list, which never matched the "Hip-Hop" casing
+    // profile.html actually saves — so the Hip-Hop genre filter returned
+    // nothing.) KEEP IN SYNC with those two files.
     const ALL_ROLES = ["Producer", "Vocalist", "Songwriter", "Rapper", "Mixing eng.", "Mastering", "Guitarist", "Drummer", "Bassist", "Keys", "DJ", "A&R"];
-    const ALL_GENRES = ["R&B", "Pop", "Hip-hop", "Afrobeats", "Soul", "Indie", "Electronic", "Folk", "Jazz", "Rock", "Latin"];
+    const ALL_GENRES = ["Pop", "Hip-Hop", "R&B", "Afrobeats", "Soul", "Electronic", "House", "Techno", "Indie", "Rock", "Alt", "Jazz", "Country", "Latin", "Folk", "Ambient", "K-pop", "Reggaeton", "Drill", "Funk"];
     const QUICK_LOCATIONS = ["Remote", "NYC", "LA", "London", "Berlin"];
 
     const BrowseApp = () => {

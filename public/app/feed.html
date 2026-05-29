@@ -527,10 +527,14 @@
       );
     };
 
-    // Canonical filter vocabularies. The DB stores `comp` as the enum
-    // value, so the UI label/value pairs map label → enum.
-    const FEED_ROLES  = ["Vocalist", "Producer", "Mixing eng.", "Mastering", "Drummer", "Songwriter", "Guitarist", "Bassist", "Keys", "Rapper", "DJ", "Composer", "Engineer", "A&R"];
-    const FEED_GENRES = ["Pop", "Hip-Hop", "R&B", "Afrobeats", "Soul", "Electronic", "House", "Techno", "Indie", "Rock", "Alt", "Jazz", "Country", "Latin", "Folk", "Ambient", "K-pop", "Reggaeton", "Drill", "Funk"];
+    // Filter vocabularies. These filter gigs by exact value (role via in(),
+    // genres via overlaps()), so they MUST match the strings post.html writes
+    // — otherwise a filter option matches zero rows. KEEP IN SYNC with the
+    // ROLES / GENRES / COMP_OPTIONS lists in post.html. (Previously these had
+    // drifted: extra roles like "Mastering"/"Keys" matched no gigs, and
+    // "Hip-Hop" never matched the "Hip-hop" gigs actually post.html writes.)
+    const FEED_ROLES  = ["Vocalist", "Topline writer", "Producer", "Mixing eng.", "Drummer", "Bassist", "Songwriter", "Guitarist", "DJ", "Other"];
+    const FEED_GENRES = ["Afrobeats", "R&B", "Soul", "Pop", "Hip-hop", "Indie", "Electronic", "Folk", "Jazz"];
     const FEED_COMPS  = [["Paid", "paid"], ["Split / royalty", "split"], ["Trade / barter", "trade"], ["Unpaid", "unpaid"]];
 
     // ——— Main Feed App ———
