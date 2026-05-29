@@ -23,8 +23,8 @@ export type NavActive = "feed" | "browse" | "applications" | "inbox" | "profile"
 // page is ported. (feed is ported.)
 const R = {
   feed: "/feed",
-  browse: "/app/browse.html",
-  applications: "/app/applications.html",
+  browse: "/browse",
+  applications: "/applications",
   post: "/app/post.html",
   inbox: "/app/inbox.html",
   settings: "/app/settings.html",

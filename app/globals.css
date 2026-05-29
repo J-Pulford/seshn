@@ -106,3 +106,11 @@ html, body {
 
 .logo { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.04em; font-size: 18px; color: var(--ink); display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
 .logo::before { content: ""; width: 14px; height: 14px; border-radius: 3px; background: var(--accent); display: inline-block; box-shadow: 0 0 0 2px var(--frame), 0 0 0 3px var(--ink); margin-right: 2px; }
+
+.check-box { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--line); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; }
+.check-box.checked { background: var(--ink); border-color: var(--ink); }
+.radio-btn { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--line); display: inline-block; flex-shrink: 0; cursor: pointer; position: relative; }
+.radio-btn.checked { border-color: var(--ink); }
+.radio-btn.checked::after { content: ""; position: absolute; inset: 2px; background: var(--ink); border-radius: 50%; }
+.ph-line { background: var(--ph); border-radius: 2px; height: 8px; }
+.ph-line.sm { height: 6px; }

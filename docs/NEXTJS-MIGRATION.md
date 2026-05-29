@@ -102,7 +102,12 @@ until the legacy auth.html is retired in Phase 5); new routes coexist.
 - [x] feed (`/feed`) — full port: filter sidebar (role/comp/genre/location/search),
       sort pills, grid/list view toggle (localStorage), GigCard, suggested artists,
       Pro upsell. First page to render the new Nav. Build + smoke test pass.
-- [ ] browse → gig → profile → post → applications → settings
+- [x] browse (`/browse`) — artist discovery: role/genre/location/pro filters,
+      search, sort, grid/list, ArtistCard. Uses PROFILE_ROLES/PROFILE_GENRES.
+- [x] applications (`/applications`) — my applications, active/archived tabs,
+      withdraw. Signed-out CTA. Nav links for feed/browse/applications now point
+      at the ported routes.
+- [ ] gig → profile → post → settings
 
 ### Phase 4 — Messaging + contracts
 - [ ] inbox (realtime messages), contract, project, pro

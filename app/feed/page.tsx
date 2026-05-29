@@ -14,7 +14,7 @@ const R = {
   gig: (id?: string) => (id ? `/app/gig.html?id=${encodeURIComponent(id)}` : "/app/gig.html"),
   profile: (u?: string) => `/app/profile.html?u=${encodeURIComponent(u || "")}`,
   post: "/app/post.html",
-  browse: "/app/browse.html",
+  browse: "/browse",
   pro: "/app/pro.html",
 };
 
