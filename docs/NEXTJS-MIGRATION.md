@@ -124,8 +124,13 @@ until the legacy auth.html is retired in Phase 5); new routes coexist.
 **Phase 3 complete** — all 8 marketplace pages ported (onboarding, feed, browse,
 applications, gig, profile, post, settings). All inter-page links on the new stack.
 
-### Phase 4 — Messaging + contracts
-- [ ] inbox (realtime messages), contract, project, pro
+### Phase 4 — Messaging + contracts  ⬅ IN PROGRESS
+- [x] inbox (`/inbox`) — conversation list (unread dot/preview/count), thread
+      with attachments, composer, realtime. **Fixed live unread/DM badge**:
+      `conversations` was missing from the realtime publication →
+      0017_realtime_conversations.sql adds it (REPLICA IDENTITY FULL). Apply
+      0017 + ensure project Realtime is on.
+- [ ] contract, project, pro (+ port contract write RPCs to the data layer)
 
 ### Phase 5 — Landing page (LAST — founder reworking design) + cleanup
 - [ ] Port the (redesigned) landing → `app/page.tsx` SSR + `metadata` for SEO
