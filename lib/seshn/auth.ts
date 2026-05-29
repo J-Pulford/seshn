@@ -11,8 +11,8 @@ export { getUser };
 // ported yet; flip each to its Next route as that page lands. Centralised here
 // so the guards don't need editing in multiple places.
 const ROUTES = {
-  auth: "/auth", // ported (this phase)
-  onboarding: "/app/onboarding.html", // legacy until ported
+  auth: "/auth", // ported
+  onboarding: "/onboarding", // ported
   feed: "/app/feed.html", // legacy until ported
   profile: (username: string) => `/app/profile.html?u=${encodeURIComponent(username)}`, // legacy
 };

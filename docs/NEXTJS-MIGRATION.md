@@ -92,8 +92,12 @@ We keep the legacy files until their replacement route is verified, then remove 
 - [ ] `components/Nav.tsx` — port `seshn-nav.js` (incl. the global NavSearch)
 
 ### Phase 3 — Core marketplace pages (client-rendered)
-Port in dependency order, deleting each legacy file as its route is verified:
-- [ ] feed → browse → gig → profile → post → applications → onboarding → settings
+Port in dependency order. Legacy files are NOT deleted yet (kept for coexistence
+until the legacy auth.html is retired in Phase 5); new routes coexist.
+- [x] onboarding (`/onboarding`) — standalone, no nav. routeAfterAuth/requireProfile
+      now target it. Build + verified.
+- [ ] feed → browse → gig → profile → post → applications → settings
+      (these need `components/Nav.tsx` first)
 
 ### Phase 4 — Messaging + contracts
 - [ ] inbox (realtime messages), contract, project, pro
@@ -101,21 +105,8 @@ Port in dependency order, deleting each legacy file as its route is verified:
 ### Phase 5 — Landing page (LAST — founder reworking design) + cleanup
 - [ ] Port the (redesigned) landing → `app/page.tsx` SSR + `metadata` for SEO
 - [ ] Waitlist form → `app/api/waitlist/route.ts`
-- [ ] Remove the last legacy `.html` + the three `public/js/*.js` files
-- [ ] Strip Babel/CDN script tags everywhere (now compiled at build time)
-- [ ] Confirm all internal links use Next routes; add redirects for any old
-      `/app/*.html` URLs that may be linked externally (email links, etc.)
-- [ ] Lighthouse/SEO check on the landing page
-
-### Phase 3 — Core marketplace pages (client-rendered)
-Port in dependency order, deleting each legacy file as its route is verified:
-- [ ] feed → browse → gig → profile → post → applications → onboarding → settings
-
-### Phase 4 — Messaging + contracts
-- [ ] inbox (realtime messages), contract, project, pro
-
-### Phase 5 — Cleanup + cutover
-- [ ] Remove the last legacy `.html` + the three `public/js/*.js` files
+- [ ] Retire legacy auth.html: update Supabase redirect URLs to `/auth`, then
+      remove the last legacy `.html` + the three `public/js/*.js` files
 - [ ] Strip Babel/CDN script tags everywhere (now compiled at build time)
 - [ ] Confirm all internal links use Next routes; add redirects for any old
       `/app/*.html` URLs that may be linked externally (email links, etc.)
