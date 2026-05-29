@@ -13,7 +13,7 @@ import "./profile.css";
 
 const R = {
   settings: "/app/settings.html",
-  post: "/app/post.html",
+  post: "/post",
   gig: (id: string) => `/gig/${encodeURIComponent(id)}`,
   inboxConvo: (id: string) => `/app/inbox.html?c=${encodeURIComponent(id)}`,
 };

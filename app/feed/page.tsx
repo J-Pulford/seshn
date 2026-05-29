@@ -13,7 +13,7 @@ import "./feed.css";
 const R = {
   gig: (id?: string) => (id ? `/gig/${encodeURIComponent(id)}` : "/feed"),
   profile: (u?: string) => `/profile/${encodeURIComponent(u || "")}`,
-  post: "/app/post.html",
+  post: "/post",
   browse: "/browse",
   pro: "/app/pro.html",
 };

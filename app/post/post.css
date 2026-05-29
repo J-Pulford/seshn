@@ -1,0 +1,51 @@
+/* Post-a-gig flow — ported from public/app/post.html. Scoped under .post-page
+ * because it carries a bare h1 + generic class names that would otherwise leak
+ * (all non-module CSS in Next is global). Shared atoms come from globals.css. */
+
+.post-page { background: var(--bg); min-height: 100vh; }
+.post-page .top-nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; border-bottom: 1px solid var(--line); background: var(--frame); position: sticky; top: 0; z-index: 10; }
+.post-page .nav-right { display: flex; align-items: center; gap: 12px; }
+.post-page .content { max-width: 1200px; margin: 0 auto; padding: 28px 48px 60px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 36px; }
+
+.post-page .step-label { font-family: var(--font-display); font-weight: 500; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
+.post-page h1 { font-family: var(--font-display); font-weight: 600; font-size: 30px; line-height: 1.05; letter-spacing: -0.025em; color: var(--ink); }
+.post-page .section-label { font-family: var(--font-display); font-weight: 600; font-size: 14px; color: var(--ink); margin-bottom: 10px; }
+.post-page .eyebrow { font-family: var(--font-display); font-weight: 500; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+
+.post-page .input-field { width: 100%; padding: 10px 12px; border-radius: var(--r); border: 1px solid var(--line); background: var(--surface); font-size: 13px; font-family: var(--font-body); color: var(--ink); outline: none; }
+.post-page .input-field:focus { border-color: var(--ink); }
+.post-page .input-field::placeholder { color: var(--ink-4); }
+
+.post-page .progress { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
+.post-page .step-node { width: 22px; height: 22px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 600; font-size: 11px; }
+.post-page .step-connector { width: 28px; height: 1px; background: var(--line); }
+
+.post-page .pill { cursor: pointer; }
+
+.post-page .comp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.post-page .comp-card { padding: 12px; border-radius: var(--r); border: 1px solid var(--line); background: var(--surface); cursor: pointer; }
+.post-page .comp-card.selected { border-color: var(--accent-d); background: var(--accent-bg); }
+.post-page .comp-card .title { font-family: var(--font-display); font-weight: 600; font-size: 13px; color: var(--ink); }
+.post-page .comp-card.selected .title { color: var(--accent-d); }
+.post-page .comp-card .sub { font-size: 10.5px; color: var(--ink-3); margin-top: 2px; }
+
+.post-page .amount-row { display: flex; gap: 10px; margin-top: 10px; }
+.post-page .preview-section { position: sticky; top: 80px; }
+
+.post-page .gig-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.post-page .gig-head { display: flex; align-items: center; gap: 10px; }
+.post-page .gig-title { font-family: var(--font-display); font-weight: 600; font-size: 16px; letter-spacing: -0.012em; line-height: 1.2; }
+.post-page .gig-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 10px; border-top: 1px solid var(--line-soft); }
+.post-page .actions { display: flex; align-items: center; justify-content: space-between; padding-top: 20px; border-top: 1px solid var(--line); margin-top: 16px; }
+
+@media (max-width: 900px) {
+  .post-page .content { grid-template-columns: 1fr; padding: 20px 20px 40px; }
+  .post-page .preview-section { position: static; }
+  .post-page .comp-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 720px) {
+  .post-page .content { padding: 16px 14px 32px; gap: 14px; }
+  .post-page .comp-grid { grid-template-columns: 1fr !important; }
+  .post-page input[type="text"], .post-page input[type="number"], .post-page textarea { font-size: 16px !important; }
+  .post-page h1 { font-size: 24px !important; }
+}

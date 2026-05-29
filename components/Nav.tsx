@@ -25,7 +25,7 @@ const R = {
   feed: "/feed",
   browse: "/browse",
   applications: "/applications",
-  post: "/app/post.html",
+  post: "/post",
   inbox: "/app/inbox.html",
   settings: "/app/settings.html",
   profile: (username?: string) => (username ? `/profile/${encodeURIComponent(username)}` : "/feed"),
