@@ -1,0 +1,61 @@
+/* Seshn — global styles.
+ * Ported verbatim from the CSS custom-property palette that every prototype
+ * page used to re-declare in its own <style> block. Single source of truth now.
+ * See docs/NEXTJS-MIGRATION.md. */
+
+@import url("https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=satoshi@400,500,600,700&display=swap");
+
+:root {
+  /* Wireframe palette — desaturated, with one accent */
+  --bg:        #f4f3ef;
+  --frame:     #ffffff;
+  --surface:   #ffffff;
+  --surface-2: #f7f6f3;
+  --line:      #d8d6d1;
+  --line-soft: #ececea;
+  --ink:       #0d0d0d;
+  --ink-2:     #3a3a38;
+  --ink-3:     #6e6c66;
+  --ink-4:     #a4a29c;
+  --ph:        #ececea;
+  --ph-2:      #e2e0db;
+
+  /* Brand */
+  --accent:    #2CCB73;
+  --accent-d:  #1C8F56;
+  --accent-m:  #63D89A;
+  --accent-bg: #A8EBC8;
+  --ink-black: #0D0D0D;
+
+  --ok:        #1C8F56;
+  --danger:    #c0392b;
+  --cherry:    #c43d3f;
+
+  --r-sm: 4px;
+  --r:    8px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+
+  --font-display: "General Sans", "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-body:    "Satoshi", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Landing (dark) palette */
+  --land-bg: #0d0d0d;
+  --land-surface: #161614;
+  --land-surface-2: #1d1d1a;
+  --land-line: #25251f;
+  --land-ink: #f4f3ef;
+  --land-ink-2: #c9c7c1;
+  --land-ink-3: #8a8880;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes seshn-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.seshn-vinyl-spin { animation: seshn-spin 12s linear infinite; }
