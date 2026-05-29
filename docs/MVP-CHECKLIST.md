@@ -85,7 +85,7 @@ Everything below must work before you let waitlist users in. Grouped by **critic
 - [x] **Password reset flow** (verified end-to-end 2026-05-29: forgot → email → recovery page → new password → sign-in. Required Supabase Site URL + www-aware redirect allow-list + disabling "require current password")
 - [x] Onboarding (username, display name, roles, genres, location)
 - [ ] **Onboarding explanation step** — first page after signup that explains what Seshn is, before they're dropped into the feed
-- [ ] **Email verification** — currently we trust unverified email addresses; need to gate signup completion on email confirmation
+- [x] **Email verification** — routing gate (isEmailVerified) blocks unverified sessions from the app + a confirm-your-email holding screen with resend. Magic-link/Google are inherently verified, so zero friction. Turn ON Supabase → Email → "Confirm email" to make it a hard gate for password signups.
 
 #### Core marketplace
 
@@ -101,8 +101,8 @@ Everything below must work before you let waitlist users in. Grouped by **critic
 - [x] DMs (1-to-1 conversations)
 - [x] Notifications (bell + counters)
 - [x] **Customisable gig cover photos** (upload picker in post flow; falls back to algorithmic cover)
-- [ ] **Feed filters that actually filter** — current filter UI exists; verify all filter combinations narrow results
-- [ ] **Search works** — gig title search, profile name/username search
+- [x] **Feed filters that actually filter** — fixed vocabulary drift: feed role/genre filters now match post.html's stored values (e.g. "Hip-hop" casing), browse genre filter matches profile.html's. Several chips previously matched zero rows.
+- [x] **Search works** — gig title (feed), profile name/username/bio (browse), and global NavSearch were already wired; hardened the profile or= filter against punctuation breakage (J.Cole, drum (live)). Verify in browser.
 - [ ] **Mobile responsiveness sweep** — every page on iPhone, every page on small Android. Most pages done per commit history; needs final pass on the new contract + verification pages.
 
 #### Contracts & money (or deferred)
@@ -126,10 +126,11 @@ If you ARE shipping contracts at launch:
 
 #### Trust & safety
 
-- [ ] **Report user / report gig button** — basic flag, lands in a `reports` table
-- [ ] **Block user button** — for users to control their own experience (we don't currently have this)
-- [ ] **Restriction system live** — schema is done (`profiles.restrictions`); needs RLS hooks on `gigs.insert` and `applications.insert` to actually enforce
-- [ ] **Admin UI to handle reports** — simplest is a private page that lists reports + actions
+- [x] **Report user / report gig button** — `reports` table (0016) + report modal on profile.html and gig.html. Insert/select-own under RLS; triage via SQL.
+- [x] **Block user button** — `blocks` table (0016) + Block/Unblock in the "⋯" menu on profiles. Enforced: blocked pairs can't apply to each other's gigs or DM each other.
+- [x] **Restriction system live** — 0016 turns it on: RLS on gigs.insert (cannot_post_until) and applications.insert (cannot_apply_until), via SECURITY DEFINER `is_restricted()`. NOTE: requires applying migration 0016 to the live DB.
+- [ ] **Admin UI to handle reports** — DEFERRED. Needs an admin-role mechanism first; founder triages via SQL (docs/sops/09) for now. Not a launch blocker.
+- [ ] **Hide blocked users' gigs from feed** — block currently gates applying + DMing, not feed visibility. Follow-up.
 - [ ] **Profanity / scam pattern filter** — defer to post-launch unless you're seeing abuse
 
 #### Legal & compliance
