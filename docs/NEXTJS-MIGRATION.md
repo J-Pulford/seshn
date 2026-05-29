@@ -130,7 +130,13 @@ applications, gig, profile, post, settings). All inter-page links on the new sta
       `conversations` was missing from the realtime publication →
       0017_realtime_conversations.sql adds it (REPLICA IDENTITY FULL). Apply
       0017 + ensure project Realtime is on.
-- [ ] contract, project, pro (+ port contract write RPCs to the data layer)
+- [x] pro (`/pro`) — pricing page (static).
+- [x] project (`/project`) — project-room mockup (static; no data wiring in the
+      prototype either).
+- [x] contracts data layer (`lib/seshn/contracts.ts`) — completes lib/seshn.
+- [ ] contract page (`/contract/[id]`) — the one remaining port. Needs
+      contract-template.js → lib/contract-template.ts (agreement render + sha256
+      hash) + the 840-line UI. Launch-deferred feature; gets a dedicated pass.
 
 ### Phase 5 — Landing page (LAST — founder reworking design) + cleanup
 - [ ] Port the (redesigned) landing → `app/page.tsx` SSR + `metadata` for SEO
