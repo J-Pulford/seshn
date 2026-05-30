@@ -1,0 +1,81 @@
+/* Marketing sub-page styles (features, mission, roadmap, suggestions, stories).
+ * Scoped under .daw-site; complements marketing.css + landing.css. */
+
+.daw-site .mk-hero { padding: 70px 0 30px; }
+.daw-site .mk-hero h1 { font-size: clamp(40px, 6vw, 76px); }
+.daw-site .final-band { text-align: center; padding: 90px 0; background: linear-gradient(180deg, var(--bg-2), var(--bg)); }
+
+/* Deep features (features page) */
+.daw-site .fdeep-row { display: grid; grid-template-columns: 56px 1fr 1fr; gap: 28px; padding: 32px 0; border-top: 1px solid var(--line); }
+.daw-site .fdeep-row .num { font-family: var(--mono); font-size: 13px; color: var(--accent); }
+.daw-site .fdeep-row .lead { color: var(--ink); font-size: 18px; font-weight: 600; margin-bottom: 12px; letter-spacing: -0.01em; }
+.daw-site .fdeep-row .body { color: var(--ink-2); font-size: 14px; line-height: 1.6; }
+.daw-site .fdeep-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+.daw-site .fdeep-panel ul { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 13.5px; line-height: 1.8; }
+.daw-site .fdeep-panel .solves { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); font-style: italic; color: var(--ink-3); font-size: 13px; line-height: 1.5; }
+@media (max-width: 980px) { .daw-site .fdeep-row { grid-template-columns: 1fr; gap: 14px; } }
+
+/* Mission */
+.daw-site .pillars { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.daw-site .pillar { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 24px; }
+.daw-site .pillar .n { font-family: var(--mono); font-size: 13px; color: var(--accent); }
+.daw-site .pillar p { color: var(--ink-2); font-size: 14px; line-height: 1.6; margin-top: 6px; }
+.daw-site .why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.daw-site .why-grid p { color: var(--ink-2); font-size: 15px; line-height: 1.65; margin-bottom: 14px; }
+.daw-site .pledge-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.daw-site .pledge-item { display: flex; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; color: var(--ink-2); font-size: 14px; line-height: 1.5; }
+.daw-site .pledge-item::before { content: "✓"; color: var(--accent); font-weight: 700; }
+@media (max-width: 720px) { .daw-site .pillars, .daw-site .why-grid, .daw-site .pledge-grid { grid-template-columns: 1fr; } }
+
+/* Roadmap */
+.daw-site .legend { display: flex; gap: 18px; flex-wrap: wrap; font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-bottom: 28px; }
+.daw-site .legend .dotk { display: inline-flex; align-items: center; gap: 6px; }
+.daw-site .legend .sw { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+.daw-site .rm-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.daw-site .rm-quarter { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+.daw-site .rm-quarter .q { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+.daw-site .rm-quarter .status { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 4px; display: inline-block; margin: 8px 0; }
+.daw-site .rm-quarter.live .status { color: var(--accent); background: rgba(44,203,115,0.12); }
+.daw-site .rm-quarter.next .status { color: var(--bus); background: rgba(91,141,239,0.12); }
+.daw-site .rm-quarter.later .status, .daw-site .rm-quarter.vision .status { color: var(--ink-3); background: var(--panel-2); }
+.daw-site .rm-item { padding: 12px 0; border-top: 1px solid var(--line); }
+.daw-site .rm-item .it-title { font-weight: 600; font-size: 13.5px; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.daw-site .rm-item .it-desc { color: var(--ink-3); font-size: 12.5px; line-height: 1.5; margin-top: 4px; }
+.daw-site .state-badge { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 6px; border-radius: 3px; flex: 0 0 auto; }
+.daw-site .state-shipped { color: var(--accent); background: rgba(44,203,115,0.12); }
+.daw-site .state-in-progress { color: var(--warn); background: rgba(246,166,53,0.12); }
+.daw-site .state-design { color: var(--bus); background: rgba(91,141,239,0.12); }
+.daw-site .state-exploring { color: var(--ink-3); background: var(--panel-2); }
+.daw-site .changelog { margin-top: 40px; }
+.daw-site .changelog .cl-row { display: grid; grid-template-columns: 120px 1fr; gap: 16px; padding: 12px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+.daw-site .changelog .cl-date { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+@media (max-width: 1100px) { .daw-site .rm-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 640px) { .daw-site .rm-grid { grid-template-columns: 1fr; } }
+
+/* Suggestions */
+.daw-site .composer { background: var(--panel); border: 1px solid var(--line-2); border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+.daw-site .composer textarea, .daw-site .composer select, .daw-site .composer input { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; color: var(--ink); font-family: "Inter Tight", sans-serif; font-size: 14px; padding: 12px; outline: none; }
+.daw-site .composer textarea { min-height: 90px; resize: vertical; }
+.daw-site .composer .row2 { display: flex; gap: 12px; flex-wrap: wrap; }
+.daw-site .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 22px 0; }
+.daw-site .chip { font-family: var(--mono); font-size: 11px; color: var(--ink-3); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; background: transparent; }
+.daw-site .chip.on { color: var(--accent); border-color: var(--accent); background: rgba(44,203,115,0.1); }
+.daw-site .sugg-item { display: flex; gap: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 10px; }
+.daw-site .upvote { flex: 0 0 auto; width: 54px; text-align: center; border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 0; cursor: pointer; background: var(--panel-2); color: var(--ink-2); }
+.daw-site .upvote.voted { border-color: var(--accent); color: var(--accent); }
+.daw-site .upvote .uv-n { font-family: "Inter Tight"; font-weight: 800; font-size: 16px; display: block; }
+.daw-site .upvote .uv-c { font-family: var(--mono); font-size: 9px; }
+.daw-site .sugg-item .stag { font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
+.daw-site .ack { background: rgba(44,203,115,0.12); border: 1px solid rgba(44,203,115,0.3); color: var(--accent); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; font-size: 14px; }
+
+/* Stories */
+.daw-site .stats-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 50px; }
+.daw-site .stats-strip .s { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; text-align: center; }
+.daw-site .stats-strip .s .v { font-family: "Inter Tight"; font-weight: 800; font-size: 30px; color: var(--accent); letter-spacing: -0.02em; }
+.daw-site .stats-strip .s .k { font-family: var(--mono); font-size: 10px; color: var(--ink-3); text-transform: uppercase; margin-top: 4px; }
+.daw-site .case { background: var(--panel); border: 1px solid var(--line-2); border-radius: 16px; padding: 32px; margin-top: 50px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center; }
+.daw-site .case-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.daw-site .case-stats .cs { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+.daw-site .case-stats .cs .v { font-family: "Inter Tight"; font-weight: 800; font-size: 26px; color: var(--accent); }
+.daw-site .case-stats .cs .k { font-family: var(--mono); font-size: 10px; color: var(--ink-3); text-transform: uppercase; margin-top: 4px; }
+@media (max-width: 900px) { .daw-site .stats-strip { grid-template-columns: 1fr 1fr; } .daw-site .case { grid-template-columns: 1fr; } }
