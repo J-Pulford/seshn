@@ -1,0 +1,92 @@
+/* Seshn marketing site — "Studio/DAW" theme. Ported from the landing handoff's
+ * theme.css. EVERYTHING is scoped under .daw-site so the marketing tokens
+ * (which reuse names like --bg/--ink/--accent) never leak into the app's
+ * themeable :root, and so the marketing site is always dark regardless of the
+ * app's light/dark toggle. */
+
+.daw-site {
+  --bg: #0a0a09;
+  --bg-2: #131312;
+  --panel: #1a1a18;
+  --panel-2: #21211e;
+  --line: #2d2d29;
+  --line-2: #3a3a35;
+  --ink: #e9e8e0;
+  --ink-2: #b6b5ab;
+  --ink-3: #74736a;
+  --accent: #2CCB73;
+  --accent-dim: #1a6f3d;
+  --warn: #f6a635;
+  --danger: #ff5e5e;
+  --bus: #5b8def;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Inter Tight", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.daw-site .container { max-width: 1380px; margin: 0 auto; padding: 0 24px; }
+
+/* Top transport bar */
+.daw-site .daw-bar {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line-2);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 18px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em;
+}
+.daw-site .daw-bar .left { display: flex; align-items: center; gap: 18px; }
+.daw-site .daw-bar .brand { font-family: "Inter Tight", sans-serif; font-weight: 800; font-size: 15px; letter-spacing: -0.045em; color: var(--ink); display: inline-flex; align-items: center; gap: 7px; text-decoration: none; }
+.daw-site .daw-bar .brand svg { width: 22px; height: 22px; flex: 0 0 auto; }
+.daw-site .daw-bar .brand .suffix { font-family: var(--mono); font-weight: 500; font-size: 10px; letter-spacing: 0.04em; color: var(--ink-3); align-self: flex-end; margin-bottom: 1px; }
+.daw-site .daw-bar .links { display: flex; gap: 14px; align-items: center; }
+.daw-site .daw-bar .links a { color: var(--ink-3); text-decoration: none; padding: 4px 8px; border-radius: 4px; transition: color .15s; }
+.daw-site .daw-bar .links a:hover, .daw-site .daw-bar .links a.active { color: var(--accent); background: rgba(44,203,115,0.08); }
+.daw-site .daw-bar .cta { background: var(--accent); color: var(--bg); padding: 6px 14px; border-radius: 4px; font-family: "Inter Tight"; font-weight: 600; font-size: 12px; text-decoration: none; }
+@media (max-width: 880px) { .daw-site .daw-bar .left .file, .daw-site .daw-bar .links a.txt, .daw-site .daw-bar .transport, .daw-site .daw-bar .links { display: none; } }
+
+.daw-site .section { padding: 80px 0; position: relative; }
+.daw-site .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); display: inline-block; padding: 5px 10px; background: rgba(44,203,115,0.1); border: 1px solid rgba(44,203,115,0.25); border-radius: 4px; margin-bottom: 18px; }
+.daw-site h1, .daw-site h2, .daw-site h3, .daw-site h4 { font-family: "Inter Tight", sans-serif; }
+.daw-site h1 { font-weight: 800; font-size: clamp(48px, 7vw, 96px); line-height: 0.94; letter-spacing: -0.04em; margin: 0 0 24px; }
+.daw-site h1 .stem, .daw-site h2 .stem { color: var(--accent); }
+.daw-site h2 { font-weight: 800; font-size: clamp(32px, 4.5vw, 56px); line-height: 0.96; letter-spacing: -0.035em; margin: 0 0 22px; max-width: 16ch; }
+.daw-site h3 { font-weight: 700; font-size: 22px; letter-spacing: -0.015em; margin: 0 0 10px; }
+.daw-site p { margin: 0; }
+.daw-site .lede { font-size: 17px; line-height: 1.55; color: var(--ink-2); max-width: 600px; margin: 0 0 40px; }
+
+.daw-site .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 22px; border-radius: 6px; font-family: "Inter Tight", sans-serif; font-weight: 600; font-size: 14px; text-decoration: none; cursor: pointer; border: 1px solid var(--line-2); background: var(--panel); color: var(--ink); transition: all .15s; }
+.daw-site .btn.primary { background: var(--accent); color: var(--bg); border-color: transparent; }
+.daw-site .btn.primary:hover { background: #57e293; }
+.daw-site .btn:hover { border-color: var(--accent); }
+
+.daw-site .footer { border-top: 1px solid var(--line-2); padding: 50px 0 30px; color: var(--ink-3); font-family: var(--mono); font-size: 12px; }
+.daw-site .footer-inner { max-width: 1380px; margin: 0 auto; padding: 0 24px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
+.daw-site .footer-col b { color: var(--accent); display: block; margin-bottom: 14px; font-size: 11px; letter-spacing: 0.12em; }
+.daw-site .footer-col a { display: block; color: var(--ink-2); text-decoration: none; padding: 4px 0; font-size: 12.5px; }
+.daw-site .footer-col a:hover { color: var(--ink); }
+.daw-site .footer .bottom { max-width: 1380px; margin: 38px auto 0; padding: 18px 24px 0; border-top: 1px solid var(--line-2); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 720px) { .daw-site .footer-inner { grid-template-columns: 1fr 1fr; } }
+
+.daw-site .reveal { opacity: 0; transform: translateY(20px); transition: all .8s cubic-bezier(.2,.7,.3,1); }
+.daw-site .reveal.in { opacity: 1; transform: translateY(0); }
+
+/* Transport cluster (home only) */
+.daw-site .daw-bar .transport { display: flex; align-items: center; gap: 10px; color: var(--ink-3); }
+.daw-site .daw-bar .transport .tbtn { width: 24px; height: 24px; border-radius: 4px; border: 1px solid var(--line-2); background: var(--panel-2); color: var(--ink-2); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.daw-site .daw-bar .transport .tbtn.rec { color: var(--danger); border-color: rgba(255,94,94,0.4); box-shadow: 0 0 8px rgba(255,94,94,0.35); }
+.daw-site .daw-bar .transport .tc { color: var(--accent); }
+
+/* Hamburger + mobile drawer */
+.daw-site .daw-hamburger { display: none; width: 34px; height: 34px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--panel-2); color: var(--ink); cursor: pointer; align-items: center; justify-content: center; }
+.daw-site .daw-drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(3px); z-index: 200; }
+.daw-site .daw-drawer { position: fixed; top: 0; right: 0; height: 100%; width: min(82vw, 340px); background: var(--panel); border-left: 1px solid var(--line-2); z-index: 201; display: flex; flex-direction: column; padding: 18px; gap: 4px; }
+.daw-site .daw-drawer .x { align-self: flex-end; width: 34px; height: 34px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--panel-2); color: var(--ink); cursor: pointer; font-size: 18px; }
+.daw-site .daw-drawer a { font-family: var(--mono); font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); text-decoration: none; padding: 14px 8px; border-bottom: 1px solid var(--line); }
+.daw-site .daw-drawer a.active { color: var(--accent); }
+.daw-site .daw-drawer .cta { margin-top: auto; }
+@media (max-width: 880px) { .daw-site .daw-hamburger { display: inline-flex; } }
