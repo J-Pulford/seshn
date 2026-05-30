@@ -15,6 +15,7 @@ import {
 } from "@/lib/seshn/notifications";
 import { getUnreadCount, subscribeToMyConversations } from "@/lib/seshn/messaging";
 import type { Gig, Notification, Profile } from "@/lib/seshn/types";
+import ThemeToggle from "./ThemeToggle";
 import "./nav.css";
 
 export type NavActive = "feed" | "browse" | "applications" | "inbox" | "profile" | null;
@@ -374,6 +375,7 @@ export default function Nav({ active = null, showSearch = true, showPostButton =
             <IconSvg kind="message" size={18} />
             {unreadConvos > 0 && <Badge count={unreadConvos} />}
           </a>
+          <ThemeToggle />
           <NotificationsBell />
           <a href={R.profile(me?.username)} style={{ textDecoration: "none" }} aria-label="Your profile">
             <span className="avatar md" style={{ background: me?.avatar_url ? "var(--ph)" : "linear-gradient(135deg,#a8ebc8,#2CCB73)", color: "#062c19", fontSize: 12, fontFamily: "var(--font-display)", fontWeight: 700, border: active === "profile" ? "2px solid var(--ink)" : "2px solid transparent", overflow: "hidden", width: 32, height: 32, display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>

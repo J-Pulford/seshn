@@ -2,8 +2,6 @@
  * (minus the :root vars + base resets, which now live in globals.css). */
 
 .top-nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid var(--line); background: var(--frame); }
-.logo { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.04em; font-size: 20px; color: var(--ink); display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
-.logo::before { content: ""; width: 14px; height: 14px; border-radius: 3px; background: var(--accent); display: inline-block; box-shadow: 0 0 0 2px var(--frame), 0 0 0 3px var(--ink); margin-right: 2px; }
 
 .auth-grid { display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 57px); }
 
