@@ -1,0 +1,53 @@
+/* Auth page styles — ported verbatim from public/app/auth.html's <style> block
+ * (minus the :root vars + base resets, which now live in globals.css). */
+
+.top-nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid var(--line); background: var(--frame); }
+
+.auth-grid { display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 57px); }
+
+.auth-left { display: flex; flex-direction: column; justify-content: center; padding: 60px 80px; background: var(--frame); gap: 0; }
+.auth-left .eyebrow { font-family: var(--font-display); font-weight: 500; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 12px; }
+.auth-left h1 { font-family: var(--font-display); font-weight: 600; font-size: 40px; line-height: 1.05; letter-spacing: -0.025em; color: var(--ink); margin-bottom: 12px; }
+.auth-left .sub { font-size: 14px; color: var(--ink-3); line-height: 1.55; max-width: 360px; margin-bottom: 32px; }
+
+.form-stack { display: flex; flex-direction: column; gap: 10px; max-width: 380px; }
+.btn-oauth { display: flex; align-items: center; gap: 12px; padding: 13px 18px; border-radius: var(--r); border: 1px solid var(--line); background: var(--surface); font-size: 14px; font-family: var(--font-display); font-weight: 600; color: var(--ink); cursor: pointer; width: 100%; transition: background 0.15s; }
+.btn-oauth:hover { background: var(--surface-2); }
+.btn-oauth svg { flex-shrink: 0; }
+
+.divider { display: flex; align-items: center; gap: 12px; margin: 6px 0; }
+.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.divider span { font-size: 12px; color: var(--ink-4); font-family: var(--font-display); white-space: nowrap; }
+
+.input-field { width: 100%; padding: 13px 14px; border-radius: var(--r); border: 1px solid var(--line); background: var(--surface); font-size: 14px; font-family: var(--font-body); color: var(--ink); outline: none; }
+.input-field:focus { border-color: var(--ink); }
+.input-field::placeholder { color: var(--ink-4); }
+
+.btn-primary { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 20px; border-radius: var(--r); border: none; background: var(--accent); font-size: 14px; font-family: var(--font-display); font-weight: 600; color: #062c19; cursor: pointer; width: 100%; }
+.btn-primary:hover { background: var(--accent-m); }
+.btn-primary:disabled { opacity: 0.55; cursor: default; }
+
+.tos { font-size: 12px; color: var(--ink-4); line-height: 1.55; max-width: 360px; margin-top: 8px; }
+.tos a { color: var(--ink-3); }
+.signin-link { margin-top: 24px; font-size: 13px; color: var(--ink-3); }
+.signin-link a { color: var(--ink); font-weight: 600; text-decoration: none; }
+
+.auth-right { background: #0d0d0d; color: #f4f3ef; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 48px 56px; }
+.featured-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: rgba(255,255,255,0.7); font-size: 11px; font-family: var(--font-display); font-weight: 500; position: relative; z-index: 2; width: fit-content; }
+.quote-section { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 20px; }
+.quote-text { font-family: var(--font-display); font-size: 26px; line-height: 1.25; letter-spacing: -0.015em; color: #f4f3ef; max-width: 380px; }
+.attribution { display: flex; align-items: center; gap: 12px; }
+.attr-avatar { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 600; font-size: 13px; color: #f4f3ef; flex-shrink: 0; }
+.attr-name { font-family: var(--font-display); font-weight: 600; font-size: 14px; color: #f4f3ef; }
+.attr-sub { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+.pagination-dots { display: flex; gap: 6px; }
+.footer-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: rgba(255,255,255,0.45); position: relative; z-index: 2; }
+.float-art { position: absolute; z-index: 1; }
+
+@media (max-width: 768px) {
+  .auth-grid { grid-template-columns: 1fr; }
+  .auth-right { display: none; }
+  .auth-left { padding: 40px 24px; }
+  .auth-left h1 { font-size: 32px !important; }
+  input[type="email"], input[type="text"], input[type="password"] { font-size: 16px !important; }
+}

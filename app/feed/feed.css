@@ -1,0 +1,28 @@
+/* Feed page layout — ported verbatim from public/app/feed.html's <style>
+ * (the shared atoms + nav live in globals.css / nav.css). */
+
+.gig { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.gig.boost { border-color: var(--accent-d); background: linear-gradient(180deg, color-mix(in srgb, var(--accent-bg) 40%, var(--surface)) 0%, var(--surface) 60%); }
+
+.feed-cards { display: flex; flex-direction: column; gap: 14px; }
+.feed-cards.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+
+.check-box { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--line); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; }
+.check-box.checked { background: var(--ink); border-color: var(--ink); }
+
+.feed-grid { display: grid; grid-template-columns: 240px 1fr 300px; gap: 24px; padding: 24px 28px; flex: 1; max-width: 1400px; margin: 0 auto; width: 100%; }
+.feed-filters-toggle { display: none; }
+.feed-filters-drawer { display: contents; }
+.feed-filters-drawer-header { display: none; }
+
+@media (max-width: 720px) {
+  .feed-cards.grid { grid-template-columns: 1fr !important; }
+  .feed-grid { grid-template-columns: 1fr; padding: 14px; gap: 14px; }
+  .feed-right-rail { display: none; }
+  .feed-filters-toggle { display: inline-flex; }
+  .feed-filters-drawer { display: none; position: fixed; inset: 0; z-index: 200; background: var(--bg); overflow-y: auto; padding: 16px; }
+  .feed-filters-drawer.open { display: block; }
+  .feed-filters-drawer .feed-filters-aside { position: static !important; height: auto !important; max-height: none !important; overflow: visible !important; }
+  .feed-filters-drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); }
+  .feed-filters-aside { position: static !important; height: auto !important; }
+}

@@ -1,0 +1,22 @@
+/* Gig detail page — ported from public/app/gig.html (shared atoms/nav in
+ * globals.css / nav.css; .page renamed to .gig-page to avoid clashes). */
+
+.gig-page { max-width: 1200px; margin: 0 auto; padding: 28px 56px 60px; display: grid; grid-template-columns: 1fr 340px; gap: 32px; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-3); text-decoration: none; margin-bottom: 20px; font-family: var(--font-display); }
+.back-link:hover { color: var(--ink); }
+.card.hairline { border-color: var(--line-soft); }
+
+.apply-section { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; }
+.input-field { width: 100%; padding: 10px 12px; border-radius: var(--r); border: 1px solid var(--line); background: var(--surface); font-size: 13px; font-family: var(--font-body); color: var(--ink); outline: none; resize: none; }
+.input-field:focus { border-color: var(--ink); }
+.input-field::placeholder { color: var(--ink-4); }
+
+@media (max-width: 900px) {
+  .gig-page { grid-template-columns: 1fr; padding: 20px 20px 40px; }
+}
+@media (max-width: 720px) {
+  .gig-page { padding: 14px 14px 32px; gap: 16px; }
+  .gig-page h1 { font-size: 26px !important; }
+  .apply-section { padding: 14px !important; }
+  textarea, input[type="text"], input[type="url"] { font-size: 16px !important; }
+}

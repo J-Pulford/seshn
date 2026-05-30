@@ -1,0 +1,17 @@
+/* Browse page layout — ported verbatim from public/app/browse.html's <style>
+ * (shared atoms + nav live in globals.css / nav.css). */
+
+.browse-grid { display: grid; grid-template-columns: 240px 1fr; gap: 24px; padding: 24px 28px; flex: 1; max-width: 1400px; margin: 0 auto; width: 100%; }
+.browse-filters-toggle { display: none; }
+.browse-filters-drawer { display: contents; }
+.browse-filters-drawer-header { display: none; }
+
+@media (max-width: 720px) {
+  .browse-grid { grid-template-columns: 1fr; padding: 14px; gap: 14px; }
+  .browse-filters-toggle { display: inline-flex; }
+  .browse-filters-drawer { display: none; position: fixed; inset: 0; z-index: 200; background: var(--bg); overflow-y: auto; padding: 16px; }
+  .browse-filters-drawer.open { display: block; }
+  .browse-filters-drawer .browse-filters-aside { position: static !important; height: auto !important; max-height: none !important; overflow: visible !important; }
+  .browse-filters-drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); }
+  .browse-cards-grid { grid-template-columns: 1fr !important; }
+}

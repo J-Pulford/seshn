@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 120" fill="none">
+  <g>
+    <path d="M82 38 C82 22 38 22 38 46 C38 64 82 56 82 80 C82 104 38 104 38 84" stroke="#2CCB73" stroke-width="14" stroke-linecap="round"></path>
+    <circle cx="82" cy="38" r="12.5" fill="#2CCB73"></circle>
+    <circle cx="38" cy="84" r="12.5" fill="#2CCB73"></circle>
+  </g>
+  <text x="150" y="84" font-family="&#39;Inter Tight&#39;, system-ui, sans-serif" font-weight="800" font-size="76" letter-spacing="-3.4" fill="#E9E8E0">SESHN</text>
+</svg>

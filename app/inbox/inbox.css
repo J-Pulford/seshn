@@ -1,0 +1,79 @@
+/* Inbox — ported from public/app/inbox.html. Scoped under .inbox-page because
+ * it carries generic class names (.main, .messages, .search-bar) and a bare
+ * .avatar default size that would clash with the global atoms. */
+
+.inbox-page { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+.inbox-page .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--ph); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--ink-3); flex-shrink: 0; overflow: hidden; }
+.inbox-page .avatar.md { width: 40px; height: 40px; font-size: 14px; }
+.inbox-page .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.inbox-page .main { display: grid; grid-template-columns: 320px 1fr; flex: 1; overflow: hidden; }
+
+.inbox-page .convo-list { border-right: 1px solid var(--line); display: flex; flex-direction: column; overflow: hidden; }
+.inbox-page .convo-header { padding: 16px 18px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+.inbox-page .convo-header-row { display: flex; align-items: center; justify-content: space-between; }
+.inbox-page .search-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--surface-2); border-radius: 999px; border: 1px solid var(--line); }
+.inbox-page .filter-row { display: flex; gap: 6px; }
+.inbox-page .filter-row .pill { cursor: pointer; }
+.inbox-page .convo-scroll { overflow-y: auto; flex: 1; }
+
+.inbox-page .convo-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; border-left: 3px solid transparent; cursor: pointer; transition: background 0.1s; }
+.inbox-page .convo-item:hover { background: var(--surface-2); }
+.inbox-page .convo-item.active { background: var(--surface-2); border-left-color: var(--ink); }
+.inbox-page .convo-info { flex: 1; min-width: 0; }
+.inbox-page .convo-name-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.inbox-page .convo-name { font-family: var(--font-display); font-weight: 600; font-size: 13px; color: var(--ink); }
+.inbox-page .convo-time { font-size: 11px; color: var(--ink-4); }
+.inbox-page .convo-preview { font-size: 12px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inbox-page .convo-preview.unread { color: var(--ink-2); font-weight: 500; }
+.inbox-page .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 4px; }
+
+.inbox-page .dm-panel { display: flex; flex-direction: column; overflow: hidden; }
+.inbox-page .dm-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+.inbox-page .dm-header-left { display: flex; align-items: center; gap: 12px; }
+.inbox-page .dm-header-right { display: flex; gap: 14px; align-items: center; }
+
+.inbox-page .messages { flex: 1; overflow-y: auto; padding: 16px 24px; display: flex; flex-direction: column; gap: 0; }
+.inbox-page .date-divider { text-align: center; font-size: 11px; color: var(--ink-4); padding: 10px 0; font-family: var(--font-display); }
+.inbox-page .msg-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; }
+.inbox-page .msg-row.self { flex-direction: row-reverse; }
+.inbox-page .msg-content { display: flex; flex-direction: column; gap: 4px; max-width: 68%; }
+.inbox-page .msg-row.self .msg-content { align-items: flex-end; }
+.inbox-page .msg-meta { display: flex; gap: 8px; align-items: center; font-size: 11px; }
+.inbox-page .msg-name { font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--ink); }
+.inbox-page .msg-time { color: var(--ink-4); }
+.inbox-page .msg-bubble { padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.45; color: var(--ink); background: var(--surface-2); border-top-left-radius: 3px; }
+.inbox-page .msg-row.self .msg-bubble { background: var(--ink); color: var(--frame); border-top-left-radius: 12px; border-top-right-radius: 3px; }
+
+.inbox-page .attachment-card { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); min-width: 240px; max-width: 320px; }
+.inbox-page .msg-row.self .attachment-card { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); color: var(--frame); }
+.inbox-page .attachment-meta { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.inbox-page .attachment-name { font-family: var(--font-display); font-weight: 600; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
+.inbox-page .attachment-size { font-size: 10.5px; opacity: 0.6; flex-shrink: 0; }
+.inbox-page .attachment-card audio { width: 100%; height: 32px; }
+
+.inbox-page .composer { padding: 12px 24px; border-top: 1px solid var(--line); flex-shrink: 0; }
+.inbox-page .composer-inner { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+.inbox-page .composer-input { flex: 1; background: transparent; border: none; outline: none; font-size: 13px; font-family: var(--font-body); color: var(--ink); }
+.inbox-page .composer-input::placeholder { color: var(--ink-4); }
+.inbox-page .composer-attach { background: transparent; border: none; cursor: pointer; padding: 4px; color: var(--ink-3); display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; }
+.inbox-page .composer-attach:hover { color: var(--ink); background: var(--surface); }
+.inbox-page .composer-attach:disabled { opacity: 0.4; cursor: not-allowed; }
+.inbox-page .composer-preview { display: flex; align-items: center; gap: 10px; padding: 8px 12px; margin-bottom: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; font-size: 12px; }
+
+.inbox-page .dm-back { display: none; }
+
+@media (max-width: 720px) {
+  .inbox-page .main { grid-template-columns: 1fr; }
+  .inbox-page .main.has-active .convo-list { display: none; }
+  .inbox-page .main:not(.has-active) .dm-panel { display: none; }
+  .inbox-page .dm-header { padding: 12px 14px !important; }
+  .inbox-page .messages { padding: 12px 14px !important; }
+  .inbox-page .composer { padding: 10px 12px !important; }
+  .inbox-page .composer-input { font-size: 16px !important; }
+  .inbox-page .convo-header { padding: 14px 16px !important; }
+  .inbox-page .convo-item { padding: 12px 14px !important; }
+  .inbox-page .dm-back { display: inline-flex !important; }
+  .inbox-page .convo-header input[type="text"] { font-size: 16px !important; }
+}
