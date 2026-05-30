@@ -13,8 +13,8 @@ export { getUser };
 const ROUTES = {
   auth: "/auth", // ported
   onboarding: "/onboarding", // ported
-  feed: "/app/feed.html", // legacy until ported
-  profile: (username: string) => `/app/profile.html?u=${encodeURIComponent(username)}`, // legacy
+  feed: "/feed", // ported
+  profile: (username: string) => `/profile/${encodeURIComponent(username)}`, // ported
 };
 
 function origin() {
@@ -29,7 +29,7 @@ export async function sendMagicLink(email: string, redirectTo?: string) {
   return getBrowserClient().auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: redirectTo || origin() + "/app/auth.html",
+      emailRedirectTo: redirectTo || origin() + "/auth",
       shouldCreateUser: true,
     },
   });
@@ -49,7 +49,7 @@ export async function signUpWithPassword(email: string, password: string, redire
   return getBrowserClient().auth.signUp({
     email: email.trim(),
     password,
-    options: { emailRedirectTo: redirectTo || origin() + "/app/auth.html" },
+    options: { emailRedirectTo: redirectTo || origin() + "/auth" },
   });
 }
 
@@ -65,14 +65,14 @@ export async function setMyPassword(newPassword: string) {
 export async function sendPasswordReset(email: string, redirectTo?: string) {
   if (!email) throw new Error("Missing email");
   return getBrowserClient().auth.resetPasswordForEmail(email.trim(), {
-    redirectTo: redirectTo || origin() + "/app/auth.html?recover=1",
+    redirectTo: redirectTo || origin() + "/auth?recover=1",
   });
 }
 
 export async function signInWithGoogle(redirectTo?: string) {
   return getBrowserClient().auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: redirectTo || origin() + "/app/auth.html" },
+    options: { redirectTo: redirectTo || origin() + "/auth" },
   });
 }
 
@@ -96,7 +96,7 @@ export async function resendVerificationEmail(email: string, redirectTo?: string
   return getBrowserClient().auth.resend({
     type: "signup",
     email: email.trim(),
-    options: { emailRedirectTo: redirectTo || origin() + "/app/auth.html" },
+    options: { emailRedirectTo: redirectTo || origin() + "/auth" },
   });
 }
 
