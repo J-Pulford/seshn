@@ -3,6 +3,12 @@
 import { getBrowserClient } from "./client";
 import type { GetProfileOpts, Profile } from "./types";
 
+// Public-safe profile columns. Must match the SELECT grant in
+// 0018_security_hardening.sql — `select *` would hit a revoked column
+// (stripe_*, restrictions, deletion_requested_at are client-inaccessible).
+const PROFILE_COLUMNS =
+  "id, username, display_name, bio, location, pronouns, roles, genres, is_pro, avatar_url, cover_url, notification_prefs, created_at, updated_at";
+
 export async function getUser() {
   const sb = getBrowserClient();
   const res = await sb.auth.getUser();
@@ -11,7 +17,7 @@ export async function getUser() {
 
 export async function getProfile(opts: GetProfileOpts = {}): Promise<Profile | null> {
   const sb = getBrowserClient();
-  let q = sb.from("profiles").select("*").limit(1);
+  let q = sb.from("profiles").select(PROFILE_COLUMNS).limit(1);
   if (opts.username) q = q.eq("username", opts.username);
   else if (opts.id) q = q.eq("id", opts.id);
   else {
@@ -29,7 +35,7 @@ export async function upsertProfile(fields: Partial<Profile>): Promise<Profile> 
   const u = await getUser();
   if (!u) throw new Error("Not signed in");
   const row = { id: u.id, ...fields };
-  const res = await sb.from("profiles").upsert(row, { onConflict: "id" }).select().single();
+  const res = await sb.from("profiles").upsert(row, { onConflict: "id" }).select(PROFILE_COLUMNS).single();
   if (res.error) throw res.error;
   return res.data as Profile;
 }
@@ -41,7 +47,7 @@ export async function updateProfile(fields: Partial<Profile>): Promise<Profile> 
   const sb = getBrowserClient();
   const u = await getUser();
   if (!u) throw new Error("Not signed in");
-  const res = await sb.from("profiles").update(fields).eq("id", u.id).select().single();
+  const res = await sb.from("profiles").update(fields).eq("id", u.id).select(PROFILE_COLUMNS).single();
   if (res.error) throw res.error;
   return res.data as Profile;
 }
