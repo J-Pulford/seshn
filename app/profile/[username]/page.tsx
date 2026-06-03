@@ -130,32 +130,21 @@ function CoverHeader({ height = 150, seed = "cover", imageUrl }: { height?: numb
   );
 }
 
-function GigSummary({ gig, profile }: { gig: Gig; profile: Profile }) {
+function GigSummary({ gig }: { gig: Gig }) {
   const closed = gig.status === "closed";
   return (
-    <div className="gig" style={closed ? { opacity: 0.72 } : undefined}>
-      <div className="row" style={{ gap: 10 }}>
-        <span className="avatar md" style={{ background: "var(--ph-2)" }}>
-          {initials(profile.display_name)}
-          <span style={{ position: "absolute", bottom: -2, right: -2, background: "var(--frame)", borderRadius: 999, padding: "1px 4px", fontSize: 7, fontFamily: "var(--font-display)", fontWeight: 600, color: "var(--ink)", border: "1px solid var(--line)", lineHeight: 1.4, textTransform: "uppercase" }}>{profile.is_pro ? "PRO" : "ART"}</span>
-        </span>
-        <div className="col" style={{ flex: 1, gap: 2, minWidth: 0 }}>
-          <div className="row" style={{ gap: 6, alignItems: "center" }}>
-            <span style={{ fontWeight: 600, fontFamily: "var(--font-display)", fontSize: 13 }}>{profile.display_name}</span>
-            <span className="dot" />
-            <span className="t-meta">{timeAgo(gig.created_at)} ago</span>
-            {closed && <span className="pill" style={{ marginLeft: "auto", background: "var(--ink)", color: "var(--frame)", borderColor: "transparent", fontSize: 9 }}>Closed</span>}
-          </div>
-          <div className="row" style={{ gap: 6 }}>
-            <span className="pill accent">{gig.role} needed</span>
-            <span className="t-meta">· {compLabel(gig)}</span>
-          </div>
-        </div>
+    <div className={"gig-card" + (closed ? " closed" : "")}>
+      <div className="gig-card-head">
+        <span className="pill accent">{gig.role} needed</span>
+        {closed && <span className="gig-closed-tag">Closed</span>}
       </div>
-      <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 16, letterSpacing: "-0.012em", lineHeight: 1.2 }}>{gig.title}</div>
-      {(gig.genres || []).length > 0 && (
-        <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>{gig.genres.slice(0, 3).map((t) => <span key={t} className="pill">{t}</span>)}</div>
-      )}
+      <div className="gig-card-title">{gig.title}</div>
+      <div className="gig-card-meta">
+        <span>{compLabel(gig)}</span>
+        <span className="dot" />
+        <span>{timeAgo(gig.created_at)} ago</span>
+        {(gig.genres || []).slice(0, 3).map((t) => <span key={t} className="pill sm">{t}</span>)}
+      </div>
     </div>
   );
 }
@@ -825,7 +814,7 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
               ) : (
                 gigs.map((g) => (
                   <a key={g.id} href={R.gig(g.id)} style={{ textDecoration: "none", color: "inherit" }}>
-                    <GigSummary gig={g} profile={profile} />
+                    <GigSummary gig={g} />
                   </a>
                 ))
               )}
