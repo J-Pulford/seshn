@@ -39,3 +39,23 @@ export const PROFILE_GENRES = [
   "K-pop", "Reggaeton", "Drill", "Funk",
 ] as const;
 export type ProfileGenre = (typeof PROFILE_GENRES)[number];
+
+// ── Showcase links (profile.social_links). Order = display order. ──────
+// `host` is used to validate/normalise pasted URLs loosely (we don't hard-
+// reject, just prepend https:// if missing).
+export const SOCIAL_PLATFORMS = [
+  { key: "spotify",    label: "Spotify",    placeholder: "https://open.spotify.com/artist/…" },
+  { key: "soundcloud", label: "SoundCloud", placeholder: "https://soundcloud.com/you" },
+  { key: "youtube",    label: "YouTube",    placeholder: "https://youtube.com/@you" },
+  { key: "instagram",  label: "Instagram",  placeholder: "https://instagram.com/you" },
+  { key: "facebook",   label: "Facebook",   placeholder: "https://facebook.com/you" },
+  { key: "twitter",    label: "X / Twitter", placeholder: "https://x.com/you" },
+] as const;
+export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number]["key"];
+
+// ── Availability (profile.availability) ────────────────────────────────
+export const AVAILABILITY_OPTIONS = [
+  { id: "open",      label: "Open to work",   dot: "var(--accent)" },
+  { id: "selective", label: "Selective",      dot: "#f6a635" },
+  { id: "booked",    label: "Booked / busy",  dot: "var(--ink-3)" },
+] as const;

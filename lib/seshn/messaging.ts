@@ -54,7 +54,7 @@ export async function getConversation(conversationId: string): Promise<Conversat
   const res = await sb
     .from("conversations")
     .select(
-      "id, user_a, user_b, last_message_at, " +
+      "id, user_a, user_b, last_message_at, last_message_preview, last_message_sender, " +
         "user_a_profile:" + CONVO_PROFILE + ", " +
         "user_b_profile:profiles!user_b(id, username, display_name, is_pro, location, roles, avatar_url)",
     )
