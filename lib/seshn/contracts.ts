@@ -36,8 +36,8 @@ export async function getContract(id: string): Promise<Contract | null> {
     .from("contracts")
     .select(
       CONTRACT_FIELDS +
-        ", owner:profiles!owner_id(id, username, display_name, avatar_url, is_pro, location, stripe_country)" +
-        ", collaborator:profiles!collaborator_id(id, username, display_name, avatar_url, is_pro, location, stripe_country)" +
+        ", owner:profiles!owner_id(id, username, display_name, avatar_url, is_pro, location)" +
+        ", collaborator:profiles!collaborator_id(id, username, display_name, avatar_url, is_pro, location)" +
         ", gig:gigs(id, title, role, genres, comp, pay_amount, pay_currency)",
     )
     .eq("id", id)
