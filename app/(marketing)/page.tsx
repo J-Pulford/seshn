@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Reveal from "@/components/landing/Reveal";
 import Beatmaker from "@/components/landing/Beatmaker";
+import WaitlistSection from "@/components/landing/WaitlistSection";
 import { SESHN } from "@/lib/landing/content";
 import "./landing.css";
 
@@ -200,6 +201,9 @@ export default function LandingPage() {
           </Reveal>
         </div>
       </section>
+
+      {/* Waitlist */}
+      <WaitlistSection />
 
       {/* Final CTA */}
       <section className="final" id="join">

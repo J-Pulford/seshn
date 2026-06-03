@@ -88,7 +88,7 @@ export default function AuthPage() {
     setStatus("sending");
     const next = new URLSearchParams(window.location.search).get("next");
     if (next) sessionStorage.setItem("seshn_auth_next", next);
-    const redirect = window.location.origin + "/app/auth.html" + (next ? "?next=" + encodeURIComponent(next) : "");
+    const redirect = window.location.origin + "/auth" + (next ? "?next=" + encodeURIComponent(next) : "");
     try {
       const { error } = await signInWithGoogle(redirect);
       if (error) throw error;

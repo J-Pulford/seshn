@@ -53,7 +53,7 @@ The goal: get 200–2000 emails of musicians who want in, segmented by what role
 **What it needs:**
 
 - [ ] **Landing page** (one URL, public) — value prop, screenshots/demo, social proof if any, email capture field, segmentation question ("are you a producer / vocalist / songwriter / engineer / etc"). Already exists in `public/index.html` to some degree — needs an email capture form.
-- [ ] **Waitlist table** in Supabase — `waitlist (email, role, location, source, created_at)`. Public-write under RLS that allows insert-only with rate limiting via Supabase Edge Function or a separate captcha.
+- [x] **Waitlist table** in Supabase — `waitlist (email, role, location, source, created_at)`, insert-only under RLS (migration `0019`); landing `#waitlist` section captures email + role + city. Rate-limit/captcha still TODO (see below).
 - [ ] **Confirmation email** — they sign up, they get a thanks-for-joining email confirming their spot. Builds trust.
 - [ ] **Anti-abuse** — basic captcha (Cloudflare Turnstile is free), email format validation, server-side rate limit (1 signup per IP per minute).
 - [ ] **Analytics** — at minimum: how many signups per day, by source (referrer), by role. Plausible / PostHog / Fathom are all $0–10/mo.
