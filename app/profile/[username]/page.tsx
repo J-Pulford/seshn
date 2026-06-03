@@ -3,14 +3,45 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useParams } from "next/navigation";
 import Nav from "@/components/Nav";
-import { getProfile, getUser, updateProfile, uploadAvatar, uploadCover, uploadGalleryImage, normalizeUrl, emitProfileUpdated } from "@/lib/seshn/profiles";
+import { getProfile, getProfileStats, getUser, updateProfile, uploadAvatar, uploadCover, uploadGalleryImage, normalizeUrl, emitProfileUpdated } from "@/lib/seshn/profiles";
 import { listGigs } from "@/lib/seshn/gigs";
 import { getOrCreateConversation } from "@/lib/seshn/messaging";
 import { blockUser, isUserBlocked, reportUser, unblockUser } from "@/lib/seshn/trust-safety";
 import { listConnectedAccounts } from "@/lib/seshn/connected-accounts";
 import { SOCIAL_PLATFORMS, AVAILABILITY_OPTIONS } from "@/lib/seshn/constants";
-import type { ConnectedAccount, Credit, GalleryItem, Gig, Profile, SocialLinks } from "@/lib/seshn/types";
+import { embedFor } from "@/lib/seshn/embeds";
+import type { ConnectedAccount, Credit, FeaturedItem, GalleryItem, Gig, Profile, ProfileStats, Service, SocialLinks } from "@/lib/seshn/types";
 import "./profile.css";
+
+// A simple free-text tag input (type, Enter/comma to add). Used for skills,
+// influences, and languages in the editor.
+function TagInput({ tags, onChange, placeholder, max = 20 }: { tags: string[]; onChange: (next: string[]) => void; placeholder?: string; max?: number }) {
+  const [draft, setDraft] = useState("");
+  const add = (raw: string) => {
+    const v = raw.trim().replace(/,$/, "").trim();
+    if (!v) return;
+    if (tags.length >= max || tags.some((t) => t.toLowerCase() === v.toLowerCase())) { setDraft(""); return; }
+    onChange(tags.concat([v.slice(0, 40)]));
+    setDraft("");
+  };
+  return (
+    <div className="tag-input">
+      {tags.map((t, i) => (
+        <span key={t + i} className="tag-chip">{t}<button type="button" aria-label={"Remove " + t} onClick={() => onChange(tags.filter((_, idx) => idx !== i))}>×</button></span>
+      ))}
+      <input
+        value={draft}
+        placeholder={tags.length === 0 ? placeholder : ""}
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(draft); }
+          else if (e.key === "Backspace" && !draft && tags.length) onChange(tags.slice(0, -1));
+        }}
+        onBlur={() => add(draft)}
+      />
+    </div>
+  );
+}
 
 const R = {
   settings: "/settings",
@@ -242,6 +273,11 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
   const [gallery, setGallery] = useState<GalleryItem[]>(profile.gallery ? [...profile.gallery] : []);
   const [credits, setCredits] = useState<Credit[]>(profile.credits ? [...profile.credits] : []);
   const [availability, setAvailability] = useState<string>(profile.availability || "");
+  const [featured, setFeatured] = useState<FeaturedItem[]>(profile.featured ? [...profile.featured] : []);
+  const [skills, setSkills] = useState<string[]>(profile.skills ? [...profile.skills] : []);
+  const [influences, setInfluences] = useState<string[]>(profile.influences ? [...profile.influences] : []);
+  const [languages, setLanguages] = useState<string[]>(profile.languages ? [...profile.languages] : []);
+  const [services, setServices] = useState<Service[]>(profile.services ? [...profile.services] : []);
   const [galleryBusy, setGalleryBusy] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadBusy, setUploadBusy] = useState(false);
@@ -277,6 +313,14 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
   const removeCredit = (i: number) => setCredits((prev) => prev.filter((_, idx) => idx !== i));
   const setCreditField = (i: number, field: keyof Credit, val: string) =>
     setCredits((prev) => prev.map((c, idx) => (idx === i ? { ...c, [field]: val } : c)));
+  const addFeatured = () => setFeatured((prev) => (prev.length >= 6 ? prev : prev.concat([{ url: "" }])));
+  const removeFeatured = (i: number) => setFeatured((prev) => prev.filter((_, idx) => idx !== i));
+  const setFeaturedField = (i: number, field: keyof FeaturedItem, val: string) =>
+    setFeatured((prev) => prev.map((f, idx) => (idx === i ? { ...f, [field]: val } : f)));
+  const addService = () => setServices((prev) => (prev.length >= 12 ? prev : prev.concat([{ title: "" }])));
+  const removeService = (i: number) => setServices((prev) => prev.filter((_, idx) => idx !== i));
+  const setServiceField = (i: number, field: keyof Service, val: string) =>
+    setServices((prev) => prev.map((s, idx) => (idx === i ? { ...s, [field]: val } : s)));
 
   const toggleRole = (r: string) => setRoles((prev) => { const next = new Set(prev); if (next.has(r)) next.delete(r); else if (next.size < MAX_ROLES) next.add(r); return next; });
   const toggleGenre = (g: string) => setGenres((prev) => { const next = new Set(prev); if (next.has(g)) next.delete(g); else if (next.size < MAX_GENRES) next.add(g); return next; });
@@ -338,11 +382,18 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
         .map((c) => ({ title: c.title.trim(), role: c.role?.trim() || undefined, year: c.year?.trim() || undefined, link: c.link ? normalizeUrl(c.link) : undefined }))
         .filter((c) => c.title);
       const cleanGallery = gallery.map((g) => ({ url: g.url, caption: g.caption?.trim() || undefined })).filter((g) => g.url);
+      const cleanFeatured = featured
+        .map((f) => ({ url: normalizeUrl(f.url), title: f.title?.trim() || undefined }))
+        .filter((f) => f.url);
+      const cleanServices = services
+        .map((s) => ({ title: s.title.trim(), price: s.price?.trim() || undefined, unit: s.unit?.trim() || undefined, description: s.description?.trim() || undefined }))
+        .filter((s) => s.title);
       const updated = await updateProfile({
         display_name: name, bio: bio.trim(), location: location.trim(), pronouns: pronouns.trim(),
         roles: Array.from(roles), genres: Array.from(genres), avatar_url: avatarUrl || "", cover_url: coverUrl || "",
         social_links: cleanSocial, gallery: cleanGallery, credits: cleanCredits,
         availability: (availability || null) as Profile["availability"],
+        featured: cleanFeatured, skills, influences, languages, services: cleanServices,
       });
       emitProfileUpdated(updated);
       onSaved(updated);
@@ -431,6 +482,20 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
           </div>
 
           <div className="field">
+            <span className="field-label">Skills &amp; gear</span>
+            <TagInput tags={skills} onChange={setSkills} placeholder="Pro Tools, vocal tuning, SSL console…" max={20} />
+            <span className="field-hint">What you&apos;re great at and what you work on. Press Enter to add.</span>
+          </div>
+          <div className="field">
+            <span className="field-label">Sounds like / influences</span>
+            <TagInput tags={influences} onChange={setInfluences} placeholder="SZA, Fred again.., Dilla…" max={12} />
+          </div>
+          <div className="field">
+            <span className="field-label">Languages</span>
+            <TagInput tags={languages} onChange={setLanguages} placeholder="English, Spanish…" max={10} />
+          </div>
+
+          <div className="field">
             <span className="field-label">Availability</span>
             <div className="chip-row">
               <span className={`chip ${availability === "" ? "selected" : ""}`} onClick={() => setAvailability("")}>Not set</span>
@@ -452,6 +517,25 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
                 </div>
               ))}
             </div>
+          </div>
+
+          <div className="field">
+            <span className="field-label">Featured work ({featured.length}/6)</span>
+            <span className="field-hint" style={{ marginBottom: 4 }}>Paste a Spotify, SoundCloud, or YouTube link — it plays inline on your profile.</span>
+            <div className="credits-edit">
+              {featured.map((f, i) => {
+                const kind = f.url.trim() ? embedFor(f.url).kind : null;
+                return (
+                  <div key={i} className="featured-edit-row">
+                    <input className="input sm" type="url" placeholder="https://open.spotify.com/track/…" value={f.url} onChange={(e) => setFeaturedField(i, "url", e.target.value)} />
+                    <input className="input sm" placeholder="Label (optional)" value={f.title || ""} maxLength={80} onChange={(e) => setFeaturedField(i, "title", e.target.value)} />
+                    <span className={"featured-kind " + (kind && kind !== "link" ? "ok" : "bad")}>{!f.url.trim() ? "" : kind === "link" ? "not embeddable" : kind}</span>
+                    <button type="button" className="gallery-remove credit-remove" aria-label="Remove" onClick={() => removeFeatured(i)}>×</button>
+                  </div>
+                );
+              })}
+            </div>
+            {featured.length < 6 && <div style={{ marginTop: featured.length ? 8 : 0 }}><button type="button" className="btn sm" onClick={addFeatured}>+ Add featured track</button></div>}
           </div>
 
           <div className="field">
@@ -491,6 +575,23 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
             {credits.length < 30 && <div style={{ marginTop: gallery.length ? 8 : 0 }}><button type="button" className="btn sm" onClick={addCredit}>+ Add a credit</button></div>}
           </div>
 
+          <div className="field">
+            <span className="field-label">Services &amp; rates ({services.length}/12)</span>
+            <span className="field-hint" style={{ marginBottom: 4 }}>What you offer and your rates. Shown on your profile — paid booking comes with Stripe.</span>
+            <div className="credits-edit">
+              {services.map((s, i) => (
+                <div key={i} className="service-edit-row">
+                  <input className="input sm service-title" placeholder="e.g. Mixing" value={s.title} maxLength={80} onChange={(e) => setServiceField(i, "title", e.target.value)} />
+                  <input className="input sm service-price" placeholder="$200" value={s.price || ""} maxLength={20} onChange={(e) => setServiceField(i, "price", e.target.value)} />
+                  <input className="input sm service-unit" placeholder="per track" value={s.unit || ""} maxLength={24} onChange={(e) => setServiceField(i, "unit", e.target.value)} />
+                  <input className="input sm service-desc" placeholder="Short description (optional)" value={s.description || ""} maxLength={160} onChange={(e) => setServiceField(i, "description", e.target.value)} />
+                  <button type="button" className="gallery-remove credit-remove" aria-label="Remove service" onClick={() => removeService(i)}>×</button>
+                </div>
+              ))}
+            </div>
+            {services.length < 12 && <div style={{ marginTop: services.length ? 8 : 0 }}><button type="button" className="btn sm" onClick={addService}>+ Add a service</button></div>}
+          </div>
+
           {err && <div style={{ color: "#c43d3f", fontSize: 12, fontFamily: "var(--font-display)" }}>{err}</div>}
         </div>
         <div className="modal-footer">
@@ -506,8 +607,10 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
   const [editing, setEditing] = useState(false);
   const [connected, setConnected] = useState<ConnectedAccount[] | null>(null);
   const [lightbox, setLightbox] = useState<number | null>(null);
+  const [stats, setStats] = useState<ProfileStats | null>(null);
   useEffect(() => {
     listConnectedAccounts(profile.id).then(setConnected).catch(() => setConnected([]));
+    getProfileStats(profile.id).then(setStats).catch(() => setStats(null));
   }, [profile.id]);
 
   const social = profile.social_links || {};
@@ -517,6 +620,11 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
   const hasShowcase = socialItems.length > 0 || extraConnected.length > 0;
   const gallery = profile.gallery || [];
   const credits = profile.credits || [];
+  const featured = (profile.featured || []).filter((f) => f.url);
+  const services = profile.services || [];
+  const skills = profile.skills || [];
+  const influences = profile.influences || [];
+  const languages = profile.languages || [];
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column" }}>
@@ -574,10 +682,39 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
           {(profile.roles || []).map((r) => <span key={r} className="pill accent">{r}</span>)}
           {(profile.genres || []).map((g) => <span key={g} className="pill">{g}</span>)}
         </div>
+        {stats && (stats.gigs_posted > 0 || stats.collaborations > 0) && (
+          <div className="profile-stats">
+            <div className="stat"><span className="stat-n">{stats.gigs_posted}</span><span className="stat-l">{stats.gigs_posted === 1 ? "gig posted" : "gigs posted"}</span></div>
+            <div className="stat"><span className="stat-n">{stats.collaborations}</span><span className="stat-l">{stats.collaborations === 1 ? "collaboration" : "collaborations"}</span></div>
+          </div>
+        )}
       </div>
 
       <div className="profile-grid">
         <div className="col" style={{ gap: 28, minWidth: 0 }}>
+          {featured.length > 0 && (
+            <section>
+              <div className="t-eyebrow" style={{ marginBottom: 10 }}>Featured work</div>
+              <div className="featured-list">
+                {featured.map((f, i) => {
+                  const e = embedFor(f.url);
+                  return (
+                    <div key={i} className="featured-item">
+                      {f.title && <div className="featured-title">{f.title}</div>}
+                      {e.kind === "youtube" ? (
+                        <div className="embed-16x9"><iframe src={e.src} title={f.title || "Featured video"} loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen /></div>
+                      ) : e.kind === "link" ? (
+                        <a href={e.url} target="_blank" rel="noopener noreferrer" className="social-link">Open link ↗</a>
+                      ) : (
+                        <iframe className="embed-player" style={{ height: e.height }} src={e.src} title={f.title || "Featured track"} loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
           <section>
             <div className="t-eyebrow" style={{ marginBottom: 10 }}>Bio</div>
             <p style={{ fontSize: 14, lineHeight: 1.65, color: "var(--ink-2)", maxWidth: 680, whiteSpace: "pre-wrap" }}>
@@ -646,6 +783,33 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
             </section>
           )}
 
+          {services.length > 0 && (
+            <section>
+              <div className="t-eyebrow" style={{ marginBottom: 10 }}>Services &amp; rates</div>
+              <div className="services-grid">
+                {services.map((s, i) => (
+                  <div key={i} className="service-card">
+                    <div className="row between" style={{ alignItems: "baseline", gap: 8 }}>
+                      <span className="service-name">{s.title}</span>
+                      {s.price && <span className="service-rate">{s.price}{s.unit ? <span className="service-unit"> / {s.unit}</span> : null}</span>}
+                    </div>
+                    {s.description && <p className="service-desc-text">{s.description}</p>}
+                  </div>
+                ))}
+              </div>
+              {!isOwner && (
+                <button className="btn sm" style={{ marginTop: 10 }} onClick={async () => {
+                  try {
+                    const me = await getUser();
+                    if (!me) { window.location.href = "/auth?next=" + encodeURIComponent(window.location.pathname); return; }
+                    const cid = await getOrCreateConversation(profile.id);
+                    window.location.href = R.inboxConvo(cid);
+                  } catch (e) { alert((e as Error)?.message || "Couldn't start a conversation."); }
+                }}>Message to book</button>
+              )}
+            </section>
+          )}
+
           <section>
             <div className="row between" style={{ marginBottom: 12 }}>
               <div className="t-eyebrow">Recent posts</div>
@@ -686,6 +850,28 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
               )}
             </div>
           ) : null}
+          {(skills.length > 0 || influences.length > 0 || languages.length > 0) && (
+            <div className="card" style={{ padding: 18, display: "flex", flexDirection: "column", gap: 14 }}>
+              {skills.length > 0 && (
+                <div>
+                  <div className="t-eyebrow" style={{ marginBottom: 8 }}>Skills &amp; gear</div>
+                  <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>{skills.map((s) => <span key={s} className="pill">{s}</span>)}</div>
+                </div>
+              )}
+              {influences.length > 0 && (
+                <div>
+                  <div className="t-eyebrow" style={{ marginBottom: 8 }}>Sounds like</div>
+                  <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>{influences.map((s) => <span key={s} className="pill">{s}</span>)}</div>
+                </div>
+              )}
+              {languages.length > 0 && (
+                <div>
+                  <div className="t-eyebrow" style={{ marginBottom: 8 }}>Languages</div>
+                  <span className="t-meta">{languages.join(" · ")}</span>
+                </div>
+              )}
+            </div>
+          )}
           <div style={{ padding: "14px 0", borderTop: "1px solid var(--line-soft)" }}>
             <div className="t-eyebrow" style={{ marginBottom: 8 }}>Share profile</div>
             <div style={{ padding: "8px 12px", background: "var(--surface-2)", borderRadius: 8, border: "1px solid var(--line)", fontSize: 11, color: "var(--ink-3)", fontFamily: "var(--font-body)" }}>seshn.fm/@{profile.username}</div>

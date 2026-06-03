@@ -25,6 +25,26 @@ export interface Credit {
   link?: string;
 }
 
+/** A featured inline player (Spotify/SoundCloud/YouTube). */
+export interface FeaturedItem {
+  url: string;
+  title?: string;
+}
+
+/** A service the member offers (informational; "book" wires to Stripe later). */
+export interface Service {
+  title: string;
+  price?: string;
+  unit?: string;
+  description?: string;
+}
+
+/** public_profile_stats() RPC result. */
+export interface ProfileStats {
+  gigs_posted: number;
+  collaborations: number;
+}
+
 export type Availability = "open" | "selective" | "booked";
 
 export interface Profile {
@@ -45,6 +65,12 @@ export interface Profile {
   gallery?: GalleryItem[];
   credits?: Credit[];
   availability?: Availability | null;
+  // 0022 additions (showcase, round 2).
+  featured?: FeaturedItem[];
+  skills?: string[];
+  influences?: string[];
+  languages?: string[];
+  services?: Service[];
   // 0012 additions (escrow / trust & safety); optional on read.
   stripe_account_id?: string | null;
   stripe_account_status?: "pending" | "verified" | "restricted" | null;

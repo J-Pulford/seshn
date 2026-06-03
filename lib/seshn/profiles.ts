@@ -1,13 +1,27 @@
 // Profile reads/writes + image uploads. Typed port of the profile section of
 // the legacy public/js/seshn-supabase.js. Runs in the browser (client pages).
 import { getBrowserClient } from "./client";
-import type { GetProfileOpts, Profile } from "./types";
+import type { GetProfileOpts, Profile, ProfileStats } from "./types";
+
+// Public profile stats (gigs posted + collaborations), via the SECURITY DEFINER
+// RPC so it works when viewing other people's profiles (contracts are RLS-
+// restricted to participants).
+export async function getProfileStats(userId: string): Promise<ProfileStats> {
+  const zero: ProfileStats = { gigs_posted: 0, collaborations: 0 };
+  if (!userId) return zero;
+  const res = await getBrowserClient().rpc("public_profile_stats", { p_uid: userId });
+  if (res.error) {
+    console.error("[seshn] getProfileStats error", res.error);
+    return zero;
+  }
+  return { ...zero, ...(res.data as Partial<ProfileStats>) };
+}
 
 // Public-safe profile columns. Must match the SELECT grant in
 // 0018_security_hardening.sql — `select *` would hit a revoked column
 // (stripe_*, restrictions, deletion_requested_at are client-inaccessible).
 const PROFILE_COLUMNS =
-  "id, username, display_name, bio, location, pronouns, roles, genres, is_pro, avatar_url, cover_url, notification_prefs, social_links, gallery, credits, availability, created_at, updated_at";
+  "id, username, display_name, bio, location, pronouns, roles, genres, is_pro, avatar_url, cover_url, notification_prefs, social_links, gallery, credits, availability, featured, skills, influences, languages, services, created_at, updated_at";
 
 export async function getUser() {
   const sb = getBrowserClient();
