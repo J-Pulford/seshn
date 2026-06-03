@@ -5,8 +5,7 @@ import { getUser, getProfile, upsertProfile } from "@/lib/seshn/profiles";
 import { PROFILE_ROLES } from "@/lib/seshn/constants";
 import "./onboarding.css";
 
-// Legacy until ported (profile page). Flip to /profile/[username] in Phase 3.
-const profileHref = (username: string) => `/app/profile.html?u=${encodeURIComponent(username)}`;
+const profileHref = (username: string) => `/profile/${encodeURIComponent(username)}`;
 
 export default function OnboardingPage() {
   const [displayName, setDisplayName] = useState("");

@@ -118,7 +118,7 @@ export default function ApplicationsPage() {
         <div className="app-page" style={{ textAlign: "center", paddingTop: 60 }}>
           <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 28 }}>Sign in to see your applications</h1>
           <p style={{ color: "var(--ink-3)", marginTop: 8, marginBottom: 18 }}>Track every gig you&apos;ve pitched yourself for.</p>
-          <a href={"/auth?next=" + encodeURIComponent("/app/applications.html")} className="btn primary lg">Sign in</a>
+          <a href={"/auth?next=" + encodeURIComponent("/applications")} className="btn primary lg">Sign in</a>
         </div>
       </div>
     );

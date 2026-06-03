@@ -143,14 +143,19 @@ applications, gig, profile, post, settings). All inter-page links on the new sta
 app runs on Next.js, coexisting with the legacy files.
 
 ### Phase 5 — Landing page (LAST — founder reworking design) + cleanup
-- [ ] Port the (redesigned) landing → `app/page.tsx` SSR + `metadata` for SEO
-- [ ] Waitlist form → `app/api/waitlist/route.ts`
-- [ ] Retire legacy auth.html: update Supabase redirect URLs to `/auth`, then
-      remove the last legacy `.html` + the three `public/js/*.js` files
-- [ ] Strip Babel/CDN script tags everywhere (now compiled at build time)
-- [ ] Confirm all internal links use Next routes; add redirects for any old
-      `/app/*.html` URLs that may be linked externally (email links, etc.)
-- [ ] Lighthouse/SEO check on the landing page
+- [x] Port the (redesigned) landing → `app/(marketing)/page.tsx` SSR + the five
+      marketing sub-pages (features, mission, roadmap, suggestions, stories)
+- [ ] Waitlist form → `app/api/waitlist/route.ts` (still TODO)
+- [x] Retire legacy auth.html: all internal links now target `/auth`; the
+      legacy `public/app/*.html` + three `public/js/*.js` + old `public/index.html`
+      are removed. **ACTION REQUIRED (founder, Supabase dashboard):** confirm the
+      Google OAuth + email redirect URLs allow `/auth` (the `/**` wildcard already
+      covers it) so email/OAuth links land on the new route.
+- [x] Strip Babel/CDN script tags everywhere (legacy files deleted; the only
+      inline script left is the theme-init literal in `app/layout.tsx`)
+- [x] Confirm all internal links use Next routes; redirects for old `/app/*.html`
+      URLs (incl. `?id=`/`?u=` → dynamic segments) added in `next.config.mjs`
+- [ ] Lighthouse/SEO check on the landing page (still TODO)
 
 ## Risks & how we handle them
 - **Auth session continuity**: localStorage auth is preserved in the client app, so
@@ -166,3 +171,10 @@ app runs on Next.js, coexisting with the legacy files.
 
 ## Progress log
 - 2026-05-29: Plan written; decisions locked. Starting Phase 0.
+- 2026-06-03: Phase 5 cleanup — Next.js is now the sole app. Removed all legacy
+  `public/app/*.html`, `public/js/*.js`, and the old `public/index.html`; added
+  `/app/*.html` → route redirects (with `?id=`/`?u=` capture); flipped the last
+  three legacy links (onboarding profile, applications sign-in, Google OAuth
+  redirect) to Next routes. Security: closed an open-redirect in the `?next=`
+  guard (rejected protocol-relative `//host` targets). Remaining: waitlist API
+  route, Lighthouse pass, and the Supabase dashboard redirect-URL confirmation.

@@ -137,7 +137,10 @@ export async function routeAfterAuth() {
   } catch {
     /* ignore */
   }
-  if (next && /^\/(app\/)?[A-Za-z0-9_./?=&%-]*$/.test(next)) {
+  // Only follow same-origin relative paths. The negative lookahead rejects
+  // protocol-relative ("//evil.com") and backslash ("/\\evil.com") targets,
+  // which the browser would otherwise treat as an off-site (open) redirect.
+  if (next && /^\/(?![/\\])[A-Za-z0-9_./?=&%-]*$/.test(next)) {
     window.location.href = next;
     return;
   }
