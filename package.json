@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Seshn — collaboration marketplace for musicians (Next.js migration in progress; see docs/NEXTJS-MIGRATION.md).",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
