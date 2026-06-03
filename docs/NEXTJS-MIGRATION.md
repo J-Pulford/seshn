@@ -145,7 +145,10 @@ app runs on Next.js, coexisting with the legacy files.
 ### Phase 5 — Landing page (LAST — founder reworking design) + cleanup
 - [x] Port the (redesigned) landing → `app/(marketing)/page.tsx` SSR + the five
       marketing sub-pages (features, mission, roadmap, suggestions, stories)
-- [ ] Waitlist form → `app/api/waitlist/route.ts` (still TODO)
+- [x] Waitlist capture — `#waitlist` section on the landing
+      (`components/landing/WaitlistSection.tsx`) writing to an insert-only
+      `waitlist` table (migration `0019`) via `lib/seshn/waitlist.ts`. Follow-ups:
+      captcha/rate-limit, confirmation email, signup analytics.
 - [x] Retire legacy auth.html: all internal links now target `/auth`; the
       legacy `public/app/*.html` + three `public/js/*.js` + old `public/index.html`
       are removed. **ACTION REQUIRED (founder, Supabase dashboard):** confirm the

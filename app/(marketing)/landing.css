@@ -74,6 +74,29 @@
 .daw-site .final { text-align: center; padding: 110px 0; background: linear-gradient(180deg, var(--bg-2), var(--bg)); }
 .daw-site .final h2 { margin: 0 auto 16px; max-width: none; }
 
+/* Waitlist */
+.daw-site .wl-card { background: var(--panel); border: 1px solid var(--line-2); border-radius: 16px; padding: 26px; margin-top: 30px; position: relative; max-width: 760px; }
+.daw-site .wl-card::before { content: ""; position: absolute; top: 0; left: 26px; right: 26px; height: 2px; background: var(--accent); border-radius: 2px; }
+.daw-site .wl-form { display: flex; flex-direction: column; gap: 14px; }
+.daw-site .wl-row { display: flex; gap: 12px; align-items: flex-end; }
+.daw-site .wl-field { display: flex; flex-direction: column; gap: 6px; flex: 0 0 auto; }
+.daw-site .wl-field.wl-grow { flex: 1 1 auto; }
+.daw-site .wl-lab { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--ink-3); }
+.daw-site .wl-field input, .daw-site .wl-field select {
+  font-family: "Inter Tight", sans-serif; font-size: 14px; color: var(--ink);
+  background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 8px;
+  padding: 11px 12px; outline: none; transition: border-color .12s;
+}
+.daw-site .wl-field input:focus, .daw-site .wl-field select:focus { border-color: var(--accent); }
+.daw-site .wl-field input::placeholder { color: var(--ink-3); }
+.daw-site .wl-submit { flex: 0 0 auto; white-space: nowrap; }
+.daw-site .wl-err { font-family: var(--mono); font-size: 12px; color: var(--danger); }
+.daw-site .wl-fine { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; color: var(--ink-3); }
+.daw-site .wl-done { text-align: center; padding: 14px 8px; }
+.daw-site .wl-done-mark { width: 44px; height: 44px; margin: 0 auto 14px; border-radius: 50%; background: rgba(44,203,115,0.12); border: 1px solid var(--accent); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.daw-site .wl-done h3 { font-size: 20px; margin: 0 0 8px; }
+.daw-site .wl-done p { color: var(--ink-2); font-size: 14px; line-height: 1.55; max-width: 440px; margin: 0 auto; }
+
 @media (max-width: 980px) {
   .daw-site .hero-grid { grid-template-columns: 1fr; gap: 36px; }
   .daw-site .stat-row, .daw-site .how-grid, .daw-site .feat-grid, .daw-site .tg { grid-template-columns: 1fr 1fr; }
@@ -82,4 +105,6 @@
   .daw-site .stat-row, .daw-site .how-grid, .daw-site .feat-grid, .daw-site .tg, .daw-site .price-grid { grid-template-columns: 1fr; }
   .daw-site .dp-row { grid-template-columns: 1fr; gap: 12px; }
   .daw-site .hero .ctas .btn { flex: 1; justify-content: center; }
+  .daw-site .wl-row { flex-direction: column; align-items: stretch; }
+  .daw-site .wl-submit { width: 100%; justify-content: center; }
 }
