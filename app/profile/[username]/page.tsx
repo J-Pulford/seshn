@@ -3,12 +3,13 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useParams } from "next/navigation";
 import Nav from "@/components/Nav";
-import { getProfile, getUser, updateProfile, uploadAvatar, uploadCover, emitProfileUpdated } from "@/lib/seshn/profiles";
+import { getProfile, getUser, updateProfile, uploadAvatar, uploadCover, uploadGalleryImage, normalizeUrl, emitProfileUpdated } from "@/lib/seshn/profiles";
 import { listGigs } from "@/lib/seshn/gigs";
 import { getOrCreateConversation } from "@/lib/seshn/messaging";
 import { blockUser, isUserBlocked, reportUser, unblockUser } from "@/lib/seshn/trust-safety";
 import { listConnectedAccounts } from "@/lib/seshn/connected-accounts";
-import type { ConnectedAccount, Gig, Profile } from "@/lib/seshn/types";
+import { SOCIAL_PLATFORMS, AVAILABILITY_OPTIONS } from "@/lib/seshn/constants";
+import type { ConnectedAccount, Credit, GalleryItem, Gig, Profile, SocialLinks } from "@/lib/seshn/types";
 import "./profile.css";
 
 const R = {
@@ -58,6 +59,11 @@ function compLabel(g: Gig) {
   if (g.comp === "trade") return "Trade";
   return "Unpaid";
 }
+function memberSince(iso?: string) {
+  if (!iso) return "";
+  return "Member since " + new Date(iso).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+}
+const availabilityMeta = (id?: string | null) => AVAILABILITY_OPTIONS.find((a) => a.id === id) || null;
 
 type IconKind = "pin" | "more" | "flag" | "ban";
 const Icon = ({ kind, size = 16 }: { kind: IconKind; size?: number }) => {
@@ -232,12 +238,45 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
   const [coverUrl, setCoverUrl] = useState(profile.cover_url || "");
   const [previewSrc, setPreviewSrc] = useState("");
   const [coverPreviewSrc, setCoverPreviewSrc] = useState("");
+  const [social, setSocial] = useState<SocialLinks>({ ...(profile.social_links || {}) });
+  const [gallery, setGallery] = useState<GalleryItem[]>(profile.gallery ? [...profile.gallery] : []);
+  const [credits, setCredits] = useState<Credit[]>(profile.credits ? [...profile.credits] : []);
+  const [availability, setAvailability] = useState<string>(profile.availability || "");
+  const [galleryBusy, setGalleryBusy] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadBusy, setUploadBusy] = useState(false);
   const [coverBusy, setCoverBusy] = useState(false);
   const [err, setErr] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  const setLink = (key: string, val: string) => setSocial((prev) => ({ ...prev, [key]: val }));
+  async function onPickGallery(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
+    if (galleryInputRef.current) galleryInputRef.current.value = "";
+    if (!files.length) return;
+    const room = 12 - gallery.length;
+    if (room <= 0) { setErr("Gallery is full (12 photos max)."); return; }
+    setErr("");
+    setGalleryBusy(true);
+    try {
+      for (const file of files.slice(0, room)) {
+        const url = await uploadGalleryImage(file);
+        if (url) setGallery((prev) => (prev.length >= 12 ? prev : prev.concat([{ url }])));
+      }
+    } catch (e2) {
+      setErr((e2 as Error)?.message || "Couldn't upload a photo.");
+    } finally {
+      setGalleryBusy(false);
+    }
+  }
+  const removeGallery = (i: number) => setGallery((prev) => prev.filter((_, idx) => idx !== i));
+  const setCaption = (i: number, caption: string) => setGallery((prev) => prev.map((g, idx) => (idx === i ? { ...g, caption } : g)));
+  const addCredit = () => setCredits((prev) => (prev.length >= 30 ? prev : prev.concat([{ title: "" }])));
+  const removeCredit = (i: number) => setCredits((prev) => prev.filter((_, idx) => idx !== i));
+  const setCreditField = (i: number, field: keyof Credit, val: string) =>
+    setCredits((prev) => prev.map((c, idx) => (idx === i ? { ...c, [field]: val } : c)));
 
   const toggleRole = (r: string) => setRoles((prev) => { const next = new Set(prev); if (next.has(r)) next.delete(r); else if (next.size < MAX_ROLES) next.add(r); return next; });
   const toggleGenre = (g: string) => setGenres((prev) => { const next = new Set(prev); if (next.has(g)) next.delete(g); else if (next.size < MAX_GENRES) next.add(g); return next; });
@@ -289,9 +328,21 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
     setSaving(true);
     setErr("");
     try {
+      // Clean the showcase + credits: normalise URLs, drop blanks.
+      const cleanSocial: SocialLinks = {};
+      for (const p of SOCIAL_PLATFORMS) {
+        const v = normalizeUrl(social[p.key] || "");
+        if (v) cleanSocial[p.key] = v;
+      }
+      const cleanCredits = credits
+        .map((c) => ({ title: c.title.trim(), role: c.role?.trim() || undefined, year: c.year?.trim() || undefined, link: c.link ? normalizeUrl(c.link) : undefined }))
+        .filter((c) => c.title);
+      const cleanGallery = gallery.map((g) => ({ url: g.url, caption: g.caption?.trim() || undefined })).filter((g) => g.url);
       const updated = await updateProfile({
         display_name: name, bio: bio.trim(), location: location.trim(), pronouns: pronouns.trim(),
         roles: Array.from(roles), genres: Array.from(genres), avatar_url: avatarUrl || "", cover_url: coverUrl || "",
+        social_links: cleanSocial, gallery: cleanGallery, credits: cleanCredits,
+        availability: (availability || null) as Profile["availability"],
       });
       emitProfileUpdated(updated);
       onSaved(updated);
@@ -378,6 +429,68 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
               })}
             </div>
           </div>
+
+          <div className="field">
+            <span className="field-label">Availability</span>
+            <div className="chip-row">
+              <span className={`chip ${availability === "" ? "selected" : ""}`} onClick={() => setAvailability("")}>Not set</span>
+              {AVAILABILITY_OPTIONS.map((a) => (
+                <span key={a.id} className={`chip ${availability === a.id ? "selected" : ""}`} onClick={() => setAvailability(a.id)}>{availability === a.id && "✓ "}{a.label}</span>
+              ))}
+            </div>
+            <span className="field-hint">Shown as a badge on your profile so collaborators know if you&apos;re taking work.</span>
+          </div>
+
+          <div className="field">
+            <span className="field-label">Showcase links</span>
+            <span className="field-hint" style={{ marginBottom: 4 }}>Paste links to your work — only the ones you fill in show on your profile.</span>
+            <div className="link-grid">
+              {SOCIAL_PLATFORMS.map((p) => (
+                <div key={p.key} className="link-field">
+                  <span className="link-label">{p.label}</span>
+                  <input className="input" type="url" inputMode="url" placeholder={p.placeholder} value={social[p.key] || ""} onChange={(e) => setLink(p.key, e.target.value)} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="field">
+            <span className="field-label">Photo gallery ({gallery.length}/12)</span>
+            <span className="field-hint" style={{ marginBottom: 4 }}>Studio shots, live photos, gear, sessions — show people who you are.</span>
+            {gallery.length > 0 && (
+              <div className="gallery-edit-grid">
+                {gallery.map((g, i) => (
+                  <div key={g.url} className="gallery-edit-item">
+                    <div className="gallery-edit-thumb"><img src={g.url} alt="" /><button type="button" className="gallery-remove" aria-label="Remove photo" onClick={() => removeGallery(i)}>×</button></div>
+                    <input className="input sm" placeholder="Caption (optional)" value={g.caption || ""} maxLength={120} onChange={(e) => setCaption(i, e.target.value)} />
+                  </div>
+                ))}
+              </div>
+            )}
+            <input ref={galleryInputRef} type="file" accept="image/*" multiple onChange={onPickGallery} style={{ display: "none" }} />
+            <div>
+              <button type="button" className="btn sm" disabled={galleryBusy || gallery.length >= 12} onClick={() => galleryInputRef.current?.click()}>{galleryBusy ? "Uploading…" : "+ Add photos"}</button>
+            </div>
+            <span className="field-hint">JPG/PNG/WebP, up to 8 MB each.</span>
+          </div>
+
+          <div className="field">
+            <span className="field-label">Credits &amp; discography</span>
+            <span className="field-hint" style={{ marginBottom: 4 }}>Notable releases or projects you worked on. This is what builds trust fast.</span>
+            <div className="credits-edit">
+              {credits.map((c, i) => (
+                <div key={i} className="credit-edit-row">
+                  <input className="input sm credit-title" placeholder="Track / project" value={c.title} maxLength={120} onChange={(e) => setCreditField(i, "title", e.target.value)} />
+                  <input className="input sm credit-role" placeholder="Your role" value={c.role || ""} maxLength={60} onChange={(e) => setCreditField(i, "role", e.target.value)} />
+                  <input className="input sm credit-year" placeholder="Year" value={c.year || ""} maxLength={9} onChange={(e) => setCreditField(i, "year", e.target.value)} />
+                  <input className="input sm credit-link" placeholder="Link (optional)" value={c.link || ""} onChange={(e) => setCreditField(i, "link", e.target.value)} />
+                  <button type="button" className="gallery-remove credit-remove" aria-label="Remove credit" onClick={() => removeCredit(i)}>×</button>
+                </div>
+              ))}
+            </div>
+            {credits.length < 30 && <div style={{ marginTop: gallery.length ? 8 : 0 }}><button type="button" className="btn sm" onClick={addCredit}>+ Add a credit</button></div>}
+          </div>
+
           {err && <div style={{ color: "#c43d3f", fontSize: 12, fontFamily: "var(--font-display)" }}>{err}</div>}
         </div>
         <div className="modal-footer">
@@ -392,9 +505,18 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
 function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Profile; isOwner: boolean; gigs: Gig[] | null; onProfileUpdate: (p: Profile) => void }) {
   const [editing, setEditing] = useState(false);
   const [connected, setConnected] = useState<ConnectedAccount[] | null>(null);
+  const [lightbox, setLightbox] = useState<number | null>(null);
   useEffect(() => {
     listConnectedAccounts(profile.id).then(setConnected).catch(() => setConnected([]));
   }, [profile.id]);
+
+  const social = profile.social_links || {};
+  const socialItems = SOCIAL_PLATFORMS.filter((p) => social[p.key]).map((p) => ({ key: p.key as string, label: p.label, url: social[p.key] as string }));
+  // OAuth-connected accounts (e.g. Spotify) whose platform isn't already a manual link.
+  const extraConnected = (connected || []).filter((acc) => !socialItems.some((s) => s.key === acc.provider));
+  const hasShowcase = socialItems.length > 0 || extraConnected.length > 0;
+  const gallery = profile.gallery || [];
+  const credits = profile.credits || [];
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column" }}>
@@ -438,10 +560,15 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
 
       <div className="profile-name-block" style={{ background: "var(--surface)", borderBottom: "1px solid var(--line)" }}>
         <div className="row" style={{ gap: 10, marginBottom: 5, flexWrap: "wrap" }}><h1 className="t-h1" style={{ fontSize: 30 }}>{profile.display_name}</h1></div>
-        <div className="row" style={{ gap: 14, marginBottom: 10, flexWrap: "wrap" }}>
+        <div className="row" style={{ gap: 14, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
+          {(() => { const a = availabilityMeta(profile.availability); return a ? (
+            <span className="t-meta" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "3px 10px", borderRadius: 999, border: "1px solid var(--line)", background: "var(--surface-2)", fontFamily: "var(--font-display)", fontWeight: 600 }}>
+              <span style={{ width: 7, height: 7, background: a.dot, borderRadius: "50%", display: "inline-block" }} />{a.label}
+            </span>
+          ) : null; })()}
           {profile.location && <span className="t-meta" style={{ display: "flex", alignItems: "center", gap: 5 }}><Icon kind="pin" size={12} /> {profile.location}</span>}
           {profile.location && <span className="dot" />}
-          <span className="t-meta"><span style={{ width: 7, height: 7, background: "var(--accent)", borderRadius: "50%", display: "inline-block", marginRight: 5 }} />New on Seshn</span>
+          <span className="t-meta">{memberSince(profile.created_at)}</span>
         </div>
         <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
           {(profile.roles || []).map((r) => <span key={r} className="pill accent">{r}</span>)}
@@ -458,22 +585,63 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
             </p>
           </section>
 
-          {connected && connected.length > 0 && (
+          {hasShowcase && (
             <section>
-              <div className="t-eyebrow" style={{ marginBottom: 10 }}>Elsewhere</div>
+              <div className="t-eyebrow" style={{ marginBottom: 10 }}>Find me on</div>
               <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
-                {connected.map((acc) => {
+                {socialItems.map((s) => (
+                  <a key={s.key} href={s.url} target="_blank" rel="noopener noreferrer" className="social-link">
+                    <span>{s.label}</span>
+                    <span aria-hidden="true" style={{ color: "var(--ink-4)" }}>↗</span>
+                  </a>
+                ))}
+                {extraConnected.map((acc) => {
                   const followers = acc.stats?.followers != null ? acc.stats.followers.toLocaleString() + " followers" : null;
                   const inner = (
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 999, background: "var(--surface)", border: "1px solid var(--line)", fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 12, color: "var(--ink)" }}>
-                      <span style={{ textTransform: "capitalize", color: "var(--ink-2)" }}>{acc.provider}</span>
-                      <span style={{ color: "var(--ink-4)" }}>·</span>
-                      <span>{acc.display_name || acc.provider}</span>
+                    <span className="social-link" style={{ background: "var(--surface)" }}>
+                      <span style={{ textTransform: "capitalize" }}>{acc.provider}</span>
+                      {acc.display_name && <><span style={{ color: "var(--ink-4)" }}>·</span><span style={{ color: "var(--ink-2)" }}>{acc.display_name}</span></>}
                       {followers && <><span style={{ color: "var(--ink-4)" }}>·</span><span style={{ color: "var(--accent-d)" }}>{followers}</span></>}
                     </span>
                   );
                   return acc.profile_url ? <a key={acc.provider} href={acc.profile_url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>{inner}</a> : <span key={acc.provider}>{inner}</span>;
                 })}
+              </div>
+            </section>
+          )}
+
+          {credits.length > 0 && (
+            <section>
+              <div className="t-eyebrow" style={{ marginBottom: 10 }}>Credits &amp; discography</div>
+              <div className="credits-list">
+                {credits.map((c, i) => {
+                  const meta = [c.role, c.year].filter(Boolean).join(" · ");
+                  const body = (
+                    <>
+                      <span className="credit-dot" aria-hidden="true" />
+                      <span className="credit-name">{c.title}</span>
+                      {meta && <span className="credit-meta">{meta}</span>}
+                      {c.link && <span className="credit-go" aria-hidden="true">↗</span>}
+                    </>
+                  );
+                  return c.link
+                    ? <a key={i} href={c.link} target="_blank" rel="noopener noreferrer" className="credit-row is-link">{body}</a>
+                    : <div key={i} className="credit-row">{body}</div>;
+                })}
+              </div>
+            </section>
+          )}
+
+          {gallery.length > 0 && (
+            <section>
+              <div className="t-eyebrow" style={{ marginBottom: 10 }}>Gallery</div>
+              <div className="gallery-grid">
+                {gallery.map((g, i) => (
+                  <button type="button" key={g.url} className="gallery-cell" onClick={() => setLightbox(i)} title={g.caption || "View photo"}>
+                    <img src={g.url} alt={g.caption || ""} loading="lazy" />
+                    {g.caption && <span className="gallery-cap">{g.caption}</span>}
+                  </button>
+                ))}
               </div>
             </section>
           )}
@@ -526,6 +694,21 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
       </div>
 
       {editing && <EditProfileModal profile={profile} onClose={() => setEditing(false)} onSaved={(updated) => { setEditing(false); onProfileUpdate(updated); }} />}
+      {lightbox !== null && gallery[lightbox] && (
+        <div className="modal-backdrop" onClick={() => setLightbox(null)} style={{ alignItems: "center" }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ maxWidth: "min(92vw, 900px)", maxHeight: "90vh", display: "flex", flexDirection: "column", gap: 10 }}>
+            <img src={gallery[lightbox].url} alt={gallery[lightbox].caption || ""} style={{ maxWidth: "100%", maxHeight: "78vh", objectFit: "contain", borderRadius: 10, display: "block" }} />
+            <div className="row between" style={{ alignItems: "center" }}>
+              <span className="t-meta" style={{ color: "#fff" }}>{gallery[lightbox].caption || ""}</span>
+              <div className="row" style={{ gap: 8 }}>
+                <button className="btn sm" onClick={() => setLightbox((i) => (i! - 1 + gallery.length) % gallery.length)} disabled={gallery.length < 2}>← Prev</button>
+                <button className="btn sm" onClick={() => setLightbox((i) => (i! + 1) % gallery.length)} disabled={gallery.length < 2}>Next →</button>
+                <button className="btn sm" onClick={() => setLightbox(null)}>Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

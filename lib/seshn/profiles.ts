@@ -7,7 +7,7 @@ import type { GetProfileOpts, Profile } from "./types";
 // 0018_security_hardening.sql — `select *` would hit a revoked column
 // (stripe_*, restrictions, deletion_requested_at are client-inaccessible).
 const PROFILE_COLUMNS =
-  "id, username, display_name, bio, location, pronouns, roles, genres, is_pro, avatar_url, cover_url, notification_prefs, created_at, updated_at";
+  "id, username, display_name, bio, location, pronouns, roles, genres, is_pro, avatar_url, cover_url, notification_prefs, social_links, gallery, credits, availability, created_at, updated_at";
 
 export async function getUser() {
   const sb = getBrowserClient();
@@ -104,6 +104,21 @@ export async function uploadCover(file: File) {
 
 export async function uploadGigCover(file: File, previousUrl?: string | null) {
   return uploadImage(file, "gig-cover", 8 * 1024 * 1024, previousUrl);
+}
+
+// Gallery photos: many per profile, so no previous-url cleanup (removal is
+// handled by editing the gallery array; orphaned objects are a day-2 cleanup).
+export async function uploadGalleryImage(file: File) {
+  return uploadImage(file, "gallery", 8 * 1024 * 1024);
+}
+
+// Loosely normalise a pasted showcase URL: trim, prepend https:// when the
+// scheme is missing. Returns "" for blank input. Does not hard-validate.
+export function normalizeUrl(raw: string): string {
+  const v = (raw || "").trim();
+  if (!v) return "";
+  if (/^https?:\/\//i.test(v)) return v;
+  return "https://" + v.replace(/^\/+/, "");
 }
 
 // Notify listening UI (e.g. the nav) that the current profile row changed.
