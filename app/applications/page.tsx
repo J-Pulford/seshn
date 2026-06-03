@@ -6,6 +6,7 @@ import Nav from "@/components/Nav";
 import { requireProfile } from "@/lib/seshn/auth";
 import { listMyApplications, updateApplicationStatus } from "@/lib/seshn/applications";
 import type { Application, Gig } from "@/lib/seshn/types";
+import "./applications.css";
 
 // listMyApplications embeds the gig (+ its owner).
 type MyApplication = Application & { gig?: Gig };
