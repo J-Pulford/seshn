@@ -73,7 +73,7 @@ export default function ProPage() {
               <span className="pill solid" style={{ fontSize: 9, padding: "3px 9px" }}>Most popular</span>
             </div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 4 }}>
-              <div className="price" style={{ color: "var(--frame)" }}>$5</div>
+              <div className="price" style={{ color: "#f4f3ef" }}>$5</div>
               <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>/ month</span>
             </div>
             <div className="price-sub" style={{ color: "rgba(255,255,255,0.55)" }}>or $48/year — save 20%</div>
