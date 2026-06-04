@@ -45,6 +45,40 @@ export interface ProfileStats {
   collaborations: number;
 }
 
+/** Per-currency financial totals (cents) from my_financial_summary(). */
+export interface CurrencyTotals {
+  currency: string;
+  earned_cents: number;
+  pending_cents: number;
+  spent_cents: number;
+  fees_cents: number;
+  paid_deals: number;
+}
+
+/** my_financial_summary() RPC result. */
+export interface FinancialSummary {
+  authenticated: boolean;
+  currencies: CurrencyTotals[];
+  active_contracts: number;
+  completed_deals: number;
+  total_deals: number;
+}
+
+/** A row in the finances dashboard's recent-activity list. */
+export interface TransactionRow {
+  id: string;
+  amount_cents: number;
+  platform_fee_cents: number;
+  currency: string;
+  status: string;
+  created_at: string;
+  funded_at: string | null;
+  released_at: string | null;
+  role: "earning" | "spending";
+  counterparty?: { username: string; display_name: string; avatar_url: string } | null;
+  gig_title?: string | null;
+}
+
 export type Availability = "open" | "selective" | "booked";
 
 export interface Profile {
@@ -217,8 +251,29 @@ export interface Notification {
   gig_id: string | null;
   application_id: string | null;
   conversation_id: string | null;
+  meeting_id?: string | null;
   actor?: { id: string; username: string; display_name: string; avatar_url: string } | null;
   gig?: { id: string; title: string; role: string } | null;
+  meeting?: { id: string; title: string; starts_at: string; status: string } | null;
+}
+
+export type MeetingStatus = "proposed" | "confirmed" | "declined" | "cancelled" | "completed";
+
+export interface Meeting {
+  id: string;
+  conversation_id: string | null;
+  contract_id: string | null;
+  organizer_id: string;
+  invitee_id: string;
+  title: string;
+  agenda: string;
+  location: string;
+  meeting_url: string;
+  starts_at: string;
+  ends_at: string;
+  status: MeetingStatus;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ConnectedAccount {

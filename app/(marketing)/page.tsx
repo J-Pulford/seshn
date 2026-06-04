@@ -181,14 +181,14 @@ export default function LandingPage() {
                 <li>Unlimited briefs &amp; applications</li>
                 <li>Audio-first profile</li>
                 <li>Project rooms &amp; DMs</li>
-                <li>Stripe payouts — zero commission</li>
+                <li>Stripe payouts — flat 5% on paid bookings</li>
               </ul>
               <a href="/auth" className="btn" style={{ width: "100%", justifyContent: "center" }}>Start free</a>
             </div>
             <div className="price-card pro">
               <div className="label" style={{ color: "var(--accent)", background: "transparent", border: "none", padding: 0 }}>PRO · $5/MO FLAT</div>
               <div className="amt">$5<span style={{ fontSize: 16, color: "var(--ink-3)" }}>/mo</span></div>
-              <div style={{ color: "var(--ink-3)", fontSize: 13 }}>Never a cut of your earnings.</div>
+              <div style={{ color: "var(--ink-3)", fontSize: 13 }}>Pro is flat — never a slice of your fee.</div>
               <ul>
                 <li>Everything in Free</li>
                 <li>Verified ✓ badge</li>

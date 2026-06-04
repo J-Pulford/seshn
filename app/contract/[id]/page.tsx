@@ -6,6 +6,7 @@ import type { User } from "@supabase/supabase-js";
 import Nav from "@/components/Nav";
 import { requireProfile } from "@/lib/seshn/auth";
 import { getContract, sendContract, signContract, declineContract, cancelContract, updateContractTerms } from "@/lib/seshn/contracts";
+import { getOrCreateConversation } from "@/lib/seshn/messaging";
 import { render as renderAgreement, hashAgreement, fmtMoney, SeshnContract, type AgreementDoc, type Paragraph } from "@/lib/contract-template";
 import type { Contract } from "@/lib/seshn/types";
 import "./contract.css";
@@ -249,7 +250,7 @@ function TermsEditor({ contract, onClose, onSave }: { contract: Contract; onClos
       template_version: SeshnContract.version,
       fee_cents: feeCents,
       currency,
-      platform_fee_pct: 8,
+      platform_fee_pct: 5,
       approval_window_days: aw,
       deliverable: { description: desc.trim(), format_notes: fmt.trim(), deliver_by: deliverBy },
       splits: { master_owner_pct: mO, master_collaborator_pct: 100 - mO, publishing_owner_pct: pO, publishing_collaborator_pct: 100 - pO },
@@ -415,6 +416,16 @@ export default function ContractPage() {
     setBusy(true); setErr("");
     try { await cancelContract(contract.id, reason); await refresh(); } catch (e) { setErr((e as Error)?.message || "Could not cancel."); } finally { setBusy(false); }
   }
+  async function scheduleMeeting() {
+    if (!contract || !me) return;
+    const otherId = contract.owner_id === me.id ? contract.collaborator_id : contract.owner_id;
+    try {
+      const cid = await getOrCreateConversation(otherId);
+      window.location.href = `/inbox?c=${encodeURIComponent(cid)}&schedule=1`;
+    } catch (e) {
+      alert((e as Error)?.message || "Couldn't open a conversation to schedule.");
+    }
+  }
 
   if (me === undefined || contract === undefined) {
     return (<div className="contract-page"><Nav active={null} /><div className="page"><div className="t-meta">Loading…</div></div></div>);
@@ -455,7 +466,10 @@ export default function ContractPage() {
           <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 22, letterSpacing: "-0.01em" }}>
             Contract with @{isOwner ? contract.collaborator?.username : contract.owner?.username}
           </h1>
-          <div style={{ display: "flex", gap: 8 }}><button className="btn sm" onClick={() => window.print()}>Print / save PDF</button></div>
+          <div style={{ display: "flex", gap: 8 }}>
+            {contract.status !== "cancelled" && <button className="btn sm" onClick={scheduleMeeting}>Schedule a meeting</button>}
+            <button className="btn sm" onClick={() => window.print()}>Print / save PDF</button>
+          </div>
         </div>
 
         {contract.status === "draft" && isOwner && <div className="banner amber no-print">This contract is a draft. Edit the terms, then send it to @{contract.collaborator?.username} for signing.</div>}

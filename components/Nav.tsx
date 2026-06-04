@@ -29,6 +29,7 @@ const R = {
   post: "/post",
   inbox: "/inbox",
   settings: "/settings",
+  dashboard: "/dashboard",
   profile: (username?: string) => (username ? `/profile/${encodeURIComponent(username)}` : "/feed"),
   gig: (id: string) => `/gig/${encodeURIComponent(id)}`,
   inboxConvo: (id: string) => `/inbox?c=${encodeURIComponent(id)}`,
@@ -63,6 +64,12 @@ function notifText(n: Notification) {
   if (n.kind === "application_accepted") return `${actor} accepted your application to ${gigTitle}`;
   if (n.kind === "application_rejected") return `${actor} passed on your application to ${gigTitle}`;
   if (n.kind === "message_received") return `${actor} sent you a message`;
+  const meetingTitle = n.meeting?.title || "a meeting";
+  if (n.kind === "meeting_proposed") return `${actor} proposed ${meetingTitle}`;
+  if (n.kind === "meeting_updated") return `${actor} rescheduled ${meetingTitle}`;
+  if (n.kind === "meeting_confirmed") return `${actor} confirmed ${meetingTitle}`;
+  if (n.kind === "meeting_declined") return `${actor} declined ${meetingTitle}`;
+  if (n.kind === "meeting_cancelled") return `${actor} cancelled ${meetingTitle}`;
   return "New activity";
 }
 
@@ -70,6 +77,7 @@ function notifHref(n: Notification): string | null {
   if (n.kind === "application_received" && n.gig_id) return R.gig(n.gig_id);
   if ((n.kind === "application_accepted" || n.kind === "application_rejected") && n.gig_id) return R.gig(n.gig_id);
   if (n.kind === "message_received" && n.conversation_id) return R.inboxConvo(n.conversation_id);
+  if (n.kind.startsWith("meeting_") && n.conversation_id) return R.inboxConvo(n.conversation_id);
   return null;
 }
 
@@ -395,6 +403,7 @@ export default function Nav({ active = null, showSearch = true, showPostButton =
         <a href={R.feed} style={mobileLinkStyle(active === "feed")} onClick={() => setMenuOpen(false)}>Feed</a>
         <a href={R.browse} style={mobileLinkStyle(active === "browse")} onClick={() => setMenuOpen(false)}>Browse</a>
         <a href={R.applications} style={mobileLinkStyle(active === "applications")} onClick={() => setMenuOpen(false)}>Applications</a>
+        <a href={R.dashboard} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Finances</a>
         <a href={R.settings} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Settings</a>
         {showSearch && <div style={{ padding: "12px 14px" }}><NavSearch /></div>}
       </div>

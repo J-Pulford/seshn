@@ -7,6 +7,7 @@ import { requireProfile, signOut, updateMyEmail, deleteMyAccount } from "@/lib/s
 import { updateNotificationPrefs } from "@/lib/seshn/notifications";
 import { emitProfileUpdated } from "@/lib/seshn/profiles";
 import { listConnectedAccounts, disconnectAccount, startSpotifyConnect, completeSpotifyConnect } from "@/lib/seshn/connected-accounts";
+import { getPayoutStatus, startPayoutOnboarding, type PayoutStatus } from "@/lib/seshn/payments";
 import type { ConnectedAccount, Profile } from "@/lib/seshn/types";
 import "./settings.css";
 
@@ -195,6 +196,51 @@ function ConnectedAccountsSection({ accounts, onChange }: { accounts: ConnectedA
   );
 }
 
+function PayoutsSection() {
+  const [status, setStatus] = useState<PayoutStatus | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  useEffect(() => {
+    getPayoutStatus().then(setStatus).catch(() => setStatus({ configured: false }));
+  }, []);
+  async function connect() {
+    setBusy(true);
+    setErr("");
+    try {
+      await startPayoutOnboarding();
+    } catch (e) {
+      setErr((e as Error)?.message || "Couldn't start payout setup.");
+      setBusy(false);
+    }
+  }
+  return (
+    <Section title="Payouts">
+      <span className="t-meta" style={{ display: "block", marginBottom: 12 }}>
+        Connect a payout account to get paid for gigs through Seshn. You always receive your full quoted rate —
+        Seshn adds a small platform fee on top, paid by the client.
+      </span>
+      {status === null ? (
+        <span className="t-meta">Loading…</span>
+      ) : !status.configured ? (
+        <span className="t-meta" style={{ fontStyle: "italic" }}>Payouts are coming soon.</span>
+      ) : status.payouts_enabled ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span className="pill solid">✓ Payouts enabled</span>
+          <button className="btn sm" onClick={connect} disabled={busy}>{busy ? "…" : "Manage on Stripe"}</button>
+        </div>
+      ) : status.connected ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <span className="t-meta">Your payout setup is started but not finished{status.status === "restricted" ? " (Stripe needs more info)" : ""}.</span>
+          <div><button className="btn primary sm" onClick={connect} disabled={busy}>{busy ? "…" : "Finish payout setup"}</button></div>
+        </div>
+      ) : (
+        <div><button className="btn primary sm" onClick={connect} disabled={busy}>{busy ? "…" : "Set up payouts"}</button></div>
+      )}
+      {err && <div className="status-line err" style={{ marginTop: 10 }}>{err}</div>}
+    </Section>
+  );
+}
+
 function DangerSection({ profile }: { profile: Profile }) {
   const [confirmText, setConfirmText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -297,6 +343,7 @@ export default function SettingsPage() {
         </div>
         {connectStatus && <div className={"status-line " + connectStatus.kind}>{connectStatus.text}</div>}
         <AccountSection user={state.user} profile={state.profile} />
+        <PayoutsSection />
         <ConnectedAccountsSection accounts={accounts} onChange={() => refreshAccounts(state.user!.id)} />
         <NotificationsSection profile={state.profile} onSaved={onProfileUpdated} />
         <DangerSection profile={state.profile} />
