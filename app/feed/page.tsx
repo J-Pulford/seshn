@@ -6,6 +6,7 @@ import { AlbumArt } from "@/components/visual/AlbumArt";
 import { getUser, listProfiles } from "@/lib/seshn/profiles";
 import { listGigs } from "@/lib/seshn/gigs";
 import { GIG_ROLES, GIG_GENRES } from "@/lib/seshn/constants";
+import WelcomeChecklist from "@/components/WelcomeChecklist";
 import type { Gig, Profile } from "@/lib/seshn/types";
 import "./feed.css";
 
@@ -123,6 +124,27 @@ function GigCard({ gig }: { gig: Gig }) {
           <a href={R.gig(gig.id)} className="btn sm">View</a>
           <a href={R.gig(gig.id)} className="btn primary sm">Apply</a>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className="gig" aria-hidden="true">
+      <div className="row" style={{ gap: 10 }}>
+        <div className="skel" style={{ width: 36, height: 36, borderRadius: "50%", flex: "0 0 auto" }} />
+        <div className="col" style={{ flex: 1, gap: 6 }}>
+          <div className="skel" style={{ height: 10, width: "40%" }} />
+          <div className="skel" style={{ height: 10, width: "60%" }} />
+        </div>
+      </div>
+      <div className="skel" style={{ height: 16, width: "80%", marginTop: 4 }} />
+      <div className="skel" style={{ height: 10, width: "100%" }} />
+      <div className="skel" style={{ height: 10, width: "92%" }} />
+      <div className="row" style={{ justifyContent: "space-between", paddingTop: 10 }}>
+        <div className="skel" style={{ height: 10, width: 64 }} />
+        <div className="skel" style={{ height: 28, width: 120, borderRadius: 6 }} />
       </div>
     </div>
   );
@@ -264,6 +286,7 @@ export default function FeedPage() {
 
         {/* Main feed */}
         <main style={{ minWidth: 0 }}>
+          <WelcomeChecklist />
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 12, flexWrap: "wrap" }}>
             <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 22, letterSpacing: "-0.02em" }}>
               Live feed
@@ -285,9 +308,9 @@ export default function FeedPage() {
             </div>
           </div>
 
-          <div className={"feed-cards" + (gigs && gigs.length > 0 && view === "grid" ? " grid" : "")}>
+          <div className={"feed-cards" + ((gigs === null || gigs.length > 0) && view === "grid" ? " grid" : "")}>
             {gigs === null ? (
-              <div style={{ padding: "60px 0", textAlign: "center", color: "var(--ink-3)", fontFamily: "var(--font-display)", fontSize: 13 }}>Loading gigs…</div>
+              Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
             ) : gigs.length === 0 ? (
               activeFilterCount > 0 ? (
                 <div className="gig" style={{ alignItems: "center", textAlign: "center", padding: "40px 20px", gap: 12 }}>

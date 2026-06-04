@@ -14,6 +14,7 @@ import {
   subscribeToNotifications,
 } from "@/lib/seshn/notifications";
 import { getUnreadCount, subscribeToMyConversations } from "@/lib/seshn/messaging";
+import { countContractsNeedingMySignature } from "@/lib/seshn/contracts";
 import type { Gig, Notification, Profile } from "@/lib/seshn/types";
 import ThemeToggle from "./ThemeToggle";
 import "./nav.css";
@@ -92,7 +93,7 @@ function iconBtnStyle(isActive: boolean): CSSProperties {
   };
 }
 
-type IconKind = "search" | "message" | "bell";
+type IconKind = "search" | "message" | "bell" | "contract";
 function IconSvg({ kind, size = 18 }: { kind: IconKind; size?: number }) {
   const common = {
     width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
@@ -100,6 +101,7 @@ function IconSvg({ kind, size = 18 }: { kind: IconKind; size?: number }) {
   };
   if (kind === "search") return (<svg {...common}><circle cx={11} cy={11} r={7} /><path d="m20 20-3.5-3.5" /></svg>);
   if (kind === "message") return (<svg {...common}><path d="M21 12a8 8 0 0 1-12 7l-5 1 1-5a8 8 0 1 1 16-3z" /></svg>);
+  if (kind === "contract") return (<svg {...common}><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5M8.5 13.5h5M8.5 17h3" /></svg>);
   return (<svg {...common}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10 21a2 2 0 0 0 4 0" /></svg>);
 }
 
@@ -323,6 +325,7 @@ function NavSearch() {
 export default function Nav({ active = null, showSearch = true, showPostButton = true }: { active?: NavActive; showSearch?: boolean; showPostButton?: boolean }) {
   const [me, setMe] = useState<Profile | null>(null);
   const [unreadConvos, setUnreadConvos] = useState(0);
+  const [contractsSig, setContractsSig] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -343,6 +346,7 @@ export default function Nav({ active = null, showSearch = true, showPostButton =
     getUser().then((u) => {
       if (!u || cancelled) return;
       refresh();
+      countContractsNeedingMySignature().then((n) => { if (!cancelled) setContractsSig(n); }).catch(() => {});
       subscribeToMyConversations(refresh).then((fn) => { if (cancelled) fn(); else unsub = fn; });
     });
     return () => { cancelled = true; try { unsub(); } catch { /* ignore */ } };
@@ -380,6 +384,10 @@ export default function Nav({ active = null, showSearch = true, showPostButton =
               <span className="seshn-nav-post-text">+ Post a gig</span>
             </a>
           )}
+          <a href={R.contracts} style={iconBtnStyle(false)} aria-label={"Contracts" + (contractsSig > 0 ? ` (${contractsSig} need your signature)` : "")} title="Contracts">
+            <IconSvg kind="contract" size={18} />
+            {contractsSig > 0 && <Badge count={contractsSig} />}
+          </a>
           <a href={R.inbox} style={iconBtnStyle(active === "inbox")} aria-label={"Inbox" + (unreadConvos > 0 ? ` (${unreadConvos} unread)` : "")}>
             <IconSvg kind="message" size={18} />
             {unreadConvos > 0 && <Badge count={unreadConvos} />}

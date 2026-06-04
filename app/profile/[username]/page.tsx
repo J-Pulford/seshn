@@ -10,6 +10,7 @@ import { blockUser, isUserBlocked, reportUser, unblockUser } from "@/lib/seshn/t
 import { listConnectedAccounts } from "@/lib/seshn/connected-accounts";
 import { SOCIAL_PLATFORMS, AVAILABILITY_OPTIONS } from "@/lib/seshn/constants";
 import { embedFor } from "@/lib/seshn/embeds";
+import { toast } from "@/lib/seshn/toast";
 import type { ConnectedAccount, Credit, FeaturedItem, GalleryItem, Gig, Profile, ProfileStats, Service, SocialLinks } from "@/lib/seshn/types";
 import "./profile.css";
 
@@ -225,10 +226,10 @@ function SafetyControls({ profile }: { profile: Profile }) {
     if (!blocked && !window.confirm("Block " + name + "? They won't be able to message you or apply to your gigs, and you won't be able to message them.")) return;
     setBusy(true);
     try {
-      if (blocked) { await unblockUser(profile.id); setBlocked(false); }
-      else { await blockUser(profile.id); setBlocked(true); }
+      if (blocked) { await unblockUser(profile.id); setBlocked(false); toast.success("Unblocked " + name + "."); }
+      else { await blockUser(profile.id); setBlocked(true); toast.success("Blocked " + name + "."); }
     } catch (e) {
-      alert((e as Error)?.message || "Couldn't update block.");
+      toast.error((e as Error)?.message || "Couldn't update block.");
     } finally {
       setBusy(false);
     }
@@ -648,7 +649,7 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
                   const cid = await getOrCreateConversation(profile.id);
                   window.location.href = R.inboxConvo(cid);
                 } catch (e) {
-                  alert((e as Error)?.message || "Couldn't start a conversation.");
+                  toast.error((e as Error)?.message || "Couldn't start a conversation.");
                 }
               }}>Message</button>
               <SafetyControls profile={profile} />
@@ -795,7 +796,7 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
                     if (!me) { window.location.href = "/auth?next=" + encodeURIComponent(window.location.pathname); return; }
                     const cid = await getOrCreateConversation(profile.id);
                     window.location.href = R.inboxConvo(cid);
-                  } catch (e) { alert((e as Error)?.message || "Couldn't start a conversation."); }
+                  } catch (e) { toast.error((e as Error)?.message || "Couldn't start a conversation."); }
                 }}>Message to book</button>
               )}
             </section>

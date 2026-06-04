@@ -24,6 +24,7 @@ export default function Footer() {
           <a href="/stories">Stories</a>
           <a href="/suggestions">Suggest a feature</a>
           <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
         </div>
         <div className="footer-col">
           <b>SOCIAL</b>

@@ -10,6 +10,7 @@ import {
   formatMoney,
 } from "@/lib/seshn/finances";
 import { getPayoutStatus, startPayoutOnboarding, type PayoutStatus } from "@/lib/seshn/payments";
+import { toast } from "@/lib/seshn/toast";
 import type { FinancialSummary, TransactionRow } from "@/lib/seshn/types";
 import "./dashboard.css";
 
@@ -118,7 +119,7 @@ export default function DashboardPage() {
     try {
       await startPayoutOnboarding();
     } catch (e) {
-      alert((e as Error)?.message || "Couldn't start payout setup.");
+      toast.error((e as Error)?.message || "Couldn't start payout setup.");
       setStarting(false);
     }
   }

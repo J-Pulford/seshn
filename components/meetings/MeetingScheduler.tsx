@@ -12,6 +12,7 @@ import {
   googleCalendarUrl,
 } from "@/lib/seshn/meetings";
 import type { Meeting } from "@/lib/seshn/types";
+import { toast } from "@/lib/seshn/toast";
 import "./meetings.css";
 
 interface OtherUser {
@@ -187,7 +188,7 @@ function MeetingCard({
       await fn();
       onChange();
     } catch (e) {
-      alert((e as Error)?.message || "Couldn't update the meeting.");
+      toast.error((e as Error)?.message || "Couldn't update the meeting.");
     } finally {
       setBusy(false);
     }

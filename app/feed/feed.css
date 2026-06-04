@@ -7,6 +7,11 @@
 .feed-cards { display: flex; flex-direction: column; gap: 14px; }
 .feed-cards.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
 
+/* Loading skeleton shimmer */
+.skel { background: linear-gradient(90deg, var(--surface-2) 25%, var(--ph) 37%, var(--surface-2) 63%); background-size: 400px 100%; animation: skel-shimmer 1.3s infinite linear; border-radius: 5px; }
+@keyframes skel-shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+@media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
+
 .check-box { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--line); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; }
 .check-box.checked { background: var(--ink); border-color: var(--ink); }
 

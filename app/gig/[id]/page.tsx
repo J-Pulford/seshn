@@ -11,6 +11,7 @@ import { applyToGig, getMyApplication, listApplicationsForGig, updateApplication
 import { createContract, getContractForApplication } from "@/lib/seshn/contracts";
 import { getOrCreateConversation } from "@/lib/seshn/messaging";
 import { reportGig } from "@/lib/seshn/trust-safety";
+import { toast } from "@/lib/seshn/toast";
 import { SeshnContract } from "@/lib/contract-template";
 import type { Application, Contract, Gig, GigOwner } from "@/lib/seshn/types";
 import GigRecommendations from "@/components/gig/GigRecommendations";
@@ -98,7 +99,7 @@ async function openDM(otherUserId: string) {
     const cid = await getOrCreateConversation(otherUserId);
     window.location.href = R.inboxConvo(cid);
   } catch (e) {
-    alert((e as Error)?.message || "Couldn't open a DM.");
+    toast.error((e as Error)?.message || "Couldn't open a DM.");
   }
 }
 
@@ -395,8 +396,9 @@ function GigView({ gig: initialGig }: { gig: Gig }) {
     try {
       const updated = await setGigStatus(gig.id, next);
       setGig((prev) => ({ ...prev, status: updated.status }));
+      toast.success(next === "closed" ? "Gig closed." : "Gig reopened.");
     } catch (e) {
-      alert((e as Error)?.message || "Couldn't update the gig.");
+      toast.error((e as Error)?.message || "Couldn't update the gig.");
     } finally {
       setStatusBusy(false);
     }
