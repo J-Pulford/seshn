@@ -385,7 +385,15 @@ export default function InboxPage() {
           </div>
           <div className="convo-scroll">
             {filtered === null ? (
-              <div className="t-meta" style={{ padding: 18 }}>Loading…</div>
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="row" style={{ gap: 12, padding: "14px 16px", alignItems: "center" }} aria-hidden="true">
+                  <div className="skel" style={{ width: 40, height: 40, borderRadius: "50%", flex: "0 0 auto" }} />
+                  <div className="col" style={{ flex: 1, gap: 7 }}>
+                    <div className="skel" style={{ height: 11, width: "45%" }} />
+                    <div className="skel" style={{ height: 10, width: "75%" }} />
+                  </div>
+                </div>
+              ))
             ) : filtered.length === 0 ? (
               <div style={{ padding: 24, textAlign: "center" }}>
                 <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14, marginBottom: 6 }}>{convos!.length === 0 ? "No conversations yet" : "Nothing here"}</div>
