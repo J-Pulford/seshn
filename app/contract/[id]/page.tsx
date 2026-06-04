@@ -209,8 +209,9 @@ function StatusSidebar({ contract, me, onOpenEditor, onSend, onDecline, onCancel
       )}
 
       <div className="card hairline">
-        <div className="t-meta" style={{ lineHeight: 1.5 }}>
-          <a href={`/gig/${encodeURIComponent(contract.gig_id)}`} style={{ color: "var(--ink-2)" }}>← Back to gig</a>
+        <div className="t-meta" style={{ lineHeight: 1.8 }}>
+          <a href="/contracts" style={{ color: "var(--ink-2)", display: "block" }}>← All contracts</a>
+          <a href={`/gig/${encodeURIComponent(contract.gig_id)}`} style={{ color: "var(--ink-2)", display: "block" }}>← Back to gig</a>
         </div>
       </div>
     </div>
