@@ -159,7 +159,7 @@ export async function listProfiles(opts: ListProfilesOpts = {}): Promise<Profile
   const sb = getBrowserClient();
   let q = sb
     .from("profiles")
-    .select("id, username, display_name, bio, location, pronouns, roles, genres, is_pro, created_at");
+    .select("id, username, display_name, bio, location, pronouns, roles, genres, is_pro, avatar_url, created_at");
   if (opts.roles?.length) q = q.overlaps("roles", opts.roles);
   if (opts.genres?.length) q = q.overlaps("genres", opts.genres);
   if (opts.location?.trim()) {
