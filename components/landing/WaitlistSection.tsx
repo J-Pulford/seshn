@@ -36,16 +36,17 @@ export default function WaitlistSection() {
   return (
     <section className="section" id="waitlist" style={{ background: "var(--bg-2)" }}>
       <div className="container">
-        <Reveal>
-          <span className="label">[EARLY ACCESS] · THE WAITLIST</span>
-          <h2>Get in <span className="stem">before the doors open.</span></h2>
-          <p className="lede">
-            We let artists in by batches so support stays human and the matches stay good. Drop your email and we&apos;ll
-            cue you for the next round — tell us what you do and we&apos;ll line up collaborators for you on day one.
-          </p>
-        </Reveal>
+        <div className="wl-wrap">
+          <Reveal>
+            <span className="label">[EARLY ACCESS] · THE WAITLIST</span>
+            <h2>Get in <span className="stem">before the doors open.</span></h2>
+            <p className="lede">
+              We let artists in by batches so support stays human and the matches stay good. Drop your email and we&apos;ll
+              cue you for the next round — tell us what you do and we&apos;ll line up collaborators for you on day one.
+            </p>
+          </Reveal>
 
-        <Reveal className="wl-card">
+          <Reveal className="wl-card">
           {status === "done" ? (
             <div className="wl-done" role="status">
               <div className="wl-done-mark" aria-hidden="true">✓</div>
@@ -102,7 +103,8 @@ export default function WaitlistSection() {
               <div className="wl-fine">No spam. We&apos;ll only email you about your spot.</div>
             </form>
           )}
-        </Reveal>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
