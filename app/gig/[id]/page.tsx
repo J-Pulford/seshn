@@ -8,9 +8,11 @@ import { AlbumArt } from "@/components/visual/AlbumArt";
 import { getUser } from "@/lib/seshn/profiles";
 import { getGig, setGigStatus } from "@/lib/seshn/gigs";
 import { applyToGig, getMyApplication, listApplicationsForGig, updateApplicationStatus } from "@/lib/seshn/applications";
+import { createContract, getContractForApplication } from "@/lib/seshn/contracts";
 import { getOrCreateConversation } from "@/lib/seshn/messaging";
 import { reportGig } from "@/lib/seshn/trust-safety";
-import type { Application, Gig, GigOwner } from "@/lib/seshn/types";
+import { SeshnContract } from "@/lib/contract-template";
+import type { Application, Contract, Gig, GigOwner } from "@/lib/seshn/types";
 import GigRecommendations from "@/components/gig/GigRecommendations";
 import "./gig.css";
 
@@ -19,7 +21,26 @@ const R = {
   applications: "/applications",
   profile: (u?: string) => `/profile/${encodeURIComponent(u || "")}`,
   inboxConvo: (id: string) => `/inbox?c=${encodeURIComponent(id)}`,
+  contract: (id: string) => `/contract/${encodeURIComponent(id)}`,
 };
+
+// Seed a fresh contract from the gig so the owner starts from sensible terms
+// (they can refine everything in the contract's "Edit terms" editor).
+function defaultTermsFromGig(gig: Gig): Record<string, unknown> {
+  const feeCents = gig.comp === "paid" && gig.pay_amount ? Math.round(Number(gig.pay_amount) * 100) : 0;
+  return {
+    fee_cents: feeCents,
+    currency: gig.pay_currency || "AUD",
+    platform_fee_pct: 5,
+    approval_window_days: 7,
+    deliverable: { description: "", format_notes: "", deliver_by: gig.deadline || "" },
+    splits: { master_owner_pct: 50, master_collaborator_pct: 50, publishing_owner_pct: 50, publishing_collaborator_pct: 50 },
+    credits: { text: "" },
+  };
+}
+
+const contractStatusLabel = (s?: string) =>
+  ({ draft: "Draft", awaiting_signatures: "Awaiting signatures", active: "Active", completed: "Completed", cancelled: "Cancelled" }[s || ""] || "");
 
 type OwnerApp = Application & { applicant?: GigOwner & { location?: string; roles?: string[]; bio?: string } };
 
@@ -124,6 +145,18 @@ function ApplicationStatusCard({ application, owner, onWithdrawn }: { applicatio
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const status = application.status;
+  const [contract, setContract] = useState<Contract | null | undefined>(undefined);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (status === "accepted") {
+      getContractForApplication(application.id).then((c) => { if (!cancelled) setContract(c); }).catch(() => { if (!cancelled) setContract(null); });
+    } else {
+      setContract(null);
+    }
+    return () => { cancelled = true; };
+  }, [application.id, status]);
+
   const withdraw = async () => {
     if (!window.confirm("Withdraw your application? You can re-apply only by contacting the poster.")) return;
     setBusy(true);
@@ -151,8 +184,14 @@ function ApplicationStatusCard({ application, owner, onWithdrawn }: { applicatio
         <p style={{ fontSize: 13, lineHeight: 1.55, color: "var(--ink-2)", whiteSpace: "pre-wrap" }}>{application.pitch}</p>
         {application.attachment_url && <a href={application.attachment_url} target="_blank" rel="noopener" style={{ display: "inline-block", marginTop: 10, fontSize: 12, color: "var(--ink)", textDecoration: "underline" }}>{application.attachment_url}</a>}
       </div>
+      {status === "accepted" && contract === null && (
+        <div className="t-meta" style={{ marginTop: 12 }}>{(owner.display_name || "The poster").split(" ")[0]} will send a collaboration agreement here for you to review and sign.</div>
+      )}
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
-        {status === "accepted" && owner?.id && <button className="btn primary sm" onClick={() => openDM(owner.id)}>Message {(owner.display_name || "").split(" ")[0] || "owner"}</button>}
+        {status === "accepted" && owner?.id && <button className="btn sm" onClick={() => openDM(owner.id)}>Message {(owner.display_name || "").split(" ")[0] || "owner"}</button>}
+        {status === "accepted" && contract && (
+          <a href={R.contract(contract.id)} className="btn primary sm">{contract.status === "awaiting_signatures" ? "Review & sign contract →" : "View contract →"}</a>
+        )}
         {status === "pending" && <button className="btn sm" onClick={withdraw} disabled={busy}>{busy ? "…" : "Withdraw application"}</button>}
       </div>
       {err && <div style={{ fontSize: 12, color: "var(--cherry)", marginTop: 8 }}>{err}</div>}
@@ -160,11 +199,37 @@ function ApplicationStatusCard({ application, owner, onWithdrawn }: { applicatio
   );
 }
 
-function OwnerApplicationCard({ app, onChange }: { app: OwnerApp; onChange: (a: Application) => void }) {
+function OwnerApplicationCard({ app, gig, onChange }: { app: OwnerApp; gig: Gig; onChange: (a: Application) => void }) {
   const a = app.applicant || ({} as NonNullable<OwnerApp["applicant"]>);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const href = R.profile(a?.username);
+  const [contract, setContract] = useState<Contract | null | undefined>(undefined);
+  const [contractBusy, setContractBusy] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (app.status === "accepted") {
+      getContractForApplication(app.id).then((c) => { if (!cancelled) setContract(c); }).catch(() => { if (!cancelled) setContract(null); });
+    } else {
+      setContract(null);
+    }
+    return () => { cancelled = true; };
+  }, [app.id, app.status]);
+
+  async function openContract() {
+    if (contractBusy) return;
+    setContractBusy(true);
+    setErr("");
+    try {
+      let c = contract || (await getContractForApplication(app.id));
+      if (!c) c = await createContract(app as Application, defaultTermsFromGig(gig), SeshnContract.version);
+      window.location.href = R.contract(c.id);
+    } catch (e) {
+      setErr((e as Error)?.message || "Couldn't open the contract.");
+      setContractBusy(false);
+    }
+  }
   const setStatus = async (next: Application["status"]) => {
     setBusy(true);
     setErr("");
@@ -209,7 +274,10 @@ function OwnerApplicationCard({ app, onChange }: { app: OwnerApp; onChange: (a: 
         {app.status === "accepted" && a?.id && (
           <>
             <button className="btn sm" onClick={() => setStatus("pending")} disabled={busy}>Undo accept</button>
-            <button className="btn primary sm" onClick={() => openDM(a.id)}>Message</button>
+            <button className="btn sm" onClick={() => openDM(a.id)}>Message</button>
+            <button className="btn primary sm" onClick={openContract} disabled={contractBusy || contract === undefined}>
+              {contractBusy || contract === undefined ? "…" : contract ? `Open contract${contract.status === "draft" ? "" : " · " + contractStatusLabel(contract.status)} →` : "Set up contract →"}
+            </button>
           </>
         )}
         {app.status === "rejected" && <button className="btn sm" onClick={() => setStatus("pending")} disabled={busy}>Undo pass</button>}
@@ -243,7 +311,7 @@ function OwnerApplicationsList({ gig }: { gig: Gig }) {
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {apps.map((a) => <OwnerApplicationCard key={a.id} app={a} onChange={updateOne} />)}
+          {apps.map((a) => <OwnerApplicationCard key={a.id} app={a} gig={gig} onChange={updateOne} />)}
         </div>
       )}
     </div>

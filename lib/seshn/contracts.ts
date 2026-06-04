@@ -49,6 +49,24 @@ export async function getContract(id: string): Promise<Contract | null> {
   return (res.data as unknown as Contract) ?? null;
 }
 
+// Look up the contract for one application (1:1 via the unique application_id).
+// Visible to both parties under the 0012 RLS, so the owner and the applicant
+// can each find it. Returns null when no contract has been drafted yet.
+export async function getContractForApplication(applicationId: string): Promise<Contract | null> {
+  const sb = getBrowserClient();
+  if (!applicationId) return null;
+  const res = await sb
+    .from("contracts")
+    .select(CONTRACT_FIELDS)
+    .eq("application_id", applicationId)
+    .maybeSingle();
+  if (res.error) {
+    console.error("[seshn] getContractForApplication error", res.error);
+    return null;
+  }
+  return (res.data as unknown as Contract) ?? null;
+}
+
 export async function createContract(application: Application, terms: Record<string, unknown>, templateVersion?: string | null): Promise<Contract> {
   const sb = getBrowserClient();
   const u = await getUser();
