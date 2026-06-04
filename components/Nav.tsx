@@ -29,6 +29,7 @@ const R = {
   post: "/post",
   inbox: "/inbox",
   settings: "/settings",
+  dashboard: "/dashboard",
   profile: (username?: string) => (username ? `/profile/${encodeURIComponent(username)}` : "/feed"),
   gig: (id: string) => `/gig/${encodeURIComponent(id)}`,
   inboxConvo: (id: string) => `/inbox?c=${encodeURIComponent(id)}`,
@@ -395,6 +396,7 @@ export default function Nav({ active = null, showSearch = true, showPostButton =
         <a href={R.feed} style={mobileLinkStyle(active === "feed")} onClick={() => setMenuOpen(false)}>Feed</a>
         <a href={R.browse} style={mobileLinkStyle(active === "browse")} onClick={() => setMenuOpen(false)}>Browse</a>
         <a href={R.applications} style={mobileLinkStyle(active === "applications")} onClick={() => setMenuOpen(false)}>Applications</a>
+        <a href={R.dashboard} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Finances</a>
         <a href={R.settings} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Settings</a>
         {showSearch && <div style={{ padding: "12px 14px" }}><NavSearch /></div>}
       </div>

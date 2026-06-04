@@ -45,6 +45,7 @@ function TagInput({ tags, onChange, placeholder, max = 20 }: { tags: string[]; o
 
 const R = {
   settings: "/settings",
+  dashboard: "/dashboard",
   post: "/post",
   gig: (id: string) => `/gig/${encodeURIComponent(id)}`,
   inboxConvo: (id: string) => `/inbox?c=${encodeURIComponent(id)}`,
@@ -634,6 +635,7 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
           {profile.is_pro && <span style={{ display: "inline-block", transform: "rotate(-4deg)", padding: "5px 11px", borderRadius: 4, background: "var(--ink)", color: "var(--frame)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 11, letterSpacing: "0.04em", textTransform: "uppercase", boxShadow: "0 4px 12px rgba(0,0,0,0.18)" }}>✓ Pro · Verified</span>}
           {isOwner ? (
             <>
+              <a className="btn" style={{ backdropFilter: "blur(8px)", background: "rgba(255,255,255,0.9)" }} href={R.dashboard}>Finances</a>
               <a className="btn" style={{ backdropFilter: "blur(8px)", background: "rgba(255,255,255,0.9)" }} href={R.settings}>Settings</a>
               <button className="btn primary" onClick={() => setEditing(true)}>Edit profile</button>
             </>
