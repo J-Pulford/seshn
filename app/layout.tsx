@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import ProducerMode from "@/components/easter/ProducerMode";
 import Toaster from "@/components/Toaster";
+import ConfirmHost from "@/components/ConfirmHost";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <ProducerMode />
         <Toaster />
+        <ConfirmHost />
       </body>
     </html>
   );

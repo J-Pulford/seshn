@@ -11,6 +11,7 @@ import { listConnectedAccounts } from "@/lib/seshn/connected-accounts";
 import { SOCIAL_PLATFORMS, AVAILABILITY_OPTIONS } from "@/lib/seshn/constants";
 import { embedFor } from "@/lib/seshn/embeds";
 import { toast } from "@/lib/seshn/toast";
+import { confirm } from "@/lib/seshn/confirm";
 import type { ConnectedAccount, Credit, FeaturedItem, GalleryItem, Gig, Profile, ProfileStats, Service, SocialLinks } from "@/lib/seshn/types";
 import "./profile.css";
 
@@ -223,7 +224,7 @@ function SafetyControls({ profile }: { profile: Profile }) {
   async function toggleBlock() {
     setOpen(false);
     const name = profile.display_name || "this user";
-    if (!blocked && !window.confirm("Block " + name + "? They won't be able to message you or apply to your gigs, and you won't be able to message them.")) return;
+    if (!blocked && !(await confirm({ title: "Block " + name + "?", message: "They won't be able to message you or apply to your gigs, and you won't be able to message them.", confirmLabel: "Block", danger: true }))) return;
     setBusy(true);
     try {
       if (blocked) { await unblockUser(profile.id); setBlocked(false); toast.success("Unblocked " + name + "."); }

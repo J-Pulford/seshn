@@ -142,7 +142,17 @@ body.smn-lock { overflow: hidden; }
 .btn.sm { padding: 6px 10px; font-size: 11px; }
 .btn.lg { padding: 12px 20px; font-size: 14px; }
 .btn.block { width: 100%; }
+.btn.danger { background: var(--danger); color: #fff; border-color: transparent; }
 .btn:hover { opacity: 0.88; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Keyboard focus ring — only shows for keyboard nav, not mouse clicks. */
+:focus-visible { outline: 2px solid var(--accent-d); outline-offset: 2px; border-radius: 3px; }
+
+/* Loading skeleton shimmer (used across feed, inbox, profile). */
+.skel { background: linear-gradient(90deg, var(--surface-2) 25%, var(--ph) 37%, var(--surface-2) 63%); background-size: 400px 100%; animation: skel-shimmer 1.3s infinite linear; border-radius: 5px; }
+@keyframes skel-shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+@media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
 
 .avatar { border-radius: 50%; background: var(--ph); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 600; color: var(--ink-3); flex-shrink: 0; position: relative; }
 .avatar.sm { width: 28px; height: 28px; font-size: 10px; }

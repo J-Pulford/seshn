@@ -7,6 +7,7 @@ import { requireProfile } from "@/lib/seshn/auth";
 import { listMyApplications, updateApplicationStatus } from "@/lib/seshn/applications";
 import { getContractForApplication } from "@/lib/seshn/contracts";
 import { toast } from "@/lib/seshn/toast";
+import { confirm } from "@/lib/seshn/confirm";
 import type { Application, Contract, Gig } from "@/lib/seshn/types";
 import "./applications.css";
 
@@ -50,7 +51,7 @@ function ApplicationRow({ app, onChange }: { app: MyApplication; onChange: (a: M
   }, [app.id, app.status]);
 
   const withdraw = async () => {
-    if (!window.confirm("Withdraw your application?")) return;
+    if (!(await confirm({ title: "Withdraw application?", message: "This removes your pitch from the gig.", confirmLabel: "Withdraw", danger: true }))) return;
     setBusy(true);
     try {
       const updated = await updateApplicationStatus(app.id, "withdrawn");

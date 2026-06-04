@@ -8,6 +8,7 @@ import { requireProfile } from "@/lib/seshn/auth";
 import { getContract, sendContract, signContract, declineContract, cancelContract, updateContractTerms } from "@/lib/seshn/contracts";
 import { getOrCreateConversation } from "@/lib/seshn/messaging";
 import { toast } from "@/lib/seshn/toast";
+import { confirm, confirmDialog } from "@/lib/seshn/confirm";
 import { render as renderAgreement, hashAgreement, fmtMoney, SeshnContract, type AgreementDoc, type Paragraph } from "@/lib/contract-template";
 import type { Contract } from "@/lib/seshn/types";
 import "./contract.css";
@@ -396,7 +397,7 @@ export default function ContractPage() {
   }
   async function doSend() {
     if (!contract) return;
-    if (!window.confirm("Send this contract to @" + (contract.collaborator?.username) + " for signing? Terms will lock once sent.")) return;
+    if (!(await confirm({ title: "Send for signing?", message: "Send this contract to @" + (contract.collaborator?.username) + " — terms will lock once sent.", confirmLabel: "Send" }))) return;
     setBusy(true); setErr("");
     try { await sendContract(contract.id); await refresh(); toast.success("Contract sent for signing."); } catch (e) { setErr((e as Error)?.message || "Could not send contract."); } finally { setBusy(false); }
   }
@@ -413,10 +414,10 @@ export default function ContractPage() {
   }
   async function doCancel() {
     if (!contract) return;
-    const reason = window.prompt("Cancel this contract? Optional: why?");
-    if (reason === null) return;
+    const res = await confirmDialog({ title: "Cancel this contract?", message: "This voids the agreement for both parties.", prompt: true, promptLabel: "Reason (optional)", promptPlaceholder: "Why are you cancelling?", confirmLabel: "Cancel contract", cancelLabel: "Keep it", danger: true });
+    if (!res.confirmed) return;
     setBusy(true); setErr("");
-    try { await cancelContract(contract.id, reason); await refresh(); } catch (e) { setErr((e as Error)?.message || "Could not cancel."); } finally { setBusy(false); }
+    try { await cancelContract(contract.id, res.value || ""); await refresh(); toast.success("Contract cancelled."); } catch (e) { setErr((e as Error)?.message || "Could not cancel."); } finally { setBusy(false); }
   }
   async function scheduleMeeting() {
     if (!contract || !me) return;
