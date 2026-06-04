@@ -136,7 +136,10 @@ export default function DashboardPage() {
             <div className="t-eyebrow">Your money</div>
             <h1 className="t-h1">Finances</h1>
           </div>
-          <a className="btn sm" href="/settings">Payout settings</a>
+          <div style={{ display: "flex", gap: 8 }}>
+            <a className="btn sm" href="/contracts">Contracts</a>
+            <a className="btn sm" href="/settings">Payout settings</a>
+          </div>
         </header>
 
         {state === "loading" && <div className="dash-loading">Loading your finances…</div>}
