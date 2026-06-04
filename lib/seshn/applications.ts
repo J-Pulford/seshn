@@ -47,7 +47,7 @@ export async function listApplicationsForGig(gigId: string): Promise<Application
   const res = await sb
     .from("applications")
     .select(
-      "*, applicant:profiles!applicant_id(id, username, display_name, location, roles, genres, bio, is_pro, avatar_url)",
+      "*, applicant:profiles!applicant_id(id, username, display_name, location, roles, genres, bio, is_pro, has_producer_badge, avatar_url)",
     )
     .eq("gig_id", gigId)
     .order("created_at", { ascending: false });

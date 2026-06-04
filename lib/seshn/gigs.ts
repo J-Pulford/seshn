@@ -28,7 +28,7 @@ export interface ListGigsOpts {
   sort?: "newest" | "default";
 }
 
-const GIG_SELECT = "*, owner:profiles!owner_id(id, username, display_name, is_pro, avatar_url)";
+const GIG_SELECT = "*, owner:profiles!owner_id(id, username, display_name, is_pro, has_producer_badge, avatar_url)";
 
 export async function listGigs(opts: ListGigsOpts = {}): Promise<Gig[]> {
   const sb = getBrowserClient();
@@ -70,7 +70,7 @@ export async function getGig(id: string): Promise<Gig | null> {
   const sb = getBrowserClient();
   const res = await sb
     .from("gigs")
-    .select("*, owner:profiles!owner_id(id, username, display_name, is_pro, location, roles, avatar_url)")
+    .select("*, owner:profiles!owner_id(id, username, display_name, is_pro, has_producer_badge, location, roles, avatar_url)")
     .eq("id", id)
     .maybeSingle();
   if (res.error) {

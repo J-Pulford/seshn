@@ -21,7 +21,7 @@ export async function getProfileStats(userId: string): Promise<ProfileStats> {
 // 0018_security_hardening.sql — `select *` would hit a revoked column
 // (stripe_*, restrictions, deletion_requested_at are client-inaccessible).
 const PROFILE_COLUMNS =
-  "id, username, display_name, bio, location, pronouns, roles, genres, is_pro, avatar_url, cover_url, notification_prefs, social_links, gallery, credits, availability, featured, skills, influences, languages, services, created_at, updated_at";
+  "id, username, display_name, bio, location, pronouns, roles, genres, is_pro, has_producer_badge, avatar_url, cover_url, notification_prefs, social_links, gallery, credits, availability, featured, skills, influences, languages, services, created_at, updated_at";
 
 export async function getUser() {
   const sb = getBrowserClient();
@@ -64,6 +64,21 @@ export async function updateProfile(fields: Partial<Profile>): Promise<Profile> 
   const res = await sb.from("profiles").update(fields).eq("id", u.id).select(PROFILE_COLUMNS).single();
   if (res.error) throw res.error;
   return res.data as Profile;
+}
+
+// Self-grant the "Producer mode" easter-egg badge (Konami code). Backed by a
+// SECURITY DEFINER RPC so it can only ever set this one cosmetic flag on the
+// caller's own row. Idempotent and safe to call repeatedly.
+export async function unlockProducerBadge(): Promise<boolean> {
+  const sb = getBrowserClient();
+  const u = await getUser();
+  if (!u) return false;
+  const res = await sb.rpc("unlock_producer_badge");
+  if (res.error) {
+    console.error("[seshn] unlockProducerBadge error", res.error);
+    return false;
+  }
+  return true;
 }
 
 function extOf(file: File): string {
@@ -159,7 +174,7 @@ export async function listProfiles(opts: ListProfilesOpts = {}): Promise<Profile
   const sb = getBrowserClient();
   let q = sb
     .from("profiles")
-    .select("id, username, display_name, bio, location, pronouns, roles, genres, is_pro, avatar_url, created_at");
+    .select("id, username, display_name, bio, location, pronouns, roles, genres, is_pro, has_producer_badge, avatar_url, created_at");
   if (opts.roles?.length) q = q.overlaps("roles", opts.roles);
   if (opts.genres?.length) q = q.overlaps("genres", opts.genres);
   if (opts.location?.trim()) {

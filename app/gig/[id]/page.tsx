@@ -13,6 +13,7 @@ import { getOrCreateConversation } from "@/lib/seshn/messaging";
 import { reportGig } from "@/lib/seshn/trust-safety";
 import { toast } from "@/lib/seshn/toast";
 import { confirm } from "@/lib/seshn/confirm";
+import { ProducerBadge } from "@/components/ProducerBadge";
 import { SeshnContract } from "@/lib/contract-template";
 import type { Application, Contract, Gig, GigOwner } from "@/lib/seshn/types";
 import GigRecommendations from "@/components/gig/GigRecommendations";
@@ -253,6 +254,7 @@ function OwnerApplicationCard({ app, gig, onChange }: { app: OwnerApp; gig: Gig;
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
             <a href={href} style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14, color: "var(--ink)", textDecoration: "none" }}>{a?.display_name || "Applicant"}</a>
             {a?.is_pro && <span className="pill solid" style={{ fontSize: 9, padding: "2px 6px" }}>✓ Pro</span>}
+            {a?.has_producer_badge && <ProducerBadge compact />}
             <span className={statusPillClass(app.status)} style={{ fontSize: 10 }}>{statusLabel(app.status)}</span>
           </div>
           <div className="t-meta" style={{ marginTop: 2 }}>
@@ -474,7 +476,7 @@ function GigView({ gig: initialGig }: { gig: Gig }) {
               {owner.is_pro && <span style={{ position: "absolute", bottom: -2, right: -2, background: "var(--frame)", borderRadius: 999, padding: "2px 5px", fontSize: 8, fontFamily: "var(--font-display)", fontWeight: 600, color: "var(--ink)", border: "1px solid var(--line)", lineHeight: 1, textTransform: "uppercase" }}>PRO</span>}
             </a>
             <div>
-              <a href={R.profile(owner.username)} style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14, color: "var(--ink)", textDecoration: "none" }}>{owner.display_name || "Artist"}</a>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 7 }}><a href={R.profile(owner.username)} style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14, color: "var(--ink)", textDecoration: "none" }}>{owner.display_name || "Artist"}</a>{owner.has_producer_badge && <ProducerBadge compact />}</span>
               <div className="t-meta">{owner.roles?.[0] || "Artist"}{owner.location ? " · " + owner.location : ""} · Posted {gig.created_at ? new Date(gig.created_at).toLocaleDateString() : "recently"}</div>
             </div>
           </div>
