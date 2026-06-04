@@ -68,6 +68,7 @@ export default function DawBar({ active, home = false }: { active?: string; home
             {LINKS.map(([label, href, key]) => (
               <a key={href} href={href} className={"txt" + (active === key ? " active" : "")}>{label.toUpperCase()}</a>
             ))}
+            <a href="/auth?mode=signin" className="txt">SIGN IN</a>
             <a href="/auth" className="cta">START SESSION →</a>
           </div>
           <button className="daw-hamburger" aria-label="Menu" onClick={() => setOpen(true)}>
@@ -84,6 +85,7 @@ export default function DawBar({ active, home = false }: { active?: string; home
             {LINKS.map(([label, href, key]) => (
               <a key={href} href={href} className={active === key ? "active" : ""} onClick={() => setOpen(false)}>{label.toUpperCase()}</a>
             ))}
+            <a href="/auth?mode=signin" onClick={() => setOpen(false)}>SIGN IN</a>
             <a href="/auth" className="btn primary cta" onClick={() => setOpen(false)}>START SESSION →</a>
           </div>
         </>
