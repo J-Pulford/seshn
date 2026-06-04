@@ -1,0 +1,152 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="1240" viewBox="0 0 1120 1240" font-family="Inter Tight, Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#1A6F3D"/>
+    </marker>
+    <marker id="arrowGrey" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#6E6C66"/>
+    </marker>
+  </defs>
+
+  <rect width="1120" height="1240" fill="#F3F1EA"/>
+
+  <!-- Header -->
+  <text x="48" y="56" font-size="30" font-weight="700" fill="#0D0D0D">Seshn escrow — where the money goes</text>
+  <text x="48" y="84" font-size="15" fill="#6E6C66">Funds are held by Stripe on Seshn's platform until the work is approved, then released to the collaborator. Example below: an agreed fee of $500.</text>
+
+  <!-- ============ SECTION 1: MONEY FLOW ============ -->
+  <text x="48" y="142" font-size="13" letter-spacing="2" font-weight="700" fill="#1A6F3D">1 · THE MONEY FLOW</text>
+
+  <!-- Owner node -->
+  <rect x="48" y="170" width="240" height="118" rx="14" fill="#FFFFFF" stroke="#D9D6CC"/>
+  <text x="168" y="202" text-anchor="middle" font-size="16" font-weight="700" fill="#0D0D0D">Owner (the client)</text>
+  <text x="168" y="226" text-anchor="middle" font-size="12.5" fill="#6E6C66">Funds the contract</text>
+  <text x="168" y="262" text-anchor="middle" font-size="24" font-weight="700" fill="#0D0D0D">Pays $540.99</text>
+
+  <!-- arrow owner -> escrow -->
+  <line x1="288" y1="229" x2="440" y2="229" stroke="#1A6F3D" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="364" y="216" text-anchor="middle" font-size="11.5" fill="#1A6F3D" font-weight="600">card charge</text>
+  <text x="364" y="248" text-anchor="middle" font-size="11" fill="#6E6C66">Stripe PaymentIntent</text>
+
+  <!-- Escrow node -->
+  <rect x="440" y="158" width="268" height="142" rx="14" fill="#16361F" stroke="#1A6F3D"/>
+  <text x="574" y="190" text-anchor="middle" font-size="16" font-weight="700" fill="#A8EBC8">ESCROW</text>
+  <text x="574" y="212" text-anchor="middle" font-size="11.5" fill="#A8EBC8">held by Stripe, on Seshn's platform</text>
+  <text x="574" y="252" text-anchor="middle" font-size="26" font-weight="700" fill="#FFFFFF">$540.99 locked</text>
+  <text x="574" y="278" text-anchor="middle" font-size="11.5" fill="#A8EBC8">nobody can touch it until release</text>
+
+  <!-- arrow escrow -> collaborator -->
+  <line x1="708" y1="229" x2="860" y2="229" stroke="#1A6F3D" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="784" y="216" text-anchor="middle" font-size="11.5" fill="#1A6F3D" font-weight="600">on release</text>
+  <text x="784" y="248" text-anchor="middle" font-size="11" fill="#6E6C66">Stripe transfer</text>
+
+  <!-- Collaborator node -->
+  <rect x="860" y="170" width="212" height="118" rx="14" fill="#FFFFFF" stroke="#D9D6CC"/>
+  <text x="966" y="202" text-anchor="middle" font-size="16" font-weight="700" fill="#0D0D0D">Collaborator</text>
+  <text x="966" y="226" text-anchor="middle" font-size="12.5" fill="#6E6C66">Gets their full quote</text>
+  <text x="966" y="262" text-anchor="middle" font-size="24" font-weight="700" fill="#1A6F3D">Receives $500</text>
+
+  <!-- deductions taken out of the charge -->
+  <line x1="574" y1="300" x2="574" y2="352" stroke="#6E6C66" stroke-width="2" marker-end="url(#arrowGrey)"/>
+  <text x="592" y="330" font-size="11.5" fill="#6E6C66">taken out of the charge</text>
+
+  <rect x="360" y="352" width="200" height="92" rx="12" fill="#FFFFFF" stroke="#D9D6CC"/>
+  <text x="460" y="382" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0D0D0D">Seshn keeps</text>
+  <text x="460" y="410" text-anchor="middle" font-size="22" font-weight="700" fill="#1A6F3D">$25.00</text>
+  <text x="460" y="430" text-anchor="middle" font-size="11" fill="#6E6C66">5% platform fee</text>
+
+  <rect x="588" y="352" width="200" height="92" rx="12" fill="#FFFFFF" stroke="#D9D6CC"/>
+  <text x="688" y="382" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0D0D0D">Stripe keeps</text>
+  <text x="688" y="410" text-anchor="middle" font-size="22" font-weight="700" fill="#6E6C66">≈ $15.99</text>
+  <text x="688" y="430" text-anchor="middle" font-size="11" fill="#6E6C66">card processing (2.9% + 30¢)</text>
+
+  <!-- equation strip -->
+  <rect x="48" y="470" width="1024" height="58" rx="12" fill="#ECEAE1" stroke="#D9D6CC"/>
+  <text x="68" y="498" font-size="13.5" fill="#0D0D0D" font-weight="600">The "payer covers all" rule:</text>
+  <text x="68" y="518" font-size="13" fill="#3A3A38">Owner pays $540.99  =  $500 fee  +  $25 Seshn (5%)  +  $15.99 card fee     →     collaborator always nets the full $500 they were quoted.</text>
+
+  <!-- ============ SECTION 2: LIFECYCLE ============ -->
+  <text x="48" y="596" font-size="13" letter-spacing="2" font-weight="700" fill="#1A6F3D">2 · THE LIFECYCLE (escrow.status)</text>
+
+  <!-- happy path row y=628 -->
+  <!-- awaiting_funds -->
+  <rect x="48" y="628" width="196" height="86" rx="12" fill="#FFFFFF" stroke="#D9D6CC"/>
+  <text x="146" y="662" text-anchor="middle" font-size="14.5" font-weight="700" fill="#0D0D0D">awaiting_funds</text>
+  <text x="146" y="686" text-anchor="middle" font-size="11.5" fill="#6E6C66">contract signed,</text>
+  <text x="146" y="702" text-anchor="middle" font-size="11.5" fill="#6E6C66">not yet paid</text>
+
+  <line x1="244" y1="671" x2="324" y2="671" stroke="#1A6F3D" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="284" y="660" text-anchor="middle" font-size="10.5" fill="#1A6F3D" font-weight="600">owner funds</text>
+
+  <!-- funded -->
+  <rect x="324" y="628" width="196" height="86" rx="12" fill="#16361F" stroke="#1A6F3D"/>
+  <text x="422" y="662" text-anchor="middle" font-size="14.5" font-weight="700" fill="#A8EBC8">funded</text>
+  <text x="422" y="686" text-anchor="middle" font-size="11.5" fill="#A8EBC8">money locked in</text>
+  <text x="422" y="702" text-anchor="middle" font-size="11.5" fill="#A8EBC8">escrow</text>
+
+  <line x1="520" y1="671" x2="600" y2="671" stroke="#1A6F3D" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="560" y="660" text-anchor="middle" font-size="10.5" fill="#1A6F3D" font-weight="600">delivers</text>
+
+  <!-- delivered -->
+  <rect x="600" y="628" width="196" height="86" rx="12" fill="#FFFFFF" stroke="#D9D6CC"/>
+  <text x="698" y="662" text-anchor="middle" font-size="14.5" font-weight="700" fill="#0D0D0D">delivered</text>
+  <text x="698" y="686" text-anchor="middle" font-size="11.5" fill="#6E6C66">collaborator submits;</text>
+  <text x="698" y="702" text-anchor="middle" font-size="11.5" fill="#6E6C66">approval clock starts</text>
+
+  <line x1="796" y1="671" x2="876" y2="671" stroke="#1A6F3D" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="836" y="655" text-anchor="middle" font-size="10.5" fill="#1A6F3D" font-weight="600">owner approves</text>
+  <text x="836" y="667" text-anchor="middle" font-size="9.5" fill="#6E6C66">or window passes</text>
+
+  <!-- released -->
+  <rect x="876" y="628" width="196" height="86" rx="12" fill="#2CCB73" stroke="#1A6F3D"/>
+  <text x="974" y="662" text-anchor="middle" font-size="14.5" font-weight="700" fill="#062C19">released</text>
+  <text x="974" y="686" text-anchor="middle" font-size="11.5" fill="#062C19">paid out to</text>
+  <text x="974" y="702" text-anchor="middle" font-size="11.5" fill="#062C19">the collaborator</text>
+
+  <!-- branch: funded -> refunded / cancelled (down from funded) -->
+  <line x1="422" y1="714" x2="422" y2="772" stroke="#6E6C66" stroke-width="2" marker-end="url(#arrowGrey)"/>
+  <text x="436" y="748" font-size="10.5" fill="#6E6C66">deadline missed / voided</text>
+  <rect x="324" y="772" width="196" height="74" rx="12" fill="#FBE9E9" stroke="#C0392B"/>
+  <text x="422" y="804" text-anchor="middle" font-size="14" font-weight="700" fill="#C0392B">refunded / cancelled</text>
+  <text x="422" y="826" text-anchor="middle" font-size="11.5" fill="#C0392B">money returns to the owner</text>
+
+  <!-- branch: delivered -> disputed (down from delivered) -->
+  <line x1="698" y1="714" x2="698" y2="772" stroke="#6E6C66" stroke-width="2" marker-end="url(#arrowGrey)"/>
+  <text x="712" y="748" font-size="10.5" fill="#6E6C66">either party flags a problem</text>
+  <rect x="600" y="772" width="196" height="74" rx="12" fill="#FFF3DC" stroke="#F6A635"/>
+  <text x="698" y="800" text-anchor="middle" font-size="14" font-weight="700" fill="#9A6712">disputed</text>
+  <text x="698" y="822" text-anchor="middle" font-size="11" fill="#9A6712">auto-release pauses;</text>
+  <text x="698" y="837" text-anchor="middle" font-size="11" fill="#9A6712">Seshn resolves: release / refund / split</text>
+
+  <!-- ============ SECTION 3: STEP BY STEP ============ -->
+  <text x="48" y="906" font-size="13" letter-spacing="2" font-weight="700" fill="#1A6F3D">3 · HOW IT MOVES THROUGH THE APP</text>
+
+  <g font-size="13.5" fill="#3A3A38">
+    <circle cx="60" cy="942" r="13" fill="#16361F"/><text x="60" y="947" text-anchor="middle" font-size="13" font-weight="700" fill="#A8EBC8">1</text>
+    <text x="86" y="947" font-weight="600" fill="#0D0D0D">Agree</text>
+    <text x="150" y="947">Owner accepts an application; both sign a contract that fixes the fee, splits, and an approval window.</text>
+
+    <circle cx="60" cy="980" r="13" fill="#16361F"/><text x="60" y="985" text-anchor="middle" font-size="13" font-weight="700" fill="#A8EBC8">2</text>
+    <text x="86" y="985" font-weight="600" fill="#0D0D0D">Fund</text>
+    <text x="150" y="985">Owner pays into escrow (Stripe PaymentIntent). The collaborator can now start, knowing the money is real and locked.</text>
+
+    <circle cx="60" cy="1018" r="13" fill="#16361F"/><text x="60" y="1023" text-anchor="middle" font-size="13" font-weight="700" fill="#A8EBC8">3</text>
+    <text x="86" y="1023" font-weight="600" fill="#0D0D0D">Deliver</text>
+    <text x="150" y="1023">Collaborator submits the work as deliverables. The escrow flips to "delivered" and the approval countdown begins.</text>
+
+    <circle cx="60" cy="1056" r="13" fill="#16361F"/><text x="60" y="1061" text-anchor="middle" font-size="13" font-weight="700" fill="#A8EBC8">4</text>
+    <text x="86" y="1061" font-weight="600" fill="#0D0D0D">Release</text>
+    <text x="150" y="1061">Owner approves — or the window lapses with no dispute — and Stripe transfers the fee to the collaborator's payout account.</text>
+
+    <circle cx="60" cy="1094" r="13" fill="#16361F"/><text x="60" y="1099" text-anchor="middle" font-size="13" font-weight="700" fill="#A8EBC8">5</text>
+    <text x="86" y="1099" font-weight="600" fill="#0D0D0D">Settle</text>
+    <text x="150" y="1099">Contract is marked completed; the deal shows up under "Earned" on the collaborator's Finances dashboard and "Spent" on the owner's.</text>
+  </g>
+
+  <!-- where it shows in-app -->
+  <rect x="48" y="1128" width="1024" height="66" rx="12" fill="#ECEAE1" stroke="#D9D6CC"/>
+  <text x="68" y="1156" font-size="12.5" font-weight="700" fill="#0D0D0D">Back in the app:</text>
+  <text x="68" y="1176" font-size="12.5" fill="#3A3A38">Contract page (sign + fund + status) · DMs/contract (schedule a call) · Finances dashboard (earned / in-escrow / spent / fees) · Notifications on every state change.</text>
+
+  <text x="48" y="1224" font-size="11" fill="#6E6C66">Figures from computeCharge() — default 5% platform fee (PLATFORM_FEE_BPS) and a 2.9% + 30¢ card-fee estimate. All amounts stored in cents. Stripe wiring activates once keys are set.</text>
+</svg>

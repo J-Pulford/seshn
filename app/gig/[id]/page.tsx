@@ -11,6 +11,7 @@ import { applyToGig, getMyApplication, listApplicationsForGig, updateApplication
 import { getOrCreateConversation } from "@/lib/seshn/messaging";
 import { reportGig } from "@/lib/seshn/trust-safety";
 import type { Application, Gig, GigOwner } from "@/lib/seshn/types";
+import GigRecommendations from "@/components/gig/GigRecommendations";
 import "./gig.css";
 
 const R = {
@@ -491,6 +492,7 @@ function GigView({ gig: initialGig }: { gig: Gig }) {
           {!isOwner && <div style={{ textAlign: "center", marginTop: 2 }}><GigReport gigId={gig.id} /></div>}
         </div>
       </div>
+      <GigRecommendations gig={gig} meId={me === undefined ? null : me?.id ?? null} />
     </div>
   );
 }
