@@ -12,6 +12,7 @@ import {
   sendMagicLink,
   signInWithGoogle,
   signInWithPassword,
+  signUpWithPassword,
   sendPasswordReset,
   setMyPassword,
   resendVerificationEmail,
@@ -34,6 +35,8 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"magic" | "password">("magic");
+  // Intent: are we creating an account (→ onboarding) or returning (→ sign in)?
+  const [authMode, setAuthMode] = useState<"signup" | "signin">("signup");
   const [status, setStatus] = useState<Status>("checking");
   const [errMsg, setErrMsg] = useState("");
   const [recoverMode, setRecoverMode] = useState(false);
@@ -50,6 +53,7 @@ export default function AuthPage() {
     const presetEmail = params.get("email") || "";
     setRecoverMode(recover);
     setVerifyMode(verify);
+    if (params.get("mode") === "signin") setAuthMode("signin");
     if (presetEmail) setEmail(presetEmail);
     setReady(true);
 
@@ -115,6 +119,51 @@ export default function AuthPage() {
       setStatus("sent");
     } catch (err) {
       setErrMsg((err as Error)?.message || "Couldn't send the link.");
+      setStatus("error");
+    }
+  }
+
+  // Toggle between create-account and sign-in intent, syncing the URL so the
+  // mode survives a refresh and can be linked to directly (?mode=signin).
+  function switchMode(m: "signup" | "signin") {
+    setAuthMode(m);
+    setErrMsg("");
+    setStatus("idle");
+    setPassword("");
+    const url = new URL(window.location.href);
+    url.searchParams.set("mode", m);
+    window.history.replaceState({}, "", url.toString());
+  }
+
+  async function onSignUpPassword(e?: React.FormEvent) {
+    e?.preventDefault();
+    if (!email || !email.includes("@")) {
+      setErrMsg("Please enter a valid email.");
+      setStatus("error");
+      return;
+    }
+    if (!password || password.length < 8) {
+      setErrMsg("Password must be at least 8 characters.");
+      setStatus("error");
+      return;
+    }
+    setStatus("sending");
+    setErrMsg("");
+    const next = new URLSearchParams(window.location.search).get("next");
+    if (next) sessionStorage.setItem("seshn_auth_next", next);
+    try {
+      const { data, error } = await signUpWithPassword(email, password);
+      if (error) throw error;
+      // If email confirmations are off, Supabase returns a session — go straight
+      // through (routeAfterAuth sends a profile-less new user to onboarding).
+      if (data.session) {
+        routeAfterAuth();
+        return;
+      }
+      // Otherwise we need them to confirm their email first.
+      window.location.href = "/auth?verify=1&email=" + encodeURIComponent(email);
+    } catch (err) {
+      setErrMsg((err as Error)?.message || "Couldn't create your account.");
       setStatus("error");
     }
   }
@@ -221,16 +270,30 @@ export default function AuthPage() {
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg)" }}>
       <nav className="top-nav">
         <a href="/" className="logo">Seshn</a>
-        <a href="/auth" style={{ fontSize: 13, color: "var(--ink-3)", textDecoration: "none", fontFamily: "var(--font-display)" }}>
-          Already on Seshn? <strong style={{ color: "var(--ink)" }}>Sign in</strong>
-        </a>
+        <button type="button" onClick={() => switchMode(authMode === "signup" ? "signin" : "signup")}
+          style={{ fontSize: 13, color: "var(--ink-3)", textDecoration: "none", fontFamily: "var(--font-display)", background: "none", border: "none", cursor: "pointer" }}>
+          {authMode === "signup" ? (
+            <>Already on Seshn? <strong style={{ color: "var(--ink)" }}>Sign in</strong></>
+          ) : (
+            <>New to Seshn? <strong style={{ color: "var(--ink)" }}>Create an account</strong></>
+          )}
+        </button>
       </nav>
 
       <div className="auth-grid" style={{ flex: 1 }}>
         <div className="auth-left">
-          <div className="eyebrow">Join Seshn</div>
-          <h1>Make your first<br />session.</h1>
-          <p className="sub">Create a profile, post a brief, find your collaborators. Free forever — no follower counts, no noise.</p>
+          <div className="eyebrow">{authMode === "signup" ? "Join Seshn" : "Welcome back"}</div>
+          {authMode === "signup" ? (
+            <>
+              <h1>Make your first<br />session.</h1>
+              <p className="sub">Create a profile, post a brief, find your collaborators. Free forever — no follower counts, no noise.</p>
+            </>
+          ) : (
+            <>
+              <h1>Pick up where<br />you left off.</h1>
+              <p className="sub">Sign in to your profile, your gigs, and your messages.</p>
+            </>
+          )}
 
           {!ready ? (
             <div className="form-stack"><div style={{ fontFamily: "var(--font-display)", fontSize: 13, color: "var(--ink-3)" }}>Loading…</div></div>
@@ -271,16 +334,25 @@ export default function AuthPage() {
               {errMsg && <div style={errStyle}>{errMsg}</div>}
             </form>
           ) : (
-            <form className="form-stack" onSubmit={mode === "password" ? onSignInPassword : onSendMagic}>
+            <form
+              className="form-stack"
+              onSubmit={
+                mode === "password"
+                  ? authMode === "signup"
+                    ? onSignUpPassword
+                    : onSignInPassword
+                  : onSendMagic
+              }
+            >
               <button type="button" className="btn-oauth" onClick={onGoogle} disabled={status === "sending" || status === "checking"}>
                 <GoogleIcon />
-                Continue with Google
+                {authMode === "signup" ? "Sign up with Google" : "Continue with Google"}
               </button>
               <div className="divider"><span>or with email</span></div>
 
               {status === "sent" ? (
                 <div style={{ padding: "16px 18px", borderRadius: 12, border: "1px solid var(--accent-d)", background: "var(--accent-bg)", color: "var(--accent-d)", fontFamily: "var(--font-display)", fontSize: 13, lineHeight: 1.45 }}>
-                  <strong>Check your inbox.</strong> We sent {mode === "password" ? "a reset link" : "a magic link"} to <b>{email}</b>. Open it on this device to continue.
+                  <strong>Check your inbox.</strong> We sent {mode === "password" ? "a reset link" : authMode === "signup" ? "a sign-up link" : "a sign-in link"} to <b>{email}</b>. Open it on this device to continue.
                 </div>
               ) : (
                 <>
@@ -288,12 +360,20 @@ export default function AuthPage() {
                     onChange={(e) => { setEmail(e.target.value); if (status === "error") setStatus("idle"); }}
                     disabled={status === "sending" || status === "checking"} autoComplete="email" />
                   {mode === "password" && (
-                    <input type="password" className="input-field" placeholder="Password" value={password}
+                    <input type="password" className="input-field" placeholder={authMode === "signup" ? "Create a password (min 8 characters)" : "Password"} value={password}
                       onChange={(e) => { setPassword(e.target.value); if (status === "error") setStatus("idle"); }}
-                      disabled={status === "sending" || status === "checking"} autoComplete="current-password" />
+                      disabled={status === "sending" || status === "checking"} autoComplete={authMode === "signup" ? "new-password" : "current-password"} />
                   )}
                   <button type="submit" className="btn-primary" disabled={status === "sending" || status === "checking" || !email || (mode === "password" && !password)}>
-                    {status === "checking" ? "Loading…" : status === "sending" ? (mode === "password" ? "Signing in…" : "Sending link…") : mode === "password" ? "Sign in →" : "Send magic link →"}
+                    {status === "checking"
+                      ? "Loading…"
+                      : status === "sending"
+                        ? mode === "password"
+                          ? authMode === "signup" ? "Creating account…" : "Signing in…"
+                          : "Sending link…"
+                        : mode === "password"
+                          ? authMode === "signup" ? "Create account →" : "Sign in →"
+                          : authMode === "signup" ? "Send sign-up link →" : "Email me a sign-in link →"}
                   </button>
                   {errMsg && <div style={{ ...errStyle, marginTop: -4 }}>{errMsg}</div>}
 
@@ -301,7 +381,7 @@ export default function AuthPage() {
                     <button type="button" onClick={() => { setMode(mode === "password" ? "magic" : "password"); setErrMsg(""); setStatus("idle"); }} style={linkBtn}>
                       {mode === "password" ? "Use a magic link instead" : "Use a password instead"}
                     </button>
-                    {mode === "password" && (
+                    {mode === "password" && authMode === "signin" && (
                       <button type="button" onClick={onSendReset} disabled={status === "sending"} style={linkBtn}>
                         Forgot password?
                       </button>
@@ -312,8 +392,16 @@ export default function AuthPage() {
             </form>
           )}
 
-          <p className="tos">By signing up you agree to Seshn&apos;s <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
-          <p className="signin-link">Already on Seshn? <a href="/auth">Sign in</a></p>
+          {authMode === "signup" && (
+            <p className="tos">By signing up you agree to Seshn&apos;s <a href="#">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>.</p>
+          )}
+          <p className="signin-link">
+            {authMode === "signup" ? (
+              <>Already on Seshn? <a role="button" tabIndex={0} onClick={() => switchMode("signin")} onKeyDown={(e) => { if (e.key === "Enter") switchMode("signin"); }} style={{ cursor: "pointer" }}>Sign in</a></>
+            ) : (
+              <>New to Seshn? <a role="button" tabIndex={0} onClick={() => switchMode("signup")} onKeyDown={(e) => { if (e.key === "Enter") switchMode("signup"); }} style={{ cursor: "pointer" }}>Create an account</a></>
+            )}
+          </p>
         </div>
 
         <div className="auth-right">
