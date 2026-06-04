@@ -12,6 +12,7 @@ import { createContract, getContractForApplication } from "@/lib/seshn/contracts
 import { getOrCreateConversation } from "@/lib/seshn/messaging";
 import { reportGig } from "@/lib/seshn/trust-safety";
 import { toast } from "@/lib/seshn/toast";
+import { confirm } from "@/lib/seshn/confirm";
 import { SeshnContract } from "@/lib/contract-template";
 import type { Application, Contract, Gig, GigOwner } from "@/lib/seshn/types";
 import GigRecommendations from "@/components/gig/GigRecommendations";
@@ -159,7 +160,7 @@ function ApplicationStatusCard({ application, owner, onWithdrawn }: { applicatio
   }, [application.id, status]);
 
   const withdraw = async () => {
-    if (!window.confirm("Withdraw your application? You can re-apply only by contacting the poster.")) return;
+    if (!(await confirm({ title: "Withdraw application?", message: "You can re-apply only by contacting the poster.", confirmLabel: "Withdraw", danger: true }))) return;
     setBusy(true);
     setErr("");
     try {
@@ -391,7 +392,12 @@ function GigView({ gig: initialGig }: { gig: Gig }) {
     if (statusBusy) return;
     const next = gig.status === "closed" ? "open" : "closed";
     const verb = next === "closed" ? "close" : "reopen";
-    if (!window.confirm("Are you sure you want to " + verb + " this gig?" + (next === "closed" ? "\n\nIt will be hidden from the feed and stop accepting new applications." : ""))) return;
+    if (!(await confirm({
+      title: (next === "closed" ? "Close" : "Reopen") + " this gig?",
+      message: next === "closed" ? "It will be hidden from the feed and stop accepting new applications." : "It will be visible in the feed and accept applications again.",
+      confirmLabel: verb.charAt(0).toUpperCase() + verb.slice(1),
+      danger: next === "closed",
+    }))) return;
     setStatusBusy(true);
     try {
       const updated = await setGigStatus(gig.id, next);

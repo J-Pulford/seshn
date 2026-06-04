@@ -8,6 +8,7 @@ import { updateNotificationPrefs } from "@/lib/seshn/notifications";
 import { emitProfileUpdated } from "@/lib/seshn/profiles";
 import { listConnectedAccounts, disconnectAccount, startSpotifyConnect, completeSpotifyConnect } from "@/lib/seshn/connected-accounts";
 import { getPayoutStatus, startPayoutOnboarding, type PayoutStatus } from "@/lib/seshn/payments";
+import { confirm } from "@/lib/seshn/confirm";
 import type { ConnectedAccount, Profile } from "@/lib/seshn/types";
 import "./settings.css";
 
@@ -145,7 +146,7 @@ function ConnectedAccountsSection({ accounts, onChange }: { accounts: ConnectedA
     }
   }
   async function disconnect(provider: string) {
-    if (!window.confirm("Disconnect " + provider + "?")) return;
+    if (!(await confirm({ title: "Disconnect " + provider + "?", confirmLabel: "Disconnect", danger: true }))) return;
     setBusy((prev) => ({ ...prev, [provider]: true }));
     try {
       await disconnectAccount(provider);
@@ -250,7 +251,7 @@ function DangerSection({ profile }: { profile: Profile }) {
 
   async function doDelete() {
     if (!matched || busy) return;
-    if (!window.confirm("Final check: this permanently deletes your account, profile, gigs, applications, and conversations. There is no undo. Continue?")) return;
+    if (!(await confirm({ title: "Delete your account?", message: "This permanently deletes your account, profile, gigs, applications, and conversations. There is no undo.", confirmLabel: "Delete forever", cancelLabel: "Keep my account", danger: true }))) return;
     setBusy(true);
     setErr("");
     try {

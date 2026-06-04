@@ -142,7 +142,9 @@ body.smn-lock { overflow: hidden; }
 .btn.sm { padding: 6px 10px; font-size: 11px; }
 .btn.lg { padding: 12px 20px; font-size: 14px; }
 .btn.block { width: 100%; }
+.btn.danger { background: var(--danger); color: #fff; border-color: transparent; }
 .btn:hover { opacity: 0.88; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .avatar { border-radius: 50%; background: var(--ph); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 600; color: var(--ink-3); flex-shrink: 0; position: relative; }
 .avatar.sm { width: 28px; height: 28px; font-size: 10px; }
