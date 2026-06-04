@@ -7,6 +7,7 @@ import { getUser, listProfiles } from "@/lib/seshn/profiles";
 import { listGigs } from "@/lib/seshn/gigs";
 import { GIG_ROLES, GIG_GENRES } from "@/lib/seshn/constants";
 import WelcomeChecklist from "@/components/WelcomeChecklist";
+import { ProducerBadge } from "@/components/ProducerBadge";
 import type { Gig, Profile } from "@/lib/seshn/types";
 import "./feed.css";
 
@@ -96,6 +97,7 @@ function GigCard({ gig }: { gig: Gig }) {
         <div className="col" style={{ flex: 1, gap: 2, minWidth: 0 }}>
           <div className="row" style={{ gap: 6 }}>
             <span style={{ fontWeight: 600, fontFamily: "var(--font-display)", fontSize: 13 }}>{owner?.display_name || "Artist"}</span>
+            {owner?.has_producer_badge && <ProducerBadge compact />}
             <span className="dot" />
             <span className="t-meta">{timeAgo(gig.created_at)} ago</span>
             {isBoosted && <span className="pill solid" style={{ marginLeft: "auto", fontSize: 9 }}>★ Boosted</span>}
@@ -161,7 +163,7 @@ function SuggestedArtist({ profile }: { profile: Profile }) {
         </span>
       </a>
       <div className="col" style={{ gap: 1, flex: 1, minWidth: 0 }}>
-        <a href={href} style={{ fontFamily: "var(--font-display)", fontSize: 12.5, fontWeight: 600, color: "var(--ink)", textDecoration: "none" }}>{profile.display_name || profile.username}</a>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, minWidth: 0 }}><a href={href} style={{ fontFamily: "var(--font-display)", fontSize: 12.5, fontWeight: 600, color: "var(--ink)", textDecoration: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{profile.display_name || profile.username}</a>{profile.has_producer_badge && <ProducerBadge compact />}</span>
         <span className="t-meta" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sub || "—"}</span>
       </div>
       <a href={href} className="btn sm">View</a>

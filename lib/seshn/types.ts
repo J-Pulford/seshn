@@ -91,6 +91,7 @@ export interface Profile {
   roles: string[];
   genres: string[];
   is_pro: boolean;
+  has_producer_badge?: boolean;
   avatar_url: string;
   cover_url?: string;
   notification_prefs?: Record<string, boolean>;
@@ -126,6 +127,7 @@ export interface GigOwner {
   username: string;
   display_name: string;
   is_pro: boolean;
+  has_producer_badge?: boolean;
   avatar_url: string;
   location?: string;
   roles?: string[];

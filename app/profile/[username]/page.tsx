@@ -12,6 +12,7 @@ import { SOCIAL_PLATFORMS, AVAILABILITY_OPTIONS } from "@/lib/seshn/constants";
 import { embedFor } from "@/lib/seshn/embeds";
 import { toast } from "@/lib/seshn/toast";
 import { confirm } from "@/lib/seshn/confirm";
+import { ProducerBadge } from "@/components/ProducerBadge";
 import type { ConnectedAccount, Credit, FeaturedItem, GalleryItem, Gig, Profile, ProfileStats, Service, SocialLinks } from "@/lib/seshn/types";
 import "./profile.css";
 
@@ -660,7 +661,7 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
       </div>
 
       <div className="profile-name-block" style={{ background: "var(--surface)", borderBottom: "1px solid var(--line)" }}>
-        <div className="row" style={{ gap: 10, marginBottom: 5, flexWrap: "wrap" }}><h1 className="t-h1" style={{ fontSize: 30 }}>{profile.display_name}</h1></div>
+        <div className="row" style={{ gap: 10, marginBottom: 5, flexWrap: "wrap", alignItems: "center" }}><h1 className="t-h1" style={{ fontSize: 30 }}>{profile.display_name}</h1>{profile.has_producer_badge && <ProducerBadge />}</div>
         <div className="row" style={{ gap: 14, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
           {(() => { const a = availabilityMeta(profile.availability); return a ? (
             <span className="t-meta" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "3px 10px", borderRadius: 999, border: "1px solid var(--line)", background: "var(--surface-2)", fontFamily: "var(--font-display)", fontWeight: 600 }}>

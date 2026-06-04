@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Vinyl } from "@/components/visual/Vinyl";
+import { getProfile, getUser, unlockProducerBadge, emitProfileUpdated } from "@/lib/seshn/profiles";
 import "./producer-mode.css";
 
 // Hidden easter egg: the Konami code (↑↑↓↓←→←→ B A) drops the beat — a vinyl
@@ -62,6 +63,22 @@ export default function ProducerMode() {
       }
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => setActive(false), 4600);
+      // Persist the earned badge for signed-in members, then refresh any
+      // profile-aware UI (e.g. the nav) so it shows without a reload.
+      void persistBadge();
+    }
+
+    async function persistBadge() {
+      try {
+        const u = await getUser();
+        if (!u) return; // anonymous visitors still get the show, just no badge
+        const ok = await unlockProducerBadge();
+        if (!ok) return;
+        const p = await getProfile({ id: u.id });
+        if (p) emitProfileUpdated(p);
+      } catch {
+        /* easter egg — never surface errors */
+      }
     }
 
     function onKey(e: KeyboardEvent) {
