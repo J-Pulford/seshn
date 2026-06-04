@@ -67,6 +67,27 @@ export async function getContractForApplication(applicationId: string): Promise<
   return (res.data as unknown as Contract) ?? null;
 }
 
+// Count contracts awaiting *my* signature (for the nav badge). RLS already
+// scopes contracts to the parties; we just filter to the awaiting state where
+// my side hasn't signed yet.
+export async function countContractsNeedingMySignature(): Promise<number> {
+  const sb = getBrowserClient();
+  const u = await getUser();
+  if (!u) return 0;
+  const res = await sb
+    .from("contracts")
+    .select("owner_id, collaborator_id, owner_signed_at, collaborator_signed_at")
+    .eq("status", "awaiting_signatures");
+  if (res.error) {
+    console.error("[seshn] countContractsNeedingMySignature error", res.error);
+    return 0;
+  }
+  type Row = { owner_id: string; collaborator_id: string; owner_signed_at: string | null; collaborator_signed_at: string | null };
+  return ((res.data as unknown as Row[]) || []).filter(
+    (c) => (c.owner_id === u.id && !c.owner_signed_at) || (c.collaborator_id === u.id && !c.collaborator_signed_at),
+  ).length;
+}
+
 export async function createContract(application: Application, terms: Record<string, unknown>, templateVersion?: string | null): Promise<Contract> {
   const sb = getBrowserClient();
   const u = await getUser();

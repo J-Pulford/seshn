@@ -393,7 +393,7 @@ export default function AuthPage() {
           )}
 
           {authMode === "signup" && (
-            <p className="tos">By signing up you agree to Seshn&apos;s <a href="#">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>.</p>
+            <p className="tos">By signing up you agree to Seshn&apos;s <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>.</p>
           )}
           <p className="signin-link">
             {authMode === "signup" ? (

@@ -6,6 +6,7 @@ import Nav from "@/components/Nav";
 import { requireProfile } from "@/lib/seshn/auth";
 import { listMyApplications, updateApplicationStatus } from "@/lib/seshn/applications";
 import { getContractForApplication } from "@/lib/seshn/contracts";
+import { toast } from "@/lib/seshn/toast";
 import type { Application, Contract, Gig } from "@/lib/seshn/types";
 import "./applications.css";
 
@@ -54,8 +55,9 @@ function ApplicationRow({ app, onChange }: { app: MyApplication; onChange: (a: M
     try {
       const updated = await updateApplicationStatus(app.id, "withdrawn");
       onChange({ ...app, ...updated });
+      toast.success("Application withdrawn.");
     } catch (e) {
-      alert((e as Error)?.message || "Couldn't withdraw.");
+      toast.error((e as Error)?.message || "Couldn't withdraw.");
     } finally {
       setBusy(false);
     }

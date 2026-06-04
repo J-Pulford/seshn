@@ -7,6 +7,7 @@ import Nav from "@/components/Nav";
 import { requireProfile } from "@/lib/seshn/auth";
 import { getContract, sendContract, signContract, declineContract, cancelContract, updateContractTerms } from "@/lib/seshn/contracts";
 import { getOrCreateConversation } from "@/lib/seshn/messaging";
+import { toast } from "@/lib/seshn/toast";
 import { render as renderAgreement, hashAgreement, fmtMoney, SeshnContract, type AgreementDoc, type Paragraph } from "@/lib/contract-template";
 import type { Contract } from "@/lib/seshn/types";
 import "./contract.css";
@@ -397,13 +398,13 @@ export default function ContractPage() {
     if (!contract) return;
     if (!window.confirm("Send this contract to @" + (contract.collaborator?.username) + " for signing? Terms will lock once sent.")) return;
     setBusy(true); setErr("");
-    try { await sendContract(contract.id); await refresh(); } catch (e) { setErr((e as Error)?.message || "Could not send contract."); } finally { setBusy(false); }
+    try { await sendContract(contract.id); await refresh(); toast.success("Contract sent for signing."); } catch (e) { setErr((e as Error)?.message || "Could not send contract."); } finally { setBusy(false); }
   }
   async function doSign() {
     if (!contract) return;
     if (!agreementHash) { setErr("Agreement hash not ready yet — try again in a moment."); return; }
     setBusy(true); setErr("");
-    try { await signContract(contract.id, agreementHash); await refresh(); } catch (e) { setErr((e as Error)?.message || "Could not sign contract."); } finally { setBusy(false); }
+    try { await signContract(contract.id, agreementHash); await refresh(); toast.success("Signed. We've recorded your signature."); } catch (e) { setErr((e as Error)?.message || "Could not sign contract."); } finally { setBusy(false); }
   }
   async function doDecline(reason: string) {
     if (!contract) return;
@@ -424,7 +425,7 @@ export default function ContractPage() {
       const cid = await getOrCreateConversation(otherId);
       window.location.href = `/inbox?c=${encodeURIComponent(cid)}&schedule=1`;
     } catch (e) {
-      alert((e as Error)?.message || "Couldn't open a conversation to schedule.");
+      toast.error((e as Error)?.message || "Couldn't open a conversation to schedule.");
     }
   }
 
