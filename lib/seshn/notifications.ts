@@ -12,9 +12,10 @@ export async function listNotifications(opts: { limit?: number } = {}): Promise<
   const res = await sb
     .from("notifications")
     .select(
-      "id, kind, created_at, read_at, gig_id, application_id, conversation_id, " +
+      "id, kind, created_at, read_at, gig_id, application_id, conversation_id, meeting_id, " +
         "actor:profiles!actor_id(id, username, display_name, avatar_url), " +
-        "gig:gigs!gig_id(id, title, role)",
+        "gig:gigs!gig_id(id, title, role), " +
+        "meeting:meetings!meeting_id(id, title, starts_at, status)",
     )
     .eq("user_id", u.id)
     .order("created_at", { ascending: false })

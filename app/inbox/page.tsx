@@ -9,6 +9,7 @@ import {
   subscribeToMessages, subscribeToMyConversations, sendMessage, uploadDmAttachment,
 } from "@/lib/seshn/messaging";
 import type { ConversationWithMeta, DmAttachment, GigOwner, Message } from "@/lib/seshn/types";
+import MeetingScheduler from "@/components/meetings/MeetingScheduler";
 import "./inbox.css";
 
 const profileHref = (u?: string) => `/profile/${encodeURIComponent(u || "")}`;
@@ -261,6 +262,14 @@ function DmPanel({ convo, meId, onMessageSent, onBack }: { convo: ConversationWi
         </div>
         <div className="dm-header-right"><a href={href} className="btn sm">View profile</a></div>
       </div>
+      {convo.other?.id && (
+        <MeetingScheduler
+          conversationId={convo.id}
+          otherUser={convo.other}
+          meId={meId}
+          autoOpen={typeof window !== "undefined" && new URLSearchParams(window.location.search).get("schedule") === "1"}
+        />
+      )}
       <MessagesPane convo={convo} messages={messages} meId={meId} />
       <Composer onSend={send} placeholderName={o.display_name || o.username || ""} />
     </div>

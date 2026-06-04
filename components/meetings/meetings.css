@@ -1,0 +1,74 @@
+/* Meeting scheduler — used inside the DM panel and the contract page. Reads the
+ * global token layer so it themes with the app. */
+
+.mtg-section { border-bottom: 1px solid var(--line); background: var(--surface); }
+.mtg-section-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 16px; }
+.mtg-section-toggle {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: none; border: none; cursor: pointer; padding: 4px 0;
+  font-family: var(--font-display); font-weight: 600; font-size: 12.5px; color: var(--ink-2);
+}
+.mtg-section-toggle:hover { color: var(--ink); }
+
+.mtg-list { display: flex; flex-direction: column; gap: 8px; padding: 0 12px 12px; max-height: 280px; overflow-y: auto; }
+.mtg-empty { padding: 12px 6px; font-family: var(--font-display); font-size: 12px; color: var(--ink-3); }
+
+.mtg-card {
+  border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--frame);
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 10px;
+}
+.mtg-card.status-confirmed { border-color: var(--accent-d); }
+.mtg-card.status-declined, .mtg-card.status-cancelled { opacity: 0.72; }
+
+.mtg-card-top { display: flex; gap: 11px; align-items: flex-start; }
+.mtg-icon {
+  width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--accent-bg); color: var(--accent-d);
+}
+.mtg-card-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.mtg-card-title { font-family: var(--font-display); font-weight: 600; font-size: 14px; color: var(--ink); }
+.mtg-card-time { font-family: var(--font-display); font-weight: 500; font-size: 12.5px; color: var(--ink-2); }
+.mtg-card-where { font-size: 11.5px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; }
+.mtg-card-where a { color: var(--accent-d); text-decoration: none; }
+.mtg-card-agenda { font-size: 12px; color: var(--ink-3); line-height: 1.5; margin-top: 2px; white-space: pre-wrap; }
+
+.mtg-badge {
+  font-family: var(--font-display); font-weight: 600; font-size: 10px; letter-spacing: 0.03em;
+  padding: 3px 8px; border-radius: var(--r-pill); white-space: nowrap; flex-shrink: 0; text-transform: uppercase;
+}
+.mtg-badge.proposed { background: rgba(246,166,53,0.16); color: #9a6712; }
+.mtg-badge.confirmed { background: var(--accent-bg); color: var(--accent-d); }
+.mtg-badge.declined, .mtg-badge.cancelled { background: var(--surface-2); color: var(--ink-3); }
+.mtg-badge.completed { background: var(--surface-2); color: var(--ink-3); }
+
+.mtg-card-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mtg-waiting { font-family: var(--font-display); font-size: 11.5px; color: var(--ink-3); font-style: italic; }
+.mtg-note { font-family: var(--font-display); font-size: 11.5px; color: var(--ink-3); }
+
+/* modal */
+.mtg-backdrop {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(13,13,13,0.5); backdrop-filter: blur(2px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.mtg-modal {
+  width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.28);
+}
+.mtg-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+.mtg-modal-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+.mtg-modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 18px; border-top: 1px solid var(--line); }
+
+.mtg-field { display: flex; flex-direction: column; gap: 6px; font-family: var(--font-display); font-weight: 600; font-size: 12px; color: var(--ink); }
+.mtg-field .input { font-weight: 400; font-size: 14px; }
+.mtg-field textarea.input { resize: vertical; line-height: 1.5; }
+.mtg-row3 { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 12px; }
+.mtg-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mtg-err { color: var(--danger); font-family: var(--font-display); font-weight: 500; font-size: 12.5px; }
+
+@media (max-width: 560px) {
+  .mtg-row3, .mtg-row2 { grid-template-columns: 1fr; }
+  .mtg-field .input { font-size: 16px; }
+}

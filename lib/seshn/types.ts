@@ -251,8 +251,29 @@ export interface Notification {
   gig_id: string | null;
   application_id: string | null;
   conversation_id: string | null;
+  meeting_id?: string | null;
   actor?: { id: string; username: string; display_name: string; avatar_url: string } | null;
   gig?: { id: string; title: string; role: string } | null;
+  meeting?: { id: string; title: string; starts_at: string; status: string } | null;
+}
+
+export type MeetingStatus = "proposed" | "confirmed" | "declined" | "cancelled" | "completed";
+
+export interface Meeting {
+  id: string;
+  conversation_id: string | null;
+  contract_id: string | null;
+  organizer_id: string;
+  invitee_id: string;
+  title: string;
+  agenda: string;
+  location: string;
+  meeting_url: string;
+  starts_at: string;
+  ends_at: string;
+  status: MeetingStatus;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ConnectedAccount {

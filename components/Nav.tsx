@@ -64,6 +64,12 @@ function notifText(n: Notification) {
   if (n.kind === "application_accepted") return `${actor} accepted your application to ${gigTitle}`;
   if (n.kind === "application_rejected") return `${actor} passed on your application to ${gigTitle}`;
   if (n.kind === "message_received") return `${actor} sent you a message`;
+  const meetingTitle = n.meeting?.title || "a meeting";
+  if (n.kind === "meeting_proposed") return `${actor} proposed ${meetingTitle}`;
+  if (n.kind === "meeting_updated") return `${actor} rescheduled ${meetingTitle}`;
+  if (n.kind === "meeting_confirmed") return `${actor} confirmed ${meetingTitle}`;
+  if (n.kind === "meeting_declined") return `${actor} declined ${meetingTitle}`;
+  if (n.kind === "meeting_cancelled") return `${actor} cancelled ${meetingTitle}`;
   return "New activity";
 }
 
@@ -71,6 +77,7 @@ function notifHref(n: Notification): string | null {
   if (n.kind === "application_received" && n.gig_id) return R.gig(n.gig_id);
   if ((n.kind === "application_accepted" || n.kind === "application_rejected") && n.gig_id) return R.gig(n.gig_id);
   if (n.kind === "message_received" && n.conversation_id) return R.inboxConvo(n.conversation_id);
+  if (n.kind.startsWith("meeting_") && n.conversation_id) return R.inboxConvo(n.conversation_id);
   return null;
 }
 
