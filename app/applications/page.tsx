@@ -5,8 +5,11 @@ import type { User } from "@supabase/supabase-js";
 import Nav from "@/components/Nav";
 import { requireProfile } from "@/lib/seshn/auth";
 import { listMyApplications, updateApplicationStatus } from "@/lib/seshn/applications";
-import type { Application, Gig } from "@/lib/seshn/types";
+import { getContractForApplication } from "@/lib/seshn/contracts";
+import type { Application, Contract, Gig } from "@/lib/seshn/types";
 import "./applications.css";
+
+const contractHref = (id: string) => `/contract/${encodeURIComponent(id)}`;
 
 // listMyApplications embeds the gig (+ its owner).
 type MyApplication = Application & { gig?: Gig };
@@ -33,6 +36,17 @@ function ApplicationRow({ app, onChange }: { app: MyApplication; onChange: (a: M
   const g = app.gig || ({} as Gig);
   const owner = g.owner;
   const [busy, setBusy] = useState(false);
+  const [contract, setContract] = useState<Contract | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (app.status === "accepted") {
+      getContractForApplication(app.id).then((c) => { if (!cancelled) setContract(c); }).catch(() => {});
+    } else {
+      setContract(null);
+    }
+    return () => { cancelled = true; };
+  }, [app.id, app.status]);
 
   const withdraw = async () => {
     if (!window.confirm("Withdraw your application?")) return;
@@ -77,6 +91,9 @@ function ApplicationRow({ app, onChange }: { app: MyApplication; onChange: (a: M
         <div style={{ display: "flex", gap: 6 }}>
           {app.status === "pending" && <button className="btn sm" onClick={withdraw} disabled={busy}>{busy ? "…" : "Withdraw"}</button>}
           {g.id && <a href={gigHref(g.id)} className="btn sm">View gig</a>}
+          {app.status === "accepted" && contract && (
+            <a href={contractHref(contract.id)} className="btn primary sm">{contract.status === "awaiting_signatures" ? "Review & sign" : "View contract"}</a>
+          )}
         </div>
       </div>
     </div>
