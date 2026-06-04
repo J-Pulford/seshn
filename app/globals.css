@@ -57,6 +57,9 @@
   --danger:    #C0392B;
   --danger-bg: #FBE9E9;
   --cherry:    #C43D3F;
+  /* Amber "warn"/pending — readable text + tint for each theme. */
+  --warn-ink:  #8A5B0F;
+  --warn-bg:   rgba(246,166,53,0.16);
 
   /* Landing is dark-on-brand in both themes (marketing surface). */
   --land-bg: #0A0A09;
@@ -96,6 +99,8 @@
   --danger:    #FF5E5E;
   --danger-bg: #3A1D1D;
   --cherry:    #FF7A7A;
+  --warn-ink:  #F6A635;
+  --warn-bg:   rgba(246,166,53,0.20);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
