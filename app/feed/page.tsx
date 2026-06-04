@@ -6,6 +6,7 @@ import { AlbumArt } from "@/components/visual/AlbumArt";
 import { getUser, listProfiles } from "@/lib/seshn/profiles";
 import { listGigs } from "@/lib/seshn/gigs";
 import { GIG_ROLES, GIG_GENRES } from "@/lib/seshn/constants";
+import WelcomeChecklist from "@/components/WelcomeChecklist";
 import type { Gig, Profile } from "@/lib/seshn/types";
 import "./feed.css";
 
@@ -264,6 +265,7 @@ export default function FeedPage() {
 
         {/* Main feed */}
         <main style={{ minWidth: 0 }}>
+          <WelcomeChecklist />
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 12, flexWrap: "wrap" }}>
             <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 22, letterSpacing: "-0.02em" }}>
               Live feed
