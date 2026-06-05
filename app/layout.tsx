@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import ProducerMode from "@/components/easter/ProducerMode";
 import Toaster from "@/components/Toaster";
 import ConfirmHost from "@/components/ConfirmHost";
+import AuthLinkCatcher from "@/components/AuthLinkCatcher";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
+        <AuthLinkCatcher />
         {children}
         <ProducerMode />
         <Toaster />

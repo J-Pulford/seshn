@@ -57,9 +57,17 @@ export default function AuthPage() {
     if (presetEmail) setEmail(presetEmail);
     setReady(true);
 
+    // An auth code (?code=, PKCE) or token (#access_token, implicit) in the URL
+    // means the client is still exchanging it for a session. Don't auto-route
+    // yet — let onAuthStateChange decide (SIGNED_IN → route, PASSWORD_RECOVERY →
+    // show the reset form), so a recovery link without ?recover=1 isn't bounced
+    // straight to the profile before we know it's a recovery.
+    const pendingExchange =
+      params.has("code") || /(access_token|type=recovery)=?/.test(window.location.hash || "");
+
     const sb = getBrowserClient();
     getUser().then((u) => {
-      if (!u || recover) {
+      if (!u || recover || pendingExchange) {
         setStatus("idle");
         return;
       }
@@ -79,7 +87,13 @@ export default function AuthPage() {
     });
 
     const { data } = sb.auth.onAuthStateChange((event, session) => {
-      if (event === "PASSWORD_RECOVERY") return; // stay on the recover form
+      if (event === "PASSWORD_RECOVERY") {
+        // Recovery session established — surface the "set a new password" form,
+        // even if the URL never carried ?recover=1 (e.g. a PKCE recovery link).
+        setRecoverMode(true);
+        setStatus("idle");
+        return;
+      }
       if (event === "SIGNED_IN" && session && !recover && isEmailVerified(session.user)) {
         routeAfterAuth();
       }
