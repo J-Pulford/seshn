@@ -38,11 +38,40 @@ _Last updated: 2026-06-05_
       auth rate limits. Required before launch.
 
 ## 🟡 Privacy
-- [ ] **Privacy work** (to be scoped). Capture specifics here — e.g. profile
-      visibility controls, data export / "download my data", account deletion UX
-      (note: `delete_my_account` RPC + `deleteMyAccount()` already exist), blocked
-      users, what's exposed to `anon` vs `authenticated`, cookie/consent. _Expand
-      with the exact requirements when we pick this up._
+- [ ] **Public profiles — product decision.** Profile pages (`/profile/[username]`)
+      are intentionally viewable logged-out (no `requireProfile` gate) for
+      discovery/SEO. This is NOT a data leak — `profiles` is column-locked
+      (migration `0018`): anon can read only public columns; `stripe_*`,
+      `restrictions`, `deletion_requested_at`, `locale` are service-role only, and
+      email lives in `auth.users` (never exposed). DECIDE: keep public (recommended
+      for a discovery marketplace) vs gate behind login. If gating, add
+      `requireProfile({ allowAnon: false })` to the profile page + tighten RLS.
+- [ ] **Tighten `notification_prefs` exposure.** `0018` grants anon SELECT on
+      `notification_prefs` (line 29) — a user's notification settings are readable by
+      anyone. Drop it from the anon/`authenticated` public grant (owner-only via a
+      scoped read) unless there's a reason it's public.
+- [ ] **Privacy policy accuracy.** `/privacy` + `/terms` pages exist. Confirm the
+      privacy policy actually reflects current data practices (Stripe Connect,
+      Spotify connect, Supabase, what we store + share). Data export / "download my
+      data" still TODO; account deletion already works (`deleteMyAccount()` →
+      `delete_my_account` RPC).
+
+## 🟡 Security hardening
+_Prompted by the indie-dev security reels (2026-06-05). Mapped to our actual code._
+- [x] **Secret scan** — no Stripe/service-role keys in tracked files; `.env.local`
+      gitignored; no secret-named `NEXT_PUBLIC_` vars. (Only hardcoded key is the
+      Supabase **anon** key in `lib/seshn/config.ts` — public/RLS-protected by
+      design.) Re-run before launch + enable GitHub secret scanning.
+- [ ] **Rate limiting on custom API routes.** `/api/stripe/connect` (+ status) have
+      no rate limit. The webhook is signature-verified (fine). Add lightweight
+      per-user/IP throttling to the authenticated routes. Auth-attempt limits are
+      handled by Supabase Auth's built-in limits — review/tune them in the dashboard.
+- [ ] **Input validation review.** Audit API routes + any client-supplied payloads
+      to SECURITY DEFINER RPCs for size/shape validation (most writes already go
+      through column-locked grants + RLS, but confirm the escrow/contract RPCs
+      reject malformed input).
+- [ ] **Prompt-injection** — N/A today (no LLM-facing user input). Revisit if/when
+      AI features are added.
 
 ## 🟡 Settings & UI polish
 - [ ] **Fix spacing in settings.** Tighten/normalise spacing on the settings page
