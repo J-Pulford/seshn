@@ -42,10 +42,13 @@ board stay dark.
 ### 3. Escrow auto-release/refund cron
 - [ ] Set `CRON_SECRET` (any long random string) in Vercel — Vercel sends it as
       `Authorization: Bearer <CRON_SECRET>` to the scheduled job.
-- [ ] `vercel.json` already schedules `/api/cron/escrow-sweep` hourly. Confirm it
-      appears under Project → Cron Jobs after deploy. (Sweep auto-releases delivered
-      escrows past their approval window and refunds funded escrows past their
-      deadline. Without it, funds never auto-release if an owner goes quiet.)
+- [ ] `vercel.json` schedules `/api/cron/escrow-sweep` **daily** at 03:00 UTC
+      (`0 3 * * *`). Vercel **Hobby only allows once-a-day crons** — keep it daily
+      unless you upgrade to Pro (then you can bump to hourly for snappier
+      auto-release). Confirm it appears under Project → Cron Jobs after deploy.
+      (Sweep auto-releases delivered escrows past their approval window and refunds
+      funded escrows past their deadline. Without it, funds never auto-release if an
+      owner goes quiet.)
 
 ### 3b. Email notifications (transactional)
 Separate from auth email (that's #4). Powers escrow/help/application emails.

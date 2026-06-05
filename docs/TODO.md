@@ -13,7 +13,7 @@ _Last updated: 2026-06-05_
 - **Escrow funding + delivery + release** — `/contract/[id]/fund` checkout (Stripe
   Checkout), webhook marks funded, `mark_delivered` RPC, owner approve→transfer
   release. Migrations `0028`. `escrow-flow.md` updated to the live 10% model.
-- **Escrow auto-release / refund cron** — `/api/cron/escrow-sweep` (hourly via
+- **Escrow auto-release / refund cron** — `/api/cron/escrow-sweep` (daily via
   `vercel.json`) releases overdue deliveries and refunds missed deadlines. Needs
   `CRON_SECRET` set in Vercel.
 - **Escrow notifications** — bell alerts on funded/delivered/released/refunded/
