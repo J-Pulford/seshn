@@ -87,6 +87,15 @@ export async function subscribeToNotifications(
   };
 }
 
+// notification_prefs is owner-only (migration 0026 revoked the public read
+// grant), so it's no longer part of the shared profile fetch. Read the caller's
+// own prefs via the SECURITY DEFINER getter scoped to auth.uid().
+export async function getMyNotificationPrefs(): Promise<Record<string, boolean>> {
+  const { data, error } = await getBrowserClient().rpc("get_my_notification_prefs");
+  if (error) throw error;
+  return (data as Record<string, boolean>) || {};
+}
+
 export async function updateNotificationPrefs(prefs: Record<string, boolean>) {
   return updateProfile({ notification_prefs: prefs });
 }

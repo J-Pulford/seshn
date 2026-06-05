@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getStripe, getAdminClient, userFromRequest } from "@/lib/stripe/server";
 import { isStripeConfigured } from "@/lib/stripe/config";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -10,6 +11,15 @@ export async function GET(req: Request) {
   if (!isStripeConfigured()) return NextResponse.json({ configured: false });
   const user = await userFromRequest(req);
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+
+  // Each call retrieves the account from Stripe; throttle per user.
+  const rl = rateLimit(`stripe:connect-status:${user.id}`, 30, 60_000);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Too many requests — please wait a moment and try again." },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfter) } },
+    );
+  }
 
   try {
     const stripe = getStripe();

@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import Nav from "@/components/Nav";
-import { requireProfile, signOut, updateMyEmail, deleteMyAccount } from "@/lib/seshn/auth";
-import { updateNotificationPrefs } from "@/lib/seshn/notifications";
+import { requireProfile, signOut, updateMyEmail, setMyPassword, deleteMyAccount } from "@/lib/seshn/auth";
+import { getMyNotificationPrefs, updateNotificationPrefs } from "@/lib/seshn/notifications";
 import { emitProfileUpdated } from "@/lib/seshn/profiles";
 import { listConnectedAccounts, disconnectAccount, startSpotifyConnect, completeSpotifyConnect } from "@/lib/seshn/connected-accounts";
 import { getPayoutStatus, startPayoutOnboarding, type PayoutStatus } from "@/lib/seshn/payments";
@@ -44,6 +44,12 @@ function AccountSection({ user, profile }: { user: User; profile: Profile }) {
   const trimmed = newEmail.trim();
   const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed) && trimmed.toLowerCase() !== (user.email || "").toLowerCase();
 
+  const [pw, setPw] = useState("");
+  const [pwConfirm, setPwConfirm] = useState("");
+  const [pwBusy, setPwBusy] = useState(false);
+  const [pwStatus, setPwStatus] = useState<Status>(null);
+  const pwValid = pw.length >= 8 && pw === pwConfirm;
+
   async function changeEmail() {
     if (!isValid || busy) return;
     setBusy(true);
@@ -56,6 +62,22 @@ function AccountSection({ user, profile }: { user: User; profile: Profile }) {
       setStatus({ kind: "err", text: (e as Error)?.message || "Couldn't update email." });
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function changePassword() {
+    if (!pwValid || pwBusy) return;
+    setPwBusy(true);
+    setPwStatus(null);
+    try {
+      await setMyPassword(pw);
+      setPwStatus({ kind: "ok", text: "Password updated." });
+      setPw("");
+      setPwConfirm("");
+    } catch (e) {
+      setPwStatus({ kind: "err", text: (e as Error)?.message || "Couldn't update password." });
+    } finally {
+      setPwBusy(false);
     }
   }
 
@@ -76,6 +98,19 @@ function AccountSection({ user, profile }: { user: User; profile: Profile }) {
         <span className="t-meta">You&apos;ll receive confirmation links at both your current and new addresses. The change only takes effect once you click the link.</span>
         {status && <div className={"status-line " + status.kind} style={{ marginTop: 6 }}>{status.text}</div>}
       </div>
+      <div className="field" style={{ marginTop: 16 }}>
+        <label className="field-label" htmlFor="se-pw">Change password</label>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <input id="se-pw" className="input" type="password" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="New password (min 8 characters)" />
+          <div style={{ display: "flex", gap: 8 }}>
+            <input id="se-pw-confirm" className="input" type="password" autoComplete="new-password" value={pwConfirm} onChange={(e) => setPwConfirm(e.target.value)} placeholder="Confirm new password" />
+            <button className="btn primary" onClick={changePassword} disabled={!pwValid || pwBusy}>{pwBusy ? "Saving…" : "Update password"}</button>
+          </div>
+        </div>
+        <span className="t-meta">Set or change the password you use to sign in. Takes effect immediately.</span>
+        {pw && pwConfirm && pw !== pwConfirm && <div className="status-line err" style={{ marginTop: 6 }}>Passwords don&apos;t match.</div>}
+        {pwStatus && <div className={"status-line " + pwStatus.kind} style={{ marginTop: 6 }}>{pwStatus.text}</div>}
+      </div>
       <div style={{ height: 1, background: "var(--line-soft)", margin: "18px 0" }} />
       <div className="row" style={{ padding: 0, borderTop: "none" }}>
         <div className="row-text"><span className="row-title">Profile</span><span className="row-sub">Name, bio, photo, roles and genres.</span></div>
@@ -89,16 +124,26 @@ function AccountSection({ user, profile }: { user: User; profile: Profile }) {
   );
 }
 
-function NotificationsSection({ profile, onSaved }: { profile: Profile; onSaved: (p: Profile) => void }) {
-  const initial = profile.notification_prefs || {};
-  const [prefs, setPrefs] = useState<Record<string, boolean>>(() => {
-    const p: Record<string, boolean> = {};
-    for (const [k] of NOTIF_KINDS) p[k] = initial[k] !== false;
-    return p;
-  });
+function NotificationsSection({ onSaved }: { onSaved: (p: Profile) => void }) {
+  // notification_prefs is owner-only now (migration 0026), so it's fetched
+  // separately via the SECURITY DEFINER getter rather than read off the profile.
+  const [initial, setInitial] = useState<Record<string, boolean> | null>(null);
+  const [prefs, setPrefs] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<Status>(null);
-  const dirty = NOTIF_KINDS.some(([k]) => (initial[k] !== false) !== prefs[k]);
+
+  useEffect(() => {
+    getMyNotificationPrefs()
+      .catch(() => ({}) as Record<string, boolean>)
+      .then((loaded) => {
+        setInitial(loaded);
+        const p: Record<string, boolean> = {};
+        for (const [k] of NOTIF_KINDS) p[k] = loaded[k] !== false;
+        setPrefs(p);
+      });
+  }, []);
+
+  const dirty = initial !== null && NOTIF_KINDS.some(([k]) => (initial[k] !== false) !== prefs[k]);
 
   const toggle = (kind: string) => setPrefs((prev) => ({ ...prev, [kind]: !prev[kind] }));
   async function save() {
@@ -107,6 +152,7 @@ function NotificationsSection({ profile, onSaved }: { profile: Profile; onSaved:
     setStatus(null);
     try {
       const updated = await updateNotificationPrefs(prefs);
+      setInitial({ ...prefs });
       onSaved(updated);
       setStatus({ kind: "ok", text: "Preferences saved." });
     } catch (e) {
@@ -114,6 +160,14 @@ function NotificationsSection({ profile, onSaved }: { profile: Profile; onSaved:
     } finally {
       setBusy(false);
     }
+  }
+
+  if (initial === null) {
+    return (
+      <Section title="Notifications">
+        <span className="t-meta">Loading…</span>
+      </Section>
+    );
   }
 
   return (
@@ -346,7 +400,7 @@ export default function SettingsPage() {
         <AccountSection user={state.user} profile={state.profile} />
         <PayoutsSection />
         <ConnectedAccountsSection accounts={accounts} onChange={() => refreshAccounts(state.user!.id)} />
-        <NotificationsSection profile={state.profile} onSaved={onProfileUpdated} />
+        <NotificationsSection onSaved={onProfileUpdated} />
         <DangerSection profile={state.profile} />
       </div>
     </div>

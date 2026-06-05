@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getStripe, getAdminClient, userFromRequest } from "@/lib/stripe/server";
 import { isStripeConfigured } from "@/lib/stripe/config";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -13,6 +14,15 @@ export async function POST(req: Request) {
   }
   const user = await userFromRequest(req);
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+
+  // Onboarding-link creation hits Stripe's API; throttle per user to blunt abuse.
+  const rl = rateLimit(`stripe:connect:${user.id}`, 10, 60_000);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Too many requests — please wait a moment and try again." },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfter) } },
+    );
+  }
 
   try {
     const stripe = getStripe();
