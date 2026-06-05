@@ -7,6 +7,9 @@ import Nav from "@/components/Nav";
 import { requireProfile } from "@/lib/seshn/auth";
 import { getContract, sendContract, signContract, declineContract, cancelContract, updateContractTerms } from "@/lib/seshn/contracts";
 import { getEscrowForContract, markDelivered, releaseEscrow, type Escrow } from "@/lib/seshn/escrow";
+import { createReview, listReviewsForContract } from "@/lib/seshn/reviews";
+import { Stars, StarRatingInput } from "@/components/reviews/Stars";
+import type { Review } from "@/lib/seshn/types";
 import { formatMoney } from "@/lib/seshn/finances";
 import { getOrCreateConversation } from "@/lib/seshn/messaging";
 import { toast } from "@/lib/seshn/toast";
@@ -399,6 +402,74 @@ function SignBar({ contract, me, readToBottom, onSign, busy }: { contract: Contr
   );
 }
 
+function ContractReviews({ contract, me }: { contract: Contract; me: User }) {
+  const isOwner = contract.owner_id === me.id;
+  const otherId = isOwner ? contract.collaborator_id : contract.owner_id;
+  const other = isOwner ? contract.collaborator : contract.owner;
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [rating, setRating] = useState(0);
+  const [body, setBody] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    listReviewsForContract(contract.id).then(setReviews).catch(() => setReviews([]));
+  }, [contract.id]);
+
+  const mine = reviews.find((r) => r.reviewer_id === me.id);
+
+  async function submit() {
+    if (rating < 1) { setErr("Pick a star rating first."); return; }
+    setBusy(true); setErr("");
+    try {
+      const r = await createReview({ contractId: contract.id, revieweeId: otherId, rating, body });
+      setReviews((prev) => [...prev, r]);
+      setRating(0); setBody("");
+      toast.success("Review posted — thanks!");
+    } catch (e) {
+      setErr((e as Error)?.message || "Couldn't post your review.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="card review-card" style={{ marginTop: 22, padding: 22 }}>
+      <div className="t-eyebrow" style={{ marginBottom: 12 }}>Reviews</div>
+      {!mine && (
+        <div style={{ marginBottom: reviews.length ? 18 : 0 }}>
+          <div style={{ fontSize: 13.5, color: "var(--ink-2)", marginBottom: 10, lineHeight: 1.5 }}>
+            How was working with <b>@{other?.username}</b>? Leave a star rating and a testimonial — it appears on their profile.
+          </div>
+          <StarRatingInput value={rating} onChange={setRating} />
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            maxLength={2000}
+            placeholder={`What was it like collaborating with @${other?.username}?`}
+            style={{ width: "100%", marginTop: 10, minHeight: 84, padding: "10px 12px", border: "1px solid var(--line)", borderRadius: 10, fontFamily: "var(--font-body)", fontSize: 14, resize: "vertical", background: "var(--surface)", color: "var(--ink)" }}
+          />
+          {err && <div className="banner cherry" style={{ marginTop: 8 }}>{err}</div>}
+          <button className="btn primary" style={{ marginTop: 10 }} onClick={submit} disabled={busy || rating < 1}>{busy ? "Posting…" : "Post review"}</button>
+        </div>
+      )}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {reviews.map((r) => (
+          <div key={r.id} style={{ borderTop: "1px solid var(--line-soft)", paddingTop: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
+              <Stars value={r.rating} />
+              <span style={{ fontSize: 12.5, color: "var(--ink-3)" }}>
+                {r.reviewer_id === me.id ? "Your review" : `@${r.reviewer?.username || "member"}`} · {fmtDateTime(r.created_at)}
+              </span>
+            </div>
+            {r.body && <div style={{ fontSize: 13.5, color: "var(--ink)", lineHeight: 1.55, whiteSpace: "pre-wrap" }}>{r.body}</div>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function ContractPage() {
   const params = useParams();
   const contractId = (Array.isArray(params.id) ? params.id[0] : params.id) || "";
@@ -556,6 +627,7 @@ export default function ContractPage() {
           <div>
             {doc && <ContractDocument doc={doc} onScrolledBottom={canSign ? () => setReadToBottom(true) : null} />}
             {canSign && <SignBar contract={contract} me={me} readToBottom={readToBottom} onSign={doSign} busy={busy} />}
+            {contract.status === "completed" && <ContractReviews contract={contract} me={me} />}
           </div>
           <StatusSidebar contract={contract} me={me} escrow={escrow} onOpenEditor={() => setShowEditor(true)} onSend={doSend} onDecline={() => setShowDecline(true)} onCancel={doCancel} onFund={doFund} onDeliver={doDeliver} onRelease={doRelease} busy={busy} />
         </div>

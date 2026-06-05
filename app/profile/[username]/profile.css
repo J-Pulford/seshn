@@ -142,3 +142,15 @@
   .modal-backdrop { padding: 0 !important; align-items: flex-end !important; }
   .input, .textarea { font-size: 16px !important; }
 }
+
+/* Reviews / testimonials */
+.profile-reviews { display: flex; flex-direction: column; gap: 12px; }
+.profile-review { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 14px 16px; }
+.profile-review .pr-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.profile-review .pr-av { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; overflow: hidden; background: var(--ph); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 12px; color: var(--ink-3); }
+.profile-review .pr-av img { width: 100%; height: 100%; object-fit: cover; }
+.profile-review .pr-who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.profile-review .pr-name { font-family: var(--font-display); font-weight: 600; font-size: 13.5px; color: var(--ink); text-decoration: none; }
+.profile-review .pr-name:hover { text-decoration: underline; }
+.profile-review .pr-date { margin-left: auto; font-size: 11.5px; color: var(--ink-3); white-space: nowrap; }
+.profile-review .pr-body { font-size: 13.5px; line-height: 1.6; color: var(--ink-2); white-space: pre-wrap; }

@@ -7,7 +7,7 @@ import type { GetProfileOpts, Profile, ProfileStats } from "./types";
 // RPC so it works when viewing other people's profiles (contracts are RLS-
 // restricted to participants).
 export async function getProfileStats(userId: string): Promise<ProfileStats> {
-  const zero: ProfileStats = { gigs_posted: 0, collaborations: 0 };
+  const zero: ProfileStats = { gigs_posted: 0, collaborations: 0, rating_avg: null, rating_count: 0 };
   if (!userId) return zero;
   const res = await getBrowserClient().rpc("public_profile_stats", { p_uid: userId });
   if (res.error) {

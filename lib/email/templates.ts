@@ -32,6 +32,8 @@ function build(kind: string, c: EmailContext): Built | null {
       return { subject: `A dispute was opened on ${c.gigTitle}`, heading: "A dispute was opened", body: `A dispute has been opened on <strong>${esc(c.gigTitle)}</strong>. The funds stay safely in escrow while the Seshn team reviews it — we'll be in touch.`, ctaLabel: "View the contract" };
     case "help_reply":
       return { subject: `${c.actorName} replied to your thread`, heading: "New reply on your thread", body: `${esc(c.actorName)} replied to your post${c.threadTitle ? ` <strong>“${esc(c.threadTitle)}”</strong>` : ""} on the Seshn help board.`, ctaLabel: "Read the reply" };
+    case "review_received":
+      return { subject: `${c.actorName} left you a review ⭐`, heading: "You got a new review", body: `${esc(c.actorName)} reviewed your collaboration on <strong>${esc(c.gigTitle)}</strong>. It's now live on your profile.`, ctaLabel: "See the review" };
     case "application_received":
       return { subject: `New application on ${c.gigTitle}`, heading: "You've got an application", body: `${esc(c.actorName)} applied to <strong>${esc(c.gigTitle)}</strong>. Take a look while it's fresh.`, ctaLabel: "View the application" };
     case "application_accepted":

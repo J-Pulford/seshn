@@ -21,6 +21,7 @@ ones power live features:
 - [ ] `0031` data export (`export_my_data`)
 - [ ] `0032` Help & community board (threads/replies, `is_staff`, reply notifications)
 - [ ] `0033` Help board seeder (`seed_help_threads`)
+- [ ] `0034` Reviews & star ratings (post-collaboration ratings + testimonials)
 
 Without these the app won't crash (the client degrades gracefully) but
 deliver/release, escrow bell alerts, analytics, "download my data", and the Help

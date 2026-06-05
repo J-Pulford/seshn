@@ -43,6 +43,19 @@ export interface Service {
 export interface ProfileStats {
   gigs_posted: number;
   collaborations: number;
+  rating_avg: number | null;
+  rating_count: number;
+}
+
+export interface Review {
+  id: string;
+  contract_id: string;
+  reviewer_id: string;
+  reviewee_id: string;
+  rating: number;
+  body: string;
+  created_at: string;
+  reviewer?: { id: string; username: string; display_name: string; avatar_url: string; is_pro?: boolean } | null;
 }
 
 /** Per-currency financial totals (cents) from my_financial_summary(). */

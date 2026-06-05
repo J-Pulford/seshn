@@ -9,12 +9,14 @@ import { getOrCreateConversation } from "@/lib/seshn/messaging";
 import { blockUser, isUserBlocked, reportUser, unblockUser } from "@/lib/seshn/trust-safety";
 import { listConnectedAccounts } from "@/lib/seshn/connected-accounts";
 import { recordProfileView } from "@/lib/seshn/analytics";
+import { listProfileReviews } from "@/lib/seshn/reviews";
+import { Stars } from "@/components/reviews/Stars";
 import { SOCIAL_PLATFORMS, AVAILABILITY_OPTIONS } from "@/lib/seshn/constants";
 import { embedFor } from "@/lib/seshn/embeds";
 import { toast } from "@/lib/seshn/toast";
 import { confirm } from "@/lib/seshn/confirm";
 import { ProducerBadge } from "@/components/ProducerBadge";
-import type { ConnectedAccount, Credit, FeaturedItem, GalleryItem, Gig, Profile, ProfileStats, Service, SocialLinks } from "@/lib/seshn/types";
+import type { ConnectedAccount, Credit, FeaturedItem, GalleryItem, Gig, Profile, ProfileStats, Review, Service, SocialLinks } from "@/lib/seshn/types";
 import "./profile.css";
 
 // A simple free-text tag input (type, Enter/comma to add). Used for skills,
@@ -602,9 +604,11 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
   const [connected, setConnected] = useState<ConnectedAccount[] | null>(null);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [stats, setStats] = useState<ProfileStats | null>(null);
+  const [reviews, setReviews] = useState<Review[] | null>(null);
   useEffect(() => {
     listConnectedAccounts(profile.id).then(setConnected).catch(() => setConnected([]));
     getProfileStats(profile.id).then(setStats).catch(() => setStats(null));
+    listProfileReviews(profile.id).then(setReviews).catch(() => setReviews([]));
   }, [profile.id]);
 
   const social = profile.social_links || {};
@@ -677,8 +681,14 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
           {(profile.roles || []).map((r) => <span key={r} className="pill accent">{r}</span>)}
           {(profile.genres || []).map((g) => <span key={g} className="pill">{g}</span>)}
         </div>
-        {stats && (stats.gigs_posted > 0 || stats.collaborations > 0) && (
+        {stats && (stats.gigs_posted > 0 || stats.collaborations > 0 || stats.rating_count > 0) && (
           <div className="profile-stats">
+            {stats.rating_count > 0 && stats.rating_avg != null && (
+              <div className="stat">
+                <span className="stat-n">{Number(stats.rating_avg).toFixed(1)}</span>
+                <span className="stat-l" style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><Stars value={Number(stats.rating_avg)} size={12} /> {stats.rating_count} {stats.rating_count === 1 ? "review" : "reviews"}</span>
+              </div>
+            )}
             <div className="stat"><span className="stat-n">{stats.gigs_posted}</span><span className="stat-l">{stats.gigs_posted === 1 ? "gig posted" : "gigs posted"}</span></div>
             <div className="stat"><span className="stat-n">{stats.collaborations}</span><span className="stat-l">{stats.collaborations === 1 ? "collaboration" : "collaborations"}</span></div>
           </div>
@@ -687,6 +697,33 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
 
       <div className="profile-grid">
         <div className="col" style={{ gap: 28, minWidth: 0 }}>
+          {reviews && reviews.length > 0 && (
+            <section>
+              <div className="t-eyebrow" style={{ marginBottom: 10, display: "flex", alignItems: "center", gap: 10 }}>
+                Reviews
+                {stats && stats.rating_count > 0 && stats.rating_avg != null && (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--ink-2)", fontSize: 12, fontFamily: "var(--font-body)", letterSpacing: 0, textTransform: "none" }}>
+                    <Stars value={Number(stats.rating_avg)} size={14} /> {Number(stats.rating_avg).toFixed(1)} · {stats.rating_count}
+                  </span>
+                )}
+              </div>
+              <div className="profile-reviews">
+                {reviews.map((r) => (
+                  <div key={r.id} className="profile-review">
+                    <div className="pr-head">
+                      <span className="pr-av">{r.reviewer?.avatar_url ? <img src={r.reviewer.avatar_url} alt="" /> : initials(r.reviewer?.display_name || r.reviewer?.username)}</span>
+                      <div className="pr-who">
+                        <a className="pr-name" href={`/profile/${encodeURIComponent(r.reviewer?.username || "")}`}>{r.reviewer?.display_name || ("@" + (r.reviewer?.username || "member"))}</a>
+                        <Stars value={r.rating} size={13} />
+                      </div>
+                      <span className="pr-date">{new Date(r.created_at).toLocaleDateString(undefined, { month: "short", year: "numeric" })}</span>
+                    </div>
+                    {r.body && <div className="pr-body">{r.body}</div>}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
           {featured.length > 0 && (
             <section>
               <div className="t-eyebrow" style={{ marginBottom: 10 }}>Featured work</div>
