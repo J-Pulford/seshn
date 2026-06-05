@@ -113,7 +113,7 @@ function AccountSection({ user, profile }: { user: User; profile: Profile }) {
         {pwStatus && <div className={"status-line " + pwStatus.kind} style={{ marginTop: 6 }}>{pwStatus.text}</div>}
       </div>
       <div style={{ height: 1, background: "var(--line-soft)", margin: "18px 0" }} />
-      <div className="row" style={{ padding: 0, borderTop: "none" }}>
+      <div className="row" style={{ borderTop: "none" }}>
         <div className="row-text"><span className="row-title">Profile</span><span className="row-sub">Name, bio, photo, roles and genres.</span></div>
         <a className="btn" href={`/profile/${encodeURIComponent(profile.username)}`}>Go to profile</a>
       </div>
