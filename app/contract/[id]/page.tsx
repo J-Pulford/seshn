@@ -6,6 +6,8 @@ import type { User } from "@supabase/supabase-js";
 import Nav from "@/components/Nav";
 import { requireProfile } from "@/lib/seshn/auth";
 import { getContract, sendContract, signContract, declineContract, cancelContract, updateContractTerms } from "@/lib/seshn/contracts";
+import { getEscrowForContract, markDelivered, releaseEscrow, type Escrow } from "@/lib/seshn/escrow";
+import { formatMoney } from "@/lib/seshn/finances";
 import { getOrCreateConversation } from "@/lib/seshn/messaging";
 import { toast } from "@/lib/seshn/toast";
 import { confirm, confirmDialog } from "@/lib/seshn/confirm";
@@ -134,11 +136,13 @@ function ContractDocument({ doc, onScrolledBottom }: { doc: AgreementDoc; onScro
   );
 }
 
-function StatusSidebar({ contract, me, onOpenEditor, onSend, onDecline, onCancel, busy }: { contract: Contract; me: User; onOpenEditor: () => void; onSend: () => void; onDecline: () => void; onCancel: () => void; busy: boolean }) {
+function StatusSidebar({ contract, me, escrow, onOpenEditor, onSend, onDecline, onCancel, onFund, onDeliver, onRelease, busy }: { contract: Contract; me: User; escrow: Escrow | null; onOpenEditor: () => void; onSend: () => void; onDecline: () => void; onCancel: () => void; onFund: () => void; onDeliver: () => void; onRelease: () => void; busy: boolean }) {
   const isOwner = contract.owner_id === me.id;
   const t = (contract.terms || {}) as ContractTerms;
   const amount = fmtMoney(t.fee_cents, t.currency || "AUD");
   const days = t.approval_window_days || 7;
+  const currency = t.currency || "AUD";
+  const netCents = escrow ? escrow.amount_cents - escrow.platform_fee_cents : null;
 
   return (
     <div className="sidebar no-print">
@@ -196,17 +200,58 @@ function StatusSidebar({ contract, me, onOpenEditor, onSend, onDecline, onCancel
         </div>
       )}
 
-      {contract.status === "active" && (
+      {(contract.status === "active" || contract.status === "completed") && (
         <div className="card">
-          <div className="t-eyebrow" style={{ marginBottom: 8 }}>Next step</div>
-          {isOwner ? (
-            <>
-              <button className="btn primary" style={{ width: "100%" }} disabled>Fund escrow ({amount})</button>
-              <div className="t-meta" style={{ marginTop: 8, lineHeight: 1.5 }}>Funding goes live once Stripe Connect is wired up. For now this contract sits active.</div>
-            </>
-          ) : (
-            <div className="t-meta" style={{ lineHeight: 1.5 }}>Waiting on @{contract.owner?.username} to fund the escrow. Once funded, you can start delivering.</div>
+          <div className="t-eyebrow" style={{ marginBottom: 8 }}>{contract.status === "completed" ? "Settled" : "Next step"}</div>
+
+          {/* Awaiting funds — owner funds, collaborator waits. */}
+          {(!escrow || escrow.status === "awaiting_funds") && contract.status === "active" && (
+            isOwner ? (
+              <>
+                <button className="btn primary" style={{ width: "100%" }} onClick={onFund} disabled={busy}>Fund escrow ({amount})</button>
+                <div className="t-meta" style={{ marginTop: 8, lineHeight: 1.5 }}>You&apos;ll review the breakdown before paying. Funds are held safely until you approve delivery.</div>
+              </>
+            ) : (
+              <div className="t-meta" style={{ lineHeight: 1.5 }}>Waiting on @{contract.owner?.username} to fund the escrow. Once funded, you can start delivering with confidence.</div>
+            )
           )}
+
+          {/* Funded — collaborator delivers, owner can approve early. */}
+          {escrow?.status === "funded" && (
+            isOwner ? (
+              <>
+                <div className="banner green" style={{ margin: "0 0 10px" }}>{amount} is held in escrow. @{contract.collaborator?.username} can start work.</div>
+                <button className="btn primary" style={{ width: "100%" }} onClick={onRelease} disabled={busy}>Approve &amp; release</button>
+                <div className="t-meta" style={{ marginTop: 8, lineHeight: 1.5 }}>Release early if you&apos;re happy, or wait for them to mark the work delivered. @{contract.collaborator?.username} receives {netCents != null ? formatMoney(netCents, currency) : amount}.</div>
+              </>
+            ) : (
+              <>
+                <div className="banner green" style={{ margin: "0 0 10px" }}>Funds are secured — you&apos;re clear to start.</div>
+                <button className="btn primary" style={{ width: "100%" }} onClick={onDeliver} disabled={busy}>Mark as delivered</button>
+                <div className="t-meta" style={{ marginTop: 8, lineHeight: 1.5 }}>Marking delivered starts a {days}-day approval window. You&apos;ll receive {netCents != null ? formatMoney(netCents, currency) : amount} on release.</div>
+              </>
+            )
+          )}
+
+          {/* Delivered — approval window running. */}
+          {escrow?.status === "delivered" && (
+            isOwner ? (
+              <>
+                <div className="banner amber" style={{ margin: "0 0 10px" }}>@{contract.collaborator?.username} marked the work delivered.</div>
+                <button className="btn primary" style={{ width: "100%" }} onClick={onRelease} disabled={busy}>Approve &amp; release now</button>
+                <div className="t-meta" style={{ marginTop: 8, lineHeight: 1.5 }}>Auto-releases {fmtDateTime(escrow.auto_release_at)} if you don&apos;t act. Open a dispute from support if there&apos;s a problem.</div>
+              </>
+            ) : (
+              <div className="t-meta" style={{ lineHeight: 1.5 }}>Delivered — waiting on @{contract.owner?.username} to approve. Funds auto-release {fmtDateTime(escrow.auto_release_at)}.</div>
+            )
+          )}
+
+          {/* Terminal states. */}
+          {escrow?.status === "released" && (
+            <div className="banner green" style={{ margin: 0 }}>Released ✅ {netCents != null ? formatMoney(netCents, currency) : amount} paid to @{contract.collaborator?.username}{escrow.released_at ? ` on ${fmtDateTime(escrow.released_at)}` : ""}. Bank payout takes 2–5 business days.</div>
+          )}
+          {escrow?.status === "refunded" && <div className="banner amber" style={{ margin: 0 }}>Refunded to @{contract.owner?.username}.</div>}
+          {escrow?.status === "disputed" && <div className="banner cherry" style={{ margin: 0 }}>A dispute is open. Funds stay in escrow until Seshn resolves it.</div>}
         </div>
       )}
 
@@ -359,6 +404,7 @@ export default function ContractPage() {
   const contractId = (Array.isArray(params.id) ? params.id[0] : params.id) || "";
   const [me, setMe] = useState<User | null | undefined>(undefined);
   const [contract, setContract] = useState<Contract | null | undefined>(undefined);
+  const [escrow, setEscrow] = useState<Escrow | null>(null);
   const [doc, setDoc] = useState<AgreementDoc | null>(null);
   const [agreementHash, setAgreementHash] = useState<string | null>(null);
   const [readToBottom, setReadToBottom] = useState(false);
@@ -377,6 +423,9 @@ export default function ContractPage() {
       try {
         const c = await getContract(contractId);
         setContract(c);
+        if (c && (c.status === "active" || c.status === "completed")) {
+          setEscrow(await getEscrowForContract(contractId));
+        }
       } catch (e) {
         setErr((e as Error)?.message || "Could not load contract.");
         setContract(null);
@@ -393,7 +442,28 @@ export default function ContractPage() {
   }, [contract]);
 
   async function refresh() {
-    setContract(await getContract(contractId));
+    const c = await getContract(contractId);
+    setContract(c);
+    if (c && (c.status === "active" || c.status === "completed")) {
+      setEscrow(await getEscrowForContract(contractId));
+    }
+  }
+  function doFund() {
+    if (!contract) return;
+    window.location.href = `/contract/${encodeURIComponent(contract.id)}/fund`;
+  }
+  async function doDeliver() {
+    if (!contract || !escrow) return;
+    const res = await confirmDialog({ title: "Mark work as delivered?", message: "This tells @" + contract.owner?.username + " the work is ready and starts the approval window. Add a note if you like.", prompt: true, promptLabel: "Note (optional)", promptPlaceholder: "e.g. Final stems attached in the project room.", confirmLabel: "Mark delivered", cancelLabel: "Not yet" });
+    if (!res.confirmed) return;
+    setBusy(true); setErr("");
+    try { await markDelivered(escrow.id, res.value || ""); await refresh(); toast.success("Marked as delivered."); } catch (e) { setErr((e as Error)?.message || "Could not mark delivered."); } finally { setBusy(false); }
+  }
+  async function doRelease() {
+    if (!contract) return;
+    if (!(await confirm({ title: "Approve & release funds?", message: "This releases the escrow to @" + contract.collaborator?.username + ". This can't be undone.", confirmLabel: "Release funds" }))) return;
+    setBusy(true); setErr("");
+    try { await releaseEscrow(contract.id); await refresh(); toast.success("Funds released."); } catch (e) { setErr((e as Error)?.message || "Could not release the escrow."); } finally { setBusy(false); }
   }
   async function doSend() {
     if (!contract) return;
@@ -487,7 +557,7 @@ export default function ContractPage() {
             {doc && <ContractDocument doc={doc} onScrolledBottom={canSign ? () => setReadToBottom(true) : null} />}
             {canSign && <SignBar contract={contract} me={me} readToBottom={readToBottom} onSign={doSign} busy={busy} />}
           </div>
-          <StatusSidebar contract={contract} me={me} onOpenEditor={() => setShowEditor(true)} onSend={doSend} onDecline={() => setShowDecline(true)} onCancel={doCancel} busy={busy} />
+          <StatusSidebar contract={contract} me={me} escrow={escrow} onOpenEditor={() => setShowEditor(true)} onSend={doSend} onDecline={() => setShowDecline(true)} onCancel={doCancel} onFund={doFund} onDeliver={doDeliver} onRelease={doRelease} busy={busy} />
         </div>
       </div>
 
