@@ -9,7 +9,7 @@ import {
   primaryCurrency,
   formatMoney,
 } from "@/lib/seshn/finances";
-import { getPayoutStatus, startPayoutOnboarding, type PayoutStatus } from "@/lib/seshn/payments";
+import { getPayoutStatus, getStripeBalance, startPayoutOnboarding, type PayoutStatus, type StripeBalance } from "@/lib/seshn/payments";
 import { toast } from "@/lib/seshn/toast";
 import type { FinancialSummary, TransactionRow } from "@/lib/seshn/types";
 import "./dashboard.css";
@@ -81,11 +81,64 @@ function StatCard({ label, value, sub, accent }: { label: string; value: string;
   );
 }
 
+const PAYOUT_STATUS_LABEL: Record<string, string> = {
+  paid: "Paid",
+  pending: "Pending",
+  in_transit: "In transit",
+  canceled: "Canceled",
+  failed: "Failed",
+};
+
+// Live balance + recent payouts pulled straight from the user's Stripe Connect
+// account (distinct from the internal escrow figures above, which reflect Seshn
+// bookings). Hidden until the user has a connected account with something to show.
+function StripeBalanceSection({ balance }: { balance: StripeBalance }) {
+  if (!balance.connected) return null;
+  const available = balance.available || [];
+  const pending = balance.pending || [];
+  const payouts = balance.payouts || [];
+  if (!available.length && !pending.length && !payouts.length) return null;
+
+  const fallbackCur = available[0]?.currency || pending[0]?.currency || "AUD";
+
+  return (
+    <section className="dash-activity" style={{ marginBottom: 18 }}>
+      <div className="row between" style={{ marginBottom: 12 }}>
+        <span className="t-eyebrow">Stripe balance</span>
+        <a className="btn sm" href="/settings">Manage payouts</a>
+      </div>
+      <div className="dash-stats">
+        {(available.length ? available : [{ amount_cents: 0, currency: fallbackCur }]).map((a) => (
+          <StatCard key={"avail-" + a.currency} accent label="Available" value={formatMoney(a.amount_cents, a.currency)} sub="Settled — ready to pay out" />
+        ))}
+        {(pending.length ? pending : [{ amount_cents: 0, currency: fallbackCur }]).map((p) => (
+          <StatCard key={"pend-" + p.currency} label="Pending" value={formatMoney(p.amount_cents, p.currency)} sub="Still clearing in Stripe" />
+        ))}
+      </div>
+      {payouts.length > 0 && (
+        <div className="dash-othercur" style={{ marginTop: 14 }}>
+          <span className="t-eyebrow">Recent payouts</span>
+          <div className="dash-othercur-rows">
+            {payouts.map((p) => (
+              <div key={p.id} className="dash-othercur-row">
+                <span>{formatMoney(p.amount_cents, p.currency)}</span>
+                <span className="dash-cur-code">{PAYOUT_STATUS_LABEL[p.status] || p.status}</span>
+                <span>{p.status === "paid" ? "Arrived" : "Expected"} {fmtDate(new Date(p.arrival_date * 1000).toISOString())}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function DashboardPage() {
   const [state, setState] = useState<"loading" | "ready" | "signedout" | "error">("loading");
   const [summary, setSummary] = useState<FinancialSummary | null>(null);
   const [txns, setTxns] = useState<TransactionRow[] | null>(null);
   const [payout, setPayout] = useState<PayoutStatus | null>(null);
+  const [balance, setBalance] = useState<StripeBalance | null>(null);
   const [starting, setStarting] = useState(false);
 
   useEffect(() => {
@@ -98,14 +151,16 @@ export default function DashboardPage() {
           return;
         }
         document.title = "Seshn — Finances";
-        const [s, t, p] = await Promise.all([
+        const [s, t, p, b] = await Promise.all([
           getFinancialSummary(),
           listRecentTransactions(20),
           getPayoutStatus().catch(() => ({ configured: false }) as PayoutStatus),
+          getStripeBalance().catch(() => ({ configured: false }) as StripeBalance),
         ]);
         setSummary(s);
         setTxns(t);
         setPayout(p);
+        setBalance(b);
         setState("ready");
       } catch (e) {
         console.error("[seshn] dashboard load error", e);
@@ -149,6 +204,8 @@ export default function DashboardPage() {
         {state === "ready" && summary && (
           <>
             {payout && <PayoutBanner status={payout} onStart={onStartPayout} starting={starting} />}
+
+            {balance && <StripeBalanceSection balance={balance} />}
 
             <div className="dash-stats">
               <StatCard label="Earned" accent value={formatMoney(primary?.earned_cents || 0, cur)} sub="Released to you, after fees" />

@@ -39,3 +39,36 @@ export async function getPayoutStatus(): Promise<PayoutStatus> {
     return { configured: false };
   }
 }
+
+export interface StripeMoney {
+  amount_cents: number;
+  currency: string;
+}
+
+export interface StripePayout {
+  id: string;
+  amount_cents: number;
+  currency: string;
+  status: string;       // paid | pending | in_transit | canceled | failed
+  arrival_date: number; // unix seconds
+  created: number;      // unix seconds
+}
+
+export interface StripeBalance {
+  configured: boolean;
+  connected?: boolean;
+  available?: StripeMoney[]; // settled, ready to pay out
+  pending?: StripeMoney[];   // still clearing
+  payouts?: StripePayout[];  // most recent payouts to the bank
+}
+
+// Live balance + recent payouts straight from the user's Stripe Connect account.
+export async function getStripeBalance(): Promise<StripeBalance> {
+  try {
+    const res = await fetch("/api/stripe/balance", { headers: await authHeaders() });
+    if (!res.ok) return { configured: false };
+    return (await res.json()) as StripeBalance;
+  } catch {
+    return { configured: false };
+  }
+}
