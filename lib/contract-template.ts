@@ -135,7 +135,7 @@ function buildDeliverable(c?: TemplateContract): AgreementSection {
 function buildPayment(c?: TemplateContract): AgreementSection {
   const t = getTerms(c) as { fee_cents?: number; currency?: string; platform_fee_pct?: number };
   const feeStr = fmtMoney(t.fee_cents, t.currency);
-  const platformPct = t.platform_fee_pct != null ? t.platform_fee_pct : 8;
+  const platformPct = t.platform_fee_pct != null ? t.platform_fee_pct : 10;
   const netCents = t.fee_cents ? Math.round(t.fee_cents * (1 - platformPct / 100)) : null;
   return {
     number: "4",

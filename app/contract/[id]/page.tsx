@@ -253,7 +253,7 @@ function TermsEditor({ contract, onClose, onSave }: { contract: Contract; onClos
       template_version: SeshnContract.version,
       fee_cents: feeCents,
       currency,
-      platform_fee_pct: 5,
+      platform_fee_pct: 10,
       approval_window_days: aw,
       deliverable: { description: desc.trim(), format_notes: fmt.trim(), deliver_by: deliverBy },
       splits: { master_owner_pct: mO, master_collaborator_pct: 100 - mO, publishing_owner_pct: pO, publishing_collaborator_pct: 100 - pO },

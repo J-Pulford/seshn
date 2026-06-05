@@ -126,7 +126,7 @@ export default function TermsPage() {
         <ul>
           <li>Payments are processed by <strong>Stripe</strong>; your use of payment features is also subject to Stripe&apos;s terms. We never store your full card or bank details.</li>
           <li>For a paid booking, the owner funds an <strong>escrow</strong>; funds are released to the collaborator on approval, or after the agreed approval window, or as resolved in a dispute.</li>
-          <li>Seshn charges a <strong>flat 5% platform fee</strong> on paid bookings (the &quot;payer covers all&quot; model means the collaborator receives their full quoted fee). Card-processing fees also apply. Fees are shown before you commit.</li>
+          <li>Seshn charges a <strong>flat 10% platform fee</strong> on paid bookings, deducted from the collaborator&apos;s payout: the client pays the agreed fee, and the collaborator receives that fee minus the 10% platform fee. Stripe card-processing fees are absorbed by Seshn. Fees are shown before you commit.</li>
           <li>Keep payments on-platform — taking a deal off-platform to avoid fees means you lose escrow protection and breaches these terms.</li>
           <li>You&apos;re responsible for your own taxes on what you earn.</li>
         </ul>
