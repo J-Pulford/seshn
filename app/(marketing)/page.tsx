@@ -165,11 +165,40 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Fee comparison — keep more of what you earn */}
+      <section className="section" id="keep">
+        <div className="container">
+          <Reveal>
+            <span className="label">CH 05 · GAIN STAGING</span>
+            <h2>{SESHN.feeComparison.headline}</h2>
+            <p className="lede" style={{ maxWidth: 720 }}>{SESHN.feeComparison.sub}</p>
+          </Reveal>
+          <Reveal>
+            <div className="fee-basis">{SESHN.feeComparison.basisLabel}</div>
+            <div className="fee-table" role="table" aria-label="What you keep, compared">
+              <div className="fee-row fee-head" role="row">
+                <span role="columnheader">Path</span>
+                <span role="columnheader">Their cut</span>
+                <span role="columnheader">You keep</span>
+              </div>
+              {SESHN.feeComparison.rows.map((r) => (
+                <div className={"fee-row" + (r.highlight ? " is-seshn" : "")} role="row" key={r.path}>
+                  <span className="fee-path" role="cell"><strong>{r.path}</strong><span className="fee-note">{r.note}</span></span>
+                  <span className="fee-cut" role="cell">{r.cut}</span>
+                  <span className="fee-keep" role="cell">{r.keep}</span>
+                </div>
+              ))}
+            </div>
+            <p className="fee-footnote">{SESHN.feeComparison.footnote}</p>
+          </Reveal>
+        </div>
+      </section>
+
       {/* Pricing */}
       <section className="section" id="pricing" style={{ background: "var(--bg-2)" }}>
         <div className="container" style={{ textAlign: "center" }}>
           <Reveal>
-            <span className="label">CH 05 · MASTER OUT</span>
+            <span className="label">CH 06 · MASTER OUT</span>
             <h2 style={{ marginInline: "auto" }}>Free forever. <span className="stem">Pro</span> when you mean it.</h2>
           </Reveal>
           <Reveal className="price-grid" style={{ marginTop: 30, textAlign: "left" }}>
@@ -181,7 +210,7 @@ export default function LandingPage() {
                 <li>Unlimited briefs &amp; applications</li>
                 <li>Audio-first profile</li>
                 <li>Project rooms &amp; DMs</li>
-                <li>Stripe payouts — flat 5% on paid bookings</li>
+                <li>Stripe payouts — flat 10% on paid bookings (fees included)</li>
               </ul>
               <a href="/auth" className="btn" style={{ width: "100%", justifyContent: "center" }}>Start free</a>
             </div>

@@ -111,3 +111,24 @@
   .daw-site .wl-row { flex-direction: column; align-items: stretch; }
   .daw-site .wl-submit { width: 100%; justify-content: center; }
 }
+
+/* Fee comparison table — "what you actually keep" */
+.daw-site .fee-basis { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin: 30px 0 12px; }
+.daw-site .fee-table { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--panel); }
+.daw-site .fee-row { display: grid; grid-template-columns: 1fr 150px 130px; gap: 16px; align-items: center; padding: 18px 22px; border-top: 1px solid var(--line); }
+.daw-site .fee-row:first-child { border-top: none; }
+.daw-site .fee-head { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); padding-top: 14px; padding-bottom: 14px; }
+.daw-site .fee-head span:nth-child(3) { text-align: right; }
+.daw-site .fee-path strong { display: block; font-family: "Inter Tight", sans-serif; font-weight: 700; font-size: 16px; color: var(--ink); }
+.daw-site .fee-note { display: block; color: var(--ink-3); font-size: 12.5px; line-height: 1.5; margin-top: 4px; }
+.daw-site .fee-cut { font-family: var(--mono); font-size: 13px; color: var(--ink-2); }
+.daw-site .fee-keep { font-family: "Inter Tight", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; color: var(--ink); text-align: right; }
+.daw-site .fee-row.is-seshn { background: rgba(44,203,115,0.08); border-top-color: var(--accent); }
+.daw-site .fee-row.is-seshn .fee-keep, .daw-site .fee-row.is-seshn .fee-cut { color: var(--accent); }
+.daw-site .fee-footnote { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); line-height: 1.6; margin-top: 14px; max-width: 760px; }
+@media (max-width: 640px) {
+  .daw-site .fee-head { display: none; }
+  .daw-site .fee-row { grid-template-columns: 1fr auto; row-gap: 6px; padding: 16px; }
+  .daw-site .fee-path { grid-column: 1 / -1; }
+  .daw-site .fee-keep { text-align: left; font-size: 20px; }
+}

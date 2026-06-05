@@ -22,7 +22,7 @@ export default function StoriesPage() {
             <p className="lede">Not testimonials for a landing page — sessions that became songs. Here&apos;s what the work looks like on Seshn.</p>
           </Reveal>
           <Reveal className="stats-strip">
-            {[["1,240", "Sessions reviewed"], ["4.9", "Avg rating"], ["7.9M", "Artists reachable"], ["38", "Cities"], ["5%", "Flat platform fee"]].map(([v, k]) => (
+            {[["1,240", "Sessions reviewed"], ["4.9", "Avg rating"], ["7.9M", "Artists reachable"], ["38", "Cities"], ["10%", "Flat fee, all-in"]].map(([v, k]) => (
               <div className="s" key={k}><div className="v">{v}</div><div className="k">{k}</div></div>
             ))}
           </Reveal>

@@ -11,6 +11,7 @@ export interface Testimonial { name: string; ini: string; role: string; rating: 
 export interface Suggestion { upvotes: number; body: string; tag: string }
 export interface FeatureDeep { n: string; h: string; lead: string; body: string; points: string[]; solves: string }
 export interface ProblemDeep { stat: string; label: string; h: string; body: string; src: string }
+export interface FeeRow { path: string; cut: string; keep: string; note: string; highlight?: boolean }
 
 export const SESHN = {
   mission: {
@@ -21,7 +22,7 @@ export const SESHN = {
     pillars: [
       { n: "01", h: "Trust > Followers.", b: "Every rating comes from a real session. Every profile is vetted. No fake DMs from bot accounts. The bigger your follower count, the less it matters here." },
       { n: "02", h: "The work speaks first.", b: "Profiles lead with audio, not bios. Briefs lead with the role, not the brand. We hide follower counts on purpose so what you make is what you're judged on." },
-      { n: "03", h: "Artists keep what artists make.", b: "Stripe-powered payouts with one flat, visible fee: 5% on paid bookings, which runs the escrow that protects both sides. Split and trade collabs are free, and Pro is $5/mo flat — never a slice of your fee." },
+      { n: "03", h: "Artists keep what artists make.", b: "Stripe-powered payouts with one flat, visible fee: 10% on paid bookings — and that 10% covers Stripe's processing fees, so the rate you're quoted is the rate you keep 90% of. No manager, label, or agent taking a cut on top. Split and trade collabs are free, and Pro is $5/mo flat — never a slice of your fee." },
       { n: "04", h: "Built by musicians, in public.", b: "Every feature ships because someone on the team needed it on a Tuesday at 11pm. The roadmap is public. The suggestions box is open. You shape this." },
     ] as Pillar[],
     why_now: {
@@ -36,7 +37,7 @@ export const SESHN = {
       h: "Our pledge to you",
       points: [
         "Never sell your data, never train AI on your unreleased work.",
-        "Keep our cut small and visible — a flat 5% on paid bookings to run escrow, and Pro is always a flat fee, never a slice of what you earn.",
+        "Keep our cut flat and visible — 10% on paid bookings, Stripe processing fees included, and nothing else stacked on top. Pro is always a flat fee, never a slice of what you earn.",
         "Public roadmap. Public changelog. If we kill a feature you love, you'll know why first.",
         "Free tier is permanent. Not a trial. Not a teaser.",
       ],
@@ -61,7 +62,7 @@ export const SESHN = {
     { n: "F.02", h: "Tag-based discovery", p: "Filter by role, genre, comp, location. Pure signal — no follower-count theatre." },
     { n: "F.03", h: "Project rooms", p: "Chat, stems, voice notes, deadlines, voice notes — without piling up in group DMs." },
     { n: "F.04", h: "Verified ratings", p: "Real reviews from people you actually worked with. No bot stars. No paid placements." },
-    { n: "F.05", h: "Stripe payouts", p: "Set rate, split, or trade. One flat 5% on paid bookings covers escrow; split and trade are free. Escrow ships Q3." },
+    { n: "F.05", h: "Stripe payouts", p: "Set rate, split, or trade. One flat 10% on paid bookings — Stripe fees included; split and trade are free. Escrow ships Q3." },
     { n: "F.06", h: "Boost mode", p: "$5 puts your post at the top of every matched feed for 7 days." },
   ] as Feature[],
 
@@ -121,7 +122,7 @@ export const SESHN = {
     { n: "02", h: "Tag-based discovery", lead: "Find people by what they make and how they work — not by who has the most followers.", body: "Search is built around the brief, not the brand. Filter by role, genre, compensation type, location, availability and rating. Follower counts are deliberately hidden so a 200-follower engineer with a 4.9 rating outranks a 90k-follower account that ghosts.", points: ["Filter by role, genre, comp type, location, availability", "Follower counts hidden by design", "“Open to work” / “booked” / “archived” availability states", "Save searches; get notified when a new match joins"], solves: "Solves: “every discovery tool just shows me the biggest accounts, not the right ones.”" },
     { n: "03", h: "Project rooms", lead: "One workspace per record. Chat, stems, deadlines, versions — out of the group chat forever.", body: "When a collab kicks off, spin up a private room. Inline audio with waveform comments (drop a note at 1:42 and it stays anchored there), file versioning so you never lose the take you wanted, a synced deadline, and a member list with roles. When the project ships, ratings are issued automatically.", points: ["Inline audio + waveform-anchored comments", "File versioning — v1, v2, v3 never overwrite", "Shared deadline synced to everyone's calendar", "Auto-issued ratings + testimonials on delivery"], solves: "Solves: “the project lives across three group chats, a Drive folder, and someone's voice memos.”" },
     { n: "04", h: "Verified ratings & trust", lead: "Every rating comes from a real, completed session. No anonymous reviews, no bot stars.", body: "Trust is the whole game — 78% of indie musicians say finding reliable collaborators is their #1 problem. Seshn only lets you rate someone you actually shared a project room with, and breaks the score into communication, on-time delivery and musical fit so the number means something.", points: ["Ratings only from verified completed sessions", "Breakdown: communication / timeliness / musical fit", "Verified ✓ ID badge for Pro members", "Report + review moderation, real humans"], solves: "Solves: “I agreed to a remote session and they took my deposit and vanished.”" },
-    { n: "05", h: "Get paid like a pro", lead: "Set your rate, split, or trade up front. Stripe-powered. One flat 5% on paid bookings — split and trade are free.", body: "Money is stated in the brief before anyone applies, so there's no awkward DM negotiation. Get paid via Stripe, hold funds in escrow (released on delivery), and generate a splits sheet straight from project-room participation for your PRO / SOCAN registration. Our only cut is a flat 5% on paid bookings, which runs the escrow that protects both sides.", points: ["Comp type stated up front: paid / split / trade", "Stripe payouts — flat 5% on paid bookings, nothing on split/trade", "Escrow: funds released on delivery (Q3)", "Auto-generated splits sheets for PRO registration"], solves: "Solves: “we never agreed on money up front and now the song is done and it's weird.”" },
+    { n: "05", h: "Get paid like a pro", lead: "Set your rate, split, or trade up front. Stripe-powered. One flat 10% on paid bookings — Stripe fees included; split and trade are free.", body: "Money is stated in the brief before anyone applies, so there's no awkward DM negotiation. The client pays the rate you agreed; you keep 90%. Get paid via Stripe, hold funds in escrow (released on delivery), and generate a splits sheet straight from project-room participation for your PRO / SOCAN registration. Our only cut is a flat 10% on a paid booking — and that covers the payment processing too, so there's no separate card fee and no team commission stacked on top.", points: ["Comp type stated up front: paid / split / trade", "Stripe payouts — flat 10% on paid bookings (fees included), nothing on split/trade", "Escrow: funds released on delivery (Q3)", "Auto-generated splits sheets for PRO registration"], solves: "Solves: “we never agreed on money up front and now the song is done and it's weird.”" },
     { n: "06", h: "Boost & reach", lead: "When a brief matters, put it in front of every matched artist for seven days.", body: "Most posts reach people organically. When you need to move fast — a deadline, a label deliverable — Boost pins your brief to the top of every matched feed and sends a push to the most relevant artists. Five dollars, one-time, or a free credit every month on Pro.", points: ["Top of every matched feed for 7 days", "Push notification to your strongest matches", "Boosted badge + ranking lift", "$5 one-time, or 1 free credit/month on Pro"], solves: "Solves: “I posted a paid gig and 4 people saw it because the feed buried it.”" },
   ] as FeatureDeep[],
 
@@ -131,6 +132,20 @@ export const SESHN = {
     { stat: "64%", label: "say money is why they'd quit music", h: "The economics push artists out.", body: "77.8% of independent musicians earn under $15,000/year from music, and the share citing financial pressure as the #1 reason they'd leave jumped from 39% in 2023 to 64.4% in 2025. Solo artistry is expensive and slow. Pooling skills, splitting work, and getting paid for sessions is how working musicians actually survive.", src: "Xposure State of the Industry 2025" },
     { stat: "57K", label: "artists take 90% of all streams", h: "The middle class of music vanished.", body: "Independent artists now drive over half of global streams — yet just 57,000 musicians capture 90% of them, leaving 7.94 million to share the rest. The way back isn't going viral alone; it's building a network, a reputation, and a body of collaborative work that compounds.", src: "YouGov / IJFMR 2025" },
   ] as ProblemDeep[],
+
+  feeComparison: {
+    eyebrow: "What you actually keep",
+    headline: "Make more of what you earn — without a whole team taking a cut.",
+    sub: "The old way to build a music career meant handing slices to a manager, an agent, a lawyer, and a label before you saw a dollar. Seshn is one flat 10% — Stripe's processing fees included — so more of every booking stays with the artist who did the work.",
+    basisLabel: "On every $1,000 you earn from a paid collaboration",
+    rows: [
+      { path: "Major-label deal", cut: "~80% to the label", keep: "≈ $150–200", note: "A standard artist royalty is 15–20% — and the label recoups its advances before you see a cent." },
+      { path: "Manager only", cut: "15–20%", keep: "≈ $800–850", note: "Just the manager's commission. A working career usually also needs an agent, a lawyer and a business manager." },
+      { path: "The full team stack", cut: "~40% combined", keep: "≈ $600", note: "Manager 20% + booking agent 10% + business manager 5% + legal 5%. Every cut stacks on the last." },
+      { path: "Seshn", cut: "Flat 10%", keep: "$900", note: "Stripe processing fees included. No manager, no label, no agent required to get paid.", highlight: true },
+    ] as FeeRow[],
+    footnote: "Industry figures are typical ranges, not guarantees — commissions and label royalty splits vary by deal. Seshn's flat 10% is the only fee on a paid booking and includes payment processing. Split and trade collaborations are always free.",
+  },
 
   meta: { brand: "Seshn", tagline: "Find the people who finish your record.", year: 2026 },
 };
