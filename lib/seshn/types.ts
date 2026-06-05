@@ -254,6 +254,8 @@ export interface Notification {
   application_id: string | null;
   conversation_id: string | null;
   meeting_id?: string | null;
+  contract_id?: string | null;
+  escrow_id?: string | null;
   actor?: { id: string; username: string; display_name: string; avatar_url: string } | null;
   gig?: { id: string; title: string; role: string } | null;
   meeting?: { id: string; title: string; starts_at: string; status: string } | null;

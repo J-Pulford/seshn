@@ -8,6 +8,7 @@ import { listGigs } from "@/lib/seshn/gigs";
 import { getOrCreateConversation } from "@/lib/seshn/messaging";
 import { blockUser, isUserBlocked, reportUser, unblockUser } from "@/lib/seshn/trust-safety";
 import { listConnectedAccounts } from "@/lib/seshn/connected-accounts";
+import { recordProfileView } from "@/lib/seshn/analytics";
 import { SOCIAL_PLATFORMS, AVAILABILITY_OPTIONS } from "@/lib/seshn/constants";
 import { embedFor } from "@/lib/seshn/embeds";
 import { toast } from "@/lib/seshn/toast";
@@ -910,6 +911,7 @@ export default function ProfilePage() {
         document.title = "Seshn — " + (profile.display_name || profile.username);
         const isOwner = !!(me && me.id === profile.id);
         setState({ status: "ready", profile, isOwner, gigs: null });
+        if (!isOwner) void recordProfileView(profile.id);
         try {
           const list = await listGigs({ ownerId: profile.id, limit: 8, statuses: isOwner ? ["open", "closed"] : ["open"] });
           setState((s) => ({ ...s, gigs: list }));

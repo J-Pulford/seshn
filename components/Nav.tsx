@@ -32,6 +32,7 @@ const R = {
   inbox: "/inbox",
   settings: "/settings",
   dashboard: "/dashboard",
+  analytics: "/analytics",
   contracts: "/contracts",
   profile: (username?: string) => (username ? `/profile/${encodeURIComponent(username)}` : "/feed"),
   gig: (id: string) => `/gig/${encodeURIComponent(id)}`,
@@ -73,6 +74,12 @@ function notifText(n: Notification) {
   if (n.kind === "meeting_confirmed") return `${actor} confirmed ${meetingTitle}`;
   if (n.kind === "meeting_declined") return `${actor} declined ${meetingTitle}`;
   if (n.kind === "meeting_cancelled") return `${actor} cancelled ${meetingTitle}`;
+  const deal = n.gig?.title ? `“${n.gig.title}”` : "your collaboration";
+  if (n.kind === "escrow_funded") return `Escrow funded for ${deal} — you're clear to start`;
+  if (n.kind === "escrow_delivered") return `Work delivered on ${deal} — approve to release`;
+  if (n.kind === "escrow_released") return `Funds released for ${deal} — you've been paid`;
+  if (n.kind === "escrow_refunded") return `Escrow refunded for ${deal}`;
+  if (n.kind === "escrow_disputed") return `A dispute was opened on ${deal}`;
   return "New activity";
 }
 
@@ -81,6 +88,7 @@ function notifHref(n: Notification): string | null {
   if ((n.kind === "application_accepted" || n.kind === "application_rejected") && n.gig_id) return R.gig(n.gig_id);
   if (n.kind === "message_received" && n.conversation_id) return R.inboxConvo(n.conversation_id);
   if (n.kind.startsWith("meeting_") && n.conversation_id) return R.inboxConvo(n.conversation_id);
+  if (n.kind.startsWith("escrow_") && n.contract_id) return `/contract/${encodeURIComponent(n.contract_id)}`;
   return null;
 }
 
@@ -364,6 +372,7 @@ function ProfileMenu({ me, active, initials }: { me: Profile | null; active: Nav
           )}
           <a role="menuitem" href={R.profile(me?.username)} style={itemStyle} onClick={() => setOpen(false)}>Your profile</a>
           <a role="menuitem" href={R.dashboard} style={itemStyle} onClick={() => setOpen(false)}>Finances</a>
+          <a role="menuitem" href={R.analytics} style={itemStyle} onClick={() => setOpen(false)}>Analytics</a>
           <a role="menuitem" href={R.settings} style={itemStyle} onClick={() => setOpen(false)}>Settings</a>
           <div style={{ height: 1, background: "var(--line-soft)", margin: "4px 0" }} />
           <button role="menuitem" type="button" style={{ ...itemStyle, color: "var(--ink-2)" }}
@@ -464,6 +473,7 @@ export default function Nav({ active = null, showSearch = true, showPostButton =
         <a href={R.applications} style={mobileLinkStyle(active === "applications")} onClick={() => setMenuOpen(false)}>Applications</a>
         <a href={R.contracts} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Contracts</a>
         <a href={R.dashboard} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Finances</a>
+        <a href={R.analytics} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Analytics</a>
         <a href={R.settings} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Settings</a>
         {showSearch && <div style={{ padding: "12px 14px" }}><NavSearch /></div>}
       </div>

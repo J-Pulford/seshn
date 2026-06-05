@@ -7,6 +7,7 @@ import Nav from "@/components/Nav";
 import { AlbumArt } from "@/components/visual/AlbumArt";
 import { getUser } from "@/lib/seshn/profiles";
 import { getGig, setGigStatus } from "@/lib/seshn/gigs";
+import { recordGigView } from "@/lib/seshn/analytics";
 import { applyToGig, getMyApplication, listApplicationsForGig, updateApplicationStatus } from "@/lib/seshn/applications";
 import { createContract, getContractForApplication } from "@/lib/seshn/contracts";
 import { getOrCreateConversation } from "@/lib/seshn/messaging";
@@ -592,6 +593,7 @@ export default function GigPage() {
       }
       document.title = "Seshn — " + gig.title;
       setState({ status: "ready", gig });
+      void recordGigView(gig.id);
     }).catch(() => setState({ status: "error", gig: null }));
   }, [id]);
 
