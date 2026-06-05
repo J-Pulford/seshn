@@ -19,6 +19,7 @@ const NOTIF_KINDS: [string, string, string][] = [
   ["application_accepted", "Application accepted", "When a poster accepts your application."],
   ["application_rejected", "Application declined", "When a poster passes on your application."],
   ["message_received", "New messages", "When someone sends you a DM."],
+  ["email_enabled", "Email notifications", "Also email me about activity — escrow updates, replies, and applications."],
 ];
 
 const PROVIDERS = [

@@ -20,6 +20,7 @@ ones power live features:
 - [ ] `0030` analytics (view tables, record/read RPCs, realtime)
 - [ ] `0031` data export (`export_my_data`)
 - [ ] `0032` Help & community board (threads/replies, `is_staff`, reply notifications)
+- [ ] `0033` Help board seeder (`seed_help_threads`)
 
 Without these the app won't crash (the client degrades gracefully) but
 deliver/release, escrow bell alerts, analytics, "download my data", and the Help
@@ -44,6 +45,16 @@ board stay dark.
       appears under Project → Cron Jobs after deploy. (Sweep auto-releases delivered
       escrows past their approval window and refunds funded escrows past their
       deadline. Without it, funds never auto-release if an owner goes quiet.)
+
+### 3b. Email notifications (transactional)
+Separate from auth email (that's #4). Powers escrow/help/application emails.
+- [ ] Set `RESEND_API_KEY`, `EMAIL_FROM` (verified sender), `NEXT_PUBLIC_SITE_URL`,
+      and `NOTIFICATIONS_WEBHOOK_SECRET` in Vercel.
+- [ ] In Supabase → Database → Webhooks, create a webhook: **INSERT on
+      `public.notifications`** → POST `https://www.seshnnn.com/api/notifications/email`
+      with header `x-webhook-secret: <NOTIFICATIONS_WEBHOOK_SECRET>`.
+- [ ] The bridge respects each member's "Email notifications" toggle (Settings →
+      Notifications) and is a no-op until `RESEND_API_KEY` is set.
 
 ### 4. Custom SMTP for auth email
 - [ ] Configure Resend / Postmark / SES in Supabase → Auth → SMTP, verify the
@@ -72,7 +83,8 @@ board stay dark.
       the Supabase anon key — public/RLS-protected by design.)
 - [ ] **Set yourself as staff** for the Help board: `update profiles set is_staff =
       true where username = '<you>';` so your replies show the Seshn badge and you can
-      pin/close threads.
+      pin/close threads. Then open `/help` and click **"Seed starter posts"** to
+      populate the board with welcome/FAQ threads (one-time, idempotent).
 
 ## 🟢 Can ship after launch
 - [ ] Launch mode: open signup vs gate behind the existing **waitlist** (`0019`).

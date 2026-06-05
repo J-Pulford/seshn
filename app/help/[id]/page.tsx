@@ -32,6 +32,17 @@ function Avatar({ url, name }: { url?: string; name?: string }) {
   return <span className="help-av">{url ? <img src={url} alt="" /> : initials(name)}</span>;
 }
 
+// Turn raw URLs and internal paths (e.g. /guides#win-applications) into links.
+function linkify(text: string) {
+  return String(text || "")
+    .split(/(https?:\/\/[^\s]+|\/[A-Za-z][A-Za-z0-9/_#-]*)/g)
+    .map((part, i) => {
+      if (/^https?:\/\//.test(part)) return <a key={i} href={part} target="_blank" rel="noopener noreferrer">{part}</a>;
+      if (/^\/[A-Za-z]/.test(part)) return <a key={i} href={part}>{part}</a>;
+      return part;
+    });
+}
+
 function ReplyCard({ r }: { r: HelpReply }) {
   return (
     <div className={"help-reply" + (r.is_staff_reply ? " staff" : "")}>
@@ -45,7 +56,7 @@ function ReplyCard({ r }: { r: HelpReply }) {
           <span className="help-reply-time">{fmt(r.created_at)}</span>
         </div>
       </div>
-      <div className="help-reply-body">{r.body}</div>
+      <div className="help-reply-body">{linkify(r.body)}</div>
     </div>
   );
 }
@@ -145,7 +156,7 @@ export default function HelpThreadPage() {
             <Avatar url={thread.author?.avatar_url} name={thread.author?.display_name || thread.author?.username} />
             <span>@{thread.author?.username || "member"} · {fmt(thread.created_at)}</span>
           </div>
-          <div className="help-thread-body">{thread.body}</div>
+          <div className="help-thread-body">{linkify(thread.body)}</div>
 
           {canModerate && (
             <div className="help-mod">

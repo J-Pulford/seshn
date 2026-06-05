@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import Nav from "@/components/Nav";
 import { requireProfile } from "@/lib/seshn/auth";
-import { HELP_CATEGORIES, listThreads, createThread } from "@/lib/seshn/help";
+import { HELP_CATEGORIES, listThreads, createThread, amIStaff, seedHelpThreads } from "@/lib/seshn/help";
 import { toast } from "@/lib/seshn/toast";
 import type { HelpCategory, HelpThread } from "@/lib/seshn/types";
 import "./help.css";
@@ -81,15 +81,33 @@ function Composer({ onCreated }: { onCreated: (t: HelpThread) => void }) {
 
 export default function HelpPage() {
   const [me, setMe] = useState<User | null | undefined>(undefined);
+  const [staff, setStaff] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   const [cat, setCat] = useState<HelpCategory | "all">("all");
   const [threads, setThreads] = useState<HelpThread[] | null>(null);
 
   useEffect(() => {
     (async () => {
       const r = await requireProfile({ allowAnon: true });
-      if (r) setMe(r.user ?? null);
+      if (r) {
+        setMe(r.user ?? null);
+        if (r.user) amIStaff().then(setStaff);
+      }
     })();
   }, []);
+
+  async function doSeed() {
+    setSeeding(true);
+    try {
+      const n = await seedHelpThreads();
+      if (n > 0) { toast.success(`Seeded ${n} starter posts.`); setThreads(await listThreads({ category: cat })); }
+      else toast.error("Board already has posts — nothing seeded.");
+    } catch (e) {
+      toast.error((e as Error)?.message || "Couldn't seed.");
+    } finally {
+      setSeeding(false);
+    }
+  }
 
   useEffect(() => {
     setThreads(null);
@@ -104,7 +122,7 @@ export default function HelpPage() {
           <div>
             <span className="t-eyebrow">Help &amp; community</span>
             <h1>Ask, report, and shape Seshn</h1>
-            <p>Questions, bug reports, feedback, and feature ideas — in the open. The Seshn team replies here, and so does the community.</p>
+            <p>Questions, bug reports, feedback, and feature ideas — in the open. The Seshn team replies here, and so does the community. New here? <a href="/guides">Read the best-practices guides →</a></p>
           </div>
           {me ? <Composer onCreated={(t) => (window.location.href = `/help/${t.id}`)} /> : <a className="btn primary" href={"/auth?next=" + encodeURIComponent("/help")}>Sign in to post</a>}
         </header>
@@ -122,6 +140,9 @@ export default function HelpPage() {
           <div className="help-empty">
             <div className="help-empty-title">No posts here yet</div>
             <p>{cat === "all" ? "Be the first to ask a question or share feedback." : "Nothing in this category yet — start the conversation."}</p>
+            {staff && cat === "all" && (
+              <button className="btn" style={{ marginTop: 12 }} onClick={doSeed} disabled={seeding}>{seeding ? "Seeding…" : "Seed starter posts"}</button>
+            )}
           </div>
         ) : (
           <div className="help-list">

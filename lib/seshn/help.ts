@@ -100,6 +100,13 @@ export async function setThreadPinned(threadId: string, pinned: boolean): Promis
   if (res.error) throw res.error;
 }
 
+// Staff-only: seed the board with starter threads (no-op once it has content).
+export async function seedHelpThreads(): Promise<number> {
+  const res = await getBrowserClient().rpc("seed_help_threads");
+  if (res.error) throw res.error;
+  return (res.data as number) || 0;
+}
+
 // Am I staff? (Used to reveal moderation controls. RLS still enforces the rest.)
 export async function amIStaff(): Promise<boolean> {
   const u = await getUser();
