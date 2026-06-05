@@ -216,7 +216,8 @@ export default function OnboardingPage() {
         social_links: cleanSocial,
         featured,
       });
-      window.location.href = profileHref(profile.username);
+      // Send brand-new members to Get Started so they grok the platform fast.
+      window.location.href = "/start";
     } catch (e) {
       const ex = e as { code?: string; message?: string };
       console.error("[seshn] onboarding upsert error:", e);

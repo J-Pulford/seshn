@@ -256,9 +256,45 @@ export interface Notification {
   meeting_id?: string | null;
   contract_id?: string | null;
   escrow_id?: string | null;
+  help_thread_id?: string | null;
   actor?: { id: string; username: string; display_name: string; avatar_url: string } | null;
   gig?: { id: string; title: string; role: string } | null;
   meeting?: { id: string; title: string; starts_at: string; status: string } | null;
+}
+
+export type HelpCategory = "question" | "bug" | "feedback" | "feature_request" | "general";
+export type HelpStatus = "open" | "answered" | "closed";
+
+export interface HelpAuthor {
+  id: string;
+  username: string;
+  display_name: string;
+  avatar_url: string;
+}
+
+export interface HelpThread {
+  id: string;
+  author_id: string;
+  category: HelpCategory;
+  title: string;
+  body: string;
+  status: HelpStatus;
+  pinned: boolean;
+  reply_count: number;
+  last_activity_at: string;
+  created_at: string;
+  updated_at: string;
+  author?: HelpAuthor | null;
+}
+
+export interface HelpReply {
+  id: string;
+  thread_id: string;
+  author_id: string;
+  body: string;
+  is_staff_reply: boolean;
+  created_at: string;
+  author?: HelpAuthor | null;
 }
 
 export type MeetingStatus = "proposed" | "confirmed" | "declined" | "cancelled" | "completed";

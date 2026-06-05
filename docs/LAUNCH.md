@@ -19,9 +19,11 @@ ones power live features:
 - [ ] `0029` escrow notifications (trigger + new `notifications.kind`s)
 - [ ] `0030` analytics (view tables, record/read RPCs, realtime)
 - [ ] `0031` data export (`export_my_data`)
+- [ ] `0032` Help & community board (threads/replies, `is_staff`, reply notifications)
 
 Without these the app won't crash (the client degrades gracefully) but
-deliver/release, escrow bell alerts, analytics, and "download my data" stay dark.
+deliver/release, escrow bell alerts, analytics, "download my data", and the Help
+board stay dark.
 
 ### 2. Stripe go-live (Vercel → Settings → Environment Variables → Production)
 - [ ] `STRIPE_SECRET_KEY` = `sk_live_…`
