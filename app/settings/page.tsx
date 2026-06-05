@@ -83,7 +83,7 @@ function AccountSection({ user, profile }: { user: User; profile: Profile }) {
 
   return (
     <Section title="Account">
-      <div className="field" style={{ marginBottom: 16 }}>
+      <div className="field">
         <span className="field-label">Current email</span>
         <div style={{ padding: "10px 12px", background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 8, fontSize: 13, color: "var(--ink-2)" }}>
           {user.email || <span style={{ color: "var(--ink-3)", fontStyle: "italic" }}>No email on file</span>}
@@ -98,7 +98,7 @@ function AccountSection({ user, profile }: { user: User; profile: Profile }) {
         <span className="t-meta">You&apos;ll receive confirmation links at both your current and new addresses. The change only takes effect once you click the link.</span>
         {status && <div className={"status-line " + status.kind} style={{ marginTop: 6 }}>{status.text}</div>}
       </div>
-      <div className="field" style={{ marginTop: 16 }}>
+      <div className="field">
         <label className="field-label" htmlFor="se-pw">Change password</label>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <input id="se-pw" className="input" type="password" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="New password (min 8 characters)" />

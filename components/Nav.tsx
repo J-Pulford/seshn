@@ -15,6 +15,7 @@ import {
 } from "@/lib/seshn/notifications";
 import { getUnreadCount, subscribeToMyConversations } from "@/lib/seshn/messaging";
 import { countContractsNeedingMySignature } from "@/lib/seshn/contracts";
+import { signOut } from "@/lib/seshn/auth";
 import type { Gig, Notification, Profile } from "@/lib/seshn/types";
 import ThemeToggle from "./ThemeToggle";
 import "./nav.css";
@@ -322,6 +323,59 @@ function NavSearch() {
   );
 }
 
+// Avatar in the top-right opens an account dropdown (profile / finances /
+// settings / sign out) rather than jumping straight to the profile. Closes on
+// outside-click or Escape.
+function ProfileMenu({ me, active, initials }: { me: Profile | null; active: NavActive; initials: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey); };
+  }, [open]);
+
+  const itemStyle: CSSProperties = {
+    display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 8,
+    color: "var(--ink)", textDecoration: "none", background: "transparent", border: "none",
+    width: "100%", textAlign: "left", cursor: "pointer",
+    fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 13,
+  };
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button type="button" onClick={() => setOpen((o) => !o)} aria-haspopup="menu" aria-expanded={open} aria-label="Account menu"
+        style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "inline-flex" }}>
+        <span className="avatar md" style={{ background: me?.avatar_url ? "var(--ph)" : "linear-gradient(135deg,#a8ebc8,#2CCB73)", color: "#062c19", fontSize: 12, fontFamily: "var(--font-display)", fontWeight: 700, border: (active === "profile" || open) ? "2px solid var(--ink)" : "2px solid transparent", overflow: "hidden", width: 32, height: 32, display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>
+          {me?.avatar_url ? <img src={me.avatar_url} alt="" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover", display: "block" }} /> : initials}
+        </span>
+      </button>
+      {open && (
+        <div role="menu" style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, minWidth: 208, background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, boxShadow: "0 12px 32px rgba(0,0,0,0.18)", padding: 6, zIndex: 200 }}>
+          {me && (
+            <div style={{ padding: "8px 14px 10px", borderBottom: "1px solid var(--line-soft)", marginBottom: 4 }}>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13, color: "var(--ink)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{me.display_name || me.username}</div>
+              {me.username && <div style={{ fontSize: 12, color: "var(--ink-3)" }}>@{me.username}</div>}
+            </div>
+          )}
+          <a role="menuitem" href={R.profile(me?.username)} style={itemStyle} onClick={() => setOpen(false)}>Your profile</a>
+          <a role="menuitem" href={R.dashboard} style={itemStyle} onClick={() => setOpen(false)}>Finances</a>
+          <a role="menuitem" href={R.settings} style={itemStyle} onClick={() => setOpen(false)}>Settings</a>
+          <div style={{ height: 1, background: "var(--line-soft)", margin: "4px 0" }} />
+          <button role="menuitem" type="button" style={{ ...itemStyle, color: "var(--ink-2)" }}
+            onClick={async () => { setOpen(false); try { await signOut(); } catch { /* ignore */ } window.location.href = "/auth"; }}>
+            Sign out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Nav({ active = null, showSearch = true, showPostButton = true }: { active?: NavActive; showSearch?: boolean; showPostButton?: boolean }) {
   const [me, setMe] = useState<Profile | null>(null);
   const [unreadConvos, setUnreadConvos] = useState(0);
@@ -394,11 +448,7 @@ export default function Nav({ active = null, showSearch = true, showPostButton =
           </a>
           <ThemeToggle />
           <NotificationsBell />
-          <a href={R.profile(me?.username)} style={{ textDecoration: "none" }} aria-label="Your profile">
-            <span className="avatar md" style={{ background: me?.avatar_url ? "var(--ph)" : "linear-gradient(135deg,#a8ebc8,#2CCB73)", color: "#062c19", fontSize: 12, fontFamily: "var(--font-display)", fontWeight: 700, border: active === "profile" ? "2px solid var(--ink)" : "2px solid transparent", overflow: "hidden", width: 32, height: 32, display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>
-              {me?.avatar_url ? <img src={me.avatar_url} alt="" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover", display: "block" }} /> : initials}
-            </span>
-          </a>
+          <ProfileMenu me={me} active={active} initials={initials} />
           <button type="button" className="seshn-nav-hamburger" onClick={() => setMenuOpen(!menuOpen)}
             style={{ width: 34, height: 34, borderRadius: 8, color: "var(--ink-2)", background: "transparent", cursor: "pointer", border: "none", alignItems: "center", justifyContent: "center" }}
             aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}>
