@@ -100,6 +100,14 @@ export async function resendVerificationEmail(email: string, redirectTo?: string
   });
 }
 
+// Subject-access export: returns everything we hold about the caller as one
+// JSON object (scoped to auth.uid() by the export_my_data RPC).
+export async function exportMyData(): Promise<Record<string, unknown>> {
+  const { data, error } = await getBrowserClient().rpc("export_my_data");
+  if (error) throw error;
+  return (data as Record<string, unknown>) || {};
+}
+
 export async function deleteMyAccount() {
   const sb = getBrowserClient();
   const u = await getUser();

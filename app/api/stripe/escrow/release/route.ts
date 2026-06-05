@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getStripe, getAdminClient, userFromRequest } from "@/lib/stripe/server";
 import { isStripeConfigured } from "@/lib/stripe/config";
+import { releaseEscrow } from "@/lib/stripe/escrow-ops";
 import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -54,7 +55,7 @@ export async function POST(req: Request) {
 
     const { data: escrow, error: eErr } = await admin
       .from("escrows")
-      .select("id, status, amount_cents, platform_fee_cents, currency, stripe_transfer_id")
+      .select("id, contract_id, status, amount_cents, platform_fee_cents, currency, stripe_payment_intent_id, stripe_transfer_id")
       .eq("contract_id", contractId)
       .maybeSingle();
     if (eErr) throw eErr;
@@ -81,43 +82,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const transferAmount = Math.max(0, escrow.amount_cents - escrow.platform_fee_cents);
-
-    // Idempotency: a stable key per escrow keeps a retried request from sending
-    // the money twice.
-    const transfer = await stripe.transfers.create(
-      {
-        amount: transferAmount,
-        currency: String(escrow.currency).toLowerCase(),
-        destination: collab.stripe_account_id,
-        transfer_group: `escrow_${escrow.id}`,
-        metadata: { kind: "escrow_release", escrow_id: escrow.id, contract_id: contractId },
-      },
-      { idempotencyKey: `escrow_release_${escrow.id}` },
-    );
-
-    const { error: upErr } = await admin
-      .from("escrows")
-      .update({ status: "released", released_at: new Date().toISOString(), stripe_transfer_id: transfer.id })
-      .eq("id", escrow.id)
-      .in("status", ["funded", "delivered"]);
-    if (upErr) throw upErr;
-
-    await admin.from("contracts").update({ status: "completed" }).eq("id", contractId);
-
-    await admin.from("audit_log").insert({
-      actor_id: user.id,
-      action: "escrow_released",
-      target_table: "escrows",
-      target_id: escrow.id,
-      payload: {
-        transfer_id: transfer.id,
-        transfer_amount_cents: transferAmount,
-        platform_fee_cents: escrow.platform_fee_cents,
-        currency: escrow.currency,
-      },
-    });
-
+    await releaseEscrow(admin, stripe, escrow, collab.stripe_account_id, user.id, "owner_approved");
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("[stripe] escrow release error", e);

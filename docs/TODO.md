@@ -5,9 +5,28 @@ launch sequencing see `MVP-CHECKLIST.md`; this is the day-to-day "do next" list.
 
 _Last updated: 2026-06-05_
 
+> **Launching?** See `LAUNCH.md` for the authoritative, ordered go-live runbook.
+
 ---
 
 ## 🟢 Recently done
+- **Escrow funding + delivery + release** — `/contract/[id]/fund` checkout (Stripe
+  Checkout), webhook marks funded, `mark_delivered` RPC, owner approve→transfer
+  release. Migrations `0028`. `escrow-flow.md` updated to the live 10% model.
+- **Escrow auto-release / refund cron** — `/api/cron/escrow-sweep` (hourly via
+  `vercel.json`) releases overdue deliveries and refunds missed deadlines. Needs
+  `CRON_SECRET` set in Vercel.
+- **Escrow notifications** — bell alerts on funded/delivered/released/refunded/
+  disputed (migration `0029`).
+- **Profile + listing analytics** — `/analytics` with live view counts, trend
+  sparkline, and per-listing view→application conversion (migration `0030`).
+- **Download my data** — Settings → "Download my data" (`export_my_data`, `0031`).
+- **Marketing** — fee-comparison table + sourced stats (`docs/marketing-sources.md`).
+- **Stripe Connect payouts (test mode)** — onboarding → `account.updated` → status sync.
+
+---
+
+## 🟢 Previously done
 - **Auth email links** — magic-link / password-reset links no longer land on the
   homepage. Root cause was the Supabase Redirect-URL allow-list missing the
   canonical `www.seshnnn.com` origin; added `AuthLinkCatcher` safety-net + `/auth`
@@ -25,10 +44,8 @@ _Last updated: 2026-06-05_
       and set `STRIPE_WEBHOOK_SECRET` to that live endpoint's secret; redeploy; do one
       real onboarding to verify the live chain. Keep modes consistent (don't mix
       test/live keys, webhook, secret).
-- [ ] **Escrow fund/release flow.** Wire the stubbed webhook events
-      (`payment_intent.succeeded` → mark escrow funded; `transfer.created` /
-      `charge.refunded` → release / refund bookkeeping) in
-      `app/api/stripe/webhook/route.ts`. Design notes in `docs/escrow-flow.md`.
+- [x] **Escrow fund/release flow.** Done — see "Recently done" above. Live switch
+      (`charge.refunded` bookkeeping is handled in the cron refund path).
 
 ## 🔴 Infra / email
 - [ ] **Custom SMTP in Supabase.** Built-in sender is rate-limited and unreliable

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import Nav from "@/components/Nav";
-import { requireProfile, signOut, updateMyEmail, setMyPassword, deleteMyAccount } from "@/lib/seshn/auth";
+import { requireProfile, signOut, updateMyEmail, setMyPassword, deleteMyAccount, exportMyData } from "@/lib/seshn/auth";
 import { getMyNotificationPrefs, updateNotificationPrefs } from "@/lib/seshn/notifications";
 import { emitProfileUpdated } from "@/lib/seshn/profiles";
 import { listConnectedAccounts, disconnectAccount, startSpotifyConnect, completeSpotifyConnect } from "@/lib/seshn/connected-accounts";
@@ -296,6 +296,44 @@ function PayoutsSection() {
   );
 }
 
+function DataExportSection({ profile }: { profile: Profile }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+
+  async function doExport() {
+    if (busy) return;
+    setBusy(true);
+    setErr("");
+    try {
+      const data = await exportMyData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `seshn-data-${profile.username || "export"}-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setErr((e as Error)?.message || "Couldn't export your data. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="card">
+      <div className="section-title">Your data</div>
+      <span className="t-meta" style={{ display: "block", marginBottom: 12 }}>Download a copy of everything we hold about you — your profile, gigs, applications, contracts, escrows, connected accounts, messages you&apos;ve sent, and notifications — as a JSON file.</span>
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <button className="btn" onClick={doExport} disabled={busy}>{busy ? "Preparing…" : "Download my data"}</button>
+      </div>
+      {err && <div className="status-line err" style={{ marginTop: 10 }}>{err}</div>}
+    </div>
+  );
+}
+
 function DangerSection({ profile }: { profile: Profile }) {
   const [confirmText, setConfirmText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -401,6 +439,7 @@ export default function SettingsPage() {
         <PayoutsSection />
         <ConnectedAccountsSection accounts={accounts} onChange={() => refreshAccounts(state.user!.id)} />
         <NotificationsSection onSaved={onProfileUpdated} />
+        <DataExportSection profile={state.profile} />
         <DangerSection profile={state.profile} />
       </div>
     </div>
