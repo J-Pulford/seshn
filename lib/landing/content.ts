@@ -46,7 +46,7 @@ export const SESHN = {
 
   stats: [
     { big: "78%", h: "of indie musicians struggle to find reliable collaborators.", p: "Ghosting. Half-finished demos. Producers who never reply. Vetting is the #1 unsolved problem in independent music.", src: "CoCreatea Indie Survey · 2025" },
-    { big: "100K+", h: "songs uploaded to streaming every day.", p: "~35 per minute. Posting alone is no longer a discovery strategy. Being heard means being connected.", src: "Spotify Loud & Clear · 2025" },
+    { big: "100K+", h: "songs uploaded to streaming every day.", p: "~35 per minute. Posting alone is no longer a discovery strategy. Being heard means being connected.", src: "Luminate Year-End Report · 2025" },
     { big: "77.8%", h: "earn under $15K/yr from music.", p: "64.4% cite financial pressure as the #1 reason they leave music — up from 39% in 2023.", src: "Xposure Music · State of the Industry 2025" },
     { big: "50%+", h: "of all global streams are now independent artists.", p: "57,000 musicians take 90% of streams. 7.94 million share the rest. The economics of solo virality are broken — but the door is wide open for the collaborators who organize.", src: "YouGov / IJFMR · 2025" },
   ] as Stat[],
@@ -144,7 +144,7 @@ export const SESHN = {
       { path: "The full team stack", cut: "~40% combined", keep: "≈ $600", note: "Manager 20% + booking agent 10% + business manager 5% + legal 5%. Every cut stacks on the last." },
       { path: "Seshn", cut: "Flat 10%", keep: "$900", note: "Stripe processing fees included. No manager, no label, no agent required to get paid.", highlight: true },
     ] as FeeRow[],
-    footnote: "Industry figures are typical ranges, not guarantees — commissions and label royalty splits vary by deal. Seshn's flat 10% is the only fee on a paid booking and includes payment processing. Split and trade collaborations are always free.",
+    footnote: "Industry figures are typical published ranges, not guarantees — commissions and label royalty splits vary by deal (manager 15–20%, booking agent ~10%, business manager 5%, legal ~5%; major-label artist royalties run 15–20% before the label recoups its advances). Even next to creative marketplaces — Fiverr takes 20%, AirGigs 8–15%, SoundBetter ~10% before card fees — Seshn's flat 10% is the only fee on a paid booking and includes Stripe processing. Split and trade collaborations are always free. Sources: docs/marketing-sources.md.",
   },
 
   meta: { brand: "Seshn", tagline: "Find the people who finish your record.", year: 2026 },
