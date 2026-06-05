@@ -52,17 +52,15 @@ traditional team stack **and** competitive with the best creative marketplaces.
 | "77.8% earn under $15K/yr from music" | 77.8% of surveyed artists <$15K | ✅ | Xposure Music, *Independent Music Industry Report 2025* |
 | "Financial pressure is the #1 reason artists leave" | Financial strain replaced "lack of exposure" as the #1 career barrier | ✅ | Xposure Music 2025; corroborated by Mixmag (*76% say a music career is financially unsustainable*) |
 | "64.4% cite financial pressure (up from 39% in 2023)" | The trend (up sharply) is supported; **exact 64.4%/39% needs the original Xposure report** | ⚠️ | Xposure Music 2025 / 2023 — verify the precise numbers in the source PDF before quoting |
-| "50%+ of all global streams are independent artists" | Indie/DIY = 96.2% of daily *uploads* in 2025; consumption share is more nuanced | ⚠️ | Luminate 2025. 🔁 Stronger, cleaner stat: **"just 0.2% of tracks (≈541K) drive ~half of all global streams"** (MBW/Luminate 2025) |
-| "57,000 artists take 90% of streams; 7.94M share the rest" | **Could not verify the 57K/7.94M figures** against a primary source | ⚠️🔁 | Likely echoes older reporting. Suggested verified swap: *"0.2% of tracks generate half of all streaming"* (Luminate 2025) |
-| "78% of indie musicians struggle to find reliable collaborators" (CoCreatea Indie Survey) | **Could not verify** — no public "CoCreatea" survey found | ⚠️ | If the founder has the original source, keep it and cite the URL here. Otherwise reframe: the difficulty of finding/vetting collaborators is well-documented qualitatively (MIDiA; Mirada Media; NERFA) but no clean "78%" figure was confirmed |
+| "96% of new music is independent or DIY" *(swapped in)* | Indie/DIY = 96.2% of daily uploads in 2025 | ✅ | Luminate 2025, via Music Business Worldwide. Replaced the unverifiable "78% / CoCreatea" stat. |
+| "0.2% of tracks drive half of all streams" *(swapped in)* | ~541,000 tracks (0.2%) = 49.4% of global audio streams in 2025 | ✅ | Luminate 2025, via MBW. Replaced the unverifiable "57K/7.94M" stat. |
 
 ---
 
 ## Action items before a paid campaign
 
-1. **Confirm or replace two soft stats** flagged ⚠️🔁 above (the "78% collaborators"
-   and "57K/7.94M streams" lines). Either drop in the original source URL, or swap to
-   the Luminate-grounded alternatives noted.
+1. ~~Confirm or replace the two soft stats (78% collaborators, 57K/7.94M streams).~~
+   **Done** — both swapped to the Luminate-grounded figures above.
 2. **Pull exact figures** for the 64.4%/39% financial-pressure line from the Xposure
    2025 PDF and record the page here.
 3. Keep this file updated whenever `content.ts` stats change.

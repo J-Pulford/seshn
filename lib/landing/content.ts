@@ -45,10 +45,10 @@ export const SESHN = {
   },
 
   stats: [
-    { big: "78%", h: "of indie musicians struggle to find reliable collaborators.", p: "Ghosting. Half-finished demos. Producers who never reply. Vetting is the #1 unsolved problem in independent music.", src: "CoCreatea Indie Survey · 2025" },
+    { big: "96%", h: "of new music is independent or DIY.", p: "More artists than ever are going it alone — with no shared system to find, vet, and pay the people they need. The missing layer isn't more uploads; it's trusted connection.", src: "Luminate Year-End Report · 2025" },
     { big: "100K+", h: "songs uploaded to streaming every day.", p: "~35 per minute. Posting alone is no longer a discovery strategy. Being heard means being connected.", src: "Luminate Year-End Report · 2025" },
     { big: "77.8%", h: "earn under $15K/yr from music.", p: "64.4% cite financial pressure as the #1 reason they leave music — up from 39% in 2023.", src: "Xposure Music · State of the Industry 2025" },
-    { big: "50%+", h: "of all global streams are now independent artists.", p: "57,000 musicians take 90% of streams. 7.94 million share the rest. The economics of solo virality are broken — but the door is wide open for the collaborators who organize.", src: "YouGov / IJFMR · 2025" },
+    { big: "0.2%", h: "of tracks drive half of all streams.", p: "Around 541,000 tracks — 0.2% of everything on streaming — pull half of all global plays. The economics of solo virality are broken; the door is open for the collaborators who organize.", src: "Luminate Year-End Report · 2025" },
   ] as Stat[],
 
   how: [
@@ -127,10 +127,10 @@ export const SESHN = {
   ] as FeatureDeep[],
 
   problemsDeep: [
-    { stat: "78%", label: "can't find reliable collaborators", h: "Discovery is broken — and trust is worse.", body: "Finding someone is hard. Trusting them is harder. Reddit and Discord are full of “how do I find a vocalist who won't ghost me” threads with no good answer. There's no vetting, no track record, no recourse when someone disappears with your stems or your deposit.", src: "CoCreatea Indie Survey 2025" },
+    { stat: "96%", label: "of new uploads are indie / DIY", h: "Discovery is broken — and trust is worse.", body: "Independent and DIY releases now make up 96% of everything uploaded to streaming — more artists working without a label than ever, and no shared system to find, vet, or trust a collaborator. Reddit and Discord are full of “how do I find a vocalist who won't ghost me” threads with no good answer: no track record, no ratings, no recourse when someone disappears with your stems or your deposit.", src: "Luminate Year-End Report 2025" },
     { stat: "100K+", label: "songs uploaded to streaming / day", h: "Visibility is no longer a strategy.", body: "More than 100,000 tracks land on streaming every single day; 47.6% of all tracks last year got fewer than ten plays. The old playbook — 'just put it out and the algorithm will find you' — is dead. What still works is a great record made by the right people. That requires collaboration, not more uploads.", src: "Spotify Loud & Clear / Luminate 2025" },
     { stat: "64%", label: "say money is why they'd quit music", h: "The economics push artists out.", body: "77.8% of independent musicians earn under $15,000/year from music, and the share citing financial pressure as the #1 reason they'd leave jumped from 39% in 2023 to 64.4% in 2025. Solo artistry is expensive and slow. Pooling skills, splitting work, and getting paid for sessions is how working musicians actually survive.", src: "Xposure State of the Industry 2025" },
-    { stat: "57K", label: "artists take 90% of all streams", h: "The middle class of music vanished.", body: "Independent artists now drive over half of global streams — yet just 57,000 musicians capture 90% of them, leaving 7.94 million to share the rest. The way back isn't going viral alone; it's building a network, a reputation, and a body of collaborative work that compounds.", src: "YouGov / IJFMR 2025" },
+    { stat: "0.2%", label: "of tracks = half of all streams", h: "The middle class of music vanished.", body: "Just 0.2% of tracks on streaming — around 541,000 of more than 253 million — capture half of all global plays, while almost half get fewer than ten plays a year. The way back isn't going viral alone; it's building a network, a reputation, and a body of collaborative work that compounds.", src: "Luminate Year-End Report 2025" },
   ] as ProblemDeep[],
 
   feeComparison: {
