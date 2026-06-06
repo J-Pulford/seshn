@@ -48,10 +48,28 @@ export async function upsertProfile(fields: Partial<Profile>): Promise<Profile> 
   const sb = getBrowserClient();
   const u = await getUser();
   if (!u) throw new Error("Not signed in");
-  const row = { id: u.id, ...fields };
-  const res = await sb.from("profiles").upsert(row, { onConflict: "id" }).select(PROFILE_COLUMNS).single();
-  if (res.error) throw res.error;
-  return res.data as Profile;
+
+  // profiles is column-locked (0018): the authenticated role may INSERT all
+  // onboarding columns (incl. username), but a true upsert is blocked — its
+  // `ON CONFLICT DO UPDATE` requires UPDATE privilege on the SET columns, and
+  // username/id are deliberately NOT update-grantable (username is immutable
+  // post-create). So create with a plain INSERT; if a row already exists for
+  // this user, fall back to updating only the editable columns.
+  const ins = await sb.from("profiles").insert({ id: u.id, ...fields }).select(PROFILE_COLUMNS).single();
+  if (!ins.error) return ins.data as Profile;
+
+  const detail = `${ins.error.message ?? ""} ${ins.error.details ?? ""}`.toLowerCase();
+  // Username already taken by someone else — let the caller surface it.
+  if (ins.error.code === "23505" && detail.includes("username")) throw ins.error;
+  // This user already has a profile row (id conflict) — update editable fields.
+  if (ins.error.code === "23505") {
+    const editable: Partial<Profile> = { ...fields };
+    delete editable.username; // immutable after creation (no UPDATE grant)
+    const upd = await sb.from("profiles").update(editable).eq("id", u.id).select(PROFILE_COLUMNS).single();
+    if (upd.error) throw upd.error;
+    return upd.data as Profile;
+  }
+  throw ins.error;
 }
 
 // For editing an existing profile. Does NOT include immutable fields like
