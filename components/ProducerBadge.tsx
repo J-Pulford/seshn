@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-const TITLE = "Cracked the Konami code — Producer mode unlocked 🎛️";
+const TITLE = "Cracked the secret code — Secret Member unlocked 🔑";
 
 // Cosmetic badge earned by discovering the Konami-code easter egg. `compact`
 // renders just the icon (for tight rows like feed cards); the default is a
@@ -8,15 +8,15 @@ const TITLE = "Cracked the Konami code — Producer mode unlocked 🎛️";
 export function ProducerBadge({ compact = false, style }: { compact?: boolean; style?: CSSProperties }) {
   if (compact) {
     return (
-      <span role="img" aria-label="Producer mode" title={TITLE} style={{ fontSize: 12, lineHeight: 1, cursor: "default", ...style }}>
-        🎛️
+      <span role="img" aria-label="Secret Member" title={TITLE} style={{ fontSize: 12, lineHeight: 1, cursor: "default", ...style }}>
+        🔑
       </span>
     );
   }
   return (
     <span
       role="img"
-      aria-label="Producer mode badge"
+      aria-label="Secret Member badge"
       title={TITLE}
       style={{
         display: "inline-flex",
@@ -35,7 +35,7 @@ export function ProducerBadge({ compact = false, style }: { compact?: boolean; s
         ...style,
       }}
     >
-      <span aria-hidden="true">🎛️</span> Producer
+      <span aria-hidden="true">🔑</span> Secret Member
     </span>
   );
 }

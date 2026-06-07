@@ -131,10 +131,10 @@ export default function ProducerMode() {
           </span>
         ))}
       <div className="pm-toast" role="status">
-        <span className="pm-toast-icon">🎛️</span>
+        <span className="pm-toast-icon">🔑</span>
         <span>
-          <strong>Producer mode unlocked</strong>
-          <span className="pm-toast-sub">that&apos;s the one. now go make something.</span>
+          <strong>Secret Member unlocked</strong>
+          <span className="pm-toast-sub">that&apos;s the one. welcome to the inner circle.</span>
         </span>
       </div>
     </div>
