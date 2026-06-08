@@ -378,13 +378,19 @@
 
     // ─── Audio ───
     function ensureAudio() {
-      if (state.ctx) { if (state.ctx.state === "suspended") state.ctx.resume(); return; }
-      const AC = window.AudioContext || window.webkitAudioContext;
-      state.ctx = new AC();
-      state.noiseBuf = makeNoiseBuffer(state.ctx);
-      state.master = state.ctx.createGain();
-      state.master.gain.value = 0.9;
-      state.master.connect(state.ctx.destination);
+      if (!state.ctx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        state.ctx = new AC();
+        state.noiseBuf = makeNoiseBuffer(state.ctx);
+        state.master = state.ctx.createGain();
+        state.master.gain.value = 0.9;
+        state.master.connect(state.ctx.destination);
+      }
+      // iOS/mobile browsers create the AudioContext "suspended" — it stays
+      // silent until resume() is called inside a user gesture. ensureAudio() is
+      // always invoked from a tap/click/keydown handler, so resume here (a
+      // no-op when already running) to unlock sound on the very first press.
+      if (state.ctx.state === "suspended") state.ctx.resume();
     }
 
     function play(track, time) {
