@@ -332,7 +332,7 @@
       pad.className = "bm-pad";
       pad.dataset.track = t.id;
       pad.innerHTML = `<span class="nm">${t.name}</span><span class="ky">${t.key}</span>`;
-      pad.addEventListener("pointerdown", (e) => { e.preventDefault(); ensureAudio(); play(t); flash(t.id); });
+      pad.addEventListener("pointerdown", async (e) => { e.preventDefault(); await ensureAudio(); play(t); flash(t.id); });
       padsWrap.appendChild(pad);
       padEls[t.id] = pad;
     });
@@ -377,7 +377,7 @@
     }
 
     // ─── Audio ───
-    function ensureAudio() {
+    async function ensureAudio() {
       if (!state.ctx) {
         const AC = window.AudioContext || window.webkitAudioContext;
         state.ctx = new AC();
@@ -387,10 +387,14 @@
         state.master.connect(state.ctx.destination);
       }
       // iOS/mobile browsers create the AudioContext "suspended" — it stays
-      // silent until resume() is called inside a user gesture. ensureAudio() is
-      // always invoked from a tap/click/keydown handler, so resume here (a
-      // no-op when already running) to unlock sound on the very first press.
-      if (state.ctx.state === "suspended") state.ctx.resume();
+      // silent (and its clock frozen at 0) until resume() is called inside a
+      // user gesture. resume() is kicked off synchronously here (keeping the
+      // gesture) and awaited, so callers that read currentTime (the sequencer)
+      // only do so once the audio clock is actually advancing — otherwise the
+      // scheduler anchors to time 0 and stalls after the first step.
+      if (state.ctx.state === "suspended") {
+        try { await state.ctx.resume(); } catch (e) { /* ignore */ }
+      }
     }
 
     function play(track, time) {
@@ -444,17 +448,24 @@
     }
 
     function scheduler() {
+      // Don't schedule against a clock that isn't moving yet (context still
+      // resuming, or interrupted e.g. by a phone call). It picks up on the next
+      // tick once the context is running again.
+      if (!state.ctx || state.ctx.state !== "running") return;
       while (state.nextNoteTime < state.ctx.currentTime + state.scheduleAhead) {
         scheduleNote(state.current, state.nextNoteTime);
         nextNote();
       }
     }
 
-    function start() {
-      ensureAudio();
+    async function start() {
+      await ensureAudio();
+      if (!state.ctx) return;
       state.playing = true;
       state.current = 0;
-      state.nextNoteTime = state.ctx.currentTime + 0.05;
+      // Anchor to the (now-running) audio clock with a little headroom so the
+      // first step isn't scheduled in the past on slower mobile devices.
+      state.nextNoteTime = state.ctx.currentTime + 0.1;
       state.timer = setInterval(scheduler, state.lookahead);
       playBtn.innerHTML = "■ Stop";
       bumpMadeCount();
@@ -533,11 +544,11 @@
     // ─── Keyboard ───
     const keymap = {};
     TRACKS.forEach(t => keymap[t.key.toLowerCase()] = t);
-    window.addEventListener("keydown", (e) => {
+    window.addEventListener("keydown", async (e) => {
       if (e.repeat) return;
       if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
       const t = keymap[e.key.toLowerCase()];
-      if (t) { ensureAudio(); play(t); flash(t.id); }
+      if (t) { await ensureAudio(); play(t); flash(t.id); }
       if (e.code === "Space" && isInView(root)) { e.preventDefault(); state.playing ? stop() : start(); }
     });
     function isInView(el) {
