@@ -76,8 +76,14 @@
   .seshn-sheet-av img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .ssp-name { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .ssp-handle { font-size: 13px; color: var(--ink-3); }
-  .seshn-sheet-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--line-soft); font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--ink); }
-  .seshn-sheet-signout { display: block; width: 100%; text-align: left; padding: 14px 18px; border: none; background: transparent; cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--ink-2); }
+  .seshn-sheet-group { padding: 6px 0; }
+  .seshn-sheet-link { display: flex; align-items: center; gap: 8px; padding: 12px 18px; text-decoration: none; color: var(--ink); font-family: var(--font-display); font-weight: 600; font-size: 15px; border-radius: 10px; margin: 0 8px; }
+  .seshn-sheet-link.active { color: var(--accent-d); background: var(--accent-bg); }
+  .seshn-sheet-link:active { background: var(--surface-2); }
+  .seshn-sheet-count { margin-left: auto; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--accent); color: #062c19; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  .seshn-sheet-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-top: 1px solid var(--line-soft); font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--ink); }
+  .seshn-sheet-signout { display: block; width: 100%; text-align: left; padding: 12px 18px; border: none; background: transparent; cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--ink-2); }
+  .seshn-sheet-signout:active { background: var(--surface-2); }
 
   @keyframes bm-fade { from { opacity: 0; } to { opacity: 1; } }
   @keyframes bm-slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }

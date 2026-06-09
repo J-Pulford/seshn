@@ -141,7 +141,7 @@ export default function PostPage() {
           <a href="/feed" className="logo">Seshn</a>
         </div>
         <div className="nav-right">
-          <span style={{ fontSize: 12, color: "var(--ink-3)", fontFamily: "var(--font-display)" }}>{authState === "checking" ? "Loading…" : "Draft · not yet published"}</span>
+          <span className="post-draft" style={{ fontSize: 12, color: "var(--ink-3)", fontFamily: "var(--font-display)" }}>{authState === "checking" ? "Loading…" : "Draft · not yet published"}</span>
           <a href="/feed" className="btn ghost">Cancel</a>
           {me && <a href={`/profile/${me.username}`} className="avatar" style={{ background: "var(--ph)", textDecoration: "none", color: "var(--ink-3)", width: 32, height: 32 }}>{initialsOf(me.display_name)}</a>}
         </div>

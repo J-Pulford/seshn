@@ -20,7 +20,7 @@
   gap: 12px;
   padding: 24px 24px 0;
 }
-.ob-step-label { font-size: 12px; color: var(--ink-3); font-family: var(--font-display); text-align: right; }
+.ob-step-label { font-size: 12px; color: var(--ink-3); font-family: var(--font-display); text-align: right; white-space: nowrap; }
 
 .ob-progress {
   display: flex;
@@ -249,6 +249,7 @@
 @media (max-width: 560px) {
   .ob-top { padding: 18px 16px 0; }
   .ob-step-label { font-size: 11px; }
+  .ob-step-hint { display: none; } /* keep just "Step X of N" on small screens */
   .ob-progress { padding: 14px 16px 0; }
   .ob-layout { padding: 22px 16px 36px; }
   .ob-two, .ob-link-grid { grid-template-columns: 1fr; }

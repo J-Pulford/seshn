@@ -467,11 +467,6 @@ export default function Nav({ active = null, showSearch = true, showPostButton =
     color: isActive ? "var(--ink)" : "var(--ink-2)", background: isActive ? "var(--surface-2)" : "transparent",
     textDecoration: "none", fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 13,
   });
-  const mobileLinkStyle = (isActive: boolean): CSSProperties => ({
-    display: "block", padding: "14px 18px", borderBottom: "1px solid var(--line-soft)",
-    color: isActive ? "var(--accent-d)" : "var(--ink)", background: isActive ? "var(--accent-bg)" : "transparent",
-    textDecoration: "none", fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15,
-  });
 
   return (
     <>
@@ -516,14 +511,16 @@ export default function Nav({ active = null, showSearch = true, showPostButton =
             </span>
           </a>
         )}
-        <a href={R.applications} style={mobileLinkStyle(active === "applications")} onClick={() => setMenuOpen(false)}>Applications</a>
-        <a href={R.contracts} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Contracts{contractsSig > 0 ? ` (${contractsSig})` : ""}</a>
-        <a href={R.dashboard} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Finances</a>
-        <a href={R.analytics} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Analytics</a>
-        <a href={R.start} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Get started</a>
-        <a href={R.guides} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Best practices</a>
-        <a href={R.help} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Help &amp; community</a>
-        <a href={R.settings} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Settings</a>
+        <div className="seshn-sheet-group">
+          <a href={R.applications} className={"seshn-sheet-link" + (active === "applications" ? " active" : "")} onClick={() => setMenuOpen(false)}>Applications</a>
+          <a href={R.contracts} className="seshn-sheet-link" onClick={() => setMenuOpen(false)}>Contracts{contractsSig > 0 ? <span className="seshn-sheet-count">{contractsSig}</span> : null}</a>
+          <a href={R.dashboard} className="seshn-sheet-link" onClick={() => setMenuOpen(false)}>Finances</a>
+          <a href={R.analytics} className="seshn-sheet-link" onClick={() => setMenuOpen(false)}>Analytics</a>
+          <a href={R.start} className="seshn-sheet-link" onClick={() => setMenuOpen(false)}>Get started</a>
+          <a href={R.guides} className="seshn-sheet-link" onClick={() => setMenuOpen(false)}>Best practices</a>
+          <a href={R.help} className="seshn-sheet-link" onClick={() => setMenuOpen(false)}>Help &amp; community</a>
+          <a href={R.settings} className="seshn-sheet-link" onClick={() => setMenuOpen(false)}>Settings</a>
+        </div>
         <div className="seshn-sheet-row"><span>Theme</span><ThemeToggle /></div>
         <button type="button" className="seshn-sheet-signout"
           onClick={async () => { setMenuOpen(false); try { await signOut(); } catch { /* ignore */ } window.location.href = "/auth"; }}>

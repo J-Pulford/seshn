@@ -252,7 +252,7 @@ export default function OnboardingPage() {
       <header className="ob-top">
         <a href="/" className="logo">Seshn</a>
         <span className="ob-step-label">
-          Step {step + 1} of {STEPS.length} · You can change all of this later
+          Step {step + 1} of {STEPS.length}<span className="ob-step-hint"> · You can change all of this later</span>
         </span>
       </header>
 
