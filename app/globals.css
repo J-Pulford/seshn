@@ -5,7 +5,8 @@
  * reads these, so flipping data-theme on <html> reskins the whole app.
  * See docs/NEXTJS-MIGRATION.md. */
 
-@import url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap");
+/* Fonts are self-hosted via next/font (see app/layout.tsx); the CSS variables
+ * below reference the generated font-family with safe system fallbacks. */
 
 :root {
   /* ── Brand scale (theme-independent) ── */
@@ -24,10 +25,11 @@
   --r-lg: 12px;  /* brand card radius */
   --r-pill: 999px;
 
-  /* Inter Tight carries display + body; JetBrains Mono is the "console" voice. */
-  --font-display: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
-  --font-body:    "Inter Tight", ui-sans-serif, system-ui, sans-serif;
-  --font-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  /* Inter Tight carries display + body; JetBrains Mono is the "console" voice.
+     The --font-* vars are injected by next/font in app/layout.tsx. */
+  --font-display: var(--font-inter-tight), "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-body:    var(--font-inter-tight), "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    var(--font-jetbrains-mono), "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
   /* ── LIGHT theme (default) — warm paper neutrals + green ── */
   color-scheme: light;

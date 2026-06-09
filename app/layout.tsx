@@ -1,9 +1,26 @@
 import type { Metadata, Viewport } from "next";
+import { Inter_Tight, JetBrains_Mono } from "next/font/google";
 import ProducerMode from "@/components/easter/ProducerMode";
 import Toaster from "@/components/Toaster";
 import ConfirmHost from "@/components/ConfirmHost";
 import AuthLinkCatcher from "@/components/AuthLinkCatcher";
 import "./globals.css";
+
+// Self-hosted via next/font (preloaded, font-display: swap) — replaces the
+// render-blocking @import to Google Fonts, which serialized HTML → CSS → Google
+// CSS → font files across third-party origins and slowed first paint everywhere.
+const interTight = Inter_Tight({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-inter-tight",
+  display: "swap",
+});
+const jetBrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Seshn — find your next collaborator",
@@ -33,7 +50,7 @@ const THEME_INIT = `(function(){try{var t=localStorage.getItem('seshn:theme');if
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={`${interTight.variable} ${jetBrainsMono.variable}`} suppressHydrationWarning>
       <body>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
         <AuthLinkCatcher />
