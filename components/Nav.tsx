@@ -109,7 +109,7 @@ function iconBtnStyle(isActive: boolean): CSSProperties {
   };
 }
 
-type IconKind = "search" | "message" | "bell" | "contract";
+type IconKind = "search" | "message" | "bell" | "contract" | "home" | "compass" | "plus";
 function IconSvg({ kind, size = 18 }: { kind: IconKind; size?: number }) {
   const common = {
     width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
@@ -118,6 +118,9 @@ function IconSvg({ kind, size = 18 }: { kind: IconKind; size?: number }) {
   if (kind === "search") return (<svg {...common}><circle cx={11} cy={11} r={7} /><path d="m20 20-3.5-3.5" /></svg>);
   if (kind === "message") return (<svg {...common}><path d="M21 12a8 8 0 0 1-12 7l-5 1 1-5a8 8 0 1 1 16-3z" /></svg>);
   if (kind === "contract") return (<svg {...common}><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5M8.5 13.5h5M8.5 17h3" /></svg>);
+  if (kind === "home") return (<svg {...common}><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V21h14V9.5" /></svg>);
+  if (kind === "compass") return (<svg {...common}><circle cx={12} cy={12} r={9} /><path d="m15.5 8.5-2.2 5.3-5.3 2.2 2.2-5.3z" /></svg>);
+  if (kind === "plus") return (<svg {...common}><path d="M12 5v14M5 12h14" /></svg>);
   return (<svg {...common}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10 21a2 2 0 0 0 4 0" /></svg>);
 }
 
@@ -395,6 +398,30 @@ function ProfileMenu({ me, active, initials }: { me: Profile | null; active: Nav
   );
 }
 
+// Native-app-style bottom tab bar (mobile only). Primary destinations live here;
+// everything else folds into the "More" sheet. Inbox shows the unread badge; the
+// last tab is the member's avatar and opens the account sheet.
+function MobileTabBar({ me, active, unreadConvos, menuOpen, onToggleMenu, initials }: { me: Profile | null; active: NavActive; unreadConvos: number; menuOpen: boolean; onToggleMenu: () => void; initials: string }) {
+  const cls = (on: boolean) => "seshn-bottom-tab" + (on ? " active" : "");
+  return (
+    <nav className="seshn-bottom-nav" aria-label="Primary">
+      <a href={R.feed} className={cls(active === "feed")}><span className="bt-icon"><IconSvg kind="home" size={22} /></span><span className="bt-label">Home</span></a>
+      <a href={R.browse} className={cls(active === "browse")}><span className="bt-icon"><IconSvg kind="compass" size={22} /></span><span className="bt-label">Browse</span></a>
+      <a href={R.post} className="seshn-bottom-tab seshn-bottom-post" aria-label="Post a gig"><span className="bt-post"><IconSvg kind="plus" size={24} /></span></a>
+      <a href={R.inbox} className={cls(active === "inbox")}>
+        <span className="bt-icon"><IconSvg kind="message" size={22} />{unreadConvos > 0 && <span className="bt-badge">{unreadConvos > 9 ? "9+" : unreadConvos}</span>}</span>
+        <span className="bt-label">Inbox</span>
+      </a>
+      <button type="button" className={cls(menuOpen) + " seshn-bottom-more"} aria-label="More" aria-expanded={menuOpen} onClick={onToggleMenu}>
+        <span className="bt-icon bt-avatar">
+          {me?.avatar_url ? <img src={me.avatar_url} alt="" /> : <span className="bt-avatar-fallback">{initials}</span>}
+        </span>
+        <span className="bt-label">More</span>
+      </button>
+    </nav>
+  );
+}
+
 export default function Nav({ active = null, showSearch = true, showPostButton = true }: { active?: NavActive; showSearch?: boolean; showPostButton?: boolean }) {
   const [me, setMe] = useState<Profile | null>(null);
   const [unreadConvos, setUnreadConvos] = useState(0);
@@ -425,6 +452,13 @@ export default function Nav({ active = null, showSearch = true, showPostButton =
     return () => { cancelled = true; try { unsub(); } catch { /* ignore */ } };
   }, []);
 
+  // Reserve space for the fixed mobile bottom tab bar (scoped to pages that
+  // render <Nav/> — marketing pages don't, so they keep no bottom padding).
+  useEffect(() => {
+    document.body.classList.add("has-bottom-nav");
+    return () => document.body.classList.remove("has-bottom-nav");
+  }, []);
+
   const displayName = me?.display_name || "";
   const initials = navInitials(displayName);
 
@@ -453,43 +487,51 @@ export default function Nav({ active = null, showSearch = true, showPostButton =
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {showPostButton && (
-            <a href={R.post} className="btn primary sm">
+            <a href={R.post} className="btn primary sm seshn-hide-mobile">
               <span className="seshn-nav-post-text">+ Post a gig</span>
             </a>
           )}
-          <a href={R.contracts} style={iconBtnStyle(false)} aria-label={"Contracts" + (contractsSig > 0 ? ` (${contractsSig} need your signature)` : "")} title="Contracts">
+          <a href={R.contracts} className="seshn-hide-mobile" style={iconBtnStyle(false)} aria-label={"Contracts" + (contractsSig > 0 ? ` (${contractsSig} need your signature)` : "")} title="Contracts">
             <IconSvg kind="contract" size={18} />
             {contractsSig > 0 && <Badge count={contractsSig} />}
           </a>
-          <a href={R.inbox} style={iconBtnStyle(active === "inbox")} aria-label={"Inbox" + (unreadConvos > 0 ? ` (${unreadConvos} unread)` : "")}>
+          <a href={R.inbox} className="seshn-hide-mobile" style={iconBtnStyle(active === "inbox")} aria-label={"Inbox" + (unreadConvos > 0 ? ` (${unreadConvos} unread)` : "")}>
             <IconSvg kind="message" size={18} />
             {unreadConvos > 0 && <Badge count={unreadConvos} />}
           </a>
-          <ThemeToggle />
+          <span className="seshn-hide-mobile" style={{ display: "inline-flex" }}><ThemeToggle /></span>
           <NotificationsBell />
-          <ProfileMenu me={me} active={active} initials={initials} />
-          <button type="button" className="seshn-nav-hamburger" onClick={() => setMenuOpen(!menuOpen)}
-            style={{ width: 34, height: 34, borderRadius: 8, color: "var(--ink-2)", background: "transparent", cursor: "pointer", border: "none", alignItems: "center", justifyContent: "center" }}
-            aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen}>
-            <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-              {menuOpen ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
-            </svg>
-          </button>
+          <span className="seshn-hide-mobile" style={{ display: "inline-flex" }}><ProfileMenu me={me} active={active} initials={initials} /></span>
         </div>
       </nav>
-      <div className={"seshn-nav-mobile-menu" + (menuOpen ? " open" : "")} style={{ flexDirection: "column", background: "var(--surface)", borderBottom: "1px solid var(--line)", position: "sticky", top: 58, zIndex: 99 }}>
-        <a href={R.feed} style={mobileLinkStyle(active === "feed")} onClick={() => setMenuOpen(false)}>Feed</a>
-        <a href={R.browse} style={mobileLinkStyle(active === "browse")} onClick={() => setMenuOpen(false)}>Browse</a>
+      {menuOpen && <div className="seshn-nav-backdrop" onClick={() => setMenuOpen(false)} aria-hidden="true" />}
+      <div className={"seshn-nav-mobile-menu" + (menuOpen ? " open" : "")} role="menu">
+        <div className="seshn-sheet-handle" aria-hidden="true" />
+        {me && (
+          <a href={R.profile(me.username)} className="seshn-sheet-profile" onClick={() => setMenuOpen(false)}>
+            <span className="seshn-sheet-av">{me.avatar_url ? <img src={me.avatar_url} alt="" /> : initials}</span>
+            <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+              <span className="ssp-name">{me.display_name || me.username}</span>
+              {me.username && <span className="ssp-handle">@{me.username}</span>}
+            </span>
+          </a>
+        )}
         <a href={R.applications} style={mobileLinkStyle(active === "applications")} onClick={() => setMenuOpen(false)}>Applications</a>
-        <a href={R.contracts} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Contracts</a>
+        <a href={R.contracts} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Contracts{contractsSig > 0 ? ` (${contractsSig})` : ""}</a>
         <a href={R.dashboard} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Finances</a>
         <a href={R.analytics} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Analytics</a>
         <a href={R.start} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Get started</a>
         <a href={R.guides} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Best practices</a>
         <a href={R.help} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Help &amp; community</a>
         <a href={R.settings} style={mobileLinkStyle(false)} onClick={() => setMenuOpen(false)}>Settings</a>
+        <div className="seshn-sheet-row"><span>Theme</span><ThemeToggle /></div>
+        <button type="button" className="seshn-sheet-signout"
+          onClick={async () => { setMenuOpen(false); try { await signOut(); } catch { /* ignore */ } window.location.href = "/auth"; }}>
+          Sign out
+        </button>
         {showSearch && <div style={{ padding: "12px 14px" }}><NavSearch /></div>}
       </div>
+      <MobileTabBar me={me} active={active} unreadConvos={unreadConvos} menuOpen={menuOpen} onToggleMenu={() => setMenuOpen((o) => !o)} initials={initials} />
     </>
   );
 }

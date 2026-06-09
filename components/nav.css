@@ -1,14 +1,91 @@
-/* Top-nav responsive behaviour. Ported from the runtime <style> injection in
- * seshn-nav.js (inline styles can't express media queries). */
+/* Top-nav responsive behaviour + the mobile bottom tab bar.
+ * Desktop is unchanged; ≤720px switches to a native-app layout: a slim top bar
+ * (logo + notifications) and a fixed bottom tab bar, with everything else in a
+ * "More" bottom sheet. */
+
+:root { --bottomnav-h: calc(56px + env(safe-area-inset-bottom)); }
 
 .seshn-nav-hamburger { display: none; }
 .seshn-nav-mobile-menu { display: none; }
+.seshn-bottom-nav { display: none; }
+.seshn-nav-backdrop { display: none; }
 
 @media (max-width: 720px) {
   .seshn-nav-root { padding: 0 14px !important; gap: 4px; }
   .seshn-nav-links, .seshn-nav-search { display: none !important; }
-  .seshn-nav-hamburger { display: inline-flex; }
+  .seshn-hide-mobile { display: none !important; }
   .seshn-nav-post-text { display: none; }
   .seshn-notifications-panel { width: calc(100vw - 28px) !important; right: -8px !important; }
-  .seshn-nav-mobile-menu.open { display: flex; }
+
+  /* clear the fixed bottom bar on normal scrolling pages */
+  body.has-bottom-nav { padding-bottom: var(--bottomnav-h); }
+
+  /* ── Bottom tab bar ── */
+  .seshn-bottom-nav {
+    display: flex; align-items: stretch;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 120;
+    height: var(--bottomnav-h);
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--surface); border-top: 1px solid var(--line);
+  }
+  .seshn-bottom-tab {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    border: none; background: transparent; cursor: pointer; text-decoration: none;
+    color: var(--ink-3); font-family: var(--font-display); font-weight: 600; font-size: 10px;
+    padding: 6px 0 4px; -webkit-tap-highlight-color: transparent;
+  }
+  .seshn-bottom-tab.active { color: var(--accent-d); }
+  .seshn-bottom-tab .bt-icon { position: relative; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+  .bt-label { line-height: 1; }
+  .bt-badge {
+    position: absolute; top: -5px; right: -7px; min-width: 15px; height: 15px; padding: 0 3px;
+    border-radius: 999px; background: var(--accent); color: #062c19;
+    font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--surface); box-sizing: content-box; line-height: 1;
+  }
+  /* center "+" Post action */
+  .seshn-bottom-post .bt-post {
+    width: 46px; height: 34px; margin-top: -2px; border-radius: 12px;
+    background: var(--accent); color: #062c19;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(44, 203, 115, 0.35);
+  }
+  /* avatar in the "More" tab */
+  .bt-avatar { width: 24px; height: 24px; border-radius: 50%; overflow: hidden; background: var(--ph); }
+  .bt-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .bt-avatar-fallback { font-family: var(--font-display); font-weight: 700; font-size: 9px; color: var(--ink-3); }
+  .seshn-bottom-more.active .bt-avatar { box-shadow: 0 0 0 2px var(--accent-d); }
+
+  /* ── "More" bottom sheet ── */
+  .seshn-nav-backdrop {
+    display: block; position: fixed; inset: 0; z-index: 150;
+    background: rgba(0, 0, 0, 0.4); animation: bm-fade 0.15s ease;
+  }
+  .seshn-nav-mobile-menu {
+    display: none; flex-direction: column;
+    position: fixed; left: 0; right: 0; bottom: var(--bottomnav-h); top: auto;
+    max-height: 72vh; overflow-y: auto; z-index: 151;
+    background: var(--surface); border-top: 1px solid var(--line);
+    border-radius: 18px 18px 0 0; box-shadow: 0 -14px 40px rgba(0, 0, 0, 0.22);
+    padding-bottom: 8px;
+  }
+  .seshn-nav-mobile-menu.open { display: flex; animation: bm-slide-up 0.2s ease; }
+  .seshn-sheet-handle { width: 38px; height: 4px; border-radius: 999px; background: var(--line); margin: 10px auto 6px; flex-shrink: 0; }
+  .seshn-sheet-profile { display: flex; align-items: center; gap: 12px; padding: 10px 18px 14px; text-decoration: none; border-bottom: 1px solid var(--line-soft); }
+  .seshn-sheet-av { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: var(--ph); flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--ink-3); }
+  .seshn-sheet-av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ssp-name { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ssp-handle { font-size: 13px; color: var(--ink-3); }
+  .seshn-sheet-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--line-soft); font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--ink); }
+  .seshn-sheet-signout { display: block; width: 100%; text-align: left; padding: 14px 18px; border: none; background: transparent; cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--ink-2); }
+
+  @keyframes bm-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes bm-slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+  /* keep bottom-anchored page UIs above the tab bar */
+  /* the inbox is a full-height app shell — it sizes itself, so drop the body
+     padding there and fit it between the top nav (58px) and the tab bar */
+  body.has-bottom-nav:has(.inbox-page) { padding-bottom: 0; }
+  body.has-bottom-nav .inbox-page { height: calc(100dvh - 58px - var(--bottomnav-h)); }
+  body.has-bottom-nav .contract-page .sign-bar.sticky-bottom { bottom: var(--bottomnav-h); }
 }
