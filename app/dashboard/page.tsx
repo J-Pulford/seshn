@@ -190,7 +190,7 @@ export default function DashboardPage() {
         <header className="dash-head">
           <div>
             <div className="t-eyebrow">Your money</div>
-            <h1 className="t-h1">Finances</h1>
+            <h1 className="t-h1 page-h1">Finances</h1>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <a className="btn sm" href="/contracts">Contracts</a>

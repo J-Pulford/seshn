@@ -122,7 +122,7 @@ export default function ContractsPage() {
         <div className="ct-head">
           <div>
             <div className="t-eyebrow">Agreements</div>
-            <h1 className="t-h1">Contracts</h1>
+            <h1 className="t-h1 page-h1">Contracts</h1>
           </div>
           <a className="btn sm" href="/dashboard">Finances →</a>
         </div>

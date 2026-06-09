@@ -155,7 +155,7 @@ export default function ApplicationsPage() {
       <Nav active="applications" />
       <div className="app-page">
         <div style={{ marginBottom: 18 }}>
-          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 26, letterSpacing: "-0.02em" }}>My applications</h1>
+          <h1 className="page-h1" style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 26, letterSpacing: "-0.02em" }}>My applications</h1>
           <span className="t-meta" style={{ fontSize: 12 }}>{apps === null ? "Loading…" : `${list.length} total · ${active.length} active · ${archived.length} archived`}</span>
         </div>
 

@@ -123,6 +123,13 @@ body.smn-lock { overflow: hidden; }
  * copies; these only affect ported Next routes.) */
 
 .t-h1 { font-family: var(--font-display); font-weight: 600; font-size: 32px; line-height: 1.05; letter-spacing: -0.025em; }
+
+/* Mobile-only page-title normalization. Tagging a page's main heading with
+ * `page-h1` unifies its size on phones (desktop sizes are intentionally left
+ * untouched — there is no desktop rule for this class). */
+@media (max-width: 720px) {
+  .page-h1 { font-size: 24px !important; line-height: 1.15 !important; }
+}
 .t-h2 { font-family: var(--font-display); font-weight: 600; font-size: 22px; line-height: 1.15; letter-spacing: -0.02em; }
 .t-h3 { font-family: var(--font-display); font-weight: 600; font-size: 16px; line-height: 1.2; letter-spacing: -0.01em; }
 .t-eyebrow { font-family: var(--font-mono); font-weight: 500; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); }

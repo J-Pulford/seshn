@@ -447,7 +447,7 @@ function GigView({ gig: initialGig }: { gig: Gig }) {
             {isOwner && <button className="btn sm" style={{ marginLeft: "auto" }} onClick={toggleStatus} disabled={statusBusy}>{statusBusy ? "…" : isClosed ? "Reopen gig" : "Close gig"}</button>}
           </div>
 
-          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 40, lineHeight: 1.02, letterSpacing: "-0.025em", color: "var(--ink)", marginBottom: 20 }}>{gig.title}</h1>
+          <h1 className="page-h1" style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 40, lineHeight: 1.02, letterSpacing: "-0.025em", color: "var(--ink)", marginBottom: 20 }}>{gig.title}</h1>
 
           <div style={{ position: "relative", marginBottom: 20 }}>
             {gig.cover_url ? (

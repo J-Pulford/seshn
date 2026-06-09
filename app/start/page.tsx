@@ -87,7 +87,7 @@ export default function GetStartedPage() {
       <div className="start-wrap">
         <header className="start-head">
           <span className="t-eyebrow">Get started</span>
-          <h1>Welcome to Seshn{me ? `, ${(me.display_name || me.username || "").split(" ")[0]}` : ""}.</h1>
+          <h1 className="page-h1">Welcome to Seshn{me ? `, ${(me.display_name || me.username || "").split(" ")[0]}` : ""}.</h1>
           <p>Seshn is the home base for the working musician: post what you need, find vetted collaborators, ship the record together, and get paid safely. Here&apos;s the whole platform in sixty seconds.</p>
         </header>
 

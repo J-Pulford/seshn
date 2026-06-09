@@ -121,7 +121,7 @@ export default function HelpPage() {
         <header className="help-head">
           <div>
             <span className="t-eyebrow">Help &amp; community</span>
-            <h1>Ask, report, and shape Seshn</h1>
+            <h1 className="page-h1">Ask, report, and shape Seshn</h1>
             <p>Questions, bug reports, feedback, and feature ideas — in the open. The Seshn team replies here, and so does the community. New here? <a href="/guides">Read the best-practices guides →</a></p>
           </div>
           {me ? <Composer onCreated={(t) => (window.location.href = `/help/${t.id}`)} /> : <a className="btn primary" href={"/auth?next=" + encodeURIComponent("/help")}>Sign in to post</a>}

@@ -16,7 +16,7 @@ export default function GuidesPage() {
       <div className="guides-wrap">
         <header className="guides-head">
           <span className="t-eyebrow">Best practices</span>
-          <h1>Get the most out of Seshn</h1>
+          <h1 className="page-h1">Get the most out of Seshn</h1>
           <p>Short, practical playbooks for both sides of a collaboration — how to win the work, post briefs that pull great applicants, and optimise every part of your presence on the platform.</p>
         </header>
 

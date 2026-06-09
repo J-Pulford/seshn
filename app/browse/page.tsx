@@ -210,7 +210,7 @@ export default function BrowsePage() {
 
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 18, gap: 12 }}>
             <div>
-              <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 22, letterSpacing: "-0.02em" }}>Browse artists</h1>
+              <h1 className="page-h1" style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 22, letterSpacing: "-0.02em" }}>Browse artists</h1>
               <span className="t-meta" style={{ fontSize: 12 }}>
                 {profiles === null ? "Loading…" : `${profiles.length} artist${profiles.length === 1 ? "" : "s"}${activeFilters > 0 ? " match your filters" : ""}`}
               </span>

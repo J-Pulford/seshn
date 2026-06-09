@@ -104,7 +104,7 @@ export default function AnalyticsPage() {
         <div className="dash-head">
           <div>
             <div className="t-eyebrow">Analytics</div>
-            <h1 className="an-title">What&apos;s happening with your account</h1>
+            <h1 className="an-title page-h1">What&apos;s happening with your account</h1>
           </div>
           <div className="an-range" role="tablist" aria-label="Time range">
             {RANGES.map((r) => (

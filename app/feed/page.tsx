@@ -290,7 +290,7 @@ export default function FeedPage() {
         <main style={{ minWidth: 0 }}>
           <WelcomeChecklist />
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 12, flexWrap: "wrap" }}>
-            <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 22, letterSpacing: "-0.02em" }}>
+            <h1 className="page-h1" style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 22, letterSpacing: "-0.02em" }}>
               Live feed
               {gigs && <span style={{ fontSize: 13, color: "var(--ink-3)", fontWeight: 400, marginLeft: 8 }}>· {gigs.length} {gigs.length === 1 ? "gig" : "gigs"}</span>}
             </h1>
