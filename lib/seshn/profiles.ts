@@ -1,6 +1,7 @@
 // Profile reads/writes + image uploads. Typed port of the profile section of
 // the legacy public/js/seshn-supabase.js. Runs in the browser (client pages).
 import { getBrowserClient } from "./client";
+import type { User } from "@supabase/supabase-js";
 import type { GetProfileOpts, Profile, ProfileStats } from "./types";
 
 // Public profile stats (gigs posted + collaborations), via the SECURITY DEFINER
@@ -23,10 +24,29 @@ export async function getProfileStats(userId: string): Promise<ProfileStats> {
 const PROFILE_COLUMNS =
   "id, username, display_name, bio, location, pronouns, roles, genres, is_pro, has_producer_badge, avatar_url, cover_url, social_links, gallery, credits, availability, featured, skills, influences, languages, services, created_at, updated_at";
 
+// Cached current user. getUser() is called by nearly every helper (and several
+// times per page), and supabase's auth.getUser() makes a NETWORK round-trip to
+// re-validate the JWT each time — so the old version fired many redundant
+// requests per page load. We instead read the session from local storage
+// (instant, no network) and keep it fresh via onAuthStateChange. RLS still
+// enforces auth on every query, so this is safe for client-side identity.
+let _cachedUser: User | null | undefined; // undefined = not loaded yet
+let _authWatch = false;
+
+function watchAuth() {
+  if (_authWatch) return;
+  _authWatch = true;
+  getBrowserClient().auth.onAuthStateChange((_event, session) => {
+    _cachedUser = session?.user ?? null;
+  });
+}
+
 export async function getUser() {
-  const sb = getBrowserClient();
-  const res = await sb.auth.getUser();
-  return res.data ? res.data.user : null;
+  watchAuth();
+  if (_cachedUser !== undefined) return _cachedUser;
+  const { data } = await getBrowserClient().auth.getSession(); // local, no network
+  _cachedUser = data.session?.user ?? null;
+  return _cachedUser;
 }
 
 export async function getProfile(opts: GetProfileOpts = {}): Promise<Profile | null> {
@@ -105,6 +125,37 @@ function extOf(file: File): string {
   return ext;
 }
 
+// Downscale + re-encode an image in the browser before upload. Phone photos are
+// often 3–8 MB / 4000px — way bigger than any avatar/cover needs — which bloats
+// storage, egress, and render time. We cap the longest edge and re-encode to
+// WebP. Skips animated GIFs and anything we can't decode (uploads the original).
+async function downscaleImage(file: File, maxDim: number, quality = 0.82): Promise<File> {
+  if (typeof document === "undefined" || typeof createImageBitmap !== "function") return file;
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return file; // leave gif/svg alone
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const longest = Math.max(bitmap.width, bitmap.height);
+    const scale = Math.min(1, maxDim / longest);
+    if (scale >= 1) { bitmap.close?.(); return file; } // already small enough
+    const w = Math.round(bitmap.width * scale);
+    const h = Math.round(bitmap.height * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) { bitmap.close?.(); return file; }
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    bitmap.close?.();
+    const blob: Blob | null = await new Promise((res) => canvas.toBlob(res, "image/webp", quality));
+    if (!blob || blob.size >= file.size) return file; // no real gain — keep original
+    return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".webp", { type: "image/webp" });
+  } catch {
+    return file; // any decode/encode failure → upload the original untouched
+  }
+}
+
+// Longest-edge cap per image kind.
+const MAX_DIM: Record<string, number> = { avatar: 512, cover: 1600, "gig-cover": 1600, gallery: 1600 };
+
 // Shared image-upload to the avatars bucket. `kind` is the filename prefix
 // (avatar | cover | gig-cover). `previousUrl` is best-effort deleted.
 async function uploadImage(file: File, kind: string, maxBytes: number, previousUrl?: string | null) {
@@ -116,6 +167,9 @@ async function uploadImage(file: File, kind: string, maxBytes: number, previousU
     throw new Error("Must be an image (jpg, png, webp, gif).");
   }
   if (file.size > maxBytes) throw new Error(`Image is too large (max ${Math.round(maxBytes / 1024 / 1024)} MB).`);
+
+  // Shrink oversized photos client-side before upload (no server cost).
+  file = await downscaleImage(file, MAX_DIM[kind] ?? 1600);
 
   const path = `${u.id}/${kind}-${Date.now()}.${extOf(file)}`;
   const up = await sb.storage.from("avatars").upload(path, file, {
