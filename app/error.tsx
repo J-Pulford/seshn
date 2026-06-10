@@ -4,12 +4,11 @@
 // errors in a route subtree and offers recovery without a full reload.
 // Reports to Sentry when it's configured (no-op otherwise).
 import { useEffect } from "react";
-import { captureError } from "@/lib/observability";
+import * as Sentry from "@sentry/nextjs";
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
-    console.error("[seshn] route error", error);
-    captureError(error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (

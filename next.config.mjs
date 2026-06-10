@@ -1,3 +1,5 @@
+import { withSentryConfig } from "@sentry/nextjs";
+
 /** @type {import('next').NextConfig} */
 
 // Content-Security-Policy covering the app's real origins: Supabase REST +
@@ -82,4 +84,15 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// Sentry build wrapper (required by the SDK). Source maps upload only when
+// SENTRY_AUTH_TOKEN is present (so local/preview builds without it still pass).
+// tunnelRoute proxies Sentry events through our own domain → bypasses ad
+// blockers and keeps the CSP connect-src at 'self'.
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  widenClientFileUpload: true,
+  tunnelRoute: "/monitoring",
+  silent: !process.env.CI,
+});

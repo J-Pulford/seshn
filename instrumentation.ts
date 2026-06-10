@@ -1,6 +1,7 @@
-// Next.js instrumentation hook. Loads the right Sentry config per runtime and
-// wires server-side request errors (Server Components, route handlers) into
-// Sentry. All dormant until a DSN is set.
+import * as Sentry from "@sentry/nextjs";
+
+// Server-side registration hook: load the right Sentry config per runtime, and
+// wire server request errors (Server Components, route handlers) into Sentry.
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     await import("./sentry.server.config");
@@ -10,4 +11,4 @@ export async function register() {
   }
 }
 
-export { captureRequestError as onRequestError } from "@sentry/nextjs";
+export const onRequestError = Sentry.captureRequestError;

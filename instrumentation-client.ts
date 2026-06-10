@@ -1,15 +1,15 @@
-// Sentry (browser). Dormant unless NEXT_PUBLIC_SENTRY_DSN is set, so no SDK
-// network traffic ships until it's configured.
 import * as Sentry from "@sentry/nextjs";
 
-const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
-if (dsn) {
-  Sentry.init({
-    dsn,
-    tracesSampleRate: 0.1,
-    replaysSessionSampleRate: 0,
-    replaysOnErrorSampleRate: 0,
-  });
-}
+// Browser runtime. Dormant when NEXT_PUBLIC_SENTRY_DSN is unset (Sentry disables
+// itself with no DSN — no events, no network), so this is safe to ship now.
+Sentry.init({
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  sendDefaultPii: true,
+  tracesSampleRate: process.env.NODE_ENV === "development" ? 1.0 : 0.1,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+  enableLogs: true,
+  integrations: [Sentry.replayIntegration()],
+});
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

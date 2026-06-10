@@ -4,12 +4,11 @@
 // the root layout, so global CSS/fonts/tokens are NOT available here — styles are
 // inlined with the brand's dark "Studio" palette.
 import { useEffect } from "react";
-import { captureError } from "@/lib/observability";
+import * as Sentry from "@sentry/nextjs";
 
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
-    console.error("[seshn] global error", error);
-    captureError(error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (
