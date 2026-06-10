@@ -106,6 +106,6 @@ export async function POST(req: Request) {
   } catch (e) {
     // Log and 200 so Supabase doesn't hammer retries on a transient send error.
     console.error("[email] notification bridge error", e);
-    return NextResponse.json({ ok: false, error: (e as Error)?.message || "send error" });
+    return NextResponse.json({ ok: false });
   }
 }

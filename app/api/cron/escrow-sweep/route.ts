@@ -97,7 +97,7 @@ async function handle(req: Request) {
     }
   } catch (e) {
     console.error("[cron] escrow-sweep error", e);
-    return NextResponse.json({ error: (e as Error)?.message || "sweep error" }, { status: 500 });
+    return NextResponse.json({ error: "sweep failed" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, released, refunded, skipped, errors });

@@ -54,6 +54,6 @@ export async function GET(req: Request) {
     });
   } catch (e) {
     console.error("[stripe] connect status error", e);
-    return NextResponse.json({ error: (e as Error)?.message || "Stripe error" }, { status: 500 });
+    return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 });
   }
 }
