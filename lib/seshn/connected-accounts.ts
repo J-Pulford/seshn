@@ -31,7 +31,7 @@ async function sha256Base64Url(input: string) {
 // PKCE: stash verifier + CSRF state, then redirect to Spotify. The user lands
 // back on /settings with ?code & ?state for completeSpotifyConnect.
 export async function startSpotifyConnect() {
-  if (!SPOTIFY_CLIENT_ID) throw new Error("Spotify is not configured yet — set NEXT_PUBLIC_SPOTIFY_CLIENT_ID.");
+  if (!SPOTIFY_CLIENT_ID) throw new Error("Spotify is not configured yet, set NEXT_PUBLIC_SPOTIFY_CLIENT_ID.");
   const verifier = randomString(96);
   const state = randomString(32);
   const challenge = await sha256Base64Url(verifier);
@@ -63,8 +63,8 @@ export async function completeSpotifyConnect(code: string, state: string) {
   const expectedState = sessionStorage.getItem("seshn_spotify_state");
   sessionStorage.removeItem("seshn_spotify_verifier");
   sessionStorage.removeItem("seshn_spotify_state");
-  if (!verifier) throw new Error("Spotify connection expired — try again.");
-  if (!expectedState || expectedState !== state) throw new Error("Spotify state mismatch — try again.");
+  if (!verifier) throw new Error("Spotify connection expired, try again.");
+  if (!expectedState || expectedState !== state) throw new Error("Spotify state mismatch, try again.");
 
   const tokenRes = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",

@@ -133,7 +133,7 @@ function ApplyForm({ gig, owner, onApplied }: { gig: Gig; owner: GigOwner; onApp
       <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, marginBottom: 6 }}>Apply</div>
       <div className="t-meta" style={{ marginBottom: 16 }}>{(owner.display_name || "The poster").split(" ")[0]} sees your pitch and any attached link.</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <textarea className="input-field" rows={5} placeholder="Short pitch — what you'd bring, references, turnaround time… (min 10 chars)" value={pitch} onChange={(e) => setPitch(e.target.value)} maxLength={2000} disabled={submitting} />
+        <textarea className="input-field" rows={5} placeholder="Short pitch, what you'd bring, references, turnaround time… (min 10 chars)" value={pitch} onChange={(e) => setPitch(e.target.value)} maxLength={2000} disabled={submitting} />
         <input className="input-field" style={{ resize: "none", height: 38 }} placeholder="Optional: link to a portfolio track (SoundCloud, Drive, Dropbox…)" value={link} onChange={(e) => setLink(e.target.value)} maxLength={500} disabled={submitting} />
         {err && <div style={{ fontSize: 12, color: "var(--cherry)" }}>{err}</div>}
         <div style={{ display: "flex", gap: 10, alignItems: "center", justifyContent: "space-between" }}>
@@ -174,8 +174,8 @@ function ApplicationStatusCard({ application, owner, onWithdrawn }: { applicatio
       setBusy(false);
     }
   };
-  const headline = { pending: "Your application is in.", accepted: "You're in — accepted!", rejected: "Not this time.", withdrawn: "You withdrew your application." }[status] || "Application sent.";
-  const sub = { pending: "The poster will be in touch if you're a fit.", accepted: "The poster accepted. Open a DM to take it from here.", rejected: "The poster passed on this one. Keep going — there's more.", withdrawn: "This gig is closed for you. You can apply to others freely." }[status] || "";
+  const headline = { pending: "Your application is in.", accepted: "You're in, accepted!", rejected: "Not this time.", withdrawn: "You withdrew your application." }[status] || "Application sent.";
+  const sub = { pending: "The poster will be in touch if you're a fit.", accepted: "The poster accepted. Open a DM to take it from here.", rejected: "The poster passed on this one. Keep going, there's more.", withdrawn: "This gig is closed for you. You can apply to others freely." }[status] || "";
   return (
     <div className="apply-section" style={{ marginBottom: 28 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
@@ -259,7 +259,7 @@ function OwnerApplicationCard({ app, gig, onChange }: { app: OwnerApp; gig: Gig;
             <span className={statusPillClass(app.status)} style={{ fontSize: 10 }}>{statusLabel(app.status)}</span>
           </div>
           <div className="t-meta" style={{ marginTop: 2 }}>
-            @{a?.username || "—"}
+            @{a?.username || "·"}
             {a?.location && " · " + a.location}
             {a?.roles && a.roles.length > 0 && " · " + a.roles.slice(0, 2).join(" · ")}
             {" · Applied " + new Date(app.created_at).toLocaleDateString()}
@@ -306,7 +306,7 @@ function OwnerApplicationsList({ gig }: { gig: Gig }) {
         <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18 }}>Applications {apps && `(${apps.length})`}</div>
         {apps && apps.length > 0 && <span className="t-meta">{pendingCount} pending · {acceptedCount} accepted</span>}
       </div>
-      <div className="t-meta" style={{ marginBottom: 16 }}>You&apos;re the owner — these are people who pitched themselves for this gig.</div>
+      <div className="t-meta" style={{ marginBottom: 16 }}>You&apos;re the owner, these are people who pitched themselves for this gig.</div>
       {apps === null ? (
         <div className="t-meta">Loading applications…</div>
       ) : apps.length === 0 ? (
@@ -352,13 +352,13 @@ function GigReport({ gigId }: { gigId: string }) {
             {state === "done" ? (
               <>
                 <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 20, marginBottom: 8 }}>Report received</div>
-                <p style={{ fontSize: 13, color: "var(--ink-3)", lineHeight: 1.5, marginBottom: 20 }}>Thanks for flagging this. Our team reviews every report — we won&apos;t share that it came from you.</p>
+                <p style={{ fontSize: 13, color: "var(--ink-3)", lineHeight: 1.5, marginBottom: 20 }}>Thanks for flagging this. Our team reviews every report, we won&apos;t share that it came from you.</p>
                 <button className="btn primary" style={{ width: "100%" }} onClick={close}>Done</button>
               </>
             ) : (
               <>
                 <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 20, marginBottom: 4 }}>Report this gig</div>
-                <p style={{ fontSize: 13, color: "var(--ink-3)", lineHeight: 1.5, marginBottom: 16 }}>What&apos;s going on? This goes to our team — it&apos;s confidential.</p>
+                <p style={{ fontSize: 13, color: "var(--ink-3)", lineHeight: 1.5, marginBottom: 16 }}>What&apos;s going on? This goes to our team, it&apos;s confidential.</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
                   {GIG_REPORT_REASONS.map((r) => (
                     <label key={r} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 8, border: "1px solid " + (reason === r ? "var(--accent-d)" : "var(--line)"), background: reason === r ? "var(--accent-bg)" : "var(--surface)", cursor: "pointer", fontSize: 14, fontFamily: "var(--font-display)", fontWeight: 500 }}>
@@ -488,7 +488,7 @@ function GigView({ gig: initialGig }: { gig: Gig }) {
                 {body.map((p, i) => <p key={i} style={{ fontSize: 14, lineHeight: 1.65, color: "var(--ink-2)", whiteSpace: "pre-wrap" }}>{p}</p>)}
               </div>
             ) : (
-              <p style={{ fontSize: 14, color: "var(--ink-3)", fontStyle: "italic" }}>No additional brief — reach out to {owner.display_name || "the poster"} for details.</p>
+              <p style={{ fontSize: 14, color: "var(--ink-3)", fontStyle: "italic" }}>No additional brief, reach out to {owner.display_name || "the poster"} for details.</p>
             )}
           </div>
 
@@ -540,7 +540,7 @@ function GigView({ gig: initialGig }: { gig: Gig }) {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 12, borderTop: "1px solid var(--line-soft)" }}>
               <div>
                 <div className="t-meta">Posted</div>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, marginTop: 2 }}>{gig.created_at ? new Date(gig.created_at).toLocaleDateString() : "—"}</div>
+                <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, marginTop: 2 }}>{gig.created_at ? new Date(gig.created_at).toLocaleDateString() : "·"}</div>
               </div>
               <a href={R.profile(owner.username)} className="btn sm">View profile</a>
             </div>
@@ -551,7 +551,7 @@ function GigView({ gig: initialGig }: { gig: Gig }) {
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}><span className="t-meta">Role</span><strong style={{ fontFamily: "var(--font-display)", fontSize: 13 }}>{gig.role}</strong></div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}><span className="t-meta">Pay</span><strong style={{ fontFamily: "var(--font-display)", fontSize: 13 }}>{compLabel(gig)}</strong></div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}><span className="t-meta">Location</span><strong style={{ fontFamily: "var(--font-display)", fontSize: 13 }}>{gig.location || "—"}</strong></div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}><span className="t-meta">Location</span><strong style={{ fontFamily: "var(--font-display)", fontSize: 13 }}>{gig.location || "·"}</strong></div>
               {gig.deadline && <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}><span className="t-meta">Closes</span><strong style={{ fontFamily: "var(--font-display)", fontSize: 13 }}>{new Date(gig.deadline).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</strong></div>}
             </div>
           </div>
@@ -591,7 +591,7 @@ export default function GigPage() {
         setState({ status: "notfound", gig: null });
         return;
       }
-      document.title = "Seshn — " + gig.title;
+      document.title = "Seshn, " + gig.title;
       setState({ status: "ready", gig });
       void recordGigView(gig.id);
     }).catch(() => setState({ status: "error", gig: null }));

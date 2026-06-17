@@ -18,7 +18,7 @@ async function markEscrowFunded(admin: SupabaseClient, escrowId: string, payment
     .select("id, amount_cents, currency")
     .maybeSingle();
   if (error) throw error;
-  if (!data) return; // already funded — duplicate event, nothing to do
+  if (!data) return; // already funded, duplicate event, nothing to do
   await admin.from("audit_log").insert({
     action: "escrow_funded",
     target_table: "escrows",

@@ -94,7 +94,7 @@ function ScheduleModal({
       return;
     }
     if (start.getTime() < Date.now() - 60000) {
-      setErr("That time is in the past — pick a future slot.");
+      setErr("That time is in the past, pick a future slot.");
       return;
     }
     const end = new Date(start.getTime() + duration * 60000);
@@ -240,7 +240,7 @@ function MeetingCard({
           </>
         )}
         {(meeting.status === "declined" || meeting.status === "cancelled") && (
-          <span className="mtg-note">{meeting.status === "declined" ? "Declined" : "Cancelled"} — propose a new time above.</span>
+          <span className="mtg-note">{meeting.status === "declined" ? "Declined" : "Cancelled"}, propose a new time above.</span>
         )}
       </div>
     </div>

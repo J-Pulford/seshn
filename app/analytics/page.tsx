@@ -131,7 +131,7 @@ export default function AnalyticsPage() {
                   <div className="dash-stat-value">{profile?.views_window ?? 0}</div>
                   {t && (
                     <div className={"dash-stat-sub an-trend " + t.dir}>
-                      {t.dir === "up" ? "▲" : t.dir === "down" ? "▼" : "—"} {t.pct}% vs prev {profile?.window_days}d
+                      {t.dir === "up" ? "▲" : t.dir === "down" ? "▼" : "·"} {t.pct}% vs prev {profile?.window_days}d
                     </div>
                   )}
                 </div>

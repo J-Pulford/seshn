@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-const TITLE = "Cracked the secret code — Secret Member unlocked 🔑";
+const TITLE = "Cracked the secret code, Secret Member unlocked 🔑";
 
 // Cosmetic badge earned by discovering the Konami-code easter egg. `compact`
 // renders just the icon (for tight rows like feed cards); the default is a

@@ -103,10 +103,10 @@ export default function ProjectPage() {
       <div className="main" style={{ flex: 1, overflow: "hidden" }}>
         <div className="chat-panel">
           <div className="messages">
-            <div className="date-div">— Today, Tuesday May 14 —</div>
+            <div className="date-div">,  Today, Tuesday May 14 , </div>
             <ChatMessage ini="MO" name="Maya Oduya" time="9:14" body="just pushed v3 of the topline. let me know if the bridge lands. ✶" />
             <ChatMessage ini="MO" name="Maya Oduya" time="9:14" audio={{ title: "sundowner_topline_v3.wav", meta: "Maya O. · 1:42" }} />
-            <ChatMessage self ini="YT" name="You" time="9:21" body="oh this is the move. the pre is doing exactly what we talked about. one note — can we hold the last word in the bridge a beat longer?" />
+            <ChatMessage self ini="YT" name="You" time="9:21" body="oh this is the move. the pre is doing exactly what we talked about. one note, can we hold the last word in the bridge a beat longer?" />
             <ChatMessage ini="NK" name="Nia Kassim" time="9:33" body="will track that today. I'll have a stem up by EOD." />
             <ChatMessage ini="TB" name="Theo Brooks" time="9:48" file={{ name: "drum-bus_v2_groove-shift.zip", size: "84 MB · Reaper session" }} />
             <ChatMessage ini="TB" name="Theo Brooks" time="9:48" body="re-cut the hat to push behind the beat. small thing, big feel." />

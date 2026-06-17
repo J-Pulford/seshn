@@ -65,7 +65,7 @@ function Composer({ onCreated }: { onCreated: (t: HelpThread) => void }) {
       </div>
       <div className="help-field">
         <label>Title</label>
-        <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={160} placeholder="Short and specific — e.g. ‘How do I release an escrow early?’" />
+        <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={160} placeholder="Short and specific, e.g. ‘How do I release an escrow early?’" />
       </div>
       <div className="help-field">
         <label>Details</label>
@@ -101,7 +101,7 @@ export default function HelpPage() {
     try {
       const n = await seedHelpThreads();
       if (n > 0) { toast.success(`Seeded ${n} starter posts.`); setThreads(await listThreads({ category: cat })); }
-      else toast.error("Board already has posts — nothing seeded.");
+      else toast.error("Board already has posts, nothing seeded.");
     } catch (e) {
       toast.error((e as Error)?.message || "Couldn't seed.");
     } finally {
@@ -122,7 +122,7 @@ export default function HelpPage() {
           <div>
             <span className="t-eyebrow">Help &amp; community</span>
             <h1 className="page-h1">Ask, report, and shape Seshn</h1>
-            <p>Questions, bug reports, feedback, and feature ideas — in the open. The Seshn team replies here, and so does the community. New here? <a href="/guides">Read the best-practices guides →</a></p>
+            <p>Questions, bug reports, feedback, and feature ideas, in the open. The Seshn team replies here, and so does the community. New here? <a href="/guides">Read the best-practices guides →</a></p>
           </div>
           {me ? <Composer onCreated={(t) => (window.location.href = `/help/${t.id}`)} /> : <a className="btn primary" href={"/auth?next=" + encodeURIComponent("/help")}>Sign in to post</a>}
         </header>
@@ -139,7 +139,7 @@ export default function HelpPage() {
         ) : threads.length === 0 ? (
           <div className="help-empty">
             <div className="help-empty-title">No posts here yet</div>
-            <p>{cat === "all" ? "Be the first to ask a question or share feedback." : "Nothing in this category yet — start the conversation."}</p>
+            <p>{cat === "all" ? "Be the first to ask a question or share feedback." : "Nothing in this category yet, start the conversation."}</p>
             {staff && cat === "all" && (
               <button className="btn" style={{ marginTop: 12 }} onClick={doSeed} disabled={seeding}>{seeding ? "Seeding…" : "Seed starter posts"}</button>
             )}

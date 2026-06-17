@@ -37,7 +37,7 @@ function statusPillClass(s: string) {
   return "pill";
 }
 function fmtDateTime(iso?: string | null) {
-  if (!iso) return "—";
+  if (!iso) return "·";
   try {
     return new Date(iso).toLocaleString("en-AU", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
   } catch {
@@ -207,7 +207,7 @@ function StatusSidebar({ contract, me, escrow, onOpenEditor, onSend, onDecline, 
         <div className="card">
           <div className="t-eyebrow" style={{ marginBottom: 8 }}>{contract.status === "completed" ? "Settled" : "Next step"}</div>
 
-          {/* Awaiting funds — owner funds, collaborator waits. */}
+          {/* Awaiting funds, owner funds, collaborator waits. */}
           {(!escrow || escrow.status === "awaiting_funds") && contract.status === "active" && (
             isOwner ? (
               <>
@@ -219,7 +219,7 @@ function StatusSidebar({ contract, me, escrow, onOpenEditor, onSend, onDecline, 
             )
           )}
 
-          {/* Funded — collaborator delivers, owner can approve early. */}
+          {/* Funded, collaborator delivers, owner can approve early. */}
           {escrow?.status === "funded" && (
             isOwner ? (
               <>
@@ -229,14 +229,14 @@ function StatusSidebar({ contract, me, escrow, onOpenEditor, onSend, onDecline, 
               </>
             ) : (
               <>
-                <div className="banner green" style={{ margin: "0 0 10px" }}>Funds are secured — you&apos;re clear to start.</div>
+                <div className="banner green" style={{ margin: "0 0 10px" }}>Funds are secured, you&apos;re clear to start.</div>
                 <button className="btn primary" style={{ width: "100%" }} onClick={onDeliver} disabled={busy}>Mark as delivered</button>
                 <div className="t-meta" style={{ marginTop: 8, lineHeight: 1.5 }}>Marking delivered starts a {days}-day approval window. You&apos;ll receive {netCents != null ? formatMoney(netCents, currency) : amount} on release.</div>
               </>
             )
           )}
 
-          {/* Delivered — approval window running. */}
+          {/* Delivered, approval window running. */}
           {escrow?.status === "delivered" && (
             isOwner ? (
               <>
@@ -245,7 +245,7 @@ function StatusSidebar({ contract, me, escrow, onOpenEditor, onSend, onDecline, 
                 <div className="t-meta" style={{ marginTop: 8, lineHeight: 1.5 }}>Auto-releases {fmtDateTime(escrow.auto_release_at)} if you don&apos;t act. Open a dispute from support if there&apos;s a problem.</div>
               </>
             ) : (
-              <div className="t-meta" style={{ lineHeight: 1.5 }}>Delivered — waiting on @{contract.owner?.username} to approve. Funds auto-release {fmtDateTime(escrow.auto_release_at)}.</div>
+              <div className="t-meta" style={{ lineHeight: 1.5 }}>Delivered, waiting on @{contract.owner?.username} to approve. Funds auto-release {fmtDateTime(escrow.auto_release_at)}.</div>
             )
           )}
 
@@ -337,8 +337,8 @@ function TermsEditor({ contract, onClose, onSave }: { contract: Contract; onClos
           <span className="field-hint">Days after delivery before funds auto-release if the owner doesn&apos;t act.</span>
         </div>
         <div className="field-row">
-          <div className="field"><label>Master split — owner %</label><input type="number" min="0" max="100" value={masterOwner} onChange={(e) => setMasterOwner(e.target.value)} /><span className="field-hint">Collaborator gets {Math.max(0, 100 - parseInt(masterOwner || "0", 10))}%.</span></div>
-          <div className="field"><label>Publishing split — owner %</label><input type="number" min="0" max="100" value={pubOwner} onChange={(e) => setPubOwner(e.target.value)} /><span className="field-hint">Collaborator gets {Math.max(0, 100 - parseInt(pubOwner || "0", 10))}%.</span></div>
+          <div className="field"><label>Master split, owner %</label><input type="number" min="0" max="100" value={masterOwner} onChange={(e) => setMasterOwner(e.target.value)} /><span className="field-hint">Collaborator gets {Math.max(0, 100 - parseInt(masterOwner || "0", 10))}%.</span></div>
+          <div className="field"><label>Publishing split, owner %</label><input type="number" min="0" max="100" value={pubOwner} onChange={(e) => setPubOwner(e.target.value)} /><span className="field-hint">Collaborator gets {Math.max(0, 100 - parseInt(pubOwner || "0", 10))}%.</span></div>
         </div>
         <div className="field"><label>Credit text</label><textarea value={credits} onChange={(e) => setCredits(e.target.value)} placeholder="e.g. Produced by Sam Lee. Co-produced by Jo Park." /></div>
         {err && <div className="banner cherry">{err}</div>}
@@ -389,7 +389,7 @@ function SignBar({ contract, me, readToBottom, onSign, busy }: { contract: Contr
     <div className="sign-bar sticky-bottom no-print">
       <label className={"ack-row" + (readToBottom ? "" : " disabled")} title={readToBottom ? "" : "Scroll to the bottom of the agreement first."}>
         <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} disabled={!readToBottom} />
-        <span>I have read this agreement and agree to its terms. I confirm I am @{myHandle || "—"} and I intend to sign this contract.</span>
+        <span>I have read this agreement and agree to its terms. I confirm I am @{myHandle || "·"} and I intend to sign this contract.</span>
       </label>
       <div className="sign-actions">
         <button className="btn primary lg" onClick={onSign} disabled={!canSign} aria-disabled={!canSign}>{busy ? "Signing…" : "Sign contract"}</button>
@@ -425,7 +425,7 @@ function ContractReviews({ contract, me }: { contract: Contract; me: User }) {
       const r = await createReview({ contractId: contract.id, revieweeId: otherId, rating, body });
       setReviews((prev) => [...prev, r]);
       setRating(0); setBody("");
-      toast.success("Review posted — thanks!");
+      toast.success("Review posted, thanks!");
     } catch (e) {
       setErr((e as Error)?.message || "Couldn't post your review.");
     } finally {
@@ -439,7 +439,7 @@ function ContractReviews({ contract, me }: { contract: Contract; me: User }) {
       {!mine && (
         <div style={{ marginBottom: reviews.length ? 18 : 0 }}>
           <div style={{ fontSize: 13.5, color: "var(--ink-2)", marginBottom: 10, lineHeight: 1.5 }}>
-            How was working with <b>@{other?.username}</b>? Leave a star rating and a testimonial — it appears on their profile.
+            How was working with <b>@{other?.username}</b>? Leave a star rating and a testimonial, it appears on their profile.
           </div>
           <StarRatingInput value={rating} onChange={setRating} />
           <textarea
@@ -538,13 +538,13 @@ export default function ContractPage() {
   }
   async function doSend() {
     if (!contract) return;
-    if (!(await confirm({ title: "Send for signing?", message: "Send this contract to @" + (contract.collaborator?.username) + " — terms will lock once sent.", confirmLabel: "Send" }))) return;
+    if (!(await confirm({ title: "Send for signing?", message: "Send this contract to @" + (contract.collaborator?.username) + ", terms will lock once sent.", confirmLabel: "Send" }))) return;
     setBusy(true); setErr("");
     try { await sendContract(contract.id); await refresh(); toast.success("Contract sent for signing."); } catch (e) { setErr((e as Error)?.message || "Could not send contract."); } finally { setBusy(false); }
   }
   async function doSign() {
     if (!contract) return;
-    if (!agreementHash) { setErr("Agreement hash not ready yet — try again in a moment."); return; }
+    if (!agreementHash) { setErr("Agreement hash not ready yet, try again in a moment."); return; }
     setBusy(true); setErr("");
     try { await signContract(contract.id, agreementHash); await refresh(); toast.success("Signed. We've recorded your signature."); } catch (e) { setErr((e as Error)?.message || "Could not sign contract."); } finally { setBusy(false); }
   }
@@ -620,7 +620,7 @@ export default function ContractPage() {
         {contract.status === "draft" && !isOwner && <div className="banner amber no-print">@{contract.owner?.username} is still drafting this contract. You&apos;ll see it here once they send it.</div>}
         {contract.status === "cancelled" && <div className="banner cherry no-print">This contract was cancelled.</div>}
         {contract.status === "active" && <div className="banner green no-print">Both parties signed. Contract is active. Next step: owner funds the escrow.</div>}
-        {contract.status === "completed" && <div className="banner green no-print">Contract completed — funds released, splits effective.</div>}
+        {contract.status === "completed" && <div className="banner green no-print">Contract completed, funds released, splits effective.</div>}
         {err && <div className="banner cherry no-print">{err}</div>}
 
         <div className="grid">

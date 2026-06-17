@@ -23,7 +23,7 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Seshn — find your next collaborator",
+  title: "Seshn, find your next collaborator",
   description:
     "Seshn is the collaboration marketplace for musicians. Post a brief, find producers, vocalists, writers and engineers, and make your next record.",
   icons: {

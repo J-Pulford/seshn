@@ -21,15 +21,15 @@ interface Built {
 function build(kind: string, c: EmailContext): Built | null {
   switch (kind) {
     case "escrow_funded":
-      return { subject: `Funds secured for ${c.gigTitle}`, heading: "You're clear to start 🎛️", body: `The owner has funded the escrow for <strong>${esc(c.gigTitle)}</strong>. The money is held safely by Seshn — start the work, and you'll be paid as soon as they approve the delivery.`, ctaLabel: "Open the contract" };
+      return { subject: `Funds secured for ${c.gigTitle}`, heading: "You're clear to start 🎛️", body: `The owner has funded the escrow for <strong>${esc(c.gigTitle)}</strong>. The money is held safely by Seshn, start the work, and you'll be paid as soon as they approve the delivery.`, ctaLabel: "Open the contract" };
     case "escrow_delivered":
-      return { subject: `${c.actorName} delivered work on ${c.gigTitle}`, heading: "Delivery is in — your move", body: `${esc(c.actorName)} marked the work delivered for <strong>${esc(c.gigTitle)}</strong>. Review it and approve to release the funds. If you do nothing, it auto-releases when the approval window ends.`, ctaLabel: "Review & approve" };
+      return { subject: `${c.actorName} delivered work on ${c.gigTitle}`, heading: "Delivery is in, your move", body: `${esc(c.actorName)} marked the work delivered for <strong>${esc(c.gigTitle)}</strong>. Review it and approve to release the funds. If you do nothing, it auto-releases when the approval window ends.`, ctaLabel: "Review & approve" };
     case "escrow_released":
       return { subject: `You've been paid for ${c.gigTitle}`, heading: "Payment released 💸", body: `The escrow for <strong>${esc(c.gigTitle)}</strong> has been released to you. The payout lands in your bank in 2–5 business days.`, ctaLabel: "View the contract" };
     case "escrow_refunded":
       return { subject: `Escrow refunded for ${c.gigTitle}`, heading: "Escrow refunded", body: `The escrow for <strong>${esc(c.gigTitle)}</strong> has been refunded to you.`, ctaLabel: "View the contract" };
     case "escrow_disputed":
-      return { subject: `A dispute was opened on ${c.gigTitle}`, heading: "A dispute was opened", body: `A dispute has been opened on <strong>${esc(c.gigTitle)}</strong>. The funds stay safely in escrow while the Seshn team reviews it — we'll be in touch.`, ctaLabel: "View the contract" };
+      return { subject: `A dispute was opened on ${c.gigTitle}`, heading: "A dispute was opened", body: `A dispute has been opened on <strong>${esc(c.gigTitle)}</strong>. The funds stay safely in escrow while the Seshn team reviews it, we'll be in touch.`, ctaLabel: "View the contract" };
     case "help_reply":
       return { subject: `${c.actorName} replied to your thread`, heading: "New reply on your thread", body: `${esc(c.actorName)} replied to your post${c.threadTitle ? ` <strong>“${esc(c.threadTitle)}”</strong>` : ""} on the Seshn help board.`, ctaLabel: "Read the reply" };
     case "review_received":
@@ -65,7 +65,7 @@ function layout(c: EmailContext, b: Built): { html: string; text: string } {
     </div>
     <p style="font-size:12px;color:#9a9a96;line-height:1.6;margin:20px 4px 0;">You're receiving this because you have a Seshn account. Manage email notifications in <a href="${esc(c.siteUrl)}/settings" style="color:#9a9a96;">Settings</a>.</p>
   </div></body></html>`;
-  const text = `${b.heading}\n\nHi ${c.recipientName},\n${b.body.replace(/<[^>]+>/g, "")}\n\n${b.ctaLabel}: ${c.url}\n\n— Seshn\nManage email notifications: ${c.siteUrl}/settings`;
+  const text = `${b.heading}\n\nHi ${c.recipientName},\n${b.body.replace(/<[^>]+>/g, "")}\n\n${b.ctaLabel}: ${c.url}\n\n,  Seshn\nManage email notifications: ${c.siteUrl}/settings`;
   return { html, text };
 }
 

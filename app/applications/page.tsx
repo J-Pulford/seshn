@@ -26,7 +26,7 @@ function statusPillClass(status: string) {
 }
 const statusLabel = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
 function compLabel(g?: Gig) {
-  if (!g) return "—";
+  if (!g) return "·";
   if (g.comp === "paid" && g.pay_amount) return "Paid · $" + Number(g.pay_amount).toLocaleString();
   if (g.comp === "paid") return "Paid";
   if (g.comp === "split") return "Split";

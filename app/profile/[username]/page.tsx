@@ -180,13 +180,13 @@ function ReportModal({ targetId, targetName, onClose }: { targetId: string; targ
         {state === "done" ? (
           <>
             <h2 className="t-h2" style={{ fontSize: 20, marginBottom: 8 }}>Report received</h2>
-            <p className="t-meta" style={{ lineHeight: 1.5, marginBottom: 20 }}>Thanks for flagging this. Our team reviews every report — we won&apos;t share that it came from you.</p>
+            <p className="t-meta" style={{ lineHeight: 1.5, marginBottom: 20 }}>Thanks for flagging this. Our team reviews every report, we won&apos;t share that it came from you.</p>
             <button className="btn primary" style={{ width: "100%" }} onClick={onClose}>Done</button>
           </>
         ) : (
           <>
             <h2 className="t-h2" style={{ fontSize: 20, marginBottom: 4 }}>Report {targetName || "this user"}</h2>
-            <p className="t-meta" style={{ lineHeight: 1.5, marginBottom: 16 }}>What&apos;s going on? This goes to our team — it&apos;s confidential.</p>
+            <p className="t-meta" style={{ lineHeight: 1.5, marginBottom: 16 }}>What&apos;s going on? This goes to our team, it&apos;s confidential.</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
               {REPORT_REASONS.map((r) => (
                 <label key={r} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 8, border: "1px solid " + (reason === r ? "var(--accent-d)" : "var(--line)"), background: reason === r ? "var(--accent-bg)" : "var(--surface)", cursor: "pointer", fontSize: 14, fontFamily: "var(--font-display)", fontWeight: 500 }}>
@@ -426,7 +426,7 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
           <div className="field">
             <span className="field-label">Cover photo</span>
             <div style={{ position: "relative", borderRadius: 10, overflow: "hidden", border: "1px solid var(--line)", background: "var(--ph)", aspectRatio: "4 / 1", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {coverPreviewSrc || coverUrl ? <img src={coverPreviewSrc || coverUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} /> : <span className="field-hint" style={{ padding: 12, textAlign: "center" }}>No cover yet — a generated pattern is shown on your profile.</span>}
+              {coverPreviewSrc || coverUrl ? <img src={coverPreviewSrc || coverUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} /> : <span className="field-hint" style={{ padding: 12, textAlign: "center" }}>No cover yet. We'll show a generated pattern on your profile.</span>}
               {coverBusy && <div style={{ position: "absolute", inset: 0, background: "rgba(13,13,13,0.4)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13 }}>Uploading…</div>}
             </div>
             <input ref={coverInputRef} type="file" accept="image/*" onChange={onPickCover} style={{ display: "none" }} />
@@ -504,7 +504,7 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
 
           <div className="field">
             <span className="field-label">Showcase links</span>
-            <span className="field-hint" style={{ marginBottom: 4 }}>Paste links to your work — only the ones you fill in show on your profile.</span>
+            <span className="field-hint" style={{ marginBottom: 4 }}>Paste links to your work. Only the ones you fill in show on your profile.</span>
             <div className="link-grid">
               {SOCIAL_PLATFORMS.map((p) => (
                 <div key={p.key} className="link-field">
@@ -517,7 +517,7 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
 
           <div className="field">
             <span className="field-label">Featured work ({featured.length}/6)</span>
-            <span className="field-hint" style={{ marginBottom: 4 }}>Paste a Spotify, SoundCloud, or YouTube link — it plays inline on your profile.</span>
+            <span className="field-hint" style={{ marginBottom: 4 }}>Paste a Spotify, SoundCloud, or YouTube link and it plays inline on your profile.</span>
             <div className="credits-edit">
               {featured.map((f, i) => {
                 const kind = f.url.trim() ? embedFor(f.url).kind : null;
@@ -536,7 +536,7 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
 
           <div className="field">
             <span className="field-label">Photo gallery ({gallery.length}/12)</span>
-            <span className="field-hint" style={{ marginBottom: 4 }}>Studio shots, live photos, gear, sessions — show people who you are.</span>
+            <span className="field-hint" style={{ marginBottom: 4 }}>Studio shots, live photos, gear, sessions. Show people who you are.</span>
             {gallery.length > 0 && (
               <div className="gallery-edit-grid">
                 {gallery.map((g, i) => (
@@ -573,7 +573,7 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
 
           <div className="field">
             <span className="field-label">Services &amp; rates ({services.length}/12)</span>
-            <span className="field-hint" style={{ marginBottom: 4 }}>What you offer and your rates. Shown on your profile — paid booking comes with Stripe.</span>
+            <span className="field-hint" style={{ marginBottom: 4 }}>What you offer and your rates. Shown on your profile. Paid booking comes with Stripe.</span>
             <div className="credits-edit">
               {services.map((s, i) => (
                 <div key={i} className="service-edit-row">
@@ -750,7 +750,7 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
           <section>
             <div className="t-eyebrow" style={{ marginBottom: 10 }}>Bio</div>
             <p style={{ fontSize: 14, lineHeight: 1.65, color: "var(--ink-2)", maxWidth: 680, whiteSpace: "pre-wrap" }}>
-              {profile.bio || <span style={{ color: "var(--ink-3)", fontStyle: "italic" }}>No bio yet{isOwner ? " — add one in your profile settings." : "."}</span>}
+              {profile.bio || <span style={{ color: "var(--ink-3)", fontStyle: "italic" }}>No bio yet{isOwner ? ". Add one in your profile settings." : "."}</span>}
             </p>
           </section>
 
@@ -945,7 +945,7 @@ export default function ProfilePage() {
           setState({ status: "notfound", profile: null, isOwner: false, gigs: null });
           return;
         }
-        document.title = "Seshn — " + (profile.display_name || profile.username);
+        document.title = "Seshn · " + (profile.display_name || profile.username);
         const isOwner = !!(me && me.id === profile.id);
         setState({ status: "ready", profile, isOwner, gigs: null });
         if (!isOwner) void recordProfileView(profile.id);

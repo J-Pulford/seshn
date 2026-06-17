@@ -20,13 +20,13 @@ interface ChecklistItem {
 
 // The 60-second tour — what the platform is, one card per pillar.
 const TOUR: { icon: string; title: string; body: string; href: string; link: string }[] = [
-  { icon: "📝", title: "Post a brief", body: "Say what you need — role, genre, comp, deadline. 90 seconds, no resume. Your brief goes out to matched collaborators.", href: "/post", link: "Post a brief" },
-  { icon: "🔎", title: "Find your people", body: "Browse and filter by role, genre, comp, and location. Hear the work before you read the bio — discovery is audio-first.", href: "/browse", link: "Browse talent" },
+  { icon: "📝", title: "Post a brief", body: "Say what you need, role, genre, comp, deadline. 90 seconds, no resume. Your brief goes out to matched collaborators.", href: "/post", link: "Post a brief" },
+  { icon: "🔎", title: "Find your people", body: "Browse and filter by role, genre, comp, and location. Hear the work before you read the bio, discovery is audio-first.", href: "/browse", link: "Browse talent" },
   { icon: "📨", title: "Apply & get applications", body: "Apply to briefs with a tight pitch and a sample, or field applications on your own posts. Track everything in one place.", href: "/applications", link: "Your applications" },
-  { icon: "💬", title: "Talk & plan in DMs", body: "Message collaborators, share files, and schedule a call — all without leaving Seshn.", href: "/inbox", link: "Open inbox" },
+  { icon: "💬", title: "Talk & plan in DMs", body: "Message collaborators, share files, and schedule a call, all without leaving Seshn.", href: "/inbox", link: "Open inbox" },
   { icon: "📄", title: "Contracts & escrow", body: "Agree terms, both sign, the owner funds an escrow. Funds are held safely and released on approval. One flat 10%, fees included.", href: "/contracts", link: "Your contracts" },
   { icon: "💸", title: "Get paid", body: "Connect your bank once and get paid via Stripe. You keep 90% on paid bookings; split and trade collabs are free.", href: "/settings", link: "Set up payouts" },
-  { icon: "📈", title: "Track what's working", body: "See profile views, where they come from, and which listings convert — in real time, on your analytics dashboard.", href: "/analytics", link: "View analytics" },
+  { icon: "📈", title: "Track what's working", body: "See profile views, where they come from, and which listings convert, in real time, on your analytics dashboard.", href: "/analytics", link: "View analytics" },
 ];
 
 function StepRow({ item }: { item: ChecklistItem }) {
@@ -67,9 +67,9 @@ export default function GetStartedPage() {
       const payoutsReady = !!(payout && "connected" in payout && payout.connected && payout.payouts_enabled);
 
       setItems([
-        { id: "photo", label: "Add a profile photo", desc: "A face builds instant trust — people book people.", done: !!p.avatar_url, href: `/profile/${encodeURIComponent(p.username)}`, cta: "Add photo" },
+        { id: "photo", label: "Add a profile photo", desc: "A photo gets you taken seriously. Nobody books a grey circle.", done: !!p.avatar_url, href: `/profile/${encodeURIComponent(p.username)}`, cta: "Add photo" },
         { id: "roles", label: "Say what you do", desc: "Add your roles and genres so you show up in the right searches.", done: (p.roles?.length || 0) > 0, href: `/profile/${encodeURIComponent(p.username)}`, cta: "Set roles" },
-        { id: "work", label: "Show your work", desc: "Connect Spotify/SoundCloud or add tracks — your profile should play.", done: hasWork, href: `/profile/${encodeURIComponent(p.username)}`, cta: "Add work" },
+        { id: "work", label: "Show your work", desc: "Connect Spotify/SoundCloud or add tracks, your profile should play.", done: hasWork, href: `/profile/${encodeURIComponent(p.username)}`, cta: "Add work" },
         { id: "payouts", label: "Set up payouts", desc: "Connect your bank so you can be paid (and funded) via Stripe.", done: payoutsReady, href: "/settings", cta: "Connect" },
         { id: "move", label: "Make your first move", desc: "Post a brief, or browse and apply to one. This is where it starts.", done: gigs.length > 0 || apps.length > 0, href: "/post", cta: "Post a brief" },
       ]);
@@ -97,7 +97,7 @@ export default function GetStartedPage() {
             <div className="st-progress-head">
               <div>
                 <h2>{allDone ? "You're all set up 🎉" : "Set up your account"}</h2>
-                <span className="st-progress-sub">{allDone ? "Your profile is ready to get booked." : `${done} of ${total} done — takes about a minute.`}</span>
+                <span className="st-progress-sub">{allDone ? "Your profile is ready to get booked." : `${done} of ${total} done, takes about a minute.`}</span>
               </div>
               <div className="st-ring" style={{ ["--pct" as string]: `${pct}%` }} aria-label={`${pct}% complete`}>
                 <span>{pct}%</span>
@@ -111,7 +111,7 @@ export default function GetStartedPage() {
           <section className="start-cta-card">
             <div>
               <h2>Create your account to begin</h2>
-              <span>It&apos;s free — post briefs, find collaborators, and get paid. Pro is $5/mo, never a slice of your fee.</span>
+              <span>It&apos;s free, post briefs, find collaborators, and get paid. Pro is $5/mo, never a slice of your fee.</span>
             </div>
             <a className="btn primary lg" href="/auth">Start your session</a>
           </section>

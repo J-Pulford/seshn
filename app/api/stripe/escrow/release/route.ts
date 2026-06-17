@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   const rl = rateLimit(`stripe:release:${user.id}`, 10, 60_000);
   if (!rl.ok) {
     return NextResponse.json(
-      { error: "Too many requests — please wait a moment and try again." },
+      { error: "Too many requests, please wait a moment and try again." },
       { status: 429, headers: { "Retry-After": String(rl.retryAfter) } },
     );
   }
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
       .maybeSingle();
     if (!collab?.stripe_account_id || collab.stripe_account_status !== "verified") {
       return NextResponse.json(
-        { error: "The collaborator's payout account isn't ready — can't release yet." },
+        { error: "The collaborator's payout account isn't ready, can't release yet." },
         { status: 409 },
       );
     }

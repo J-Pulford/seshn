@@ -21,7 +21,7 @@ interface Terms {
 }
 
 function fmtDate(iso?: string | null) {
-  if (!iso) return "—";
+  if (!iso) return "·";
   try {
     return new Date(iso).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
   } catch {
@@ -131,7 +131,7 @@ export default function FundEscrowPage() {
           <div className="card fund-state">
             <div className="fund-state-icon">🔒</div>
             <h1>Only the owner funds this escrow</h1>
-            <p>@{contract.owner?.username} funds the agreed fee. Once it&apos;s held in escrow, you can start delivering — and you&apos;ll be paid on approval.</p>
+            <p>@{contract.owner?.username} funds the agreed fee. Once it&apos;s held in escrow, you can start delivering, and you&apos;ll be paid on approval.</p>
           </div>
         </div>
       </div>
@@ -149,7 +149,7 @@ export default function FundEscrowPage() {
             <div className="fund-state-icon">✅</div>
             <h1>{escrow && escrow.status === "released" ? "Released" : "Funds held in escrow"}</h1>
             {escrow && escrow.status === "awaiting_funds" ? (
-              <p>We&apos;re confirming your payment with Stripe — this usually takes a few seconds. You can safely leave this page; the contract updates automatically.</p>
+              <p>We&apos;re confirming your payment with Stripe, this usually takes a few seconds. You can safely leave this page; the contract updates automatically.</p>
             ) : escrow && escrow.status === "released" ? (
               <p>This escrow has been released to @{collabHandle}. The contract is complete.</p>
             ) : (
@@ -175,7 +175,7 @@ export default function FundEscrowPage() {
               <p>You&apos;re paying the agreed fee for your collaboration with @{collabHandle}. We hold it in escrow and only release it to them once you approve the delivery.</p>
             </header>
 
-            {cancelled && <div className="banner amber">Payment cancelled — nothing was charged. You can try again whenever you&apos;re ready.</div>}
+            {cancelled && <div className="banner amber">Payment cancelled, nothing was charged. You can try again whenever you&apos;re ready.</div>}
             {err && <div className="banner cherry">{err}</div>}
 
             <div className="fund-grid">
@@ -227,11 +227,11 @@ export default function FundEscrowPage() {
               <aside className="card fund-protect">
                 <div className="t-eyebrow" style={{ marginBottom: 10 }}>How escrow protects you</div>
                 <ul className="fund-steps">
-                  <li><strong>You fund now.</strong> The money is held by Stripe — not paid out yet.</li>
+                  <li><strong>You fund now.</strong> The money is held by Stripe, not paid out yet.</li>
                   <li><strong>They deliver.</strong> @{collabHandle} does the work knowing the funds are secured.</li>
-                  <li><strong>You approve.</strong> Release the funds when you&apos;re happy — or they auto-release after the approval window, or you open a dispute.</li>
+                  <li><strong>You approve.</strong> Release the funds when you&apos;re happy, or they auto-release after the approval window, or you open a dispute.</li>
                 </ul>
-                <div className="fund-note">No card fee on top — the flat 10% covers Stripe processing. Nothing leaves escrow without your approval or the agreed window.</div>
+                <div className="fund-note">No card fee on top, the flat 10% covers Stripe processing. Nothing leaves escrow without your approval or the agreed window.</div>
               </aside>
             </div>
           </>

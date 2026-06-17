@@ -41,7 +41,7 @@ function ArtistCard({ profile }: { profile: Profile }) {
   const ini = initialsOf(profile.display_name);
   const bg = bgColors[_hash(profile.username || ini) % bgColors.length];
   const href = profileHref(profile.username);
-  const sub = [profile.location, profile.pronouns].filter(Boolean).join(" · ") || "—";
+  const sub = [profile.location, profile.pronouns].filter(Boolean).join(" · ") || "·";
   return (
     <div className="card" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 11 }}>
       <div className="row" style={{ gap: 12 }}>

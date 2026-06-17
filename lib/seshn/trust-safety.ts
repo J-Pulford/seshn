@@ -25,7 +25,7 @@ async function fileReport(
   });
   if (res.error) {
     if ((res.error as PgError).code === "23505")
-      throw new Error("You've already reported this. Thanks — we're looking into it.");
+      throw new Error("You've already reported this. Thanks, we're looking into it.");
     throw res.error;
   }
   return true;

@@ -78,9 +78,9 @@ function notifText(n: Notification) {
   if (n.kind === "meeting_declined") return `${actor} declined ${meetingTitle}`;
   if (n.kind === "meeting_cancelled") return `${actor} cancelled ${meetingTitle}`;
   const deal = n.gig?.title ? `“${n.gig.title}”` : "your collaboration";
-  if (n.kind === "escrow_funded") return `Escrow funded for ${deal} — you're clear to start`;
-  if (n.kind === "escrow_delivered") return `Work delivered on ${deal} — approve to release`;
-  if (n.kind === "escrow_released") return `Funds released for ${deal} — you've been paid`;
+  if (n.kind === "escrow_funded") return `Escrow funded for ${deal}, you're clear to start`;
+  if (n.kind === "escrow_delivered") return `Work delivered on ${deal}, approve to release`;
+  if (n.kind === "escrow_released") return `Funds released for ${deal}, you've been paid`;
   if (n.kind === "escrow_refunded") return `Escrow refunded for ${deal}`;
   if (n.kind === "escrow_disputed") return `A dispute was opened on ${deal}`;
   if (n.kind === "help_reply") return `${actor} replied to your thread`;

@@ -21,7 +21,7 @@ const PRO_FEATURES = [
   "1 boost credit per month",
 ];
 const FAQ: [string, string][] = [
-  ["Can I cancel anytime?", "Yes — cancel from your account settings. You'll keep Pro until the end of your billing period."],
+  ["Can I cancel anytime?", "Yes, cancel from your account settings. You'll keep Pro until the end of your billing period."],
   ["Is there a free trial?", "The Free plan is free forever, so you can try everything before upgrading."],
   ["What counts as a 'boost credit'?", "Each credit pins your gig to the top of the feed and sends push notifications to matched artists for 7 days."],
   ["Do I need Pro to apply to gigs?", "No. Applying is always free. Pro helps you get found and message first."],
@@ -47,7 +47,7 @@ export default function ProPage() {
         <div className="hero">
           <span className="pill accent" style={{ fontSize: 12 }}>✴ Seshn Pro</span>
           <h1>Move first,<br />get <span className="highlight"><span>heard</span></span> first.</h1>
-          <p className="sub">Pro gives you the tools serious artists use to find collaborators faster — and look like one.</p>
+          <p className="sub">Pro gives you the tools serious artists use to find collaborators faster, and look like one.</p>
         </div>
       </div>
 
@@ -76,7 +76,7 @@ export default function ProPage() {
               <div className="price" style={{ color: "#f4f3ef" }}>$5</div>
               <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>/ month</span>
             </div>
-            <div className="price-sub" style={{ color: "rgba(255,255,255,0.55)" }}>or $48/year — save 20%</div>
+            <div className="price-sub" style={{ color: "rgba(255,255,255,0.55)" }}>or $48/year, save 20%</div>
             <div className="feature-list">
               {PRO_FEATURES.map((f) => <div key={f} className="feature-item" style={{ color: "rgba(255,255,255,0.85)" }}><CheckIcon color="var(--accent)" />{f}</div>)}
             </div>

@@ -170,7 +170,7 @@ export default function HelpThreadPage() {
         <div className="help-replies-head">{replies.length} {replies.length === 1 ? "reply" : "replies"}</div>
         <div className="help-replies">
           {replies.map((r) => <ReplyCard key={r.id} r={r} />)}
-          {replies.length === 0 && <div className="help-empty sm">No replies yet — be the first to help.</div>}
+          {replies.length === 0 && <div className="help-empty sm">No replies yet, be the first to help.</div>}
         </div>
 
         {me ? (

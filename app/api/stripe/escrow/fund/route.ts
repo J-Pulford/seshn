@@ -21,7 +21,7 @@ export async function POST(req: Request) {
   const rl = rateLimit(`stripe:fund:${user.id}`, 10, 60_000);
   if (!rl.ok) {
     return NextResponse.json(
-      { error: "Too many requests — please wait a moment and try again." },
+      { error: "Too many requests, please wait a moment and try again." },
       { status: 429, headers: { "Retry-After": String(rl.retryAfter) } },
     );
   }
@@ -147,7 +147,7 @@ export async function POST(req: Request) {
             currency: currency.toLowerCase(),
             unit_amount: breakdown.amountCents,
             product_data: {
-              name: `Escrow — ${gigTitle}`,
+              name: `Escrow, ${gigTitle}`,
               description: `Held by Seshn until you approve delivery (or the approval window passes). @${collab.username} receives the fee on release.`,
             },
           },

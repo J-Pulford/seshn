@@ -247,7 +247,7 @@ export default function AuthPage() {
 
   async function onResendVerification() {
     if (!email || !email.includes("@")) {
-      setErrMsg("We don't have your email — try signing in again.");
+      setErrMsg("We don't have your email, try signing in again.");
       setStatus("error");
       return;
     }
@@ -273,10 +273,10 @@ export default function AuthPage() {
         return;
       }
       setStatus("idle");
-      setErrMsg("Still not confirmed — open the link in the email (check spam too).");
+      setErrMsg("Still not confirmed, open the link in the email (check spam too).");
     } catch {
       setStatus("idle");
-      setErrMsg("Couldn't check just yet — give it a moment and try again.");
+      setErrMsg("Couldn't check just yet, give it a moment and try again.");
     }
   }
 
@@ -300,7 +300,7 @@ export default function AuthPage() {
           {authMode === "signup" ? (
             <>
               <h1>Make your first<br />session.</h1>
-              <p className="sub">Create a profile, post a brief, find your collaborators. Free forever — no follower counts, no noise.</p>
+              <p className="sub">Create a profile, post a brief, find your collaborators. Free forever, no follower counts, no noise.</p>
             </>
           ) : (
             <>
@@ -319,7 +319,7 @@ export default function AuthPage() {
               </div>
               {status === "sent" ? (
                 <div style={{ fontSize: 13, color: "var(--ink-2)", fontFamily: "var(--font-display)" }}>
-                  Sent again — give it a minute, then check your inbox (and spam).
+                  Sent again, give it a minute, then check your inbox (and spam).
                 </div>
               ) : (
                 <button type="button" className="btn-primary" onClick={onResendVerification} disabled={status === "sending"}>
@@ -327,7 +327,7 @@ export default function AuthPage() {
                 </button>
               )}
               <button type="button" onClick={onCheckVerified} disabled={status === "checking"} style={linkBtn}>
-                {status === "checking" ? "Checking…" : "I've confirmed — continue"}
+                {status === "checking" ? "Checking…" : "I've confirmed, continue"}
               </button>
               {errMsg && <div style={errStyle}>{errMsg}</div>}
               <button type="button" onClick={() => getBrowserClient().auth.signOut().then(() => (window.location.href = "/auth"))} style={{ ...linkBtn, color: "var(--ink-4)", marginTop: 4 }}>

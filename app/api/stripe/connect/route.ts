@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   const rl = rateLimit(`stripe:connect:${user.id}`, 10, 60_000);
   if (!rl.ok) {
     return NextResponse.json(
-      { error: "Too many requests — please wait a moment and try again." },
+      { error: "Too many requests, please wait a moment and try again." },
       { status: 429, headers: { "Retry-After": String(rl.retryAfter) } },
     );
   }

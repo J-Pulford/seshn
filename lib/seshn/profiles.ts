@@ -146,7 +146,7 @@ async function downscaleImage(file: File, maxDim: number, quality = 0.82): Promi
     ctx.drawImage(bitmap, 0, 0, w, h);
     bitmap.close?.();
     const blob: Blob | null = await new Promise((res) => canvas.toBlob(res, "image/webp", quality));
-    if (!blob || blob.size >= file.size) return file; // no real gain — keep original
+    if (!blob || blob.size >= file.size) return file; // no real gain, keep original
     return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".webp", { type: "image/webp" });
   } catch {
     return file; // any decode/encode failure → upload the original untouched

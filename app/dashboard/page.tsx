@@ -109,7 +109,7 @@ function StripeBalanceSection({ balance }: { balance: StripeBalance }) {
       </div>
       <div className="dash-stats">
         {(available.length ? available : [{ amount_cents: 0, currency: fallbackCur }]).map((a) => (
-          <StatCard key={"avail-" + a.currency} accent label="Available" value={formatMoney(a.amount_cents, a.currency)} sub="Settled — ready to pay out" />
+          <StatCard key={"avail-" + a.currency} accent label="Available" value={formatMoney(a.amount_cents, a.currency)} sub="Settled, ready to pay out" />
         ))}
         {(pending.length ? pending : [{ amount_cents: 0, currency: fallbackCur }]).map((p) => (
           <StatCard key={"pend-" + p.currency} label="Pending" value={formatMoney(p.amount_cents, p.currency)} sub="Still clearing in Stripe" />
@@ -150,7 +150,7 @@ export default function DashboardPage() {
           setState("signedout");
           return;
         }
-        document.title = "Seshn — Finances";
+        document.title = "Seshn, Finances";
         const [s, t, p, b] = await Promise.all([
           getFinancialSummary(),
           listRecentTransactions(20),

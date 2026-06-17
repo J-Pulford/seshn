@@ -52,7 +52,7 @@ interface TemplateContract {
 interface TemplateGig { id?: string; title?: string }
 
 export function fmtMoney(cents?: number | null, currency?: string) {
-  if (cents == null) return "—";
+  if (cents == null) return "·";
   const n = Number(cents) / 100;
   try {
     return new Intl.NumberFormat("en-AU", { style: "currency", currency: currency || "AUD", minimumFractionDigits: 2 }).format(n);
@@ -61,7 +61,7 @@ export function fmtMoney(cents?: number | null, currency?: string) {
   }
 }
 function fmtDate(iso?: string | null) {
-  if (!iso) return "—";
+  if (!iso) return "·";
   try {
     return new Date(iso).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
   } catch {
@@ -69,7 +69,7 @@ function fmtDate(iso?: string | null) {
   }
 }
 function fmtPct(n?: number | null) {
-  if (n == null || isNaN(n)) return "—";
+  if (n == null || isNaN(n)) return "·";
   return Number(n).toString() + "%";
 }
 function fallback<T>(v: T | null | undefined, alt: T): T {
@@ -82,10 +82,10 @@ const getSplits = (c?: TemplateContract) => (getTerms(c).splits as Record<string
 const getCredits = (c?: TemplateContract) => (getTerms(c).credits as Record<string, string> | undefined) || {};
 
 function partyLine(profile?: PartyProfile) {
-  if (!profile) return { name: "[unspecified]", handle: "—", country: "—" };
+  if (!profile) return { name: "[unspecified]", handle: "·", country: "·" };
   return {
     name: fallback(profile.legal_name || profile.display_name, "[no legal name on file]"),
-    handle: profile.username ? "@" + profile.username : "—",
+    handle: profile.username ? "@" + profile.username : "·",
     country: fallback(profile.country || profile.stripe_country || "", "[location not set]"),
   };
 }
@@ -210,9 +210,9 @@ function buildDisputes(): AgreementSection {
       ] },
       "The Seshn dispute process may result in one of the following outcomes:",
       { kind: "list-bullet", items: [
-        "release — the full funds are released to the Collaborator;",
-        "refund — the full funds are returned to the Owner;",
-        "split — a partial amount is released to the Collaborator and the remainder is returned to the Owner, as agreed by both parties or as determined by the Seshn dispute resolver.",
+        "release, the full funds are released to the Collaborator;",
+        "refund, the full funds are returned to the Owner;",
+        "split, a partial amount is released to the Collaborator and the remainder is returned to the Owner, as agreed by both parties or as determined by the Seshn dispute resolver.",
       ] },
       "If the parties cannot resolve a dispute through the Seshn process, the dispute is subject to the dispute resolution clause of Seshn's Terms of Service, which provides for arbitration under the rules of the Resolution Institute (or such other Australian arbitration body as the Terms of Service specify). Any arbitration is seated in Sydney, New South Wales, and conducted in English.",
     ],

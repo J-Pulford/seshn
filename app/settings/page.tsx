@@ -19,14 +19,14 @@ const NOTIF_KINDS: [string, string, string][] = [
   ["application_accepted", "Application accepted", "When a poster accepts your application."],
   ["application_rejected", "Application declined", "When a poster passes on your application."],
   ["message_received", "New messages", "When someone sends you a DM."],
-  ["email_enabled", "Email notifications", "Also email me about activity — escrow updates, replies, and applications."],
+  ["email_enabled", "Email notifications", "Also email me about activity, escrow updates, replies, and applications."],
 ];
 
 const PROVIDERS = [
   { key: "spotify", label: "Spotify", available: true, blurb: "Show your followers and top genres as credibility on your profile." },
-  { key: "soundcloud", label: "SoundCloud", available: false, blurb: "Coming soon — connect your SoundCloud once their API access lands." },
-  { key: "instagram", label: "Instagram", available: false, blurb: "Coming soon — link your IG so collaborators see your reach." },
-  { key: "youtube", label: "YouTube", available: false, blurb: "Coming soon — show your channel and subscriber count." },
+  { key: "soundcloud", label: "SoundCloud", available: false, blurb: "Coming soon, connect your SoundCloud once their API access lands." },
+  { key: "instagram", label: "Instagram", available: false, blurb: "Coming soon, link your IG so collaborators see your reach." },
+  { key: "youtube", label: "YouTube", available: false, blurb: "Coming soon, show your channel and subscriber count." },
 ];
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -57,7 +57,7 @@ function AccountSection({ user, profile }: { user: User; profile: Profile }) {
     setStatus(null);
     try {
       await updateMyEmail(trimmed);
-      setStatus({ kind: "ok", text: "Confirmation links sent — check both your current and new inboxes. The change takes effect after you confirm." });
+      setStatus({ kind: "ok", text: "Confirmation links sent, check both your current and new inboxes. The change takes effect after you confirm." });
       setNewEmail("");
     } catch (e) {
       setStatus({ kind: "err", text: (e as Error)?.message || "Couldn't update email." });
@@ -272,7 +272,7 @@ function PayoutsSection() {
   return (
     <Section title="Payouts">
       <span className="t-meta" style={{ display: "block", marginBottom: 12 }}>
-        Connect a payout account to get paid for gigs through Seshn. You always receive your full quoted rate —
+        Connect a payout account to get paid for gigs through Seshn. You always receive your full quoted rate , 
         Seshn adds a small platform fee on top, paid by the client.
       </span>
       {status === null ? (
@@ -326,7 +326,7 @@ function DataExportSection({ profile }: { profile: Profile }) {
   return (
     <div className="card">
       <div className="section-title">Your data</div>
-      <span className="t-meta" style={{ display: "block", marginBottom: 12 }}>Download a copy of everything we hold about you — your profile, gigs, applications, contracts, escrows, connected accounts, messages you&apos;ve sent, and notifications — as a JSON file.</span>
+      <span className="t-meta" style={{ display: "block", marginBottom: 12 }}>Download a copy of everything we hold about you, your profile, gigs, applications, contracts, escrows, connected accounts, messages you&apos;ve sent, and notifications, as a JSON file.</span>
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <button className="btn" onClick={doExport} disabled={busy}>{busy ? "Preparing…" : "Download my data"}</button>
       </div>
@@ -400,7 +400,7 @@ export default function SettingsPage() {
         try {
           await completeSpotifyConnect(code, oauthState);
           await refreshAccounts(user.id);
-          setConnectStatus({ kind: "ok", text: "Spotify connected — your stats now show on your profile." });
+          setConnectStatus({ kind: "ok", text: "Spotify connected, your stats now show on your profile." });
         } catch (e) {
           setConnectStatus({ kind: "err", text: (e as Error)?.message || "Spotify connection failed." });
         }

@@ -222,7 +222,7 @@ export default function OnboardingPage() {
       const ex = e as { code?: string; message?: string };
       console.error("[seshn] onboarding upsert error:", e);
       if (ex?.code === "23505") {
-        setErr("That username is already taken — try another.");
+        setErr("That username is already taken, try another.");
         setStep(0);
       } else if (ex?.code === "42P01" || ex?.code === "PGRST205") {
         setErr("The profiles table doesn't exist yet. Run the SQL migration in your Supabase dashboard.");
@@ -279,7 +279,7 @@ export default function OnboardingPage() {
             ))}
           </h1>
 
-          {/* STEP 0 — identity */}
+          {/* STEP 0, identity */}
           {step === 0 && (
             <div className="ob-fields">
               <p className="ob-sub">A photo and a name make your profile feel real from day one.</p>
@@ -382,10 +382,10 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* STEP 2 — about */}
+          {/* STEP 2, about */}
           {step === 2 && (
             <div className="ob-fields">
-              <p className="ob-sub">A few lines and some tags help collaborators get you fast. All optional — but they make a fuller profile.</p>
+              <p className="ob-sub">A few lines and some tags help collaborators get you fast. All optional, but they make a fuller profile.</p>
               <label className="ob-label">
                 Bio
                 <textarea
@@ -430,10 +430,10 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* STEP 3 — showcase */}
+          {/* STEP 3, showcase */}
           {step === 3 && (
             <div className="ob-fields">
-              <p className="ob-sub">Drop links to your work. Only the ones you fill in show on your profile — but even one makes a huge difference.</p>
+              <p className="ob-sub">Drop links to your work. Only the ones you fill in show on your profile, but even one makes a huge difference.</p>
               <label className="ob-label">
                 Featured track
                 <input
@@ -444,7 +444,7 @@ export default function OnboardingPage() {
                   onChange={(e) => setFeaturedUrl(e.target.value)}
                   placeholder="https://open.spotify.com/track/…"
                 />
-                <span className="ob-hint-mute">A Spotify, SoundCloud, or YouTube link — it plays inline on your profile.</span>
+                <span className="ob-hint-mute">A Spotify, SoundCloud, or YouTube link, it plays inline on your profile.</span>
               </label>
               <div className="ob-link-grid">
                 {SOCIAL_PLATFORMS.map((p) => (

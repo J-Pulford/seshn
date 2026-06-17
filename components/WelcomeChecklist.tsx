@@ -36,7 +36,7 @@ export default function WelcomeChecklist() {
       const u = await getUser().catch(() => null);
       if (!u || cancelled) return;
       const p = await getProfile({ id: u.id }).catch(() => null);
-      if (!p || cancelled) return; // not onboarded yet — onboarding handles them
+      if (!p || cancelled) return; // not onboarded yet, onboarding handles them
 
       const [stats, apps, convos] = await Promise.all([
         getProfileStats(p.id).catch(() => ({ gigs_posted: 0, collaborations: 0 })),

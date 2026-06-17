@@ -45,7 +45,7 @@ const dateKey = (iso: string) => new Date(iso).toLocaleDateString(undefined, { y
 
 function ConvoListItem({ convo, isActive, onSelect }: { convo: ConversationWithMeta; isActive: boolean; onSelect: () => void }) {
   const o: Partial<GigOwner> = convo.other || {};
-  const preview = convo.last_message_preview || (convo.last_message_at ? "" : "Say hi — no messages yet.");
+  const preview = convo.last_message_preview || (convo.last_message_at ? "" : "Say hi, no messages yet.");
   const sentByMe = convo.last_message_sender === convo.me_id;
   return (
     <div className={`convo-item ${isActive ? "active" : ""}`} onClick={onSelect}>
@@ -98,7 +98,7 @@ function MessagesPane({ convo, messages, meId }: { convo: ConversationWithMeta; 
       <div className="messages" ref={scrollRef}>
         <div style={{ margin: "auto", textAlign: "center", padding: 40 }}>
           <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 16, marginBottom: 6 }}>Start the conversation with {(o.display_name || "this user").split(" ")[0]}</div>
-          <div className="t-meta">No messages yet — type below to say hi.</div>
+          <div className="t-meta">No messages yet, type below to say hi.</div>
         </div>
       </div>
     );
@@ -195,7 +195,7 @@ function Composer({ onSend, placeholderName, disabled }: { onSend: (text: string
       )}
       <div className="composer-inner">
         <input ref={fileInputRef} type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,application/pdf,image/*" onChange={onPickFile} style={{ display: "none" }} />
-        <button type="button" className="composer-attach" onClick={() => fileInputRef.current?.click()} disabled={disabled || busy || uploading} aria-label="Attach a file" title="Attach a file (audio, PDF, image — up to 50 MB)">
+        <button type="button" className="composer-attach" onClick={() => fileInputRef.current?.click()} disabled={disabled || busy || uploading} aria-label="Attach a file" title="Attach a file (audio, PDF, image, up to 50 MB)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21 12-8.5 8.5a5 5 0 1 1-7-7L14 5a3 3 0 1 1 4 4l-9 9a1 1 0 1 1-1.5-1.5L15 8" /></svg>
         </button>
         <input className="composer-input" placeholder={attachment ? "Add a caption (optional)…" : "Message " + (placeholderName ? placeholderName.split(" ")[0] : "") + "… (Enter to send)"} value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={onKey} disabled={disabled || busy} maxLength={4000} />

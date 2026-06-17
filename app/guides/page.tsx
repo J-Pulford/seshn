@@ -4,7 +4,7 @@ import { GUIDES } from "@/lib/content/guides";
 import "./guides.css";
 
 export const metadata: Metadata = {
-  title: "Best practices — Seshn",
+  title: "Best practices, Seshn",
   description:
     "Playbooks for getting the most out of Seshn: win more applications, write briefs that attract great collaborators, build a profile that books, price and get paid, and run a tight project room.",
 };
@@ -17,7 +17,7 @@ export default function GuidesPage() {
         <header className="guides-head">
           <span className="t-eyebrow">Best practices</span>
           <h1 className="page-h1">Get the most out of Seshn</h1>
-          <p>Short, practical playbooks for both sides of a collaboration — how to win the work, post briefs that pull great applicants, and optimise every part of your presence on the platform.</p>
+          <p>Short, practical playbooks for both sides of a collaboration, how to win the work, post briefs that pull great applicants, and optimise every part of your presence on the platform.</p>
         </header>
 
         <div className="guides-layout">

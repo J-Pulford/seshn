@@ -16,7 +16,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
       <a href="/" className="logo" style={{ fontSize: 22, marginBottom: 4 }}>Seshn</a>
       <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 28, letterSpacing: "-0.02em", color: "var(--ink)" }}>Something went wrong</h1>
       <p style={{ color: "var(--ink-3)", fontSize: 15, maxWidth: 440, lineHeight: 1.6 }}>
-        A hiccup on our end — give it another go. If it keeps happening, let us know on the help board.
+        A hiccup on our end, give it another go. If it keeps happening, let us know on the help board.
       </p>
       <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
         <button className="btn primary" onClick={() => reset()}>Try again</button>

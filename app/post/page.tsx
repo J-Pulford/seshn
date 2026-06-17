@@ -131,7 +131,7 @@ export default function PostPage() {
     if (selComp === "split") return "Split";
     if (selComp === "trade") return "Trade";
     if (selComp === "unpaid") return "Unpaid";
-    return "—";
+    return "·";
   };
 
   return (
@@ -258,7 +258,7 @@ export default function PostPage() {
                 <span className="t-meta">Genres</span><span style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>{[...selGenres].map((g) => <span key={g} className="pill">{g}</span>)}</span>
                 <span className="t-meta">Comp</span><span>{showCompLabel()}</span>
                 <span className="t-meta">Location</span><span>{location}</span>
-                <span className="t-meta">Deadline</span><span>{deadline ? new Date(deadline).toLocaleDateString(undefined, { weekday: "short", year: "numeric", month: "short", day: "numeric" }) : "—"}</span>
+                <span className="t-meta">Deadline</span><span>{deadline ? new Date(deadline).toLocaleDateString(undefined, { weekday: "short", year: "numeric", month: "short", day: "numeric" }) : "·"}</span>
               </div>
               <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--line-soft)", fontSize: 12, color: "var(--ink-3)", lineHeight: 1.5 }}>Once you publish, your gig appears in the public feed. You can edit or close it any time from your profile.</div>
             </div>

@@ -164,7 +164,7 @@ function SuggestedArtist({ profile }: { profile: Profile }) {
       </a>
       <div className="col" style={{ gap: 1, flex: 1, minWidth: 0 }}>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 5, minWidth: 0 }}><a href={href} style={{ fontFamily: "var(--font-display)", fontSize: 12.5, fontWeight: 600, color: "var(--ink)", textDecoration: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{profile.display_name || profile.username}</a>{profile.has_producer_badge && <ProducerBadge compact />}</span>
-        <span className="t-meta" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sub || "—"}</span>
+        <span className="t-meta" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sub || "·"}</span>
       </div>
       <a href={href} className="btn sm">View</a>
     </div>
@@ -323,7 +323,7 @@ export default function FeedPage() {
               ) : (
                 <div className="gig" style={{ alignItems: "center", textAlign: "center", padding: "40px 20px", gap: 12 }}>
                   <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22, color: "var(--ink)" }}>Feed&apos;s quiet right now.</div>
-                  <div style={{ color: "var(--ink-3)", fontSize: 14, maxWidth: 380 }}>Be the first to post a brief — once others sign up and post, their gigs will show up here.</div>
+                  <div style={{ color: "var(--ink-3)", fontSize: 14, maxWidth: 380 }}>Be the first to post a brief, once others sign up and post, their gigs will show up here.</div>
                   <a href={R.post} className="btn primary" style={{ marginTop: 6 }}>+ Post the first gig</a>
                   {err && <div style={{ color: "var(--danger)", fontSize: 12, marginTop: 8 }}>{err}</div>}
                 </div>
@@ -340,7 +340,7 @@ export default function FeedPage() {
             <div>
               <div style={{ fontFamily: "var(--font-display)", fontSize: 10, fontWeight: 500, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--ink-3)", marginBottom: 12 }}>Suggested for you</div>
               <div className="col" style={{ gap: 12 }}>
-                {suggested === null ? <span className="t-meta">Loading…</span> : suggested.length === 0 ? <span className="t-meta">No suggestions yet — check back soon.</span> : suggested.map((p) => <SuggestedArtist key={p.id} profile={p} />)}
+                {suggested === null ? <span className="t-meta">Loading…</span> : suggested.length === 0 ? <span className="t-meta">No suggestions yet, check back soon.</span> : suggested.map((p) => <SuggestedArtist key={p.id} profile={p} />)}
               </div>
               <a href={R.browse} className="btn ghost" style={{ marginTop: 10, fontSize: 11, padding: "4px 0", color: "var(--ink-3)", textDecoration: "none", display: "block" }}>See all artists →</a>
             </div>

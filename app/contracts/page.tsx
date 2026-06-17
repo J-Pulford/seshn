@@ -89,7 +89,7 @@ export default function ContractsPage() {
       if (!r) return;
       if (!r.user) { setMe(null); return; }
       setMe(r.user);
-      document.title = "Seshn — Contracts";
+      document.title = "Seshn, Contracts";
       setContracts(await listMyContracts());
     })();
   }, []);
@@ -149,7 +149,7 @@ export default function ContractsPage() {
         ) : all.length === 0 ? (
           <div className="ct-empty">
             <div className="ct-empty-title">No contracts yet</div>
-            <p>When you accept an applicant and set up an agreement — or sign one someone sends you — it shows up here. Contracts are how deals get terms, signatures, and (soon) escrow.</p>
+            <p>When you accept an applicant and set up an agreement, or sign one someone sends you, it shows up here. Contracts are how deals get terms, signatures, and (soon) escrow.</p>
             <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
               <a className="btn primary sm" href="/applications">Your applications</a>
               <a className="btn sm" href="/feed">Browse gigs</a>
