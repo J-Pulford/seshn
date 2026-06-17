@@ -90,3 +90,71 @@
 .daw-site .daw-drawer a.active { color: var(--accent); }
 .daw-site .daw-drawer .cta { margin-top: auto; }
 @media (max-width: 880px) { .daw-site .daw-hamburger { display: inline-flex; } }
+
+/* ── Animated background + motion (added: replace the flat black with drift) ── */
+.daw-site { position: relative; isolation: isolate; }
+
+/* Slow-drifting green "studio glow" behind everything. Fixed + transform-only
+   animation so it composites on the GPU and never reflows. */
+.daw-site::before {
+  content: "";
+  position: fixed;
+  inset: -25vmax;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(38vmax 38vmax at 18% 18%, rgba(44, 203, 115, 0.12), transparent 60%),
+    radial-gradient(32vmax 32vmax at 82% 12%, rgba(44, 203, 115, 0.08), transparent 60%),
+    radial-gradient(46vmax 46vmax at 72% 88%, rgba(91, 141, 239, 0.07), transparent 62%),
+    radial-gradient(30vmax 30vmax at 30% 80%, rgba(44, 203, 115, 0.06), transparent 60%);
+  will-change: transform;
+  animation: daw-drift 26s ease-in-out infinite alternate;
+}
+@keyframes daw-drift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(2.5%, -2%, 0) scale(1.08); }
+  100% { transform: translate3d(-2.5%, 2%, 0) scale(1.05); }
+}
+
+/* Richer scroll reveal: a touch more travel + a subtle settle. */
+.daw-site .reveal { opacity: 0; transform: translateY(28px) scale(0.985); transition: opacity .7s cubic-bezier(.2,.7,.3,1), transform .7s cubic-bezier(.2,.7,.3,1); }
+.daw-site .reveal.in { opacity: 1; transform: none; }
+
+/* Stagger the children of revealed grids so cards cascade in instead of popping
+   as one block. The grid container shows immediately; its children animate. */
+.daw-site .reveal.stat-row,
+.daw-site .reveal.how-grid,
+.daw-site .reveal.feat-grid { opacity: 1; transform: none; }
+.daw-site .reveal.stat-row > *,
+.daw-site .reveal.how-grid > *,
+.daw-site .reveal.feat-grid > * {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .6s cubic-bezier(.2,.7,.3,1), transform .6s cubic-bezier(.2,.7,.3,1);
+}
+.daw-site .reveal.in.stat-row > *,
+.daw-site .reveal.in.how-grid > *,
+.daw-site .reveal.in.feat-grid > * { opacity: 1; transform: none; }
+.daw-site .reveal.in.stat-row > *:nth-child(2),
+.daw-site .reveal.in.how-grid > *:nth-child(2),
+.daw-site .reveal.in.feat-grid > *:nth-child(2) { transition-delay: .08s; }
+.daw-site .reveal.in.stat-row > *:nth-child(3),
+.daw-site .reveal.in.how-grid > *:nth-child(3),
+.daw-site .reveal.in.feat-grid > *:nth-child(3) { transition-delay: .16s; }
+.daw-site .reveal.in.stat-row > *:nth-child(4),
+.daw-site .reveal.in.feat-grid > *:nth-child(4) { transition-delay: .24s; }
+.daw-site .reveal.in.feat-grid > *:nth-child(5) { transition-delay: .32s; }
+.daw-site .reveal.in.feat-grid > *:nth-child(6) { transition-delay: .4s; }
+
+/* Lift cards a little as the pointer moves over them (already have a hover on
+   feat-card; give the stat + how cards the same life). */
+.daw-site .stat-card, .daw-site .how-card { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+.daw-site .stat-card:hover, .daw-site .how-card:hover { transform: translateY(-3px); border-color: var(--line-2); box-shadow: 0 18px 40px rgba(0,0,0,0.35); }
+
+@media (prefers-reduced-motion: reduce) {
+  .daw-site::before { animation: none; }
+  .daw-site .reveal,
+  .daw-site .reveal.stat-row > *,
+  .daw-site .reveal.how-grid > *,
+  .daw-site .reveal.feat-grid > * { transition: opacity .3s ease; transform: none; }
+}

@@ -6,17 +6,15 @@ import { SESHN } from "@/lib/landing/content";
 import "./landing.css";
 
 export const metadata: Metadata = {
-  title: "Seshn — make a record. Together.",
+  title: "Seshn. Make a record, together.",
   description:
-    "Seshn is the home base for the working musician. Post a brief, find vetted collaborators, and ship a record together — audio-first profiles, verified ratings, project rooms, and Stripe payouts.",
+    "The home base for working musicians. Post a brief, find people you can trust, and make a record together. Profiles you can hear, ratings off real sessions, project rooms, and Stripe payouts.",
   openGraph: {
-    title: "Seshn — make a record. Together.",
-    description: "Find the people who finish your record. Post a brief, find vetted collaborators, ship it together.",
+    title: "Seshn. Make a record, together.",
+    description: "Find the people who finish your record. Post a brief, find collaborators you can trust, make it together.",
     type: "website",
   },
 };
-
-const stars = (n: number) => "★★★★★".slice(0, n) + "☆☆☆☆☆".slice(0, 5 - n);
 
 export default function LandingPage() {
   return (
@@ -33,7 +31,7 @@ export default function LandingPage() {
                 <span className="stem">Together.</span>
               </h1>
               <p className="lede">
-                The home base for the working musician. Post a brief, find vetted collaborators, and ship the record together — audio-first profiles, verified ratings, project rooms, and payouts in one place.
+                The home base for working musicians. Post a brief, find people you can trust, and make the record together. Profiles you can hear, ratings off real sessions, project rooms, and payouts in one place.
               </p>
               <div className="ctas">
                 <a href="/auth" className="btn primary">▶ Start your session</a>
@@ -61,7 +59,7 @@ export default function LandingPage() {
           <Reveal>
             <span className="label">[TRY IT] · LIVE DEMO</span>
             <h2>This is the energy. <span className="stem">Now find your people.</span></h2>
-            <p className="lede">Tap out a beat right here — eight synthesized voices, sixteen steps, four presets. No sign-up, nothing leaves your browser. Then go find a vocalist for it.</p>
+            <p className="lede">Tap out a beat right here. Eight voices, sixteen steps, four presets. No sign-up, nothing leaves your browser. Then go find a vocalist for it.</p>
           </Reveal>
           <Beatmaker />
         </div>
@@ -142,30 +140,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="section">
-        <div className="container">
-          <Reveal>
-            <span className="label">CH 04 · SENDS</span>
-            <h2>From the <span className="stem">control room.</span></h2>
-          </Reveal>
-          <Reveal className="tg">
-            {SESHN.testimonials.map((t) => (
-              <div className="tcard" key={t.name}>
-                <div className="stars">{stars(t.rating)}</div>
-                <div className="quote">“{t.quote}”</div>
-                <div className="ptag">{t.project} · {t.date}</div>
-                <div className="who">
-                  <span className="av">{t.ini}</span>
-                  <div><div className="nm">{t.name}</div><div className="rl">{t.role}</div></div>
-                </div>
-              </div>
-            ))}
-          </Reveal>
-        </div>
-      </section>
-
-      {/* Fee comparison — keep more of what you earn */}
+      {/* Fee comparison: keep more of what you earn */}
       <section className="section" id="keep">
         <div className="container">
           <Reveal>
@@ -210,14 +185,14 @@ export default function LandingPage() {
                 <li>Unlimited briefs &amp; applications</li>
                 <li>Audio-first profile</li>
                 <li>Project rooms &amp; DMs</li>
-                <li>Stripe payouts — flat 10% on paid bookings (fees included)</li>
+                <li>Stripe payouts. Flat 10% on paid bookings, fees included.</li>
               </ul>
               <a href="/auth" className="btn" style={{ width: "100%", justifyContent: "center" }}>Start free</a>
             </div>
             <div className="price-card pro">
               <div className="label" style={{ color: "var(--accent)", background: "transparent", border: "none", padding: 0 }}>PRO · $5/MO FLAT</div>
               <div className="amt">$5<span style={{ fontSize: 16, color: "var(--ink-3)" }}>/mo</span></div>
-              <div style={{ color: "var(--ink-3)", fontSize: 13 }}>Pro is flat — never a slice of your fee.</div>
+              <div style={{ color: "var(--ink-3)", fontSize: 13 }}>Pro is flat. Never a slice of your fee.</div>
               <ul>
                 <li>Everything in Free</li>
                 <li>Verified ✓ badge</li>

@@ -55,14 +55,14 @@ export default function SuggestionsPage() {
 
       <section className="section" style={{ paddingTop: 10 }}>
         <div className="container" style={{ maxWidth: 760 }}>
-          {ack && <div className="ack">Thanks — your suggestion is in. We read every one; the popular ones land on the roadmap.</div>}
+          {ack && <div className="ack">Thanks, your suggestion is in. We read every one; the popular ones land on the roadmap.</div>}
           <Reveal className="composer">
-            <textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="What should Seshn build next? Be specific — the clearer the ask, the faster it moves." maxLength={500} />
+            <textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="What should Seshn build next? Be specific, the clearer the ask, the faster it moves." maxLength={500} />
             <div className="row2">
               <select value={cat} onChange={(e) => setCat(e.target.value)}>
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email (optional — we'll tell you when it ships)" style={{ flex: 1, minWidth: 200 }} />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email (optional, we'll tell you when it ships)" style={{ flex: 1, minWidth: 200 }} />
               <button className="btn primary" onClick={submit} disabled={!body.trim()}>Submit →</button>
             </div>
           </Reveal>

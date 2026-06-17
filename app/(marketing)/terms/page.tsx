@@ -4,8 +4,8 @@ import "../pages.css";
 import "../legal.css";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — Seshn",
-  description: "The terms that govern your use of Seshn — accounts, collaborations, contracts, payments, conduct, and intellectual property.",
+  title: "Terms of Service · Seshn",
+  description: "The terms that govern your use of Seshn, accounts, collaborations, contracts, payments, conduct, and intellectual property.",
 };
 
 const LAST_UPDATED = "4 June 2026";
@@ -38,14 +38,14 @@ export default function TermsPage() {
       <p className="legal-meta">Effective {EFFECTIVE} · Last updated {LAST_UPDATED}</p>
       <p className="legal-lede">
         These terms are the agreement between you and Seshn for using the platform. We&apos;ve kept them
-        as plain as we can. By creating an account or using Seshn, you agree to them — so it&apos;s worth a read.
+        as plain as we can. By creating an account or using Seshn, you agree to them, so it&apos;s worth a read.
       </p>
 
       <div className="legal-callout">
         <p>
           <strong>The short version.</strong> Be who you say you are, treat people well, own (or have
           the rights to) what you upload, and honour the deals you make. Seshn is the place you find
-          collaborators and agree terms — the creative work and the relationship are yours. Keep money
+          collaborators and agree terms, the creative work and the relationship are yours. Keep money
           and agreements on-platform so escrow and our protections actually apply.
         </p>
       </div>
@@ -103,7 +103,7 @@ export default function TermsPage() {
         <h2><span className="legal-n">05</span> Gigs, applications &amp; collaborations</h2>
         <ul>
           <li>Owners post gigs (briefs); collaborators apply with a pitch. Be honest and accurate in both.</li>
-          <li>Accepting an application doesn&apos;t create a binding deal on its own — the terms you agree (ideally a Seshn contract) do.</li>
+          <li>Accepting an application doesn&apos;t create a binding deal on its own, the terms you agree (ideally a Seshn contract) do.</li>
           <li>You&apos;re responsible for the work you agree to deliver and the conduct of your collaboration.</li>
           <li>Don&apos;t post gigs for anything illegal, deceptive, or that you don&apos;t have the right to commission.</li>
         </ul>
@@ -115,7 +115,7 @@ export default function TermsPage() {
           Seshn lets the two parties to a deal draft and sign a <strong>collaboration agreement</strong>.
           When you click to sign, you&apos;re entering a legally binding electronic signature, and you consent
           to us recording the time, your IP address, your browser/device, and a cryptographic hash of the
-          document as proof — valid under the <strong>Electronic Transactions Act 1999 (Cth)</strong> and
+          document as proof, valid under the <strong>Electronic Transactions Act 1999 (Cth)</strong> and
           comparable laws. The contract is between the two members; Seshn is not a party to it but provides
           and records it. Read each agreement carefully before signing.
         </p>
@@ -127,7 +127,7 @@ export default function TermsPage() {
           <li>Payments are processed by <strong>Stripe</strong>; your use of payment features is also subject to Stripe&apos;s terms. We never store your full card or bank details.</li>
           <li>For a paid booking, the owner funds an <strong>escrow</strong>; funds are released to the collaborator on approval, or after the agreed approval window, or as resolved in a dispute.</li>
           <li>Seshn charges a <strong>flat 10% platform fee</strong> on paid bookings, deducted from the collaborator&apos;s payout: the client pays the agreed fee, and the collaborator receives that fee minus the 10% platform fee. Stripe card-processing fees are absorbed by Seshn. Fees are shown before you commit.</li>
-          <li>Keep payments on-platform — taking a deal off-platform to avoid fees means you lose escrow protection and breaches these terms.</li>
+          <li>Keep payments on-platform, taking a deal off-platform to avoid fees means you lose escrow protection and breaches these terms.</li>
           <li>You&apos;re responsible for your own taxes on what you earn.</li>
         </ul>
       </section>
@@ -135,14 +135,14 @@ export default function TermsPage() {
       <section id="ip">
         <h2><span className="legal-n">08</span> Your content &amp; intellectual property</h2>
         <p>
-          <strong>You keep ownership of your content</strong> — your profile, uploads, music, and the work
+          <strong>You keep ownership of your content</strong>, your profile, uploads, music, and the work
           you create. You grant Seshn a limited, non-exclusive licence to host, store, and display your
           content as needed to operate the Platform (for example, showing your profile and previews).
         </p>
         <p>
           Only upload content you own or have the rights to. Ownership and splits in a collaboration are
           governed by the agreement between you and your collaborators, not by Seshn. We respect
-          intellectual property and will respond to valid infringement notices — contact us if your rights
+          intellectual property and will respond to valid infringement notices, contact us if your rights
           are being infringed.
         </p>
         <p>We will never sell your content or use your unreleased work to train AI models.</p>
@@ -165,7 +165,7 @@ export default function TermsPage() {
       <section id="pro">
         <h2><span className="legal-n">10</span> Pro subscription</h2>
         <p>
-          Pro is an optional paid subscription billed through Stripe. It&apos;s a <strong>flat fee</strong> —
+          Pro is an optional paid subscription billed through Stripe. It&apos;s a <strong>flat fee</strong> , 
           never a cut of your earnings. You can cancel anytime from your settings and keep Pro until the end
           of your billing period. Fees are non-refundable except where required by law. We&apos;ll give notice
           of any price change.
@@ -175,10 +175,10 @@ export default function TermsPage() {
       <section id="termination">
         <h2><span className="legal-n">11</span> Suspension &amp; termination</h2>
         <p>
-          You can stop using Seshn and delete your account at any time (subject to records we must retain —
+          You can stop using Seshn and delete your account at any time (subject to records we must retain , 
           see the Privacy Policy). We may suspend or terminate access if you breach these terms, put others
-          or the Platform at risk, or where required by law. Some obligations — like resolving funded
-          escrows and honouring signed contracts — survive termination.
+          or the Platform at risk, or where required by law. Some obligations, like resolving funded
+          escrows and honouring signed contracts, survive termination.
         </p>
       </section>
 
@@ -207,7 +207,7 @@ export default function TermsPage() {
         <h2><span className="legal-n">14</span> Governing law &amp; disputes</h2>
         <p>
           These terms are governed by the laws of <strong>New South Wales, Australia</strong>, and you submit
-          to the non-exclusive jurisdiction of its courts. If you have a problem, contact us first — we&apos;ll
+          to the non-exclusive jurisdiction of its courts. If you have a problem, contact us first, we&apos;ll
           genuinely try to resolve it. Disputes <em>between members</em> about a collaboration are primarily
           between those members; our dispute tools for funded escrows are described in-app.
         </p>

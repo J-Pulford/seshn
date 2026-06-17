@@ -5,7 +5,7 @@ import "../landing.css";
 import "../pages.css";
 
 export const metadata: Metadata = {
-  title: "Mission — Seshn",
+  title: "Mission · Seshn",
   description: SESHN.mission.headline,
 };
 

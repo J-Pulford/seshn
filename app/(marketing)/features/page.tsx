@@ -5,7 +5,7 @@ import "../landing.css";
 import "../pages.css";
 
 export const metadata: Metadata = {
-  title: "Features — Seshn",
+  title: "Features · Seshn",
   description: "Audio-first profiles, tag-based discovery, project rooms, verified ratings, Stripe payouts, and boost. Every channel earns its keep.",
 };
 
@@ -17,7 +17,7 @@ export default function FeaturesPage() {
           <Reveal>
             <span className="label">CH 03 · INSERTS</span>
             <h1>Every channel <span className="stem">earns its keep.</span></h1>
-            <p className="lede">Six tools that replace the spreadsheet, the group chat, and the gamble. Built around the work — not the follower count.</p>
+            <p className="lede">Six tools that replace the spreadsheet, the group chat, and the gamble. Built around the work, not the follower count.</p>
           </Reveal>
         </div>
       </section>

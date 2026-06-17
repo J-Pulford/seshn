@@ -29,7 +29,7 @@ export default function WaitlistSection() {
       setStatus("done");
     } catch (err) {
       setStatus("error");
-      setErrMsg((err as Error)?.message || "Something went wrong — please try again.");
+      setErrMsg((err as Error)?.message || "Something went wrong, please try again.");
     }
   }
 
@@ -42,7 +42,7 @@ export default function WaitlistSection() {
             <h2>Get in <span className="stem">before the doors open.</span></h2>
             <p className="lede">
               We let artists in by batches so support stays human and the matches stay good. Drop your email and we&apos;ll
-              cue you for the next round — tell us what you do and we&apos;ll line up collaborators for you on day one.
+              cue you for the next round, tell us what you do and we&apos;ll line up collaborators for you on day one.
             </p>
           </Reveal>
 
@@ -53,8 +53,8 @@ export default function WaitlistSection() {
               <h3>{already ? "You're already on the list." : "You're on the list."}</h3>
               <p>
                 {already
-                  ? "Sit tight — we'll reach out when the next batch opens."
-                  : "We'll email you when your batch opens. No spam, no selling your data — ever."}
+                  ? "Sit tight, we'll reach out when the next batch opens."
+                  : "We'll email you when your batch opens. No spam, no selling your data, ever."}
               </p>
             </div>
           ) : (

@@ -1,6 +1,6 @@
 import { SESHN } from "@/lib/landing/content";
 
-// Marketing footer — mono, 4-column. CTAs into the app point at /auth.
+// Marketing footer, mono, 4-column. CTAs into the app point at /auth.
 export default function Footer() {
   return (
     <footer className="footer">
@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="footer-col">
           <b>SESHN.DAW</b>
           <p style={{ color: "var(--ink-2)", fontFamily: '"Inter Tight", sans-serif', fontSize: 13, lineHeight: 1.6, maxWidth: 280 }}>
-            {SESHN.meta.tagline} The home base for the working musician — post a brief, find vetted collaborators, ship the record together.
+            {SESHN.meta.tagline} The home base for the working musician, post a brief, find vetted collaborators, ship the record together.
           </p>
         </div>
         <div className="footer-col">

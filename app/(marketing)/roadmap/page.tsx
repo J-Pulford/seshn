@@ -5,13 +5,13 @@ import "../landing.css";
 import "../pages.css";
 
 export const metadata: Metadata = {
-  title: "Roadmap — Seshn",
+  title: "Roadmap · Seshn",
   description: "What's shipped, in progress, in design, and on the horizon. Public roadmap + changelog.",
 };
 
 const CHANGELOG: [string, string][] = [
   ["May 28", "Verified ✓ badges live for Pro members."],
-  ["May 21", "Refer-a-collaborator credits — both sides get a month of Pro."],
+  ["May 21", "Refer-a-collaborator credits, both sides get a month of Pro."],
   ["May 14", "Inline waveform comments shipped to Audio Studio v2 beta."],
   ["May 06", "Realtime inbox unread + notification badges."],
   ["Apr 29", "Report / block + trust & safety controls across profiles and gigs."],
@@ -25,7 +25,7 @@ export default function RoadmapPage() {
           <Reveal>
             <span className="label">PUBLIC ROADMAP</span>
             <h1>Built in <span className="stem">public.</span></h1>
-            <p className="lede">Every feature ships because someone needed it on a Tuesday at 11pm. Here&apos;s what&apos;s next — and where it stands.</p>
+            <p className="lede">Every feature ships because someone needed it on a Tuesday at 11pm. Here&apos;s what&apos;s next, and where it stands.</p>
           </Reveal>
           <Reveal className="legend">
             <span className="dotk"><span className="sw" style={{ background: "var(--accent)" }} /> shipped</span>

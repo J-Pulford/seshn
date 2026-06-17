@@ -1,5 +1,5 @@
-// Seshn marketing site content — typed port of the handoff's shared-content.js
-// (the single source of all copy). Pages render from this. Treat as the schema.
+// Seshn marketing copy. One file, all pages read from it. Plain, direct voice , 
+// no em dashes, no filler. Written like a working musician talks.
 
 export interface Pillar { n: string; h: string; b: string }
 export interface Stat { big: string; h: string; p: string; src: string }
@@ -7,7 +7,6 @@ export interface HowStep { n: string; h: string; p: string; points: string[] }
 export interface Feature { n: string; h: string; p: string }
 export interface RoadmapItem { title: string; desc: string; state?: "shipped" | "in-progress" | "design" | "exploring" }
 export interface RoadmapQuarter { q: string; status: string; tone: "live" | "next" | "later" | "vision"; h: string; tagline: string; items: RoadmapItem[] }
-export interface Testimonial { name: string; ini: string; role: string; rating: number; project: string; date: string; quote: string }
 export interface Suggestion { upvotes: number; body: string; tag: string }
 export interface FeatureDeep { n: string; h: string; lead: string; body: string; points: string[]; solves: string }
 export interface ProblemDeep { stat: string; label: string; h: string; body: string; src: string }
@@ -16,135 +15,123 @@ export interface FeeRow { path: string; cut: string; keep: string; note: string;
 export const SESHN = {
   mission: {
     eyebrow: "Our mission",
-    headline: "The hardest part of making music isn't writing it — it's finding the people to make it with.",
+    headline: "The hard part of making music was never writing it. It's finding the right people to make it with.",
     statement:
-      "Seshn exists for the 7.94 million artists who got left behind by streaming algorithms, label gatekeepers, and the chaos of Instagram DMs. We're building the home base for the working musician — the producer with a half-finished beat, the vocalist between projects, the drummer who can play the date in June. A platform where the work is the work, ratings are real, money flows, and collaboration is the default — not the exception.",
+      "We built Seshn for the millions of artists the streaming era left without a support system. The producer with a beat that's 80 percent there. The vocalist between projects. The drummer who's free the second week of June. It's a place where the work does the talking, the ratings are real, the money actually moves, and working together is normal instead of a hassle.",
     pillars: [
-      { n: "01", h: "Trust > Followers.", b: "Every rating comes from a real session. Every profile is vetted. No fake DMs from bot accounts. The bigger your follower count, the less it matters here." },
-      { n: "02", h: "The work speaks first.", b: "Profiles lead with audio, not bios. Briefs lead with the role, not the brand. We hide follower counts on purpose so what you make is what you're judged on." },
-      { n: "03", h: "Artists keep what artists make.", b: "Stripe-powered payouts with one flat, visible fee: 10% on paid bookings — and that 10% covers Stripe's processing fees, so the rate you're quoted is the rate you keep 90% of. No manager, label, or agent taking a cut on top. Split and trade collabs are free, and Pro is $5/mo flat — never a slice of your fee." },
-      { n: "04", h: "Built by musicians, in public.", b: "Every feature ships because someone on the team needed it on a Tuesday at 11pm. The roadmap is public. The suggestions box is open. You shape this." },
+      { n: "01", h: "Trust beats follower count.", b: "Every rating comes off a real session. Every profile is vetted. No bot DMs. The size of your following counts for almost nothing here, and that's the point." },
+      { n: "02", h: "The work goes first.", b: "Profiles lead with audio, not a bio. Briefs lead with the role, not a brand. We hide follower counts on purpose, so people judge you on what you make." },
+      { n: "03", h: "You keep what you make.", b: "Payouts run through Stripe with one flat fee: 10 percent on paid bookings, and that 10 percent already covers Stripe's card fees. So the rate you agree is the rate you keep 90 percent of. No manager, label, or agent taking a slice on top. Splits and trades cost nothing, and Pro is a flat 5 dollars a month, never a cut of your work." },
+      { n: "04", h: "Built by musicians, out in the open.", b: "Features ship because someone on the team needed one at 11pm on a Tuesday. The roadmap is public. The suggestion box is open. You push it where it goes." },
     ] as Pillar[],
     why_now: {
       h: "Why now",
       paragraphs: [
-        "Independent artists now generate over half of all global music streams. The gatekeepers are gone — but so is the support system that came with them. The average musician has more reach than ever and less infrastructure than ever.",
-        "Meanwhile, 64% of artists cite financial pressure as the #1 reason they leave music — up from #4 just two years ago. Streaming pays a fraction of a cent per play. Followers don't pay rent. The way through is not solo virality; it's collaboration, paid work, and a smaller circle of trusted people.",
-        "Seshn is the home base for that smaller circle. The platform we wish existed when we started.",
+        "Independent artists now make more than half of all music streamed worldwide. The gatekeepers are gone, and so is everything they used to handle for you. The average musician has more reach than ever and less support than ever.",
+        "At the same time, money is now the number one reason people quit music, up from fourth a couple of years ago. Streaming pays a sliver of a cent a play. Followers don't cover rent. The way through isn't going viral on your own. It's working with people, getting paid for it, and building a small circle you trust.",
+        "Seshn is the home base for that circle. The thing we wanted when we started out and never had.",
       ],
     },
     pledge: {
-      h: "Our pledge to you",
+      h: "What we promise",
       points: [
-        "Never sell your data, never train AI on your unreleased work.",
-        "Keep our cut flat and visible — 10% on paid bookings, Stripe processing fees included, and nothing else stacked on top. Pro is always a flat fee, never a slice of what you earn.",
-        "Public roadmap. Public changelog. If we kill a feature you love, you'll know why first.",
-        "Free tier is permanent. Not a trial. Not a teaser.",
+        "We will never sell your data or train AI on your unreleased work.",
+        "Our fee stays flat and out in the open: 10 percent on paid bookings, card fees included, nothing stacked on top. Pro is always a flat price, never a cut of what you earn.",
+        "Public roadmap, public changelog. If we ever kill a feature you rely on, you hear it from us first.",
+        "The free tier is permanent. Not a trial, not a teaser.",
       ],
     },
   },
 
   stats: [
-    { big: "96%", h: "of new music is independent or DIY.", p: "More artists than ever are going it alone — with no shared system to find, vet, and pay the people they need. The missing layer isn't more uploads; it's trusted connection.", src: "Luminate Year-End Report · 2025" },
-    { big: "100K+", h: "songs uploaded to streaming every day.", p: "~35 per minute. Posting alone is no longer a discovery strategy. Being heard means being connected.", src: "Luminate Year-End Report · 2025" },
-    { big: "77.8%", h: "earn under $15K/yr from music.", p: "64.4% cite financial pressure as the #1 reason they leave music — up from 39% in 2023.", src: "Xposure Music · State of the Industry 2025" },
-    { big: "0.2%", h: "of tracks drive half of all streams.", p: "Around 541,000 tracks — 0.2% of everything on streaming — pull half of all global plays. The economics of solo virality are broken; the door is open for the collaborators who organize.", src: "Luminate Year-End Report · 2025" },
+    { big: "96%", h: "of new music is independent or DIY.", p: "More people are going it alone than ever, with nothing that helps them find, vet, and pay the people they need. The missing piece isn't more uploads. It's a way to actually connect.", src: "Luminate Year-End Report, 2025" },
+    { big: "100K+", h: "songs hit streaming every day.", p: "Roughly 35 a minute. Just putting it out there stopped being a plan a long time ago. Getting heard now comes down to who you know and who you work with.", src: "Luminate Year-End Report, 2025" },
+    { big: "77.8%", h: "make under $15K a year from music.", p: "Most artists earn next to nothing from it, and money is now the top reason people walk away.", src: "Xposure Music, State of the Industry 2025" },
+    { big: "0.2%", h: "of tracks pull half of all streams.", p: "About 541,000 tracks, a fifth of one percent of everything out there, take half of all global plays. Going viral solo is a lottery ticket. Building a circle and getting paid is not.", src: "Luminate Year-End Report, 2025" },
   ] as Stat[],
 
   how: [
-    { n: "01", h: "Post what you actually need.", p: "Role, genre, comp, deadline. 90 seconds. Skip the bio — your work speaks first.", points: ["One template, no resume, no follower counts", "Set paid, split, trade, or fair-deal upfront", "Boost to land at the top of every matched feed"] },
-    { n: "02", h: "Find your collaborators.", p: "Filter by role, genre, comp, location. Hear the work before you read the bio. Verified ratings — no anonymous reviews.", points: ["Audio-first search — hear before you read", "Verified ratings from real sessions", "Reach out free; Pro lets you DM anyone first"] },
-    { n: "03", h: "Ship the record.", p: "Project rooms with chat, audio files, stems, deadlines, voice notes — out of group DMs and onto one workspace.", points: ["Inline audio previews + waveform playback", "Members, roles, deadlines, brief — synced", "Ratings + testimonials on delivery"] },
+    { n: "01", h: "Post what you actually need.", p: "Role, genre, pay, deadline. About 90 seconds. Skip the bio, the work speaks for you.", points: ["One simple form. No resume, no follower counts.", "Set it up front: paid, split, or trade.", "Boost it to the top of every matched feed."] },
+    { n: "02", h: "Find your people.", p: "Filter by role, genre, pay, and location. Hear the work before you read a word. Ratings come off real sessions, never anonymous.", points: ["Search by sound. Listen first.", "Ratings from real, finished work.", "Reach out free. Pro lets you message anyone first."] },
+    { n: "03", h: "Make the record.", p: "A room per project: chat, audio, stems, deadlines, voice notes. Out of the group chat and into one place.", points: ["Inline audio with waveform playback.", "Members, roles, deadlines, and the brief, all in sync.", "Ratings when the work ships."] },
   ] as HowStep[],
 
   features: [
-    { n: "F.01", h: "Audio-first profiles", p: "Every profile is a portfolio you can listen to. SoundCloud, Spotify, YouTube — one unified player." },
-    { n: "F.02", h: "Tag-based discovery", p: "Filter by role, genre, comp, location. Pure signal — no follower-count theatre." },
-    { n: "F.03", h: "Project rooms", p: "Chat, stems, voice notes, deadlines, voice notes — without piling up in group DMs." },
-    { n: "F.04", h: "Verified ratings", p: "Real reviews from people you actually worked with. No bot stars. No paid placements." },
-    { n: "F.05", h: "Stripe payouts", p: "Set rate, split, or trade. One flat 10% on paid bookings — Stripe fees included; split and trade are free. Escrow ships Q3." },
-    { n: "F.06", h: "Boost mode", p: "$5 puts your post at the top of every matched feed for 7 days." },
+    { n: "F.01", h: "Profiles you can hear", p: "Every profile is a portfolio you press play on. SoundCloud, Spotify, YouTube, all in one player." },
+    { n: "F.02", h: "Search by what people make", p: "Filter by role, genre, pay, and location. Real signal, no follower-count theatre." },
+    { n: "F.03", h: "Project rooms", p: "Chat, stems, voice notes, and deadlines in one place instead of piling up in a group chat." },
+    { n: "F.04", h: "Ratings that mean something", p: "Reviews from people you actually worked with. No bot stars, no paid placements." },
+    { n: "F.05", h: "Get paid through Stripe", p: "Set a rate, split, or trade. One flat 10 percent on paid bookings, card fees included. Splits and trades are free, and escrow holds the money until the work's approved." },
+    { n: "F.06", h: "Boost", p: "Five dollars puts your post at the top of every matched feed for a week." },
   ] as Feature[],
 
   roadmap: [
-    { q: "Q3 · 2026", status: "shipping now", tone: "live", h: "The Foundation", tagline: "Make the core work undeniably good.", items: [
-      { title: "Verified Profiles", desc: "Lightweight ID + work verification. Verified ✓ badge for Pro members.", state: "shipped" },
-      { title: "Stripe Escrow", desc: "Funds held by Seshn, released on delivery. Both parties protected.", state: "in-progress" },
-      { title: "Audio Studio v2", desc: "Inline waveform comments. Drop a note at 1:42. Reply chain stays with the timecode.", state: "in-progress" },
-      { title: "Mobile app — public beta", desc: "iOS + Android. Push notifications for new matches, replies, and stems.", state: "in-progress" },
-      { title: "Refer-a-collaborator credits", desc: "Bring in someone you've worked with — both get a month of Pro on us.", state: "shipped" },
+    { q: "Q3 2026", status: "shipping now", tone: "live", h: "The foundation", tagline: "Get the core undeniably right.", items: [
+      { title: "Verified profiles", desc: "Light ID and work checks. A verified badge for Pro members.", state: "shipped" },
+      { title: "Stripe escrow", desc: "Money held by Seshn and released on delivery. Both sides covered.", state: "shipped" },
+      { title: "Audio studio v2", desc: "Comment right on the waveform. Drop a note at 1:42 and the reply stays with it.", state: "in-progress" },
+      { title: "Mobile app, public beta", desc: "iOS and Android, with push for new matches, replies, and stems.", state: "in-progress" },
+      { title: "Refer a collaborator", desc: "Bring in someone you've worked with and you both get a month of Pro.", state: "shipped" },
     ] },
-    { q: "Q4 · 2026", status: "in design", tone: "next", h: "The Tools", tagline: "Replace the spreadsheet, the Google Doc, the group chat.", items: [
-      { title: "Splits & Royalty Sheets", desc: "Auto-generated splits from project room participation. Sign + send to PROs.", state: "design" },
-      { title: "Session Calendar", desc: "Sync project deadlines to your Google / Apple calendar. Conflict detection between collaborators.", state: "design" },
-      { title: "Stem Library", desc: "Reusable stems you license to other Seshn members on your own terms.", state: "design" },
-      { title: "AI Brief Coach (opt-in)", desc: "Suggests missing details on your brief before you publish. Never writes the brief itself.", state: "design" },
+    { q: "Q4 2026", status: "in design", tone: "next", h: "The tools", tagline: "Replace the spreadsheet, the doc, and the group chat.", items: [
+      { title: "Splits and royalty sheets", desc: "Splits built from who did what in the room. Sign and send to your PRO.", state: "design" },
+      { title: "Session calendar", desc: "Sync project deadlines to your calendar, with clash detection between collaborators.", state: "design" },
+      { title: "Stem library", desc: "Reusable stems you license to other members on your own terms.", state: "design" },
+      { title: "Brief coach (opt-in)", desc: "Points out what's missing on your brief before you post it. Never writes it for you.", state: "design" },
     ] },
-    { q: "Q1 · 2027", status: "exploring", tone: "later", h: "The Network", tagline: "Make the platform pull its own weight.", items: [
-      { title: "Sync Licensing Marketplace", desc: "Music supervisors browse Seshn members directly. You set rates, retain rights.", state: "exploring" },
-      { title: "Live Session Booking", desc: "Find + book a session musician for a specific date, in a specific city.", state: "exploring" },
-      { title: "Seshn for Studios", desc: "Studios list rooms, post engineer needs, sell remote sessions. Free for venues under 5 rooms.", state: "exploring" },
-      { title: "Community Channels", desc: "Genre + city channels. Closed, moderated. Like a Discord, without the discovery problem.", state: "exploring" },
+    { q: "Q1 2027", status: "exploring", tone: "later", h: "The network", tagline: "Make the platform carry its weight.", items: [
+      { title: "Sync licensing", desc: "Music supervisors browse members directly. You set the rate and keep the rights.", state: "exploring" },
+      { title: "Live session booking", desc: "Book a session player for a set date in a set city.", state: "exploring" },
+      { title: "Seshn for studios", desc: "Studios list rooms, post engineer needs, and sell remote sessions. Free for venues under five rooms.", state: "exploring" },
+      { title: "Community channels", desc: "Closed, moderated channels by genre and city. Like a Discord without the noise.", state: "exploring" },
     ] },
-    { q: "Q2 · 2027", status: "north star", tone: "vision", h: "The Industry", tagline: "Build the layer between the bedroom and the major label.", items: [
-      { title: "Investor / A&R Portal", desc: "Verified A&Rs and indie investors browse Pro members. Always opt-in. Always transparent." },
-      { title: "Crowdfunded Projects", desc: "Members pledge to a project room they want to hear. Funds the recording. Splits the upside." },
-      { title: "Cross-platform Royalty Tracking", desc: "Pull stream counts + earnings from every DSP into one dashboard. Pay your collaborators automatically." },
-      { title: "Education + Mentorship", desc: "Pros mentor emerging artists for a flat hourly. Verified, rated, paid through Seshn." },
+    { q: "Q2 2027", status: "north star", tone: "vision", h: "The industry", tagline: "Build the layer between the bedroom and the major.", items: [
+      { title: "A&R and investor portal", desc: "Vetted A&Rs and indie investors browse Pro members. Always opt-in, always clear." },
+      { title: "Crowdfunded projects", desc: "Members back a room they want to hear. It funds the recording and shares the upside." },
+      { title: "Royalty tracking", desc: "Pull stream counts and earnings from every service into one place. Pay your collaborators automatically." },
+      { title: "Mentorship", desc: "Pros mentor newer artists at a flat hourly rate. Vetted, rated, paid through Seshn." },
     ] },
   ] as RoadmapQuarter[],
 
-  testimonials: [
-    { name: "Nia Kassim", ini: "NK", role: "Vocalist · London", rating: 5, project: "Sundowner EP", date: "May 2026", quote: "I found my whole band on Seshn in three weeks. Two of them ended up on the record. No platform has ever delivered work like this." },
-    { name: "Iván Reyes", ini: "IR", role: "Producer · CDMX", rating: 5, project: "Hold The Line", date: "Apr 2026", quote: "Mixed four EPs in a month. The brief format means I don't read between the lines or waste a discovery call. The work is the work." },
-    { name: "Maya Oduya", ini: "MO", role: "Producer · Brooklyn", rating: 5, project: "Coast (demo)", date: "Mar 2026", quote: "Built a Pro profile, posted one brief, woke up to nine applications. The verified rating system means I don't gamble on collaborators." },
-    { name: "Theo Brooks", ini: "TB", role: "Drummer · NYC", rating: 5, project: "Live run · NYC", date: "May 2026", quote: "I'm a session player. Seshn replaced three group chats, a Google sheet, and the weekly back-and-forth on Instagram DMs. Booked solid through Q3." },
-    { name: "Sam Park", ini: "SP", role: "Mix eng. · LA", rating: 5, project: "Morning Light", date: "Feb 2026", quote: "Stripe payouts. Inline audio. Clear briefs. The little things add up — I haven't sent an invoice manually since I joined." },
-    { name: "Lina Vega", ini: "LV", role: "Producer · CDMX", rating: 5, project: "Sundowner EP", date: "Apr 2026", quote: "I'm based in CDMX and 60% of my work is now from NYC and London artists. Seshn made my city irrelevant to my career." },
-    { name: "Amaya L.", ini: "AL", role: "Songwriter · NYC", rating: 5, project: "Coast (demo)", date: "May 2026", quote: "I was the vocalist who replied to a brief at 2am thinking nothing would happen. We were tracking by Thursday. The format actually works." },
-    { name: "Robi K.", ini: "RK", role: "Drummer · Berlin", rating: 5, project: "Hold The Line", date: "Mar 2026", quote: "What sold me: the rating beside every name. I'd never agreed to a remote session before. Now half my income is remote sessions for artists I've never met." },
-    { name: "Mo Daniels", ini: "MD", role: "Bassist · LA", rating: 5, project: "Morning Light", date: "Apr 2026", quote: "The platform stays out of the way. No newsfeed slop. No daily 'increase your engagement' prompts. Just briefs, profiles, and the project room." },
-  ] as Testimonial[],
-
   suggestion_examples: [
-    { upvotes: 287, body: "Allow setting visibility per-portfolio-track. I want collaborators to hear my B-sides but not the public.", tag: "Profile" },
-    { upvotes: 241, body: "Add Discord-style availability statuses. 'Open to work / booked through August / archived'.", tag: "Profile" },
-    { upvotes: 196, body: "iOS app push for voice-note replies in project rooms.", tag: "Mobile" },
-    { upvotes: 154, body: "Calendar block for tracking sessions — so collaborators can see when I'm in the studio without DMing.", tag: "Project Rooms" },
-    { upvotes: 132, body: "Anonymous job posts for major-label A&Rs who don't want to show their hand early.", tag: "Discovery" },
-    { upvotes: 118, body: "Lo-fi WAV preview that hides the unmastered version from anyone without project room access.", tag: "Audio" },
-    { upvotes: 94, body: "Rating dimension breakdowns — 'communication' / 'on-time delivery' / 'musical fit' instead of one star score.", tag: "Trust" },
-    { upvotes: 82, body: "Export full project + splits sheet as a single PDF for PRO/SOCAN registration.", tag: "Payouts" },
+    { upvotes: 287, body: "Let me set visibility per track. I want collaborators to hear my B-sides, not the whole internet.", tag: "Profile" },
+    { upvotes: 241, body: "Availability statuses like Discord. Open to work, booked through August, archived.", tag: "Profile" },
+    { upvotes: 196, body: "Push notifications for voice-note replies in a project room.", tag: "Mobile" },
+    { upvotes: 154, body: "A calendar block for studio days so collaborators can see when I'm in without DMing.", tag: "Project Rooms" },
+    { upvotes: 132, body: "Anonymous posts for label A&Rs who don't want to tip their hand early.", tag: "Discovery" },
+    { upvotes: 118, body: "A lo-fi preview that hides the unmastered version from anyone outside the room.", tag: "Audio" },
+    { upvotes: 94, body: "Break ratings into communication, on-time delivery, and musical fit instead of one number.", tag: "Trust" },
+    { upvotes: 82, body: "Export the full project and splits sheet as one PDF for PRO registration.", tag: "Payouts" },
   ] as Suggestion[],
 
   featuresDeep: [
-    { n: "01", h: "Audio-first profiles", lead: "Your profile is a portfolio you can press play on — not a wall of text nobody reads.", body: "Most platforms make you sell yourself in a bio. Seshn leads with the music. A unified player wraps SoundCloud, Spotify, YouTube and direct uploads into one consistent embed, so a producer in Lagos and a vocalist in London hear the same thing the same way.", points: ["Unified player for SoundCloud / Spotify / YouTube / WAV", "Pin your three strongest tracks to the top", "Private B-sides only collaborators in a room can hear", "Auto-generated waveforms — no ugly third-party embeds"], solves: "Solves: “I have 9k monthly listeners but every collab request is someone who never even heard my music.”" },
-    { n: "02", h: "Tag-based discovery", lead: "Find people by what they make and how they work — not by who has the most followers.", body: "Search is built around the brief, not the brand. Filter by role, genre, compensation type, location, availability and rating. Follower counts are deliberately hidden so a 200-follower engineer with a 4.9 rating outranks a 90k-follower account that ghosts.", points: ["Filter by role, genre, comp type, location, availability", "Follower counts hidden by design", "“Open to work” / “booked” / “archived” availability states", "Save searches; get notified when a new match joins"], solves: "Solves: “every discovery tool just shows me the biggest accounts, not the right ones.”" },
-    { n: "03", h: "Project rooms", lead: "One workspace per record. Chat, stems, deadlines, versions — out of the group chat forever.", body: "When a collab kicks off, spin up a private room. Inline audio with waveform comments (drop a note at 1:42 and it stays anchored there), file versioning so you never lose the take you wanted, a synced deadline, and a member list with roles. When the project ships, ratings are issued automatically.", points: ["Inline audio + waveform-anchored comments", "File versioning — v1, v2, v3 never overwrite", "Shared deadline synced to everyone's calendar", "Auto-issued ratings + testimonials on delivery"], solves: "Solves: “the project lives across three group chats, a Drive folder, and someone's voice memos.”" },
-    { n: "04", h: "Verified ratings & trust", lead: "Every rating comes from a real, completed session. No anonymous reviews, no bot stars.", body: "Trust is the whole game — 78% of indie musicians say finding reliable collaborators is their #1 problem. Seshn only lets you rate someone you actually shared a project room with, and breaks the score into communication, on-time delivery and musical fit so the number means something.", points: ["Ratings only from verified completed sessions", "Breakdown: communication / timeliness / musical fit", "Verified ✓ ID badge for Pro members", "Report + review moderation, real humans"], solves: "Solves: “I agreed to a remote session and they took my deposit and vanished.”" },
-    { n: "05", h: "Get paid like a pro", lead: "Set your rate, split, or trade up front. Stripe-powered. One flat 10% on paid bookings — Stripe fees included; split and trade are free.", body: "Money is stated in the brief before anyone applies, so there's no awkward DM negotiation. The client pays the rate you agreed; you keep 90%. Get paid via Stripe, hold funds in escrow (released on delivery), and generate a splits sheet straight from project-room participation for your PRO / SOCAN registration. Our only cut is a flat 10% on a paid booking — and that covers the payment processing too, so there's no separate card fee and no team commission stacked on top.", points: ["Comp type stated up front: paid / split / trade", "Stripe payouts — flat 10% on paid bookings (fees included), nothing on split/trade", "Escrow: funds released on delivery (Q3)", "Auto-generated splits sheets for PRO registration"], solves: "Solves: “we never agreed on money up front and now the song is done and it's weird.”" },
-    { n: "06", h: "Boost & reach", lead: "When a brief matters, put it in front of every matched artist for seven days.", body: "Most posts reach people organically. When you need to move fast — a deadline, a label deliverable — Boost pins your brief to the top of every matched feed and sends a push to the most relevant artists. Five dollars, one-time, or a free credit every month on Pro.", points: ["Top of every matched feed for 7 days", "Push notification to your strongest matches", "Boosted badge + ranking lift", "$5 one-time, or 1 free credit/month on Pro"], solves: "Solves: “I posted a paid gig and 4 people saw it because the feed buried it.”" },
+    { n: "01", h: "Profiles you can hear", lead: "A profile you press play on, not a wall of text nobody reads.", body: "Most platforms make you sell yourself in a bio. Here the music goes first. One player wraps SoundCloud, Spotify, YouTube, and direct uploads, so a producer in Lagos and a vocalist in London hear the same thing the same way.", points: ["One player for SoundCloud, Spotify, YouTube, and WAV", "Pin your three strongest tracks up top", "Private B-sides only people in your room can hear", "Clean waveforms, no ugly third-party embeds"], solves: "For when you've got 9k monthly listeners but every request comes from someone who never heard a note of it." },
+    { n: "02", h: "Search by what people make", lead: "Find people by what they make and how they work, not who has the most followers.", body: "Search is built around the brief, not the brand. Filter by role, genre, pay, location, availability, and rating. Follower counts are hidden on purpose, so a 200-follower engineer with a 4.9 outranks a 90k account that ghosts.", points: ["Filter by role, genre, pay, location, availability", "Follower counts hidden by design", "Open to work, booked, or archived statuses", "Save a search and get a ping when a match joins"], solves: "For when every search tool just shows you the biggest accounts instead of the right ones." },
+    { n: "03", h: "Project rooms", lead: "One room per record. Chat, stems, deadlines, and versions, out of the group chat for good.", body: "When a collab starts, open a private room. Audio with comments pinned to the timecode, file versioning so you never lose the take you wanted, a shared deadline, and a member list with roles. When it ships, ratings go out.", points: ["Audio with comments pinned to the timecode", "File versions, so v1, v2 and v3 never overwrite", "A shared deadline on everyone's calendar", "Ratings when the work is done"], solves: "For when a project lives across three group chats, a Drive folder, and somebody's voice memos." },
+    { n: "04", h: "Ratings that mean something", lead: "Every rating comes off a real, finished session. No anonymous reviews, no bot stars.", body: "Trust is the whole game. You can only rate someone you actually shared a room with, and the score breaks into communication, on-time delivery, and musical fit, so the number tells you something real.", points: ["Ratings only from real, finished work", "Broken into communication, timeliness, and fit", "Verified badge for Pro members", "Reports reviewed by real people"], solves: "For when you agreed to a remote session and they took the deposit and vanished." },
+    { n: "05", h: "Get paid properly", lead: "Set your rate, split, or trade up front. Through Stripe. One flat 10 percent on paid bookings, card fees included. Splits and trades are free.", body: "The money is in the brief before anyone applies, so there's no awkward DM haggling. The client pays the rate you agreed, you keep 90 percent. You get paid through Stripe, the money sits in escrow until the work's approved, and you can pull a splits sheet straight from the room for your PRO. Our only cut is a flat 10 percent on a paid booking, and that covers the card fees too. No separate processing charge, no team commission on top.", points: ["Pay type stated up front: paid, split, or trade", "Stripe payouts, flat 10 percent with fees included, free on splits and trades", "Escrow holds the money until delivery is approved", "Splits sheets built straight from the room"], solves: "For when nobody settled the money up front and now the song's done and it's weird." },
+    { n: "06", h: "Boost", lead: "When a brief matters, put it in front of every matched artist for a week.", body: "Most posts find people on their own. When you're on a clock, a deadline or a label deliverable, Boost pins your brief to the top of every matched feed and pushes it to the people who fit best. Five dollars one-time, or a free credit every month on Pro.", points: ["Top of every matched feed for 7 days", "A push to your strongest matches", "Boosted badge and a ranking lift", "Five dollars one-time, or a free monthly credit on Pro"], solves: "For when you post a paid gig and four people see it because the feed buried it." },
   ] as FeatureDeep[],
 
   problemsDeep: [
-    { stat: "96%", label: "of new uploads are indie / DIY", h: "Discovery is broken — and trust is worse.", body: "Independent and DIY releases now make up 96% of everything uploaded to streaming — more artists working without a label than ever, and no shared system to find, vet, or trust a collaborator. Reddit and Discord are full of “how do I find a vocalist who won't ghost me” threads with no good answer: no track record, no ratings, no recourse when someone disappears with your stems or your deposit.", src: "Luminate Year-End Report 2025" },
-    { stat: "100K+", label: "songs uploaded to streaming / day", h: "Visibility is no longer a strategy.", body: "More than 100,000 tracks land on streaming every single day; 47.6% of all tracks last year got fewer than ten plays. The old playbook — 'just put it out and the algorithm will find you' — is dead. What still works is a great record made by the right people. That requires collaboration, not more uploads.", src: "Spotify Loud & Clear / Luminate 2025" },
-    { stat: "64%", label: "say money is why they'd quit music", h: "The economics push artists out.", body: "77.8% of independent musicians earn under $15,000/year from music, and the share citing financial pressure as the #1 reason they'd leave jumped from 39% in 2023 to 64.4% in 2025. Solo artistry is expensive and slow. Pooling skills, splitting work, and getting paid for sessions is how working musicians actually survive.", src: "Xposure State of the Industry 2025" },
-    { stat: "0.2%", label: "of tracks = half of all streams", h: "The middle class of music vanished.", body: "Just 0.2% of tracks on streaming — around 541,000 of more than 253 million — capture half of all global plays, while almost half get fewer than ten plays a year. The way back isn't going viral alone; it's building a network, a reputation, and a body of collaborative work that compounds.", src: "Luminate Year-End Report 2025" },
+    { stat: "96%", label: "of new uploads are indie or DIY", h: "Discovery is broken, and trust is worse.", body: "Independent and DIY releases are now 96 percent of everything uploaded to streaming. More people working without a label than ever, and nothing that helps them find, vet, or trust a collaborator. Reddit and Discord are full of threads asking how to find a vocalist who won't ghost, with no good answer. No track record, no ratings, no recourse when someone disappears with your stems or your deposit.", src: "Luminate Year-End Report 2025" },
+    { stat: "100K+", label: "songs uploaded a day", h: "Being seen stopped being a plan.", body: "More than 100,000 tracks land on streaming every day, and almost half of everything out there got fewer than ten plays last year. Put it out and let the algorithm find you is dead. What still works is a good record made by the right people, and that takes collaboration, not more uploads.", src: "Luminate 2025" },
+    { stat: "64%", label: "say money is why they'd quit", h: "The money pushes people out.", body: "Most independent musicians earn under $15,000 a year from music, and money is now the top reason they'd walk away, up sharply in two years. Going it alone is slow and expensive. Sharing the work, splitting it, and getting paid for sessions is how working musicians actually keep going.", src: "Xposure State of the Industry 2025" },
+    { stat: "0.2%", label: "of tracks pull half the streams", h: "The middle of the industry disappeared.", body: "About 0.2 percent of tracks, roughly 541,000 of more than 253 million, take half of all global plays, while almost half get fewer than ten a year. The way back isn't going viral alone. It's building a network, a name, and a body of work that adds up.", src: "Luminate Year-End Report 2025" },
   ] as ProblemDeep[],
 
   feeComparison: {
     eyebrow: "What you actually keep",
-    headline: "Make more of what you earn — without a whole team taking a cut.",
-    sub: "The old way to build a music career meant handing slices to a manager, an agent, a lawyer, and a label before you saw a dollar. Seshn is one flat 10% — Stripe's processing fees included — so more of every booking stays with the artist who did the work.",
+    headline: "Keep more of what you earn, without a whole team taking a cut.",
+    sub: "The old way to build a career meant handing slices to a manager, an agent, a lawyer, and a label before you saw a dollar. Seshn is one flat 10 percent with Stripe's card fees already inside it, so more of every booking stays with the person who did the work.",
     basisLabel: "On every $1,000 you earn from a paid collaboration",
     rows: [
-      { path: "Major-label deal", cut: "~80% to the label", keep: "≈ $150–200", note: "A standard artist royalty is 15–20% — and the label recoups its advances before you see a cent." },
-      { path: "Manager only", cut: "15–20%", keep: "≈ $800–850", note: "Just the manager's commission. A working career usually also needs an agent, a lawyer and a business manager." },
-      { path: "The full team stack", cut: "~40% combined", keep: "≈ $600", note: "Manager 20% + booking agent 10% + business manager 5% + legal 5%. Every cut stacks on the last." },
-      { path: "Seshn", cut: "Flat 10%", keep: "$900", note: "Stripe processing fees included. No manager, no label, no agent required to get paid.", highlight: true },
+      { path: "Major-label deal", cut: "~80% to the label", keep: "about $150 to $200", note: "A standard artist royalty is 15 to 20 percent, and the label recoups its advances before you see a cent." },
+      { path: "Manager only", cut: "15 to 20%", keep: "about $800 to $850", note: "Just the manager's cut. A working career usually also needs an agent, a lawyer, and a business manager." },
+      { path: "The full team", cut: "~40% combined", keep: "about $600", note: "Manager 20, booking agent 10, business manager 5, legal 5. Every cut stacks on the last." },
+      { path: "Seshn", cut: "Flat 10%", keep: "$900", note: "Card fees included. No manager, label, or agent needed to get paid.", highlight: true },
     ] as FeeRow[],
-    footnote: "Industry figures are typical published ranges, not guarantees — commissions and label royalty splits vary by deal (manager 15–20%, booking agent ~10%, business manager 5%, legal ~5%; major-label artist royalties run 15–20% before the label recoups its advances). Even next to creative marketplaces — Fiverr takes 20%, AirGigs 8–15%, SoundBetter ~10% before card fees — Seshn's flat 10% is the only fee on a paid booking and includes Stripe processing. Split and trade collaborations are always free. Sources: docs/marketing-sources.md.",
+    footnote: "These are typical published rates, not promises, and they vary by deal: manager 15 to 20 percent, booking agent around 10, business manager 5, legal around 5, and major-label royalties of 15 to 20 percent before the label recoups its advances. Even next to other marketplaces, where Fiverr takes 20 percent, AirGigs 8 to 15, and SoundBetter around 10 before card fees, Seshn's flat 10 percent is the only fee on a paid booking and it includes Stripe processing. Splits and trades are always free. Sources in docs/marketing-sources.md.",
   },
 
   meta: { brand: "Seshn", tagline: "Find the people who finish your record.", year: 2026 },
