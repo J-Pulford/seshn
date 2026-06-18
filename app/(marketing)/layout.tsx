@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import BackgroundFX from "@/components/landing/BackgroundFX";
 import DawBar from "@/components/landing/DawBar";
 import Footer from "@/components/landing/Footer";
 import "./marketing.css";
@@ -14,6 +15,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
   const active = home ? "" : path.slice(1).split("/")[0];
   return (
     <div className="daw-site">
+      <BackgroundFX />
       <DawBar active={active} home={home} />
       {children}
       <Footer />

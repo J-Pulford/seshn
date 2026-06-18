@@ -91,22 +91,37 @@
 .daw-site .daw-drawer .cta { margin-top: auto; }
 @media (max-width: 880px) { .daw-site .daw-hamburger { display: inline-flex; } }
 
-/* ── Animated background + motion (added: replace the flat black with drift) ── */
+/* ── Cursor-reactive green background (fluid glow behind everything) ── */
 .daw-site { position: relative; isolation: isolate; }
 
-/* Slow-drifting green "studio glow" behind everything. Fixed + transform-only
-   animation so it composites on the GPU and never reflows. */
-.daw-site::before {
-  content: "";
+/* The glow follows the mouse. Two radial layers track eased pointer points
+   (--mx/--my fast, --mx2/--my2 a slower trail) set by <BackgroundFX> on every
+   animation frame, so the green pools toward the cursor and lags behind it like
+   liquid. Fixed + z-index:-1 keeps it behind all page content; gradients only,
+   so it composites on the GPU with no reflow. */
+.daw-fx {
   position: fixed;
-  inset: -25vmax;
+  inset: 0;
   z-index: -1;
   pointer-events: none;
+  --mx: 50%; --my: 30%;
+  --mx2: 50%; --my2: 30%;
   background:
-    radial-gradient(38vmax 38vmax at 18% 18%, rgba(44, 203, 115, 0.12), transparent 60%),
-    radial-gradient(32vmax 32vmax at 82% 12%, rgba(44, 203, 115, 0.08), transparent 60%),
-    radial-gradient(46vmax 46vmax at 72% 88%, rgba(91, 141, 239, 0.07), transparent 62%),
-    radial-gradient(30vmax 30vmax at 30% 80%, rgba(44, 203, 115, 0.06), transparent 60%);
+    radial-gradient(36vmax 36vmax at var(--mx) var(--my), rgba(44, 203, 115, 0.22), transparent 60%),
+    radial-gradient(26vmax 26vmax at var(--mx2) var(--my2), rgba(44, 203, 115, 0.14), transparent 62%);
+}
+
+/* Ambient base: a slow autonomous drift so there's always quiet movement, even
+   when the pointer is still and on touch devices (where there's no cursor).
+   Oversized so its edges never show as it drifts + scales. */
+.daw-fx::before {
+  content: "";
+  position: absolute;
+  inset: -25vmax;
+  background:
+    radial-gradient(40vmax 40vmax at 18% 18%, rgba(44, 203, 115, 0.10), transparent 60%),
+    radial-gradient(34vmax 34vmax at 84% 14%, rgba(44, 203, 115, 0.07), transparent 60%),
+    radial-gradient(30vmax 30vmax at 30% 84%, rgba(44, 203, 115, 0.06), transparent 60%);
   will-change: transform;
   animation: daw-drift 26s ease-in-out infinite alternate;
 }
@@ -152,7 +167,7 @@
 .daw-site .stat-card:hover, .daw-site .how-card:hover { transform: translateY(-3px); border-color: var(--line-2); box-shadow: 0 18px 40px rgba(0,0,0,0.35); }
 
 @media (prefers-reduced-motion: reduce) {
-  .daw-site::before { animation: none; }
+  .daw-fx::before { animation: none; }
   .daw-site .reveal,
   .daw-site .reveal.stat-row > *,
   .daw-site .reveal.how-grid > *,
