@@ -144,10 +144,11 @@ function probeAudioDuration(file: File): Promise<number | null> {
   });
 }
 
-export async function uploadDmAttachment(file: File): Promise<DmAttachment> {
+export async function uploadDmAttachment(file: File, conversationId: string): Promise<DmAttachment> {
   const sb = getBrowserClient();
   const u = await getUser();
   if (!u) throw new Error("Not signed in");
+  if (!conversationId) throw new Error("Missing conversation");
   if (!file) throw new Error("No file");
   const MAX = 50 * 1024 * 1024;
   if (file.size > MAX) throw new Error("File is too large (max 50 MB).");
@@ -160,7 +161,9 @@ export async function uploadDmAttachment(file: File): Promise<DmAttachment> {
       .replace(/[^a-zA-Z0-9._-]+/g, "_")
       .replace(/^_+|_+$/g, "")
       .slice(0, 100) || "file";
-  const path = `${u.id}/${Date.now()}-${safe}`;
+  // Conversation-scoped, uploader-namespaced path. The storage RLS policies
+  // (0036) authorise reads to either participant and writes to the uploader.
+  const path = `${conversationId}/${u.id}/${Date.now()}-${safe}`;
 
   const up = await sb.storage.from("dm-attachments").upload(path, file, {
     cacheControl: "31536000",
@@ -169,11 +172,26 @@ export async function uploadDmAttachment(file: File): Promise<DmAttachment> {
   });
   if (up.error) throw up.error;
 
-  const pub = sb.storage.from("dm-attachments").getPublicUrl(path);
-  const url = pub.data?.publicUrl;
   const duration_ms = kind === "audio" ? await probeAudioDuration(file) : null;
 
-  return { url, name: file.name || safe, kind, size_bytes: file.size, duration_ms, mime };
+  // The bucket is private: persist the path (not a public URL). Viewers fetch a
+  // short-lived signed URL at render time via signedAttachmentUrl().
+  return { url: path, name: file.name || safe, kind, size_bytes: file.size, duration_ms, mime };
+}
+
+// Resolve a stored attachment value into something an <audio>/<a> can use.
+// New messages store a storage path -> mint a short-lived signed URL. Legacy
+// messages stored a full public URL (pre-0036) -> use it as-is.
+export async function signedAttachmentUrl(pathOrUrl: string | null | undefined): Promise<string | null> {
+  if (!pathOrUrl) return null;
+  if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
+  const sb = getBrowserClient();
+  const res = await sb.storage.from("dm-attachments").createSignedUrl(pathOrUrl, 60 * 60);
+  if (res.error) {
+    console.error("[seshn] signedAttachmentUrl error", res.error);
+    return null;
+  }
+  return res.data?.signedUrl ?? null;
 }
 
 export async function markConversationRead(conversationId: string): Promise<void> {

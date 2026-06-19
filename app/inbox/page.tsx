@@ -6,7 +6,7 @@ import Nav from "@/components/Nav";
 import { requireProfile } from "@/lib/seshn/auth";
 import {
   listMyConversations, getConversation, listMessages, markConversationRead,
-  subscribeToMessages, subscribeToMyConversations, sendMessage, uploadDmAttachment,
+  subscribeToMessages, subscribeToMyConversations, sendMessage, uploadDmAttachment, signedAttachmentUrl,
 } from "@/lib/seshn/messaging";
 import type { ConversationWithMeta, DmAttachment, GigOwner, Message } from "@/lib/seshn/types";
 import MeetingScheduler from "@/components/meetings/MeetingScheduler";
@@ -70,16 +70,26 @@ function MessageAttachment({ msg }: { msg: Message }) {
   const sizeLabel = formatSize(msg.attachment_size_bytes);
   const durLabel = formatDuration(msg.attachment_duration_ms);
   const isAudio = msg.attachment_kind === "audio";
+  // dm-attachments is a private bucket (0036): resolve the stored path into a
+  // short-lived signed URL. Legacy rows hold a full URL and pass through.
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    signedAttachmentUrl(msg.attachment_url).then((u) => { if (alive) setUrl(u); });
+    return () => { alive = false; };
+  }, [msg.attachment_url]);
   return (
     <div className="attachment-card">
       <div className="attachment-meta">
         <span className="attachment-name" title={label}>{label}</span>
         <span className="attachment-size">{[durLabel, sizeLabel].filter(Boolean).join(" · ") || (isAudio ? "Audio" : "File")}</span>
       </div>
-      {isAudio ? (
-        <audio controls preload="metadata" src={msg.attachment_url || undefined} />
+      {!url ? (
+        <span style={{ fontSize: 12, color: "var(--ink-3)" }}>Loading…</span>
+      ) : isAudio ? (
+        <audio controls preload="metadata" src={url} />
       ) : (
-        <a href={msg.attachment_url || undefined} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "var(--accent-d)", fontFamily: "var(--font-display)", fontWeight: 600, textDecoration: "none" }}>Open file →</a>
+        <a href={url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "var(--accent-d)", fontFamily: "var(--font-display)", fontWeight: 600, textDecoration: "none" }}>Open file →</a>
       )}
     </div>
   );
@@ -133,7 +143,7 @@ function MessagesPane({ convo, messages, meId }: { convo: ConversationWithMeta; 
   return <div className="messages" ref={scrollRef}>{rendered}</div>;
 }
 
-function Composer({ onSend, placeholderName, disabled }: { onSend: (text: string, attachment: DmAttachment | null) => Promise<void>; placeholderName?: string; disabled?: boolean }) {
+function Composer({ onSend, conversationId, placeholderName, disabled }: { onSend: (text: string, attachment: DmAttachment | null) => Promise<void>; conversationId: string; placeholderName?: string; disabled?: boolean }) {
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [attachment, setAttachment] = useState<DmAttachment | null>(null);
@@ -166,7 +176,7 @@ function Composer({ onSend, placeholderName, disabled }: { onSend: (text: string
     setUploading(true);
     setErr("");
     try {
-      setAttachment(await uploadDmAttachment(file));
+      setAttachment(await uploadDmAttachment(file, conversationId));
     } catch (e2) {
       setErr((e2 as Error)?.message || "Couldn't upload that file.");
     } finally {
@@ -271,7 +281,7 @@ function DmPanel({ convo, meId, onMessageSent, onBack }: { convo: ConversationWi
         />
       )}
       <MessagesPane convo={convo} messages={messages} meId={meId} />
-      <Composer onSend={send} placeholderName={o.display_name || o.username || ""} />
+      <Composer onSend={send} conversationId={convo.id} placeholderName={o.display_name || o.username || ""} />
     </div>
   );
 }
