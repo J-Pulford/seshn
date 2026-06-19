@@ -10,10 +10,14 @@
 --     {conversation_id}/{uploader_uid}/{timestamp}-{filename}
 -- and the app fetches short-lived signed URLs at render time (see messaging.ts).
 --
--- NOTE: requires the matching app change in the same release. Legacy rows that
--- stored a full public URL keep working because the bucket object is unchanged;
--- the renderer detects an http(s) value and uses it directly. New rows store the
--- path instead and are served via signed URLs.
+-- NOTE: requires the matching app change in the same release. New rows store the
+-- path and are served via signed URLs. CAVEAT: any attachment sent BEFORE this
+-- migration stored a full public URL, and once the bucket is private that public
+-- URL no longer resolves. This is fine for a fresh launch (bucket is empty), but
+-- if pre-0036 attachments exist they need a one-off backfill (move the object to
+-- a {conversation_id}/{uid}/ path and rewrite messages.attachment_url). Confirm
+-- `select count(*) from storage.objects where bucket_id='dm-attachments'` is 0
+-- before applying, or schedule the backfill.
 
 -- ── Private bucket ────────────────────────────────────────────────────────
 update storage.buckets set public = false where id = 'dm-attachments';

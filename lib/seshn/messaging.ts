@@ -181,7 +181,8 @@ export async function uploadDmAttachment(file: File, conversationId: string): Pr
 
 // Resolve a stored attachment value into something an <audio>/<a> can use.
 // New messages store a storage path -> mint a short-lived signed URL. Legacy
-// messages stored a full public URL (pre-0036) -> use it as-is.
+// messages stored a full public URL (pre-0036): we pass it through, but note it
+// will only resolve if it predates the bucket going private (see 0036 caveat).
 export async function signedAttachmentUrl(pathOrUrl: string | null | undefined): Promise<string | null> {
   if (!pathOrUrl) return null;
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
