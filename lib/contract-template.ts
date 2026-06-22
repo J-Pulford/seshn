@@ -90,9 +90,25 @@ function partyLine(profile?: PartyProfile) {
   };
 }
 
-function buildParties(owner?: PartyProfile, collaborator?: PartyProfile): AgreementSection {
+function buildParties(owner?: PartyProfile, collaborator?: PartyProfile, isDirect = false): AgreementSection {
   const o = partyLine(owner);
   const c = partyLine(collaborator);
+  const facilitated = "This agreement is facilitated by " + PLATFORM.name + ", a service operated by " + PLATFORM.legal_entity + " (" + PLATFORM.abn + "), a company registered in " + PLATFORM.jurisdiction + ". Seshn is not a party to this agreement. Seshn's role is to host the platform, hold the agreed payment in escrow via Stripe Connect, and provide a structured process for delivery, approval and dispute resolution.";
+  if (isDirect) {
+    // Direct bookings read more naturally as Client/Provider. The body clauses
+    // keep the defined terms "Owner"/"Collaborator", bridged by the line below.
+    return {
+      number: "1",
+      title: "The parties",
+      paragraphs: [
+        "This agreement is between:",
+        { kind: "party", role: "Client", name: o.name, handle: o.handle, country: o.country },
+        { kind: "party", role: "Provider", name: c.name, handle: c.handle, country: c.country },
+        'In this agreement, "Owner" means the Client (the party commissioning and paying for the work) and "Collaborator" means the Provider (the party performing the work). Those defined terms are used in the clauses below.',
+        facilitated,
+      ],
+    };
+  }
   return {
     number: "1",
     title: "The parties",
@@ -100,7 +116,7 @@ function buildParties(owner?: PartyProfile, collaborator?: PartyProfile): Agreem
       "This agreement is between:",
       { kind: "party", role: "Owner", name: o.name, handle: o.handle, country: o.country },
       { kind: "party", role: "Collaborator", name: c.name, handle: c.handle, country: c.country },
-      "This agreement is facilitated by " + PLATFORM.name + ", a service operated by " + PLATFORM.legal_entity + " (" + PLATFORM.abn + "), a company registered in " + PLATFORM.jurisdiction + ". Seshn is not a party to this agreement. Seshn's role is to host the platform, hold the agreed payment in escrow via Stripe Connect, and provide a structured process for delivery, approval and dispute resolution.",
+      facilitated,
     ],
   };
 }
@@ -179,11 +195,27 @@ function buildApproval(c?: TemplateContract): AgreementSection {
   };
 }
 
-function buildSplits(c?: TemplateContract, owner?: PartyProfile, collaborator?: PartyProfile): AgreementSection {
+function buildSplits(c?: TemplateContract, owner?: PartyProfile, collaborator?: PartyProfile, isDirect = false): AgreementSection {
   const s = getSplits(c);
   const oh = partyLine(owner).handle;
   const ch = partyLine(collaborator).handle;
   const credits = getCredits(c);
+  // A direct booking with no royalty split is a paid service (e.g. a flat-fee
+  // mix): render a work-for-hire ownership clause instead of a splits table.
+  if (isDirect && Object.keys(s).length === 0) {
+    return {
+      number: "6",
+      title: "Ownership",
+      paragraphs: [
+        "This is a paid service engagement. On full release of the agreed payment under Section 4, the Collaborator assigns to the Owner all of the Collaborator's rights in the deliverable described in Section 3, and the Owner owns the deliverable outright. The Collaborator retains no ownership share in the master recording or the underlying composition unless the parties separately agree otherwise in writing.",
+        "Neither party may exploit the work commercially before full release of the payment.",
+        "Each party is responsible for any registration of the work with their own collection society or PRO (in Australia: APRA AMCOS; in the US: ASCAP, BMI, or SESAC; in the UK: PRS for Music; and equivalent bodies elsewhere). Seshn does not file with any collection society.",
+        "Credit. The parties agree to use the following credit text in any release, distribution metadata, or public promotion of the work:",
+        { kind: "blockquote", text: fallback(credits.text, "[credit text]") },
+        "Variations of this credit (for example, abbreviated versions for short-form metadata) are permitted provided they substantively preserve the attribution above.",
+      ],
+    };
+  }
   return {
     number: "6",
     title: "Ownership and splits",
@@ -314,21 +346,25 @@ function buildSignatureBlocks(c: TemplateContract, owner?: PartyProfile, collabo
 }
 
 export function render(contract: TemplateContract, owner?: PartyProfile, collaborator?: PartyProfile, gig?: TemplateGig): AgreementDoc {
+  // Direct contracts have no gig. They get Client/Provider labelling and a
+  // work-for-hire ownership clause when no royalty split is set. Gig contracts
+  // render exactly as before so already-signed hashes are unchanged.
+  const isDirect = !gig || (!gig.title && !gig.id);
   return {
     version: TEMPLATE_VERSION,
-    title: "COLLABORATION AGREEMENT",
+    title: isDirect ? "SERVICE & COLLABORATION AGREEMENT" : "COLLABORATION AGREEMENT",
     header: {
       contract_id: contract?.id || "[contract id]",
       created_at: contract?.created_at || null,
       gig_title: gig?.title || null,
     },
     sections: [
-      buildParties(owner, collaborator),
+      buildParties(owner, collaborator, isDirect),
       buildBackground(gig),
       buildDeliverable(contract),
       buildPayment(contract),
       buildApproval(contract),
-      buildSplits(contract, owner, collaborator),
+      buildSplits(contract, owner, collaborator, isDirect),
       buildDisputes(),
       buildWarranties(),
       buildConfidentiality(),

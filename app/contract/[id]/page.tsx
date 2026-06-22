@@ -158,11 +158,11 @@ function StatusSidebar({ contract, me, escrow, onOpenEditor, onSend, onDecline, 
         <span className={statusPillClass(contract.status)}>{statusLabel(contract.status)}</span>
         <div style={{ marginTop: 14 }}>
           <div className="status-row">
-            <div className="who"><span className="who-name">{contract.owner?.display_name || "Owner"}</span><span className="who-meta">@{contract.owner?.username} · owner</span></div>
+            <div className="who"><span className="who-name">{contract.owner?.display_name || "Owner"}</span><span className="who-meta">@{contract.owner?.username} · {contract.origin === "direct" ? "client" : "owner"}</span></div>
             {contract.owner_signed_at ? <span className="tick" title={fmtDateTime(contract.owner_signed_at)}>✓</span> : <span className="dot" title="not yet" />}
           </div>
           <div className="status-row">
-            <div className="who"><span className="who-name">{contract.collaborator?.display_name || "Collaborator"}</span><span className="who-meta">@{contract.collaborator?.username} · collaborator</span></div>
+            <div className="who"><span className="who-name">{contract.collaborator?.display_name || "Collaborator"}</span><span className="who-meta">@{contract.collaborator?.username} · {contract.origin === "direct" ? "provider" : "collaborator"}</span></div>
             {contract.collaborator_signed_at ? <span className="tick" title={fmtDateTime(contract.collaborator_signed_at)}>✓</span> : <span className="dot" title="not yet" />}
           </div>
         </div>
