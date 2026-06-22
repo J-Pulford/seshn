@@ -106,6 +106,17 @@ function buildParties(owner?: PartyProfile, collaborator?: PartyProfile): Agreem
 }
 
 function buildBackground(gig?: TemplateGig): AgreementSection {
+  // Direct contracts have no gig: render a booking background instead. Gig
+  // contracts keep their exact original text so the signed hash is unchanged.
+  if (!gig || (!gig.title && !gig.id)) {
+    return {
+      number: "2",
+      title: "Background",
+      paragraphs: [
+        "The Owner and the Collaborator agreed to work together directly through Seshn, without a public gig listing. The parties now wish to record the terms of their collaboration in this agreement.",
+      ],
+    };
+  }
   const title = gig?.title || "[gig title]";
   const gigId = gig?.id || "[gig id]";
   return {

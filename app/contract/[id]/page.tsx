@@ -141,6 +141,10 @@ function ContractDocument({ doc, onScrolledBottom }: { doc: AgreementDoc; onScro
 
 function StatusSidebar({ contract, me, escrow, onOpenEditor, onSend, onDecline, onCancel, onFund, onDeliver, onRelease, busy }: { contract: Contract; me: User; escrow: Escrow | null; onOpenEditor: () => void; onSend: () => void; onDecline: () => void; onCancel: () => void; onFund: () => void; onDeliver: () => void; onRelease: () => void; busy: boolean }) {
   const isOwner = contract.owner_id === me.id;
+  const isProposer = contract.proposed_by === me.id;
+  const counterparty = isOwner ? contract.collaborator : contract.owner;
+  const iSigned = isOwner ? !!contract.owner_signed_at : !!contract.collaborator_signed_at;
+  const otherSigned = isOwner ? !!contract.collaborator_signed_at : !!contract.owner_signed_at;
   const t = (contract.terms || {}) as ContractTerms;
   const amount = fmtMoney(t.fee_cents, t.currency || "AUD");
   const days = t.approval_window_days || 7;
@@ -181,11 +185,11 @@ function StatusSidebar({ contract, me, escrow, onOpenEditor, onSend, onDecline, 
         </div>
       )}
 
-      {contract.status === "draft" && isOwner && (
+      {contract.status === "draft" && isProposer && (
         <div className="card">
           <div className="t-eyebrow" style={{ marginBottom: 8 }}>Actions</div>
           <button className="btn primary" style={{ width: "100%", marginBottom: 8 }} onClick={onOpenEditor} disabled={busy}>Edit terms</button>
-          <button className="btn" style={{ width: "100%", marginBottom: 8 }} onClick={onSend} disabled={busy}>{busy ? "…" : "Send to collaborator"}</button>
+          <button className="btn" style={{ width: "100%", marginBottom: 8 }} onClick={onSend} disabled={busy}>{busy ? "…" : `Send to @${counterparty?.username || "them"}`}</button>
           <button className="btn danger" style={{ width: "100%" }} onClick={onCancel} disabled={busy}>Cancel contract</button>
           <div className="t-meta" style={{ marginTop: 8, lineHeight: 1.5 }}>Once you send this contract, terms are locked until both parties sign or it&apos;s declined.</div>
         </div>
@@ -194,12 +198,12 @@ function StatusSidebar({ contract, me, escrow, onOpenEditor, onSend, onDecline, 
       {contract.status === "awaiting_signatures" && (
         <div className="card">
           <div className="t-eyebrow" style={{ marginBottom: 8 }}>What&apos;s next</div>
-          {isOwner && contract.owner_signed_at && !contract.collaborator_signed_at && (
-            <div className="t-meta" style={{ lineHeight: 1.5 }}>Waiting on @{contract.collaborator?.username} to sign. We&apos;ll notify you when they do.</div>
+          {iSigned && !otherSigned && (
+            <div className="t-meta" style={{ lineHeight: 1.5 }}>Waiting on @{counterparty?.username} to sign. We&apos;ll notify you when they do.</div>
           )}
-          {!isOwner && !contract.collaborator_signed_at && <div className="t-meta" style={{ lineHeight: 1.5 }}>Read the document, then sign or decline below.</div>}
-          {isOwner && <button className="btn danger" style={{ width: "100%", marginTop: 10 }} onClick={onCancel} disabled={busy}>Cancel contract</button>}
-          {!isOwner && <button className="btn" style={{ width: "100%", marginTop: 10 }} onClick={onDecline} disabled={busy}>Decline &amp; ask to renegotiate</button>}
+          {!iSigned && <div className="t-meta" style={{ lineHeight: 1.5 }}>Read the document, then sign{!isProposer ? " or decline" : ""} below.</div>}
+          {isProposer && <button className="btn danger" style={{ width: "100%", marginTop: 10 }} onClick={onCancel} disabled={busy}>Cancel contract</button>}
+          {!isProposer && !iSigned && <button className="btn" style={{ width: "100%", marginTop: 10 }} onClick={onDecline} disabled={busy}>Decline &amp; ask to renegotiate</button>}
         </div>
       )}
 
@@ -261,7 +265,11 @@ function StatusSidebar({ contract, me, escrow, onOpenEditor, onSend, onDecline, 
       <div className="card hairline">
         <div className="t-meta" style={{ lineHeight: 1.8 }}>
           <a href="/contracts" style={{ color: "var(--ink-2)", display: "block" }}>← All contracts</a>
-          <a href={`/gig/${encodeURIComponent(contract.gig_id)}`} style={{ color: "var(--ink-2)", display: "block" }}>← Back to gig</a>
+          {contract.gig_id ? (
+            <a href={`/gig/${encodeURIComponent(contract.gig_id)}`} style={{ color: "var(--ink-2)", display: "block" }}>← Back to gig</a>
+          ) : contract.conversation_id ? (
+            <a href={`/inbox?c=${encodeURIComponent(contract.conversation_id)}`} style={{ color: "var(--ink-2)", display: "block" }}>← Back to messages</a>
+          ) : null}
         </div>
       </div>
     </div>
@@ -600,6 +608,8 @@ export default function ContractPage() {
   }
 
   const isOwner = contract.owner_id === me.id;
+  const isProposer = contract.proposed_by === me.id;
+  const counterparty = isOwner ? contract.collaborator : contract.owner;
   const canSign = contract.status === "awaiting_signatures" && (isOwner ? !contract.owner_signed_at : !contract.collaborator_signed_at);
 
   return (
@@ -608,7 +618,7 @@ export default function ContractPage() {
       <div className="page">
         <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, flexWrap: "wrap", gap: 10 }}>
           <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 22, letterSpacing: "-0.01em" }}>
-            Contract with @{isOwner ? contract.collaborator?.username : contract.owner?.username}
+            Contract with @{counterparty?.username}
           </h1>
           <div style={{ display: "flex", gap: 8 }}>
             {contract.status !== "cancelled" && <button className="btn sm" onClick={scheduleMeeting}>Schedule a meeting</button>}
@@ -616,8 +626,8 @@ export default function ContractPage() {
           </div>
         </div>
 
-        {contract.status === "draft" && isOwner && <div className="banner amber no-print">This contract is a draft. Edit the terms, then send it to @{contract.collaborator?.username} for signing.</div>}
-        {contract.status === "draft" && !isOwner && <div className="banner amber no-print">@{contract.owner?.username} is still drafting this contract. You&apos;ll see it here once they send it.</div>}
+        {contract.status === "draft" && isProposer && <div className="banner amber no-print">This contract is a draft. Edit the terms, then send it to @{counterparty?.username} for signing.</div>}
+        {contract.status === "draft" && !isProposer && <div className="banner amber no-print">@{contract.proposed_by === contract.owner_id ? contract.owner?.username : contract.collaborator?.username} is still drafting this contract. You&apos;ll see it here once they send it.</div>}
         {contract.status === "cancelled" && <div className="banner cherry no-print">This contract was cancelled.</div>}
         {contract.status === "active" && <div className="banner green no-print">Both parties signed. Contract is active. Next step: owner funds the escrow.</div>}
         {contract.status === "completed" && <div className="banner green no-print">Contract completed, funds released, splits effective.</div>}

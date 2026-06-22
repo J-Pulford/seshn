@@ -10,6 +10,7 @@ import { blockUser, isUserBlocked, reportUser, unblockUser } from "@/lib/seshn/t
 import { listConnectedAccounts } from "@/lib/seshn/connected-accounts";
 import { recordProfileView } from "@/lib/seshn/analytics";
 import { listProfileReviews } from "@/lib/seshn/reviews";
+import DirectContractModal from "@/components/DirectContractModal";
 import { Stars } from "@/components/reviews/Stars";
 import { SOCIAL_PLATFORMS, AVAILABILITY_OPTIONS } from "@/lib/seshn/constants";
 import { embedFor } from "@/lib/seshn/embeds";
@@ -601,6 +602,8 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
 
 function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Profile; isOwner: boolean; gigs: Gig[] | null; onProfileUpdate: (p: Profile) => void }) {
   const [editing, setEditing] = useState(false);
+  const [showContract, setShowContract] = useState(false);
+  const [contractConvoId, setContractConvoId] = useState<string | null>(null);
   const [connected, setConnected] = useState<ConnectedAccount[] | null>(null);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [stats, setStats] = useState<ProfileStats | null>(null);
@@ -659,6 +662,18 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
                   toast.error((e as Error)?.message || "Couldn't start a conversation.");
                 }
               }}>Message</button>
+              <button className="btn" onClick={async () => {
+                try {
+                  const me = await getUser();
+                  if (!me) { window.location.href = "/auth?next=" + encodeURIComponent(window.location.pathname); return; }
+                  let cid: string | null = null;
+                  try { cid = await getOrCreateConversation(profile.id); } catch { cid = null; }
+                  setContractConvoId(cid);
+                  setShowContract(true);
+                } catch (e) {
+                  toast.error((e as Error)?.message || "Couldn't start a contract.");
+                }
+              }}>Send a contract</button>
               <SafetyControls profile={profile} />
             </>
           )}
@@ -912,6 +927,15 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
       </div>
 
       {editing && <EditProfileModal profile={profile} onClose={() => setEditing(false)} onSaved={(updated) => { setEditing(false); onProfileUpdate(updated); }} />}
+      {showContract && (
+        <DirectContractModal
+          open
+          onClose={() => setShowContract(false)}
+          counterparty={{ id: profile.id, username: profile.username, display_name: profile.display_name }}
+          conversationId={contractConvoId}
+          theirServices={profile.services}
+        />
+      )}
       {lightbox !== null && gallery[lightbox] && (
         <div className="modal-backdrop" onClick={() => setLightbox(null)} style={{ alignItems: "center" }}>
           <div onClick={(e) => e.stopPropagation()} style={{ maxWidth: "min(92vw, 900px)", maxHeight: "90vh", display: "flex", flexDirection: "column", gap: 10 }}>

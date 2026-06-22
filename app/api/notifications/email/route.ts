@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.seshnnn.com";
 
 function urlForKind(kind: string, r: Record<string, string | null>): string {
-  if ((kind.startsWith("escrow_") || kind === "review_received") && r.contract_id) return `${SITE_URL}/contract/${r.contract_id}`;
+  if ((kind.startsWith("escrow_") || kind === "review_received" || kind === "contract_received") && r.contract_id) return `${SITE_URL}/contract/${r.contract_id}`;
   if (kind === "help_reply" && r.help_thread_id) return `${SITE_URL}/help/${r.help_thread_id}`;
   if (kind.startsWith("application_") && r.gig_id) return `${SITE_URL}/gig/${r.gig_id}`;
   if (kind === "message_received") return `${SITE_URL}/inbox`;

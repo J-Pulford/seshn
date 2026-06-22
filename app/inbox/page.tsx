@@ -10,6 +10,7 @@ import {
 } from "@/lib/seshn/messaging";
 import type { ConversationWithMeta, DmAttachment, GigOwner, Message } from "@/lib/seshn/types";
 import MeetingScheduler from "@/components/meetings/MeetingScheduler";
+import DirectContractModal from "@/components/DirectContractModal";
 import "./inbox.css";
 
 const profileHref = (u?: string) => `/profile/${encodeURIComponent(u || "")}`;
@@ -217,6 +218,7 @@ function Composer({ onSend, conversationId, placeholderName, disabled }: { onSen
 
 function DmPanel({ convo, meId, onMessageSent, onBack }: { convo: ConversationWithMeta | null; meId: string; onMessageSent: () => void; onBack: () => void }) {
   const [messages, setMessages] = useState<Message[] | null>(null);
+  const [showContract, setShowContract] = useState(false);
 
   useEffect(() => {
     if (!convo) return;
@@ -270,8 +272,19 @@ function DmPanel({ convo, meId, onMessageSent, onBack }: { convo: ConversationWi
             <div className="t-meta">{o.roles?.[0] || "Artist"}{o.location ? " · " + o.location : ""}</div>
           </div>
         </div>
-        <div className="dm-header-right"><a href={href} className="btn sm">View profile</a></div>
+        <div className="dm-header-right" style={{ display: "flex", gap: 8 }}>
+          {convo.other?.id && <button type="button" className="btn sm" onClick={() => setShowContract(true)}>Send a contract</button>}
+          <a href={href} className="btn sm">View profile</a>
+        </div>
       </div>
+      {showContract && convo.other?.id && (
+        <DirectContractModal
+          open
+          onClose={() => setShowContract(false)}
+          counterparty={{ id: convo.other.id, username: convo.other.username, display_name: convo.other.display_name }}
+          conversationId={convo.id}
+        />
+      )}
       {convo.other?.id && (
         <MeetingScheduler
           conversationId={convo.id}

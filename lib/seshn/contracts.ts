@@ -7,7 +7,7 @@ import { getUser } from "./profiles";
 import type { Application, Contract } from "./types";
 
 const CONTRACT_FIELDS =
-  "id, gig_id, application_id, owner_id, collaborator_id, status, terms, " +
+  "id, gig_id, application_id, owner_id, collaborator_id, origin, proposed_by, conversation_id, status, terms, " +
   "governing_law, language, signing_provider_ref, pdf_url, " +
   "owner_signed_at, collaborator_signed_at, fully_signed_at, created_at, updated_at";
 
@@ -99,6 +99,8 @@ export async function createContract(application: Application, terms: Record<str
     application_id: application.id,
     owner_id: u.id,
     collaborator_id: application.applicant_id,
+    proposed_by: u.id,
+    origin: "gig",
     terms: { template_version: templateVersion ?? null, ...(terms || {}) },
   };
   const res = await sb.from("contracts").insert(row).select(CONTRACT_FIELDS).single();
@@ -106,12 +108,36 @@ export async function createContract(application: Application, terms: Record<str
   return res.data as unknown as Contract;
 }
 
+// Open a direct contract (no gig) with another user, straight from a DM or a
+// profile. `iAmProvider` sets the money direction: true = I'm the paid side
+// (collaborator) sending an offer; false = I'm the paying side (owner) booking
+// them. Returns a draft the proposer then edits and sends. Backed by the
+// create_direct_contract SECURITY DEFINER RPC (blocks self/blocked/unknown users).
+export async function createDirectContract(
+  counterpartyId: string,
+  iAmProvider: boolean,
+  terms: Record<string, unknown>,
+  conversationId?: string | null,
+  templateVersion?: string | null,
+): Promise<Contract> {
+  const sb = getBrowserClient();
+  if (!counterpartyId) throw new Error("Missing counterparty");
+  const res = await sb.rpc("create_direct_contract", {
+    p_counterparty: counterpartyId,
+    p_i_am_provider: iAmProvider,
+    p_terms: { template_version: templateVersion ?? null, ...(terms || {}) },
+    p_conversation_id: conversationId ?? null,
+  });
+  if (res.error) throw res.error;
+  return unwrap(res.data) as Contract;
+}
+
 export async function updateContractTerms(contractId: string, terms: Record<string, unknown>): Promise<Contract> {
   const sb = getBrowserClient();
   if (!contractId) throw new Error("Missing contract id");
   const u = await getUser();
   if (!u) throw new Error("Not signed in");
-  const res = await sb.from("contracts").update({ terms }).eq("id", contractId).eq("owner_id", u.id).select(CONTRACT_FIELDS).single();
+  const res = await sb.from("contracts").update({ terms }).eq("id", contractId).eq("proposed_by", u.id).select(CONTRACT_FIELDS).single();
   if (res.error) throw res.error;
   return res.data as unknown as Contract;
 }

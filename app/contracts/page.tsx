@@ -55,7 +55,7 @@ function ContractCard({ c, meId }: { c: Contract; meId: string }) {
       </span>
       <div className="ct-main">
         <div className="ct-title-row">
-          <span className="ct-title">{c.gig?.title || "Collaboration"}</span>
+          <span className="ct-title">{c.gig?.title || (c.origin === "direct" ? "Direct booking" : "Collaboration")}</span>
           <span className={"ct-status " + meta.cls}>{meta.label}</span>
         </div>
         <div className="ct-meta">

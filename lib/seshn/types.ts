@@ -208,10 +208,13 @@ export type ContractStatus = "draft" | "awaiting_signatures" | "active" | "compl
 
 export interface Contract {
   id: string;
-  gig_id: string;
-  application_id: string;
+  gig_id: string | null;
+  application_id: string | null;
   owner_id: string;
   collaborator_id: string;
+  origin: "gig" | "direct";
+  proposed_by: string;
+  conversation_id: string | null;
   status: ContractStatus;
   terms: Record<string, unknown>;
   governing_law: string | null;
