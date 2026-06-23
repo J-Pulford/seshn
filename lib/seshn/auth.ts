@@ -25,12 +25,13 @@ export async function signOut() {
   return getBrowserClient().auth.signOut();
 }
 
-export async function sendMagicLink(email: string, redirectTo?: string) {
+export async function sendMagicLink(email: string, redirectTo?: string, captchaToken?: string) {
   return getBrowserClient().auth.signInWithOtp({
     email,
     options: {
       emailRedirectTo: redirectTo || origin() + "/auth",
       shouldCreateUser: true,
+      captchaToken,
     },
   });
 }
@@ -38,18 +39,18 @@ export async function sendMagicLink(email: string, redirectTo?: string) {
 // The account must already exist and have a password. Supabase returns the same
 // generic "Invalid login credentials" for unknown email / wrong password /
 // unverified email by design (no account enumeration).
-export async function signInWithPassword(email: string, password: string) {
+export async function signInWithPassword(email: string, password: string, captchaToken?: string) {
   if (!email || !password) throw new Error("Email and password required");
-  return getBrowserClient().auth.signInWithPassword({ email: email.trim(), password });
+  return getBrowserClient().auth.signInWithPassword({ email: email.trim(), password, options: { captchaToken } });
 }
 
-export async function signUpWithPassword(email: string, password: string, redirectTo?: string) {
+export async function signUpWithPassword(email: string, password: string, redirectTo?: string, captchaToken?: string) {
   if (!email || !password) throw new Error("Email and password required");
   if (password.length < 8) throw new Error("Password must be at least 8 characters");
   return getBrowserClient().auth.signUp({
     email: email.trim(),
     password,
-    options: { emailRedirectTo: redirectTo || origin() + "/auth" },
+    options: { emailRedirectTo: redirectTo || origin() + "/auth", captchaToken },
   });
 }
 
@@ -62,10 +63,11 @@ export async function setMyPassword(newPassword: string) {
   return res.data;
 }
 
-export async function sendPasswordReset(email: string, redirectTo?: string) {
+export async function sendPasswordReset(email: string, redirectTo?: string, captchaToken?: string) {
   if (!email) throw new Error("Missing email");
   return getBrowserClient().auth.resetPasswordForEmail(email.trim(), {
     redirectTo: redirectTo || origin() + "/auth?recover=1",
+    captchaToken,
   });
 }
 
@@ -91,12 +93,12 @@ export function isEmailVerified(u: User | null): boolean {
   return !!(u && (u.email_confirmed_at || u.confirmed_at));
 }
 
-export async function resendVerificationEmail(email: string, redirectTo?: string) {
+export async function resendVerificationEmail(email: string, redirectTo?: string, captchaToken?: string) {
   if (!email?.trim()) throw new Error("Missing email");
   return getBrowserClient().auth.resend({
     type: "signup",
     email: email.trim(),
-    options: { emailRedirectTo: redirectTo || origin() + "/auth" },
+    options: { emailRedirectTo: redirectTo || origin() + "/auth", captchaToken },
   });
 }
 

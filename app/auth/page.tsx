@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlbumArt } from "@/components/visual/AlbumArt";
 import { Vinyl } from "@/components/visual/Vinyl";
 import { Grain } from "@/components/visual/Grain";
@@ -17,6 +17,7 @@ import {
   setMyPassword,
   resendVerificationEmail,
 } from "@/lib/seshn/auth";
+import Captcha, { captchaEnabled, type CaptchaHandle } from "@/components/Captcha";
 import "./auth.css";
 
 type Status = "idle" | "sending" | "sent" | "error" | "checking";
@@ -41,6 +42,10 @@ export default function AuthPage() {
   const [errMsg, setErrMsg] = useState("");
   const [recoverMode, setRecoverMode] = useState(false);
   const [verifyMode, setVerifyMode] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<CaptchaHandle>(null);
+  // Only block on captcha when it's actually configured (site key present).
+  const needCaptcha = captchaEnabled && !captchaToken;
 
   // All URL-dependent state is read after mount to avoid a hydration mismatch
   // between the server prerender (no window) and the client.
@@ -123,17 +128,23 @@ export default function AuthPage() {
       setStatus("error");
       return;
     }
+    if (needCaptcha) {
+      setErrMsg("Please complete the verification below.");
+      setStatus("error");
+      return;
+    }
     setStatus("sending");
     setErrMsg("");
     const next = new URLSearchParams(window.location.search).get("next");
     if (next) sessionStorage.setItem("seshn_auth_next", next);
     try {
-      const { error } = await sendMagicLink(email);
+      const { error } = await sendMagicLink(email, undefined, captchaToken ?? undefined);
       if (error) throw error;
       setStatus("sent");
     } catch (err) {
       setErrMsg((err as Error)?.message || "Couldn't send the link.");
       setStatus("error");
+      captchaRef.current?.reset();
     }
   }
 
@@ -161,12 +172,17 @@ export default function AuthPage() {
       setStatus("error");
       return;
     }
+    if (needCaptcha) {
+      setErrMsg("Please complete the verification below.");
+      setStatus("error");
+      return;
+    }
     setStatus("sending");
     setErrMsg("");
     const next = new URLSearchParams(window.location.search).get("next");
     if (next) sessionStorage.setItem("seshn_auth_next", next);
     try {
-      const { data, error } = await signUpWithPassword(email, password);
+      const { data, error } = await signUpWithPassword(email, password, undefined, captchaToken ?? undefined);
       if (error) throw error;
       // If email confirmations are off, Supabase returns a session — go straight
       // through (routeAfterAuth sends a profile-less new user to onboarding).
@@ -179,6 +195,7 @@ export default function AuthPage() {
     } catch (err) {
       setErrMsg((err as Error)?.message || "Couldn't create your account.");
       setStatus("error");
+      captchaRef.current?.reset();
     }
   }
 
@@ -194,17 +211,23 @@ export default function AuthPage() {
       setStatus("error");
       return;
     }
+    if (needCaptcha) {
+      setErrMsg("Please complete the verification below.");
+      setStatus("error");
+      return;
+    }
     setStatus("sending");
     setErrMsg("");
     const next = new URLSearchParams(window.location.search).get("next");
     if (next) sessionStorage.setItem("seshn_auth_next", next);
     try {
-      const { error } = await signInWithPassword(email, password);
+      const { error } = await signInWithPassword(email, password, captchaToken ?? undefined);
       if (error) throw error;
       // routeAfterAuth fires via onAuthStateChange when the session lands.
     } catch (err) {
       setErrMsg((err as Error)?.message || "Couldn't sign in.");
       setStatus("error");
+      captchaRef.current?.reset();
     }
   }
 
@@ -214,15 +237,21 @@ export default function AuthPage() {
       setStatus("error");
       return;
     }
+    if (needCaptcha) {
+      setErrMsg("Please complete the verification below.");
+      setStatus("error");
+      return;
+    }
     setStatus("sending");
     setErrMsg("");
     try {
-      const { error } = await sendPasswordReset(email);
+      const { error } = await sendPasswordReset(email, undefined, captchaToken ?? undefined);
       if (error) throw error;
       setStatus("sent");
     } catch (err) {
       setErrMsg((err as Error)?.message || "Couldn't send the reset email.");
       setStatus("error");
+      captchaRef.current?.reset();
     }
   }
 
@@ -251,15 +280,21 @@ export default function AuthPage() {
       setStatus("error");
       return;
     }
+    if (needCaptcha) {
+      setErrMsg("Please complete the verification below.");
+      setStatus("error");
+      return;
+    }
     setStatus("sending");
     setErrMsg("");
     try {
-      const { error } = await resendVerificationEmail(email);
+      const { error } = await resendVerificationEmail(email, undefined, captchaToken ?? undefined);
       if (error) throw error;
       setStatus("sent");
     } catch (err) {
       setErrMsg((err as Error)?.message || "Couldn't resend the email.");
       setStatus("error");
+      captchaRef.current?.reset();
     }
   }
 
@@ -322,9 +357,12 @@ export default function AuthPage() {
                   Sent again, give it a minute, then check your inbox (and spam).
                 </div>
               ) : (
-                <button type="button" className="btn-primary" onClick={onResendVerification} disabled={status === "sending"}>
-                  {status === "sending" ? "Resending…" : "Resend confirmation email"}
-                </button>
+                <>
+                  <Captcha ref={captchaRef} onToken={setCaptchaToken} />
+                  <button type="button" className="btn-primary" onClick={onResendVerification} disabled={status === "sending" || needCaptcha}>
+                    {status === "sending" ? "Resending…" : "Resend confirmation email"}
+                  </button>
+                </>
               )}
               <button type="button" onClick={onCheckVerified} disabled={status === "checking"} style={linkBtn}>
                 {status === "checking" ? "Checking…" : "I've confirmed, continue"}
@@ -378,7 +416,8 @@ export default function AuthPage() {
                       onChange={(e) => { setPassword(e.target.value); if (status === "error") setStatus("idle"); }}
                       disabled={status === "sending" || status === "checking"} autoComplete={authMode === "signup" ? "new-password" : "current-password"} />
                   )}
-                  <button type="submit" className="btn-primary" disabled={status === "sending" || status === "checking" || !email || (mode === "password" && !password)}>
+                  <Captcha ref={captchaRef} onToken={setCaptchaToken} />
+                  <button type="submit" className="btn-primary" disabled={status === "sending" || status === "checking" || !email || (mode === "password" && !password) || needCaptcha}>
                     {status === "checking"
                       ? "Loading…"
                       : status === "sending"
