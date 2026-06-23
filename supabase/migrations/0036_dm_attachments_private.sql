@@ -23,9 +23,14 @@
 update storage.buckets set public = false where id = 'dm-attachments';
 
 -- ── Replace the public-read policies with participant-scoped ones ──────────
+-- Drop both the old public-read policies AND the new names, so this migration
+-- is safe to re-run (Postgres has no CREATE POLICY IF NOT EXISTS).
 drop policy if exists "DM attachments are publicly readable" on storage.objects;
 drop policy if exists "Users can upload DM attachments to their own folder" on storage.objects;
 drop policy if exists "Users can delete their own DM attachments" on storage.objects;
+drop policy if exists "DM attachments readable by conversation participants" on storage.objects;
+drop policy if exists "DM attachments insert by conversation participants" on storage.objects;
+drop policy if exists "DM attachments delete by uploader" on storage.objects;
 
 -- Read: either participant of the conversation in the path's first folder.
 create policy "DM attachments readable by conversation participants"

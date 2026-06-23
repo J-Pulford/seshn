@@ -18,16 +18,16 @@
 alter table public.contracts
   alter column gig_id drop not null,
   alter column application_id drop not null,
-  add column origin          text not null default 'gig' check (origin in ('gig', 'direct')),
-  add column proposed_by      uuid references public.profiles(id) on delete restrict,
-  add column conversation_id  uuid references public.conversations(id) on delete set null;
+  add column if not exists origin          text not null default 'gig' check (origin in ('gig', 'direct')),
+  add column if not exists proposed_by      uuid references public.profiles(id) on delete restrict,
+  add column if not exists conversation_id  uuid references public.conversations(id) on delete set null;
 
 -- Existing contracts came from gigs and were drafted by the owner.
 update public.contracts set proposed_by = owner_id where proposed_by is null;
 alter table public.contracts alter column proposed_by set not null;
 
-create index contracts_proposed_by_idx  on public.contracts (proposed_by);
-create index contracts_conversation_idx on public.contracts (conversation_id) where conversation_id is not null;
+create index if not exists contracts_proposed_by_idx  on public.contracts (proposed_by);
+create index if not exists contracts_conversation_idx on public.contracts (conversation_id) where conversation_id is not null;
 
 -- ── 2. Insert/edit policies: keep the gig path, generalise edit to proposer ──
 -- Gig contracts are still created by a direct INSERT (createContract); harden it
@@ -52,6 +52,7 @@ create policy "Owners can create contracts on their accepted applications"
 -- so they don't need an INSERT policy here.
 
 drop policy if exists "Owners can edit draft contracts" on public.contracts;
+drop policy if exists "Proposer can edit draft contracts" on public.contracts;
 create policy "Proposer can edit draft contracts"
   on public.contracts for update
   using (proposed_by = auth.uid() and status = 'draft')
