@@ -279,6 +279,7 @@ function PayoutsSection() {
       ) : status.error ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <span className="t-meta">Couldn&apos;t load your payout status just now.</span>
+          {status.detail && <span className="t-meta" style={{ color: "var(--danger, #c43d3f)" }}>Stripe says: {status.detail}</span>}
           <div><button className="btn sm" onClick={loadStatus}>Retry</button></div>
         </div>
       ) : !status.configured ? (

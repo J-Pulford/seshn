@@ -16,7 +16,7 @@ async function authHeaders(): Promise<Record<string, string>> {
 export async function startPayoutOnboarding(): Promise<void> {
   const res = await fetch("/api/stripe/connect", { method: "POST", headers: await authHeaders() });
   const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(json.error || "Couldn't start payout setup.");
+  if (!res.ok) throw new Error(json.detail || json.error || "Couldn't start payout setup.");
   if (!json.url) throw new Error("Stripe didn't return an onboarding link.");
   window.location.href = json.url;
 }
@@ -29,6 +29,7 @@ export interface PayoutStatus {
   charges_enabled?: boolean;
   details_submitted?: boolean;
   error?: boolean;         // the status call failed (vs. Stripe genuinely off)
+  detail?: string;         // the underlying reason, when there's an error
 }
 
 export async function getPayoutStatus(): Promise<PayoutStatus> {
@@ -38,9 +39,10 @@ export async function getPayoutStatus(): Promise<PayoutStatus> {
     // (500, 401, 429) is an *error*, not "Stripe isn't set up" — keep them
     // distinct so the UI doesn't show "coming soon" when something actually broke.
     if (res.status === 200) return (await res.json()) as PayoutStatus;
-    return { configured: true, error: true };
-  } catch {
-    return { configured: true, error: true };
+    const body = (await res.json().catch(() => ({}))) as { detail?: string; error?: string };
+    return { configured: true, error: true, detail: body.detail || body.error };
+  } catch (e) {
+    return { configured: true, error: true, detail: (e as Error)?.message };
   }
 }
 

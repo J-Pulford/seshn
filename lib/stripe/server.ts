@@ -40,6 +40,18 @@ export async function userFromRequest(req: Request): Promise<User | null> {
 // test and live: a stripe_account_id saved under the old key can't be retrieved
 // under the new one. We treat it as "not connected" so the user can re-onboard,
 // rather than surfacing a 500.
+// Pull a useful, non-sensitive summary out of a Stripe error so auth-gated
+// routes can tell the caller what actually went wrong (e.g. "complete your
+// Connect platform profile", "Invalid API Key") instead of a blank 500.
+export function stripeErrorInfo(e: unknown): { message: string; code: string | null; type: string | null } {
+  const err = e as { message?: string; code?: string; type?: string; raw?: { message?: string; code?: string } } | null;
+  return {
+    message: err?.message || err?.raw?.message || "Unknown error",
+    code: err?.code || err?.raw?.code || null,
+    type: err?.type || null,
+  };
+}
+
 export function isMissingAccountError(e: unknown): boolean {
   const err = e as { code?: string; statusCode?: number; rawType?: string; message?: string } | null;
   if (!err) return false;

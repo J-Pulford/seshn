@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getStripe, getAdminClient, userFromRequest, isMissingAccountError } from "@/lib/stripe/server";
+import { getStripe, getAdminClient, userFromRequest, isMissingAccountError, stripeErrorInfo } from "@/lib/stripe/server";
 import { isStripeConfigured } from "@/lib/stripe/config";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -71,6 +71,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: link.url });
   } catch (e) {
     console.error("[stripe] connect error", e);
-    return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 });
+    const info = stripeErrorInfo(e);
+    return NextResponse.json({ error: "Couldn't start payout setup.", detail: info.message, code: info.code }, { status: 500 });
   }
 }
