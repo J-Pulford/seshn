@@ -105,6 +105,7 @@ export interface Profile {
   genres: string[];
   is_pro: boolean;
   has_producer_badge?: boolean;
+  is_staff?: boolean;
   avatar_url: string;
   cover_url?: string;
   notification_prefs?: Record<string, boolean>;
