@@ -244,7 +244,7 @@ function SafetyControls({ profile }: { profile: Profile }) {
   const itemStyle: CSSProperties = { display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "9px 10px", border: "none", background: "none", cursor: "pointer", borderRadius: 6, fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 13.5, textAlign: "left" };
   return (
     <div ref={menuRef} style={{ position: "relative" }}>
-      <button className="btn" aria-label="More options" disabled={busy} style={{ backdropFilter: "blur(8px)", background: "rgba(255,255,255,0.9)", padding: "0 12px" }} onClick={() => setOpen((o) => !o)}><Icon kind="more" size={16} /></button>
+      <button className="btn" aria-label="More options" disabled={busy} style={{ backdropFilter: "blur(8px)", background: "rgba(255,255,255,0.9)", color: "#141414", borderColor: "rgba(0,0,0,0.18)", padding: "0 12px" }} onClick={() => setOpen((o) => !o)}><Icon kind="more" size={16} /></button>
       {open && (
         <div style={{ position: "absolute", right: 0, top: "calc(100% + 6px)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.12)", padding: 6, minWidth: 180, zIndex: 40 }}>
           <button onClick={() => { setOpen(false); setReporting(true); }} style={{ ...itemStyle, color: "var(--ink)" }}><Icon kind="flag" size={15} /> Report</button>
@@ -647,8 +647,8 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
           {profile.is_pro && <span style={{ display: "inline-block", transform: "rotate(-4deg)", padding: "5px 11px", borderRadius: 4, background: "var(--ink)", color: "var(--frame)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 11, letterSpacing: "0.04em", textTransform: "uppercase", boxShadow: "0 4px 12px rgba(0,0,0,0.18)" }}>✓ Pro · Verified</span>}
           {isOwner ? (
             <>
-              <a className="btn" style={{ backdropFilter: "blur(8px)", background: "rgba(255,255,255,0.9)" }} href={R.dashboard}>Finances</a>
-              <a className="btn" style={{ backdropFilter: "blur(8px)", background: "rgba(255,255,255,0.9)" }} href={R.settings}>Settings</a>
+              <a className="btn" style={{ backdropFilter: "blur(8px)", background: "rgba(255,255,255,0.9)", color: "#141414", borderColor: "rgba(0,0,0,0.18)" }} href={R.dashboard}>Finances</a>
+              <a className="btn" style={{ backdropFilter: "blur(8px)", background: "rgba(255,255,255,0.9)", color: "#141414", borderColor: "rgba(0,0,0,0.18)" }} href={R.settings}>Settings</a>
               <button className="btn primary" onClick={() => setEditing(true)}>Edit profile</button>
             </>
           ) : (
