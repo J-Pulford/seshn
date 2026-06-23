@@ -40,6 +40,11 @@ export async function userFromRequest(req: Request): Promise<User | null> {
 // test and live: a stripe_account_id saved under the old key can't be retrieved
 // under the new one. We treat it as "not connected" so the user can re-onboard,
 // rather than surfacing a 500.
+// True when a Stripe error means the saved account can't be used under the
+// current API key: it doesn't exist, or it was created in the other mode (a
+// test account hit with a live key, or vice-versa). We treat these as "not
+// connected" so the user can re-onboard cleanly instead of hitting a 500.
+//
 // Pull a useful, non-sensitive summary out of a Stripe error so auth-gated
 // routes can tell the caller what actually went wrong (e.g. "complete your
 // Connect platform profile", "Invalid API Key") instead of a blank 500.
@@ -59,6 +64,8 @@ export function isMissingAccountError(e: unknown): boolean {
     err.code === "resource_missing" ||
     err.code === "account_invalid" ||
     err.statusCode === 404 ||
-    /no such account|does not have access to account|similar object exists in (test|live) mode/i.test(err.message || "")
+    /no such account|does not have access to account|similar object exists in (test|live) mode|(test|live) ?mode key|was a (test|live) account|can only be used with (test|live)mode/i.test(
+      err.message || "",
+    )
   );
 }
