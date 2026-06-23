@@ -965,7 +965,7 @@ export default function ProfilePage() {
     (async () => {
       try {
         const me = await getUser();
-        const profile = username ? await getProfile({ username }) : null;
+        const profile = username ? await getProfile({ username, withStaff: true }) : null;
         if (!profile) {
           setState({ status: "notfound", profile: null, isOwner: false, gigs: null });
           return;

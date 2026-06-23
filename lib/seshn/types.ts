@@ -133,6 +133,7 @@ export interface Profile {
 export interface GetProfileOpts {
   id?: string;
   username?: string;
+  withStaff?: boolean; // also fetch is_staff (for the "Seshn team" badge)
 }
 
 /** Trimmed profile as embedded on a gig's owner join. */

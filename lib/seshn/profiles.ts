@@ -22,7 +22,7 @@ export async function getProfileStats(userId: string): Promise<ProfileStats> {
 // 0018_security_hardening.sql — `select *` would hit a revoked column
 // (stripe_*, restrictions, deletion_requested_at are client-inaccessible).
 const PROFILE_COLUMNS =
-  "id, username, display_name, bio, location, pronouns, roles, genres, is_pro, has_producer_badge, is_staff, avatar_url, cover_url, social_links, gallery, credits, availability, featured, skills, influences, languages, services, created_at, updated_at";
+  "id, username, display_name, bio, location, pronouns, roles, genres, is_pro, has_producer_badge, avatar_url, cover_url, social_links, gallery, credits, availability, featured, skills, influences, languages, services, created_at, updated_at";
 
 // Cached current user. getUser() is called by nearly every helper (and several
 // times per page), and supabase's auth.getUser() makes a NETWORK round-trip to
@@ -61,7 +61,19 @@ export async function getProfile(opts: GetProfileOpts = {}): Promise<Profile | n
   }
   const res = await q.maybeSingle();
   if (res.error) console.error("[seshn] getProfile error", res.error);
-  return (res.data as Profile) ?? null;
+  const profile = (res.data as Profile) ?? null;
+  // is_staff drives a cosmetic badge and is read separately, on request only, so
+  // that a missing column grant (e.g. before 0038 is applied) can NEVER break the
+  // core profile read. Any error here is swallowed; the badge simply won't show.
+  if (profile && opts.withStaff) {
+    try {
+      const s = await sb.from("profiles").select("is_staff").eq("id", profile.id).maybeSingle();
+      if (!s.error && s.data) profile.is_staff = (s.data as { is_staff?: boolean }).is_staff ?? false;
+    } catch {
+      /* badge is non-critical */
+    }
+  }
+  return profile;
 }
 
 export async function upsertProfile(fields: Partial<Profile>): Promise<Profile> {
