@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getStripe, getAdminClient, userFromRequest } from "@/lib/stripe/server";
+import { getStripe, getAdminClient, userFromRequest, isMissingAccountError } from "@/lib/stripe/server";
 import { isStripeConfigured } from "@/lib/stripe/config";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -35,10 +35,19 @@ export async function GET(req: Request) {
     const accountId = prof?.stripe_account_id;
     if (!accountId) return NextResponse.json({ configured: true, connected: false });
 
-    const [balance, payouts] = await Promise.all([
-      stripe.balance.retrieve({}, { stripeAccount: accountId }),
-      stripe.payouts.list({ limit: 5 }, { stripeAccount: accountId }),
-    ]);
+    let balance, payouts;
+    try {
+      [balance, payouts] = await Promise.all([
+        stripe.balance.retrieve({}, { stripeAccount: accountId }),
+        stripe.payouts.list({ limit: 5 }, { stripeAccount: accountId }),
+      ]);
+    } catch (e) {
+      // Stale account under the current key (rotation / test-live swap): fall
+      // back to not-connected so the dashboard shows internal figures, and the
+      // status route can clear the id on next load.
+      if (isMissingAccountError(e)) return NextResponse.json({ configured: true, connected: false });
+      throw e;
+    }
 
     const mapAmounts = (list: { amount: number; currency: string }[]) =>
       list.map((b) => ({ amount_cents: b.amount, currency: b.currency.toUpperCase() }));
