@@ -2,7 +2,8 @@
 
 import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { getConsent, CONSENT_EVENT } from "@/lib/consent";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
@@ -38,11 +39,19 @@ function PageViews() {
   return null;
 }
 
-// Google Analytics 4. Dormant until NEXT_PUBLIC_GA_ID is set, so dev/preview
-// builds without the key never load gtag or send data. Mounted once in the root
-// layout to cover the whole site.
+// Google Analytics 4. Dormant until NEXT_PUBLIC_GA_ID is set AND the visitor has
+// accepted analytics cookies (see ConsentBanner) — so nothing loads or sends
+// data without both a key and consent. Mounted once in the root layout.
 export default function GoogleAnalytics() {
-  if (!GA_ID) return null;
+  const [granted, setGranted] = useState(false);
+  useEffect(() => {
+    const sync = () => setGranted(getConsent() === "granted");
+    sync();
+    window.addEventListener(CONSENT_EVENT, sync);
+    return () => window.removeEventListener(CONSENT_EVENT, sync);
+  }, []);
+
+  if (!GA_ID || !granted) return null;
   return (
     <>
       <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />

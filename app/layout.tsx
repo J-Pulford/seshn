@@ -5,6 +5,7 @@ import Toaster from "@/components/Toaster";
 import ConfirmHost from "@/components/ConfirmHost";
 import AuthLinkCatcher from "@/components/AuthLinkCatcher";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import ConsentBanner from "@/components/ConsentBanner";
 import "./globals.css";
 
 // Self-hosted via next/font (preloaded, font-display: swap) — replaces the
@@ -60,6 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Toaster />
         <ConfirmHost />
         <GoogleAnalytics />
+        <ConsentBanner />
       </body>
     </html>
   );

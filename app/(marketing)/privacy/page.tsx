@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 // compliance SOP (docs/sops/10-compliance.md). When a new category of personal
 // data is collected, add a row to the "What we collect" table and, if relevant,
 // the retention and third-party sections.
-const LAST_UPDATED = "4 June 2026";
+const LAST_UPDATED = "23 June 2026";
 const EFFECTIVE = "4 June 2026";
 
 const SECTIONS: { id: string; title: string }[] = [
@@ -208,7 +208,7 @@ export default function PrivacyPage() {
           <li>send you transactional and service notifications;</li>
           <li>keep the marketplace safe, detecting fraud, abuse, and policy violations, and handling reports, blocks, and disputes;</li>
           <li>meet our legal, tax, and record-keeping obligations; and</li>
-          <li>understand and improve the Platform using aggregated, de-identified analytics.</li>
+          <li>understand and improve the Platform. With your consent, we use Google Analytics to see how Seshn is used (such as pages visited, device and browser type, and approximate location derived from your IP address); if you don&apos;t consent, we rely only on aggregated, de-identified analytics.</li>
         </ul>
         <div className="legal-callout">
           <p>
@@ -249,6 +249,7 @@ export default function PrivacyPage() {
           <li><strong>Supabase</strong>, database, authentication, and file storage (your profile data, messages, attachments, and uploads).</li>
           <li><strong>Stripe</strong>, payment processing and payouts via Stripe Connect. Stripe handles your card and bank details directly under its own privacy policy.</li>
           <li><strong>Vercel</strong>, application hosting and content delivery.</li>
+          <li><strong>Google Analytics</strong> (Google LLC), usage analytics that help us understand how the Platform is used. It runs only if you accept analytics cookies, you can decline or withdraw consent at any time, and Google processes this data in the United States under its own privacy policy.</li>
           <li><strong>Embedded media providers</strong>, when your profile features a Spotify, SoundCloud, or YouTube player, your browser loads content from those providers, who may set their own cookies. We only embed media you choose to add.</li>
         </ul>
         <p>
@@ -344,8 +345,10 @@ export default function PrivacyPage() {
         <p>
           Seshn uses only the storage it needs to work. We keep your sign-in session in your browser&apos;s
           local storage so you stay logged in, and we use essential cookies for security and to remember
-          preferences like your light/dark theme. We don&apos;t use third-party advertising or
-          cross-site tracking cookies. Note that embedded media players (Spotify, SoundCloud, YouTube)
+          preferences like your light/dark theme. With your consent, we use Google Analytics to understand
+          how the Platform is used; it sets analytics cookies only after you accept our cookie banner, and
+          you can decline, or change your mind later by clearing cookies. We don&apos;t use third-party
+          advertising or cross-site tracking cookies. Note that embedded media players (Spotify, SoundCloud, YouTube)
           you add to a profile may set their own cookies when they load, those are governed by the
           relevant provider&apos;s policy. You can clear cookies and local storage in your browser settings,
           though doing so will sign you out.
