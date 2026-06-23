@@ -27,13 +27,31 @@ const T = (props: { d?: string; children?: React.ReactNode; cls?: string }) => (
 export default function DawBar({ active, home = false }: { active?: string; home?: boolean }) {
   const [open, setOpen] = useState(false);
 
+  // Lock background scroll while the drawer is open. `overflow:hidden` alone is
+  // ignored by iOS Safari for touch scrolling (the page scrolls behind the menu),
+  // so freeze the body with position:fixed at the current offset and restore it
+  // (and the scroll position) on close.
   useEffect(() => {
-    document.body.classList.toggle("smn-lock", open);
+    if (!open) return;
+    const scrollY = window.scrollY;
+    const body = document.body;
+    body.classList.add("smn-lock");
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.classList.remove("smn-lock");
+      body.classList.remove("smn-lock");
+      body.style.position = "";
+      body.style.top = "";
+      body.style.left = "";
+      body.style.right = "";
+      body.style.width = "";
+      window.scrollTo(0, scrollY);
     };
   }, [open]);
 
