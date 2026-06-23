@@ -34,3 +34,19 @@ export async function userFromRequest(req: Request): Promise<User | null> {
   if (error) return null;
   return data.user;
 }
+
+// True when a Stripe error means the referenced account no longer exists under
+// the current API key. This happens when keys are rotated or swapped between
+// test and live: a stripe_account_id saved under the old key can't be retrieved
+// under the new one. We treat it as "not connected" so the user can re-onboard,
+// rather than surfacing a 500.
+export function isMissingAccountError(e: unknown): boolean {
+  const err = e as { code?: string; statusCode?: number; rawType?: string; message?: string } | null;
+  if (!err) return false;
+  return (
+    err.code === "resource_missing" ||
+    err.code === "account_invalid" ||
+    err.statusCode === 404 ||
+    /no such account|does not have access to account|similar object exists in (test|live) mode/i.test(err.message || "")
+  );
+}

@@ -256,9 +256,8 @@ function PayoutsSection() {
   const [status, setStatus] = useState<PayoutStatus | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  useEffect(() => {
-    getPayoutStatus().then(setStatus).catch(() => setStatus({ configured: false }));
-  }, []);
+  const loadStatus = () => { setStatus(null); getPayoutStatus().then(setStatus).catch(() => setStatus({ configured: true, error: true })); };
+  useEffect(() => { loadStatus(); }, []);
   async function connect() {
     setBusy(true);
     setErr("");
@@ -272,11 +271,16 @@ function PayoutsSection() {
   return (
     <Section title="Payouts">
       <span className="t-meta" style={{ display: "block", marginBottom: 12 }}>
-        Connect a payout account to get paid for gigs through Seshn. You always receive your full quoted rate , 
-        Seshn adds a small platform fee on top, paid by the client.
+        Connect a payout account to get paid for collaborations through Seshn. The client pays the agreed
+        fee in full; Seshn&apos;s flat 10% comes off your side when the funds release, so there are no surprise charges to them.
       </span>
       {status === null ? (
         <span className="t-meta">Loading…</span>
+      ) : status.error ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <span className="t-meta">Couldn&apos;t load your payout status just now.</span>
+          <div><button className="btn sm" onClick={loadStatus}>Retry</button></div>
+        </div>
       ) : !status.configured ? (
         <span className="t-meta" style={{ fontStyle: "italic" }}>Payouts are coming soon.</span>
       ) : status.payouts_enabled ? (

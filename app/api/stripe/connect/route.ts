@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getStripe, getAdminClient, userFromRequest } from "@/lib/stripe/server";
+import { getStripe, getAdminClient, userFromRequest, isMissingAccountError } from "@/lib/stripe/server";
 import { isStripeConfigured } from "@/lib/stripe/config";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -35,6 +35,17 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     let accountId = prof?.stripe_account_id || null;
+    // If we have a saved account, make sure it still exists under the current
+    // key (rotation / test-live swap can orphan it). If not, drop it and make
+    // a fresh one rather than failing the onboarding link.
+    if (accountId) {
+      try {
+        await stripe.accounts.retrieve(accountId);
+      } catch (e) {
+        if (isMissingAccountError(e)) accountId = null;
+        else throw e;
+      }
+    }
     if (!accountId) {
       const account = await stripe.accounts.create({
         type: "express",

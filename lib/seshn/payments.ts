@@ -28,15 +28,19 @@ export interface PayoutStatus {
   payouts_enabled?: boolean;
   charges_enabled?: boolean;
   details_submitted?: boolean;
+  error?: boolean;         // the status call failed (vs. Stripe genuinely off)
 }
 
 export async function getPayoutStatus(): Promise<PayoutStatus> {
   try {
     const res = await fetch("/api/stripe/connect/status", { headers: await authHeaders() });
-    if (!res.ok) return { configured: false };
-    return (await res.json()) as PayoutStatus;
+    // Only an explicit 200 carries a real configured flag. Any other response
+    // (500, 401, 429) is an *error*, not "Stripe isn't set up" — keep them
+    // distinct so the UI doesn't show "coming soon" when something actually broke.
+    if (res.status === 200) return (await res.json()) as PayoutStatus;
+    return { configured: true, error: true };
   } catch {
-    return { configured: false };
+    return { configured: true, error: true };
   }
 }
 

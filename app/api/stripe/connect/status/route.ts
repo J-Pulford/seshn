@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getStripe, getAdminClient, userFromRequest } from "@/lib/stripe/server";
+import { getStripe, getAdminClient, userFromRequest, isMissingAccountError } from "@/lib/stripe/server";
 import { isStripeConfigured } from "@/lib/stripe/config";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -33,7 +33,22 @@ export async function GET(req: Request) {
     const accountId = prof?.stripe_account_id;
     if (!accountId) return NextResponse.json({ configured: true, connected: false });
 
-    const acct = await stripe.accounts.retrieve(accountId);
+    let acct;
+    try {
+      acct = await stripe.accounts.retrieve(accountId);
+    } catch (e) {
+      // The saved account doesn't exist under the current key (key rotation or
+      // a test/live swap). Clear it so the user can connect fresh, and report
+      // not-connected instead of a 500 that the UI would show as "coming soon".
+      if (isMissingAccountError(e)) {
+        await admin
+          .from("profiles")
+          .update({ stripe_account_id: null, stripe_account_status: null })
+          .eq("id", user.id);
+        return NextResponse.json({ configured: true, connected: false, reset: true });
+      }
+      throw e;
+    }
     const status = acct.payouts_enabled
       ? "verified"
       : acct.requirements?.disabled_reason
