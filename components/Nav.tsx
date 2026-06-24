@@ -37,6 +37,7 @@ const R = {
   guides: "/guides",
   help: "/help",
   contracts: "/contracts",
+  adminVerification: "/admin/verification",
   profile: (username?: string) => (username ? `/profile/${encodeURIComponent(username)}` : "/feed"),
   gig: (id: string) => `/gig/${encodeURIComponent(id)}`,
   inboxConvo: (id: string) => `/inbox?c=${encodeURIComponent(id)}`,
@@ -346,7 +347,7 @@ function NavSearch() {
 // Avatar in the top-right opens an account dropdown (profile / finances /
 // settings / sign out) rather than jumping straight to the profile. Closes on
 // outside-click or Escape.
-function ProfileMenu({ me, active, initials }: { me: Profile | null; active: NavActive; initials: string }) {
+function ProfileMenu({ me, active, initials, isStaff }: { me: Profile | null; active: NavActive; initials: string; isStaff: boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -388,6 +389,7 @@ function ProfileMenu({ me, active, initials }: { me: Profile | null; active: Nav
           <a role="menuitem" href={R.start} style={itemStyle} onClick={() => setOpen(false)}>Get started</a>
           <a role="menuitem" href={R.guides} style={itemStyle} onClick={() => setOpen(false)}>Best practices</a>
           <a role="menuitem" href={R.help} style={itemStyle} onClick={() => setOpen(false)}>Help &amp; community</a>
+          {isStaff && <a role="menuitem" href={R.adminVerification} style={itemStyle} onClick={() => setOpen(false)}>Verification review</a>}
           <a role="menuitem" href={R.settings} style={itemStyle} onClick={() => setOpen(false)}>Settings</a>
           <div style={{ height: 1, background: "var(--line-soft)", margin: "4px 0" }} />
           <button role="menuitem" type="button" style={{ ...itemStyle, color: "var(--ink-2)" }}
@@ -426,12 +428,13 @@ function MobileTabBar({ me, active, unreadConvos, menuOpen, onToggleMenu, initia
 
 export default function Nav({ active = null, showSearch = true, showPostButton = true }: { active?: NavActive; showSearch?: boolean; showPostButton?: boolean }) {
   const [me, setMe] = useState<Profile | null>(null);
+  const [isStaff, setIsStaff] = useState(false);
   const [unreadConvos, setUnreadConvos] = useState(0);
   const [contractsSig, setContractsSig] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    getProfile().then(setMe).catch(() => {});
+    getProfile({ withBadges: true }).then((p) => { setMe(p); setIsStaff(!!p?.is_staff); }).catch(() => {});
     const onUpdate = (e: Event) => {
       const detail = (e as CustomEvent<Profile>).detail;
       if (detail) setMe(detail);
@@ -498,7 +501,7 @@ export default function Nav({ active = null, showSearch = true, showPostButton =
           </a>
           <span className="seshn-hide-mobile" style={{ display: "inline-flex" }}><ThemeToggle /></span>
           <NotificationsBell />
-          <span className="seshn-hide-mobile" style={{ display: "inline-flex" }}><ProfileMenu me={me} active={active} initials={initials} /></span>
+          <span className="seshn-hide-mobile" style={{ display: "inline-flex" }}><ProfileMenu me={me} active={active} initials={initials} isStaff={isStaff} /></span>
         </div>
       </nav>
       {menuOpen && <div className="seshn-nav-backdrop" onClick={() => setMenuOpen(false)} aria-hidden="true" />}
@@ -521,6 +524,7 @@ export default function Nav({ active = null, showSearch = true, showPostButton =
           <a href={R.start} className="seshn-sheet-link" onClick={() => setMenuOpen(false)}>Get started</a>
           <a href={R.guides} className="seshn-sheet-link" onClick={() => setMenuOpen(false)}>Best practices</a>
           <a href={R.help} className="seshn-sheet-link" onClick={() => setMenuOpen(false)}>Help &amp; community</a>
+          {isStaff && <a href={R.adminVerification} className="seshn-sheet-link" onClick={() => setMenuOpen(false)}>Verification review</a>}
           <a href={R.settings} className="seshn-sheet-link" onClick={() => setMenuOpen(false)}>Settings</a>
         </div>
         <div className="seshn-sheet-row"><span>Theme</span><ThemeToggle /></div>
