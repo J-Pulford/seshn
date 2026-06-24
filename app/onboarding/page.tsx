@@ -220,9 +220,8 @@ export default function OnboardingPage() {
         social_links: cleanSocial,
         featured,
       });
-      // Brand-new members get the first-run walkthrough (what Seshn is / how it
-      // works) before anything else; it hands off to Get Started.
-      window.location.href = "/welcome";
+      // Send brand-new members to Get Started so they grok the platform fast.
+      window.location.href = "/start";
     } catch (e) {
       const ex = e as { code?: string; message?: string };
       console.error("[seshn] onboarding upsert error:", e);
