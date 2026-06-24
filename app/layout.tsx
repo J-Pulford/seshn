@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter_Tight, JetBrains_Mono } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import ProducerMode from "@/components/easter/ProducerMode";
 import Toaster from "@/components/Toaster";
 import ConfirmHost from "@/components/ConfirmHost";
@@ -62,6 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ConfirmHost />
         <GoogleAnalytics />
         <ConsentBanner />
+        <SpeedInsights />
       </body>
     </html>
   );
