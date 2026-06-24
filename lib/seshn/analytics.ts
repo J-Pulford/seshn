@@ -23,6 +23,27 @@ export async function recordGigView(gigId: string): Promise<void> {
   }
 }
 
+// Public, aggregate-only counts for a single gig (views + applicants), for
+// social proof on the listing page. Returns zeros on any error so the UI can
+// render unconditionally. See migration 0044 — the RPC exposes counts only.
+export interface GigPublicStats {
+  views: number;
+  applications: number;
+}
+
+export async function getGigPublicStats(gigId: string): Promise<GigPublicStats> {
+  const zero: GigPublicStats = { views: 0, applications: 0 };
+  if (!gigId) return zero;
+  try {
+    const res = await getBrowserClient().rpc("gig_public_stats", { p_gig_id: gigId });
+    if (res.error) return zero;
+    const d = res.data as Partial<GigPublicStats> | null;
+    return { views: Number(d?.views ?? 0), applications: Number(d?.applications ?? 0) };
+  } catch {
+    return zero;
+  }
+}
+
 export interface ProfileAnalytics {
   window_days: number;
   views_total: number;

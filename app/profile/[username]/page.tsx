@@ -19,6 +19,9 @@ import { confirm } from "@/lib/seshn/confirm";
 import { ProducerBadge } from "@/components/ProducerBadge";
 import { StaffBadge } from "@/components/StaffBadge";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { ShareButton } from "@/components/ShareButton";
+import { AlbumArt } from "@/components/visual/AlbumArt";
+import { WaveformAudio } from "@/components/visual/Waveform";
 import type { ConnectedAccount, Credit, FeaturedItem, GalleryItem, Gig, Profile, ProfileStats, Review, Service, SocialLinks } from "@/lib/seshn/types";
 import "./profile.css";
 
@@ -654,91 +657,277 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
   const influences = profile.influences || [];
   const languages = profile.languages || [];
 
+  const availability = availabilityMeta(profile.availability);
+  const hasStats = !!stats && (stats.gigs_posted > 0 || stats.collaborations > 0 || stats.rating_count > 0);
+  const startConversation = async () => {
+    try {
+      const me = await getUser();
+      if (!me) { window.location.href = "/auth?next=" + encodeURIComponent(window.location.pathname); return; }
+      const cid = await getOrCreateConversation(profile.id);
+      window.location.href = R.inboxConvo(cid);
+    } catch (e) { toast.error((e as Error)?.message || "Couldn't start a conversation."); }
+  };
+  const startContract = async () => {
+    try {
+      const me = await getUser();
+      if (!me) { window.location.href = "/auth?next=" + encodeURIComponent(window.location.pathname); return; }
+      let cid: string | null = null;
+      try { cid = await getOrCreateConversation(profile.id); } catch { cid = null; }
+      setContractConvoId(cid);
+      setShowContract(true);
+    } catch (e) { toast.error((e as Error)?.message || "Couldn't start a contract."); }
+  };
+
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column" }}>
       <Nav active="profile" />
 
-      <div style={{ position: "relative", background: "var(--surface)" }}>
-        <div className="profile-cover">
-          <CoverHeader seed={profile.username || "seshn-cover"} imageUrl={profile.cover_url} height={180} />
-        </div>
-        <div className="profile-avatar-wrap">
-          <div style={{ background: "var(--frame)", padding: 4, borderRadius: "50%", boxShadow: "0 0 0 1px var(--line)" }}>
-            <span className="avatar xl" style={{ background: profile.avatar_url ? "var(--ph)" : "linear-gradient(135deg,#a8ebc8,#2CCB73)", color: "#062c19", fontSize: 26, fontFamily: "var(--font-display)", fontWeight: 700, overflow: "hidden" }}>
-              {profile.avatar_url ? <img src={profile.avatar_url} alt="" /> : initials(profile.display_name)}
-            </span>
-          </div>
-        </div>
-        <div className="profile-actions">
-          {profile.is_verified && <VerifiedBadge style={{ fontSize: 12, padding: "5px 12px 5px 8px" }} />}
-          {isOwner ? (
-            <>
-              <a className="btn" style={{ backdropFilter: "blur(8px)", background: "rgba(255,255,255,0.9)", color: "#141414", borderColor: "rgba(0,0,0,0.18)" }} href={R.dashboard}>Finances</a>
-              <a className="btn" style={{ backdropFilter: "blur(8px)", background: "rgba(255,255,255,0.9)", color: "#141414", borderColor: "rgba(0,0,0,0.18)" }} href={R.settings}>Settings</a>
-              <button className="btn primary" onClick={() => setEditing(true)}>Edit profile</button>
-            </>
-          ) : (
-            <>
-              <button className="btn primary" onClick={async () => {
-                try {
-                  const me = await getUser();
-                  if (!me) { window.location.href = "/auth?next=" + encodeURIComponent(window.location.pathname); return; }
-                  const cid = await getOrCreateConversation(profile.id);
-                  window.location.href = R.inboxConvo(cid);
-                } catch (e) {
-                  toast.error((e as Error)?.message || "Couldn't start a conversation.");
-                }
-              }}>Message</button>
-              <button className="btn" onClick={async () => {
-                try {
-                  const me = await getUser();
-                  if (!me) { window.location.href = "/auth?next=" + encodeURIComponent(window.location.pathname); return; }
-                  let cid: string | null = null;
-                  try { cid = await getOrCreateConversation(profile.id); } catch { cid = null; }
-                  setContractConvoId(cid);
-                  setShowContract(true);
-                } catch (e) {
-                  toast.error((e as Error)?.message || "Couldn't start a contract.");
-                }
-              }}>Send a contract</button>
-              <SafetyControls profile={profile} />
-            </>
-          )}
-        </div>
+      <div className="pf-cover">
+        <CoverHeader seed={profile.username || "seshn-cover"} imageUrl={profile.cover_url} height={200} />
       </div>
 
-      <div className="profile-name-block" style={{ background: "var(--surface)", borderBottom: "1px solid var(--line)" }}>
-        <div className="row" style={{ gap: 10, marginBottom: 5, flexWrap: "wrap", alignItems: "center" }}><h1 className="t-h1 page-h1" style={{ fontSize: 30 }}>{profile.display_name}</h1>{profile.is_staff && <StaffBadge />}{profile.has_producer_badge && <ProducerBadge />}</div>
-        <div className="row" style={{ gap: 14, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
-          {(() => { const a = availabilityMeta(profile.availability); return a ? (
-            <span className="t-meta" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "3px 10px", borderRadius: 999, border: "1px solid var(--line)", background: "var(--surface-2)", fontFamily: "var(--font-display)", fontWeight: 600 }}>
-              <span style={{ width: 7, height: 7, background: a.dot, borderRadius: "50%", display: "inline-block" }} />{a.label}
-            </span>
-          ) : null; })()}
-          {profile.location && <span className="t-meta" style={{ display: "flex", alignItems: "center", gap: 5 }}><Icon kind="pin" size={12} /> {profile.location}</span>}
-          {profile.location && <span className="dot" />}
-          <span className="t-meta">{memberSince(profile.created_at)}</span>
-        </div>
-        <div className="row profile-tags" style={{ gap: 8, flexWrap: "wrap" }}>
-          {(profile.roles || []).map((r) => <span key={r} className="pill accent">{r}</span>)}
-          {(profile.genres || []).map((g) => <span key={g} className="pill">{g}</span>)}
-        </div>
-        {stats && (stats.gigs_posted > 0 || stats.collaborations > 0 || stats.rating_count > 0) && (
-          <div className="profile-stats">
-            {stats.rating_count > 0 && stats.rating_avg != null && (
-              <div className="stat">
-                <span className="stat-n">{Number(stats.rating_avg).toFixed(1)}</span>
-                <span className="stat-l" style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><Stars value={Number(stats.rating_avg)} size={12} /> {stats.rating_count} {stats.rating_count === 1 ? "review" : "reviews"}</span>
+      <div className="pf-shell">
+        {/* ── Left identity rail ── */}
+        <aside className="pf-rail">
+          <div className="pf-id">
+            <div className="pf-avatar-frame">
+              <span className="avatar pf-avatar" style={{ background: profile.avatar_url ? "var(--ph)" : "linear-gradient(135deg,#a8ebc8,#2CCB73)", color: "#062c19", fontFamily: "var(--font-display)", fontWeight: 700, overflow: "hidden" }}>
+                {profile.avatar_url ? <img src={profile.avatar_url} alt="" /> : initials(profile.display_name)}
+              </span>
+              {availability && (
+                <span className="pf-avail" title="Availability">
+                  <span className="pf-avail-dot" style={{ background: availability.dot }} />{availability.label}
+                </span>
+              )}
+            </div>
+
+            <div className="pf-namerow">
+              <h1 className="pf-name">{profile.display_name}</h1>
+              {profile.is_verified && <VerifiedBadge style={{ fontSize: 11, padding: "4px 9px 4px 7px" }} />}
+              {profile.is_staff && <StaffBadge />}
+              {profile.has_producer_badge && <ProducerBadge />}
+            </div>
+            <div className="pf-handle">@{profile.username}</div>
+            <div className="pf-metarow">
+              {profile.location && <span className="pf-meta-item"><Icon kind="pin" size={12} /> {profile.location}</span>}
+              {profile.location && <span className="dot" />}
+              <span className="pf-meta-item">{memberSince(profile.created_at)}</span>
+            </div>
+
+            {hasStats && stats && (
+              <div className="pf-statbox">
+                {stats.rating_count > 0 && stats.rating_avg != null && (
+                  <div className="pf-stat">
+                    <span className="pf-stat-n"><span className="pf-star">★</span> {Number(stats.rating_avg).toFixed(1)}</span>
+                    <span className="pf-stat-l">{stats.rating_count} {stats.rating_count === 1 ? "review" : "reviews"}</span>
+                  </div>
+                )}
+                <div className="pf-stat">
+                  <span className="pf-stat-n">{stats.gigs_posted}</span>
+                  <span className="pf-stat-l">{stats.gigs_posted === 1 ? "gig posted" : "gigs posted"}</span>
+                </div>
+                <div className="pf-stat">
+                  <span className="pf-stat-n">{stats.collaborations}</span>
+                  <span className="pf-stat-l">{stats.collaborations === 1 ? "collab" : "collabs"}</span>
+                </div>
               </div>
             )}
-            <div className="stat"><span className="stat-n">{stats.gigs_posted}</span><span className="stat-l">{stats.gigs_posted === 1 ? "gig posted" : "gigs posted"}</span></div>
-            <div className="stat"><span className="stat-n">{stats.collaborations}</span><span className="stat-l">{stats.collaborations === 1 ? "collaboration" : "collaborations"}</span></div>
-          </div>
-        )}
-      </div>
 
-      <div className="profile-grid">
-        <div className="col" style={{ gap: 28, minWidth: 0 }}>
+            <div className="pf-actions">
+              {isOwner ? (
+                <>
+                  <button className="btn primary pf-btn-primary" onClick={() => setEditing(true)}>Edit profile</button>
+                  <div className="pf-actions-row">
+                    <a className="btn" href={R.settings}>Settings</a>
+                    <a className="btn" href={R.dashboard}>Finances</a>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <button className="btn primary pf-btn-primary" onClick={startConversation}>Message</button>
+                  <div className="pf-actions-row">
+                    <button className="btn" style={{ flex: 1 }} onClick={startContract}>Send a contract</button>
+                    <SafetyControls profile={profile} />
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {(profile.roles?.length || profile.genres?.length) ? (
+            <div className="pf-card">
+              {profile.roles && profile.roles.length > 0 && (
+                <div className="pf-card-block">
+                  <div className="t-eyebrow">Roles</div>
+                  <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>{profile.roles.map((r) => <span key={r} className="pill accent">{r}</span>)}</div>
+                </div>
+              )}
+              {profile.genres && profile.genres.length > 0 && (
+                <div className="pf-card-block">
+                  <div className="t-eyebrow">Genres</div>
+                  <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>{profile.genres.map((g) => <span key={g} className="pill">{g}</span>)}</div>
+                </div>
+              )}
+            </div>
+          ) : null}
+
+          {services.length > 0 && (
+            <div className="pf-card">
+              <div className="pf-card-block">
+                <div className="t-eyebrow">Rates</div>
+                <div className="pf-rates">
+                  {services.map((s, i) => (
+                    <div key={i} className="pf-rate">
+                      <div className="pf-rate-top">
+                        <span className="pf-rate-name">{s.title}</span>
+                        {s.price && <span className="pf-rate-price">{s.price}{s.unit ? <span className="pf-rate-unit"> / {s.unit}</span> : null}</span>}
+                      </div>
+                      {s.description && <p className="pf-rate-desc">{s.description}</p>}
+                    </div>
+                  ))}
+                </div>
+                {!isOwner && <button className="btn sm" style={{ marginTop: 12, width: "100%" }} onClick={startConversation}>Message to book</button>}
+              </div>
+            </div>
+          )}
+
+          {(skills.length > 0 || influences.length > 0 || languages.length > 0) && (
+            <div className="pf-card">
+              {skills.length > 0 && (
+                <div className="pf-card-block">
+                  <div className="t-eyebrow">Skills &amp; gear</div>
+                  <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>{skills.map((s) => <span key={s} className="pill">{s}</span>)}</div>
+                </div>
+              )}
+              {influences.length > 0 && (
+                <div className="pf-card-block">
+                  <div className="t-eyebrow">Sounds like</div>
+                  <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>{influences.map((s) => <span key={s} className="pill">{s}</span>)}</div>
+                </div>
+              )}
+              {languages.length > 0 && (
+                <div className="pf-card-block">
+                  <div className="t-eyebrow">Languages</div>
+                  <span className="t-meta">{languages.join(" · ")}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {hasShowcase && (
+            <div className="pf-card">
+              <div className="pf-card-block">
+                <div className="t-eyebrow">Find me on</div>
+                <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+                  {socialItems.map((s) => (
+                    <a key={s.key} href={s.url} target="_blank" rel="noopener noreferrer" className="social-link">
+                      <span>{s.label}</span>
+                      <span aria-hidden="true" style={{ color: "var(--ink-4)" }}>↗</span>
+                    </a>
+                  ))}
+                  {extraConnected.map((acc) => {
+                    const followers = acc.stats?.followers != null ? acc.stats.followers.toLocaleString() + " followers" : null;
+                    const inner = (
+                      <span className="social-link" style={{ background: "var(--surface)" }}>
+                        <span style={{ textTransform: "capitalize" }}>{acc.provider}</span>
+                        {acc.display_name && <><span style={{ color: "var(--ink-4)" }}>·</span><span style={{ color: "var(--ink-2)" }}>{acc.display_name}</span></>}
+                        {followers && <><span style={{ color: "var(--ink-4)" }}>·</span><span style={{ color: "var(--accent-d)" }}>{followers}</span></>}
+                      </span>
+                    );
+                    return acc.profile_url ? <a key={acc.provider} href={acc.profile_url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>{inner}</a> : <span key={acc.provider}>{inner}</span>;
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+        </aside>
+
+        {/* ── Main content ── */}
+        <main className="pf-main">
+          {featured.length > 0 && (
+            <section>
+              <div className="pf-sec-head">
+                <div className="t-eyebrow">Featured work</div>
+                <span className="pf-count">{featured.length} {featured.length === 1 ? "track" : "tracks"}</span>
+              </div>
+              <div className="pf-tracks">
+                {featured.map((f, i) => {
+                  const e = embedFor(f.url);
+                  const audio = isAudioUrl(f.url);
+                  const srcLabel = audio ? "Audio" : e.kind === "youtube" ? "YouTube" : e.kind === "spotify" ? "Spotify" : e.kind === "soundcloud" ? "SoundCloud" : "Link";
+                  if (audio) {
+                    return (
+                      <div key={i} className="pf-track">
+                        <AlbumArt seed={f.title || f.url} size={52} radius={10} />
+                        <WaveformAudio src={f.url} seed={f.title || f.url} title={f.title} />
+                        <span className="pf-src">{srcLabel}</span>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={i} className="pf-track-embed">
+                      <div className="pf-track-embed-head">
+                        {f.title ? <span className="pf-embed-title">{f.title}</span> : <span />}
+                        <span className="pf-src">{srcLabel}</span>
+                      </div>
+                      {e.kind === "youtube" ? (
+                        <div className="embed-16x9"><iframe src={e.src} title={f.title || "Featured video"} loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen /></div>
+                      ) : e.kind === "link" ? (
+                        <a href={e.url} target="_blank" rel="noopener noreferrer" className="social-link">Open link ↗</a>
+                      ) : (
+                        <iframe className="embed-player" style={{ height: e.height }} src={e.src} title={f.title || "Featured track"} loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          <div className={"pf-about-grid" + (credits.length > 0 ? " two" : "")}>
+            <section>
+              <div className="t-eyebrow" style={{ marginBottom: 10 }}>About</div>
+              <p style={{ fontSize: 14.5, lineHeight: 1.7, color: "var(--ink-2)", whiteSpace: "pre-wrap", margin: 0 }}>
+                {profile.bio || <span style={{ color: "var(--ink-3)", fontStyle: "italic" }}>No bio yet{isOwner ? ". Add one in your profile settings." : "."}</span>}
+              </p>
+            </section>
+            {credits.length > 0 && (
+              <section>
+                <div className="t-eyebrow" style={{ marginBottom: 10 }}>Credits &amp; discography</div>
+                <div className="credits-list">
+                  {credits.map((c, i) => {
+                    const meta = [c.role, c.year].filter(Boolean).join(" · ");
+                    const body = (
+                      <>
+                        <span className="credit-dot" aria-hidden="true" />
+                        <span className="credit-name">{c.title}</span>
+                        {meta && <span className="credit-meta">{meta}</span>}
+                        {c.link && <span className="credit-go" aria-hidden="true">↗</span>}
+                      </>
+                    );
+                    return c.link
+                      ? <a key={i} href={c.link} target="_blank" rel="noopener noreferrer" className="credit-row is-link">{body}</a>
+                      : <div key={i} className="credit-row">{body}</div>;
+                  })}
+                </div>
+              </section>
+            )}
+          </div>
+
+          {gallery.length > 0 && (
+            <section>
+              <div className="t-eyebrow" style={{ marginBottom: 10 }}>Gallery</div>
+              <div className="gallery-grid">
+                {gallery.map((g, i) => (
+                  <button type="button" key={g.url} className="gallery-cell" onClick={() => setLightbox(i)} title={g.caption || "View photo"}>
+                    <img src={g.url} alt={g.caption || ""} loading="lazy" />
+                    {g.caption && <span className="gallery-cap">{g.caption}</span>}
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+
           {reviews && reviews.length > 0 && (
             <section>
               <div className="t-eyebrow" style={{ marginBottom: 10, display: "flex", alignItems: "center", gap: 10 }}>
@@ -766,125 +955,6 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
               </div>
             </section>
           )}
-          {featured.length > 0 && (
-            <section>
-              <div className="t-eyebrow" style={{ marginBottom: 10 }}>Featured work</div>
-              <div className="featured-list">
-                {featured.map((f, i) => {
-                  const e = embedFor(f.url);
-                  return (
-                    <div key={i} className="featured-item">
-                      {f.title && <div className="featured-title">{f.title}</div>}
-                      {isAudioUrl(f.url) ? (
-                        <audio controls preload="none" src={f.url} style={{ width: "100%" }} />
-                      ) : e.kind === "youtube" ? (
-                        <div className="embed-16x9"><iframe src={e.src} title={f.title || "Featured video"} loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen /></div>
-                      ) : e.kind === "link" ? (
-                        <a href={e.url} target="_blank" rel="noopener noreferrer" className="social-link">Open link ↗</a>
-                      ) : (
-                        <iframe className="embed-player" style={{ height: e.height }} src={e.src} title={f.title || "Featured track"} loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          <section>
-            <div className="t-eyebrow" style={{ marginBottom: 10 }}>Bio</div>
-            <p style={{ fontSize: 14, lineHeight: 1.65, color: "var(--ink-2)", maxWidth: 680, whiteSpace: "pre-wrap" }}>
-              {profile.bio || <span style={{ color: "var(--ink-3)", fontStyle: "italic" }}>No bio yet{isOwner ? ". Add one in your profile settings." : "."}</span>}
-            </p>
-          </section>
-
-          {hasShowcase && (
-            <section>
-              <div className="t-eyebrow" style={{ marginBottom: 10 }}>Find me on</div>
-              <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
-                {socialItems.map((s) => (
-                  <a key={s.key} href={s.url} target="_blank" rel="noopener noreferrer" className="social-link">
-                    <span>{s.label}</span>
-                    <span aria-hidden="true" style={{ color: "var(--ink-4)" }}>↗</span>
-                  </a>
-                ))}
-                {extraConnected.map((acc) => {
-                  const followers = acc.stats?.followers != null ? acc.stats.followers.toLocaleString() + " followers" : null;
-                  const inner = (
-                    <span className="social-link" style={{ background: "var(--surface)" }}>
-                      <span style={{ textTransform: "capitalize" }}>{acc.provider}</span>
-                      {acc.display_name && <><span style={{ color: "var(--ink-4)" }}>·</span><span style={{ color: "var(--ink-2)" }}>{acc.display_name}</span></>}
-                      {followers && <><span style={{ color: "var(--ink-4)" }}>·</span><span style={{ color: "var(--accent-d)" }}>{followers}</span></>}
-                    </span>
-                  );
-                  return acc.profile_url ? <a key={acc.provider} href={acc.profile_url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>{inner}</a> : <span key={acc.provider}>{inner}</span>;
-                })}
-              </div>
-            </section>
-          )}
-
-          {credits.length > 0 && (
-            <section>
-              <div className="t-eyebrow" style={{ marginBottom: 10 }}>Credits &amp; discography</div>
-              <div className="credits-list">
-                {credits.map((c, i) => {
-                  const meta = [c.role, c.year].filter(Boolean).join(" · ");
-                  const body = (
-                    <>
-                      <span className="credit-dot" aria-hidden="true" />
-                      <span className="credit-name">{c.title}</span>
-                      {meta && <span className="credit-meta">{meta}</span>}
-                      {c.link && <span className="credit-go" aria-hidden="true">↗</span>}
-                    </>
-                  );
-                  return c.link
-                    ? <a key={i} href={c.link} target="_blank" rel="noopener noreferrer" className="credit-row is-link">{body}</a>
-                    : <div key={i} className="credit-row">{body}</div>;
-                })}
-              </div>
-            </section>
-          )}
-
-          {gallery.length > 0 && (
-            <section>
-              <div className="t-eyebrow" style={{ marginBottom: 10 }}>Gallery</div>
-              <div className="gallery-grid">
-                {gallery.map((g, i) => (
-                  <button type="button" key={g.url} className="gallery-cell" onClick={() => setLightbox(i)} title={g.caption || "View photo"}>
-                    <img src={g.url} alt={g.caption || ""} loading="lazy" />
-                    {g.caption && <span className="gallery-cap">{g.caption}</span>}
-                  </button>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {services.length > 0 && (
-            <section>
-              <div className="t-eyebrow" style={{ marginBottom: 10 }}>Services &amp; rates</div>
-              <div className="services-grid">
-                {services.map((s, i) => (
-                  <div key={i} className="service-card">
-                    <div className="row between" style={{ alignItems: "baseline", gap: 8 }}>
-                      <span className="service-name">{s.title}</span>
-                      {s.price && <span className="service-rate">{s.price}{s.unit ? <span className="service-unit"> / {s.unit}</span> : null}</span>}
-                    </div>
-                    {s.description && <p className="service-desc-text">{s.description}</p>}
-                  </div>
-                ))}
-              </div>
-              {!isOwner && (
-                <button className="btn sm" style={{ marginTop: 10 }} onClick={async () => {
-                  try {
-                    const me = await getUser();
-                    if (!me) { window.location.href = "/auth?next=" + encodeURIComponent(window.location.pathname); return; }
-                    const cid = await getOrCreateConversation(profile.id);
-                    window.location.href = R.inboxConvo(cid);
-                  } catch (e) { toast.error((e as Error)?.message || "Couldn't start a conversation."); }
-                }}>Message to book</button>
-              )}
-            </section>
-          )}
 
           <section>
             <div className="row between" style={{ marginBottom: 12 }}>
@@ -907,52 +977,15 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
               )}
             </div>
           </section>
-        </div>
 
-        <aside className="col" style={{ gap: 16, position: "sticky", top: 82, height: "fit-content" }}>
-          {(profile.roles?.length || profile.genres?.length) ? (
-            <div className="card" style={{ padding: 18 }}>
-              {profile.roles && profile.roles.length > 0 && (
-                <div style={{ marginBottom: profile.genres && profile.genres.length ? 14 : 0 }}>
-                  <div className="t-eyebrow" style={{ marginBottom: 8 }}>Roles</div>
-                  <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>{profile.roles.map((r) => <span key={r} className="pill accent">{r}</span>)}</div>
-                </div>
-              )}
-              {profile.genres && profile.genres.length > 0 && (
-                <div>
-                  <div className="t-eyebrow" style={{ marginBottom: 8 }}>Genres</div>
-                  <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>{profile.genres.map((g) => <span key={g} className="pill">{g}</span>)}</div>
-                </div>
-              )}
+          <section className="pf-share">
+            <div className="pf-share-text">
+              <div className="pf-share-title">Share this profile</div>
+              <div className="pf-share-url">seshn.fm/@{profile.username}</div>
             </div>
-          ) : null}
-          {(skills.length > 0 || influences.length > 0 || languages.length > 0) && (
-            <div className="card" style={{ padding: 18, display: "flex", flexDirection: "column", gap: 14 }}>
-              {skills.length > 0 && (
-                <div>
-                  <div className="t-eyebrow" style={{ marginBottom: 8 }}>Skills &amp; gear</div>
-                  <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>{skills.map((s) => <span key={s} className="pill">{s}</span>)}</div>
-                </div>
-              )}
-              {influences.length > 0 && (
-                <div>
-                  <div className="t-eyebrow" style={{ marginBottom: 8 }}>Sounds like</div>
-                  <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>{influences.map((s) => <span key={s} className="pill">{s}</span>)}</div>
-                </div>
-              )}
-              {languages.length > 0 && (
-                <div>
-                  <div className="t-eyebrow" style={{ marginBottom: 8 }}>Languages</div>
-                  <span className="t-meta">{languages.join(" · ")}</span>
-                </div>
-              )}
-            </div>
-          )}
-          <div style={{ padding: "14px 0", borderTop: "1px solid var(--line-soft)" }}>
-            <div className="t-eyebrow" style={{ marginBottom: 8 }}>Share profile</div>
-            <div style={{ padding: "8px 12px", background: "var(--surface-2)", borderRadius: 8, border: "1px solid var(--line)", fontSize: 11, color: "var(--ink-3)", fontFamily: "var(--font-body)" }}>seshn.fm/@{profile.username}</div>
-          </div>
-        </aside>
+            <ShareButton url={`/profile/${encodeURIComponent(profile.username)}`} title={(profile.display_name || profile.username) + " on Seshn"} text={"Check out " + (profile.display_name || profile.username) + " on Seshn"} label="Copy link" copiedLabel="Copied!" className="btn" />
+          </section>
+        </main>
       </div>
 
       {editing && <EditProfileModal profile={profile} onClose={() => setEditing(false)} onSaved={(updated) => { setEditing(false); onProfileUpdate(updated); }} />}

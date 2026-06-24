@@ -7,7 +7,8 @@ import Nav from "@/components/Nav";
 import { AlbumArt } from "@/components/visual/AlbumArt";
 import { getUser } from "@/lib/seshn/profiles";
 import { getGig, setGigStatus } from "@/lib/seshn/gigs";
-import { recordGigView } from "@/lib/seshn/analytics";
+import { recordGigView, getGigPublicStats, type GigPublicStats } from "@/lib/seshn/analytics";
+import { ShareButton } from "@/components/ShareButton";
 import { applyToGig, getMyApplication, listApplicationsForGig, updateApplicationStatus } from "@/lib/seshn/applications";
 import { createContract, getContractForApplication } from "@/lib/seshn/contracts";
 import { getOrCreateConversation } from "@/lib/seshn/messaging";
@@ -389,6 +390,13 @@ function GigView({ gig: initialGig }: { gig: Gig }) {
   const [me, setMe] = useState<User | null | undefined>(undefined);
   const [myApp, setMyApp] = useState<Application | null | undefined>(undefined);
   const [statusBusy, setStatusBusy] = useState(false);
+  const [stats, setStats] = useState<GigPublicStats | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getGigPublicStats(gig.id).then((s) => { if (!cancelled) setStats(s); });
+    return () => { cancelled = true; };
+  }, [gig.id]);
 
   async function toggleStatus() {
     if (statusBusy) return;
@@ -443,7 +451,8 @@ function GigView({ gig: initialGig }: { gig: Gig }) {
             <span className="pill">{compLabel(gig)}</span>
             {gig.location && <span className="pill">{gig.location}</span>}
             {gig.deadline && <span className="pill">{deadlineLabel(gig.deadline)}</span>}
-            {isOwner && <button className="btn sm" style={{ marginLeft: "auto" }} onClick={toggleStatus} disabled={statusBusy}>{statusBusy ? "…" : isClosed ? "Reopen gig" : "Close gig"}</button>}
+            <ShareButton url={`/gig/${gig.id}`} title={gig.title + " · Seshn"} text={"Check out this gig on Seshn: " + gig.title} label="Share" className="btn sm" style={{ marginLeft: "auto" }} />
+            {isOwner && <button className="btn sm" onClick={toggleStatus} disabled={statusBusy}>{statusBusy ? "…" : isClosed ? "Reopen gig" : "Close gig"}</button>}
           </div>
 
           <h1 className="page-h1" style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 40, lineHeight: 1.02, letterSpacing: "-0.025em", color: "var(--ink)", marginBottom: 20 }}>{gig.title}</h1>
@@ -479,6 +488,20 @@ function GigView({ gig: initialGig }: { gig: Gig }) {
               <div className="t-meta">{owner.roles?.[0] || "Artist"}{owner.location ? " · " + owner.location : ""} · Posted {gig.created_at ? new Date(gig.created_at).toLocaleDateString() : "recently"}</div>
             </div>
           </div>
+
+          {stats && (
+            <div className="gig-stat-strip">
+              <span className="gig-stat">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" /><circle cx="12" cy="12" r="3" /></svg>
+                <strong>{stats.views.toLocaleString()}</strong> {stats.views === 1 ? "view" : "views"}
+              </span>
+              <span className="dot" />
+              <span className="gig-stat">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+                <strong>{stats.applications.toLocaleString()}</strong> {stats.applications === 1 ? "applicant" : "applicants"}
+              </span>
+            </div>
+          )}
 
           <div style={{ borderTop: "1px solid var(--line)", paddingTop: 20, marginBottom: 24 }}>
             {body.length > 0 ? (

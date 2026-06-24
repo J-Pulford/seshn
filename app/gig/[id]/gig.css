@@ -20,3 +20,9 @@
   .apply-section { padding: 14px !important; }
   textarea, input[type="text"], input[type="url"] { font-size: 16px !important; }
 }
+
+/* Public listing stats (views + applicants) — social proof under the byline */
+.gig-stat-strip { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+.gig-stat { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-display); font-size: 13px; color: var(--ink-3); }
+.gig-stat svg { color: var(--ink-4); }
+.gig-stat strong { font-weight: 700; color: var(--ink); }
