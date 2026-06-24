@@ -6,6 +6,7 @@ import { getBrowserClient } from "./client";
 import { getUser } from "./profiles";
 
 export type VerificationStatus = "pending" | "approved" | "rejected" | "withdrawn";
+export type PaymentStatus = "unpaid" | "paid" | "refunded";
 
 export interface VerificationDetails {
   full_name: string;
@@ -24,6 +25,7 @@ export interface VerificationApplication {
   id: string;
   user_id: string;
   status: VerificationStatus;
+  payment_status: PaymentStatus;
   details: Partial<VerificationDetails>;
   created_at: string;
 }
@@ -42,6 +44,8 @@ export interface VerificationReviewItem {
   user_id: string;
   status: VerificationStatus;
   details: Partial<VerificationDetails>;
+  payment_status: PaymentStatus;
+  paid_at: string | null;
   review_notes: string | null;
   reviewed_at: string | null;
   created_at: string;
@@ -49,9 +53,9 @@ export interface VerificationReviewItem {
   applicant: VerificationApplicant | null;
 }
 
-const FIELDS = "id, user_id, status, details, created_at";
+const FIELDS = "id, user_id, status, payment_status, details, created_at";
 const REVIEW_FIELDS =
-  "id, user_id, status, details, review_notes, reviewed_at, created_at, updated_at, " +
+  "id, user_id, status, payment_status, paid_at, details, review_notes, reviewed_at, created_at, updated_at, " +
   "applicant:profiles!verification_applications_user_id_fkey(id, username, display_name, avatar_url)";
 
 // The caller's most recent application, or null if they've never applied.
@@ -92,6 +96,22 @@ export async function withdrawVerificationApplication(id: string): Promise<void>
   if (!u || !id) return;
   const res = await sb.from("verification_applications").update({ status: "withdrawn" }).eq("id", id).eq("user_id", u.id);
   if (res.error) throw res.error;
+}
+
+// Start (or resume) checkout for the one-time verification fee, then redirect
+// to Stripe's hosted page. The user returns to /verify?status=paid|cancelled.
+export async function startVerificationCheckout(): Promise<void> {
+  const { data } = await getBrowserClient().auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error("Not signed in");
+  const res = await fetch("/api/stripe/verification/checkout", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + token },
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || "Couldn't start payment.");
+  if (!json.url) throw new Error("Stripe didn't return a checkout link.");
+  window.location.href = json.url;
 }
 
 // ──── Staff review queue ───────────────────────────────────────────

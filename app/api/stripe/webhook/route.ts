@@ -27,6 +27,39 @@ async function markEscrowFunded(admin: SupabaseClient, escrowId: string, payment
   });
 }
 
+// Mark a verification application paid exactly once. Guarded on
+// payment_status='unpaid' so duplicate/retried events are no-ops. Records the
+// payment in audit_log only on the real transition.
+async function markVerificationPaid(
+  admin: SupabaseClient,
+  applicationId: string,
+  paymentIntentId: string | null,
+  amountCents: number | null,
+  currency: string | null,
+) {
+  const { data, error } = await admin
+    .from("verification_applications")
+    .update({
+      payment_status: "paid",
+      paid_at: new Date().toISOString(),
+      stripe_payment_intent_id: paymentIntentId,
+      amount_paid_cents: amountCents,
+      currency: currency ? currency.toUpperCase() : null,
+    })
+    .eq("id", applicationId)
+    .eq("payment_status", "unpaid")
+    .select("id, user_id")
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return; // already paid, duplicate event
+  await admin.from("audit_log").insert({
+    action: "verification_paid",
+    target_table: "verification_applications",
+    target_id: applicationId,
+    payload: { user_id: data.user_id, amount_cents: amountCents, currency, payment_intent_id: paymentIntentId },
+  });
+}
+
 // POST /api/stripe/webhook — Stripe event sink. Verify the signature against the
 // raw body, then react. account.updated keeps payout-account status fresh;
 // escrow events (payment_intent.succeeded, transfer.*) get handled when the
@@ -71,6 +104,9 @@ export async function POST(req: Request) {
         if (meta.kind === "escrow_funding" && meta.escrow_id && session.payment_status === "paid") {
           const pi = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id || null;
           await markEscrowFunded(admin, meta.escrow_id, pi);
+        } else if (meta.kind === "verification" && meta.application_id && session.payment_status === "paid") {
+          const pi = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id || null;
+          await markVerificationPaid(admin, meta.application_id, pi, session.amount_total ?? null, session.currency ?? null);
         }
         break;
       }
@@ -82,6 +118,8 @@ export async function POST(req: Request) {
         const meta = pi.metadata || {};
         if (meta.kind === "escrow_funding" && meta.escrow_id) {
           await markEscrowFunded(admin, meta.escrow_id, pi.id);
+        } else if (meta.kind === "verification" && meta.application_id) {
+          await markVerificationPaid(admin, meta.application_id, pi.id, pi.amount ?? null, pi.currency ?? null);
         }
         break;
       }

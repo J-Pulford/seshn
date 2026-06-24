@@ -8,12 +8,14 @@ import {
   getMyVerificationApplication,
   submitVerificationApplication,
   withdrawVerificationApplication,
+  startVerificationCheckout,
   type VerificationApplication,
   type VerificationDetails,
 } from "@/lib/seshn/verification";
 import type { Profile } from "@/lib/seshn/types";
 
 const ROLES = ["Producer", "Vocalist", "Songwriter", "Mixing engineer", "Mastering engineer", "Instrumentalist", "Beatmaker", "Artist / band", "Other"];
+const PRICE_LABEL = "A$49"; // display only; the server charge is authoritative (VERIFICATION_FEE_CENTS)
 
 const label: React.CSSProperties = { display: "block", fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13, marginBottom: 6, color: "var(--ink)" };
 const hint: React.CSSProperties = { fontSize: 12, color: "var(--ink-3)", marginBottom: 6, lineHeight: 1.5 };
@@ -25,6 +27,8 @@ export default function VerifyPage() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [done, setDone] = useState(false);
+  const [paying, setPaying] = useState(false);
+  const [returned, setReturned] = useState<"paid" | "cancelled" | null>(null);
 
   const [d, setD] = useState<VerificationDetails>({
     full_name: "", primary_role: "", years_experience: "", based_in: "",
@@ -39,9 +43,33 @@ export default function VerifyPage() {
       if (!r.user || !r.profile) { setMe(null); return; }
       setMe(r.profile);
       setD((p) => ({ ...p, full_name: r.profile.display_name || "", primary_role: r.profile.roles?.[0] || "", based_in: r.profile.location || "" }));
-      setExisting(await getMyVerificationApplication());
+
+      const ret = new URLSearchParams(window.location.search).get("status");
+      if (ret === "paid" || ret === "cancelled") setReturned(ret);
+
+      let app = await getMyVerificationApplication();
+      // Returning from a successful checkout, the webhook may not have landed
+      // yet — give it a couple of short retries before showing the result.
+      if (ret === "paid" && app && app.payment_status !== "paid") {
+        for (let i = 0; i < 3 && app && app.payment_status !== "paid"; i++) {
+          await new Promise((res) => setTimeout(res, 1200));
+          app = await getMyVerificationApplication();
+        }
+      }
+      setExisting(app);
     })();
   }, []);
+
+  async function pay() {
+    setErr("");
+    setPaying(true);
+    try {
+      await startVerificationCheckout(); // redirects to Stripe on success
+    } catch (e) {
+      setErr((e as Error)?.message || "Couldn't start payment.");
+      setPaying(false);
+    }
+  }
 
   async function submit() {
     setErr("");
@@ -52,7 +80,8 @@ export default function VerifyPage() {
     if (!d.consent_identity) return setErr("Please confirm you consent to identity verification.");
     setBusy(true);
     try {
-      await submitVerificationApplication(d);
+      const app = await submitVerificationApplication(d);
+      setExisting(app);
       setDone(true);
     } catch (e) {
       setErr((e as Error)?.message || "Couldn't submit your application.");
@@ -81,9 +110,35 @@ export default function VerifyPage() {
 
   // Already submitted (and not withdrawn) → show status, not the form again.
   if ((existing && existing.status !== "withdrawn") || done) {
-    const status = done ? "pending" : existing!.status;
+    const status = existing ? existing.status : "pending";
+    const unpaid = status === "pending" && existing?.payment_status !== "paid";
+
+    // Pending + unpaid → the application exists but isn't in the queue until the
+    // one-time fee is paid. Show the payment CTA (not the generic "received").
+    if (unpaid && existing) {
+      return (
+        <Shell>
+          <div style={{ paddingTop: 48, textAlign: "center" }}>
+            <div style={{ display: "inline-flex", marginBottom: 14 }}><VerifiedBadge style={{ fontSize: 13, padding: "5px 13px 5px 9px" }} /></div>
+            <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 26, margin: "0 0 10px" }}>One step left</h1>
+            <p style={{ color: "var(--ink-2)", lineHeight: 1.6, maxWidth: 460, margin: "0 auto" }}>
+              Your details are saved. Pay the one-time {PRICE_LABEL} verification fee to enter the review queue. Our team reviews each application by hand, this is a vetting fee and isn&apos;t refunded if you&apos;re not approved.
+            </p>
+            {returned === "cancelled" && <p style={{ color: "var(--ink-3)", fontSize: 13, marginTop: 10 }}>Payment cancelled, you can try again whenever you&apos;re ready.</p>}
+            {err && <p style={{ color: "#c0392b", fontSize: 13, marginTop: 10 }}>{err}</p>}
+            <div style={{ marginTop: 22 }}>
+              <button className="btn primary" disabled={paying} onClick={pay}>{paying ? "Redirecting…" : `Pay ${PRICE_LABEL} & submit`}</button>
+            </div>
+            <button className="btn" style={{ marginTop: 12 }} onClick={async () => { try { await withdrawVerificationApplication(existing.id); setExisting({ ...existing, status: "withdrawn" }); setDone(false); } catch { /* ignore */ } }}>
+              Withdraw application
+            </button>
+          </div>
+        </Shell>
+      );
+    }
+
     const copy: Record<string, { h: string; p: string }> = {
-      pending: { h: "Application received", p: "Thanks, your verification application is in the queue. Our team reviews each one by hand, we'll be in touch by email. This usually takes a few days." },
+      pending: { h: "Application received", p: "Thanks, your verification application is paid and in the queue. Our team reviews each one by hand, we'll be in touch by email. This usually takes a few days." },
       approved: { h: "You're verified", p: "Your profile carries the Verified badge. Nice work." },
       rejected: { h: "Not approved this time", p: "We couldn't verify this application. You're welcome to reapply with more detail or links to your work." },
     };
@@ -94,6 +149,7 @@ export default function VerifyPage() {
           <div style={{ display: "inline-flex", marginBottom: 14 }}><VerifiedBadge style={{ fontSize: 13, padding: "5px 13px 5px 9px" }} /></div>
           <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 26, margin: "0 0 10px" }}>{c.h}</h1>
           <p style={{ color: "var(--ink-2)", lineHeight: 1.6, maxWidth: 460, margin: "0 auto" }}>{c.p}</p>
+          {status === "pending" && returned === "paid" && <p style={{ color: "var(--bus, #5b8def)", fontSize: 13, marginTop: 10 }}>Payment received, thank you.</p>}
           {status === "pending" && existing && (
             <button className="btn" style={{ marginTop: 22 }} onClick={async () => { try { await withdrawVerificationApplication(existing.id); setExisting({ ...existing, status: "withdrawn" }); setDone(false); } catch { /* ignore */ } }}>
               Withdraw application
@@ -112,7 +168,7 @@ export default function VerifyPage() {
         <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 30, letterSpacing: "-0.02em", margin: "0 0 10px" }}>Apply for verification</h1>
         <p style={{ color: "var(--ink-2)", lineHeight: 1.6, maxWidth: 560 }}>
           The Verified badge tells collaborators your profile has been deeply vetted by Seshn, real person, real work, real track record. Applications are reviewed by hand.
-          <strong style={{ color: "var(--ink)" }}> Payment ($49, one-time) is coming soon</strong>, for now there&apos;s no charge to apply.
+          <strong style={{ color: "var(--ink)" }}> There&apos;s a one-time {PRICE_LABEL} fee</strong>, paid after you submit, to enter the review queue.
         </p>
       </header>
 
@@ -178,7 +234,7 @@ export default function VerifyPage() {
         {err && <div style={{ color: "#c43d3f", fontSize: 13 }}>{err}</div>}
 
         <div>
-          <button className="btn primary lg" onClick={submit} disabled={busy} style={{ width: "100%" }}>{busy ? "Submitting…" : "Submit application"}</button>
+          <button className="btn primary lg" onClick={submit} disabled={busy} style={{ width: "100%" }}>{busy ? "Submitting…" : "Submit & continue to payment"}</button>
           <p style={{ fontSize: 12, color: "var(--ink-3)", textAlign: "center", marginTop: 10, lineHeight: 1.5 }}>No charge today. We&apos;ll review and email you, the $49 one-time fee will apply once verification fully launches.</p>
         </div>
       </div>

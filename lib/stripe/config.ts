@@ -13,6 +13,12 @@ export const STRIPE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE
 
 // Seshn's cut, in basis points (1000 = 10%).
 export const PLATFORM_FEE_BPS = Number(process.env.PLATFORM_FEE_BPS || "1000");
+
+// The one-time verification fee (the "Verified" badge review). Env-overridable
+// so the price/currency can change without a deploy. Defaults to A$49.
+export const VERIFICATION_FEE_CENTS = Math.max(0, Math.round(Number(process.env.VERIFICATION_FEE_CENTS || "4900")));
+export const VERIFICATION_CURRENCY = (process.env.VERIFICATION_CURRENCY || "AUD").toUpperCase();
+
 // Stripe processing-fee estimate. Seshn absorbs this out of its platform fee
 // (so the client pays exactly the quoted rate and the collaborator keeps a
 // predictable share), used here only to surface Seshn's net. Defaults to the

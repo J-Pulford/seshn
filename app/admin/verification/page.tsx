@@ -96,6 +96,9 @@ function ReviewCard({ item, onDecide }: { item: VerificationReviewItem; onDecide
           <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 2 }}>
             Applied {fmtDate(item.created_at)}
             <span style={{ marginLeft: 8, color: statusColor[item.status], fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>{item.status}</span>
+            <span style={{ marginLeft: 8, fontWeight: 600, color: item.payment_status === "paid" ? "var(--bus, #5b8def)" : "#c0392b" }}>
+              {item.payment_status === "paid" ? "● Paid" : item.payment_status === "refunded" ? "● Refunded" : "○ Awaiting payment"}
+            </span>
           </div>
         </div>
       </div>
