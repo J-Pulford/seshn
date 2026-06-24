@@ -267,7 +267,6 @@ function DmPanel({ convo, meId, onMessageSent, onBack }: { convo: ConversationWi
           <div>
             <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 3 }}>
               <a href={href} style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: "var(--ink)", textDecoration: "none" }}>{o.display_name || o.username || "User"}</a>
-              {o.is_pro && <span className="pill solid" style={{ fontSize: 9, padding: "2px 7px" }}>✓ Pro</span>}
             </div>
             <div className="t-meta">{o.roles?.[0] || "Artist"}{o.location ? " · " + o.location : ""}</div>
           </div>

@@ -254,7 +254,6 @@ function OwnerApplicationCard({ app, gig, onChange }: { app: OwnerApp; gig: Gig;
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
             <a href={href} style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14, color: "var(--ink)", textDecoration: "none" }}>{a?.display_name || "Applicant"}</a>
-            {a?.is_pro && <span className="pill solid" style={{ fontSize: 9, padding: "2px 6px" }}>✓ Pro</span>}
             {a?.has_producer_badge && <ProducerBadge compact />}
             <span className={statusPillClass(app.status)} style={{ fontSize: 10 }}>{statusLabel(app.status)}</span>
           </div>
@@ -474,7 +473,6 @@ function GigView({ gig: initialGig }: { gig: Gig }) {
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
             <a href={R.profile(owner.username)} className="avatar" style={{ width: 40, height: 40, fontSize: 14, position: "relative", textDecoration: "none", color: "var(--ink-3)" }}>
               {owner.avatar_url ? <img src={owner.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials(owner.display_name)}
-              {owner.is_pro && <span style={{ position: "absolute", bottom: -2, right: -2, background: "var(--frame)", borderRadius: 999, padding: "2px 5px", fontSize: 8, fontFamily: "var(--font-display)", fontWeight: 600, color: "var(--ink)", border: "1px solid var(--line)", lineHeight: 1, textTransform: "uppercase" }}>PRO</span>}
             </a>
             <div>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 7 }}><a href={R.profile(owner.username)} style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14, color: "var(--ink)", textDecoration: "none" }}>{owner.display_name || "Artist"}</a>{owner.has_producer_badge && <ProducerBadge compact />}</span>
@@ -532,7 +530,6 @@ function GigView({ gig: initialGig }: { gig: Gig }) {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 3 }}>
                   <a href={R.profile(owner.username)} style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: "var(--ink)", textDecoration: "none" }}>{owner.display_name || "Artist"}</a>
-                  {owner.is_pro && <span className="pill solid" style={{ fontSize: 9, padding: "2px 7px" }}>✓ Pro</span>}
                 </div>
                 <div className="t-meta">{owner.roles?.join(" · ") || "Artist"}{owner.location ? " · " + owner.location : ""}</div>
               </div>

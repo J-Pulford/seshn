@@ -53,7 +53,6 @@ function ArtistCard({ profile }: { profile: Profile }) {
         <div className="col" style={{ gap: 3, flex: 1, minWidth: 0 }}>
           <div className="row" style={{ gap: 6 }}>
             <a href={href} style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14, color: "var(--ink)", textDecoration: "none" }}>{profile.display_name}</a>
-            {profile.is_pro && <span className="pill solid" style={{ fontSize: 9, padding: "2px 5px" }}>✓ Pro</span>}
           </div>
           <span className="t-meta">{sub}</span>
           <div className="row" style={{ gap: 4, marginTop: 3, flexWrap: "wrap" }}>

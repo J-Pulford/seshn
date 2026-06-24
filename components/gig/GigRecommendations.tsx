@@ -47,7 +47,6 @@ function ArtistCard({ p }: { p: Profile }) {
         <div className="rec-artist-id">
           <div className="rec-name">
             {p.display_name || p.username}
-            {p.is_pro && <span className="pill solid rec-pro">✓ Pro</span>}
           </div>
           <div className="rec-meta">@{p.username}{p.location ? " · " + p.location : ""}</div>
         </div>

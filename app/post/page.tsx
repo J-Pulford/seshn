@@ -282,7 +282,6 @@ export default function PostPage() {
             <div className="gig-head">
               <div className="avatar" style={{ position: "relative", width: 32, height: 32, background: "var(--ph)" }}>
                 {me ? initialsOf(me.display_name) : "··"}
-                {me?.is_pro && <span style={{ position: "absolute", bottom: -2, right: -2, background: "var(--frame)", borderRadius: 999, padding: "2px 5px", fontSize: 8, fontFamily: "var(--font-display)", fontWeight: 600, color: "var(--ink)", border: "1px solid var(--line)", lineHeight: 1, textTransform: "uppercase" }}>PRO</span>}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4 }}>

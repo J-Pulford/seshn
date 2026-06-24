@@ -85,7 +85,7 @@ function GigCard({ gig }: { gig: Gig }) {
   const owner = gig.owner || ({} as NonNullable<Gig["owner"]>);
   const isBoosted = !!(gig.boosted_until && new Date(gig.boosted_until) > new Date());
   const tags = (gig.genres || []).slice(0, 4);
-  const roleTag = owner?.is_pro ? "PRO" : "ART";
+  const roleTag = "ART";
   const showArt = isBoosted || (gig.genres && gig.genres.length);
   return (
     <div className={"gig" + (isBoosted ? " boost" : "")}>

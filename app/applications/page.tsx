@@ -78,7 +78,6 @@ function ApplicationRow({ app, onChange }: { app: MyApplication; onChange: (a: M
               <>
                 {" · by "}
                 <a href={profileHref(owner.username)} style={{ color: "var(--ink-2)", textDecoration: "none" }}>{owner.display_name}</a>
-                {owner.is_pro && " ✓"}
               </>
             )}
           </div>
