@@ -23,6 +23,7 @@ function urlForKind(kind: string, r: Record<string, string | null>): string {
   if (kind.startsWith("application_") && r.gig_id) return `${SITE_URL}/gig/${r.gig_id}`;
   if (kind === "message_received") return `${SITE_URL}/inbox`;
   if (kind.startsWith("meeting_")) return `${SITE_URL}/inbox`;
+  if (kind.startsWith("verification_")) return `${SITE_URL}/verify`;
   return SITE_URL;
 }
 

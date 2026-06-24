@@ -37,6 +37,7 @@ const R = {
   guides: "/guides",
   help: "/help",
   contracts: "/contracts",
+  verify: "/verify",
   adminVerification: "/admin/verification",
   profile: (username?: string) => (username ? `/profile/${encodeURIComponent(username)}` : "/feed"),
   gig: (id: string) => `/gig/${encodeURIComponent(id)}`,
@@ -87,6 +88,8 @@ function notifText(n: Notification) {
   if (n.kind === "help_reply") return `${actor} replied to your thread`;
   if (n.kind === "review_received") return `${actor} left you a review`;
   if (n.kind === "contract_received") return `${actor} sent you a contract to review and sign`;
+  if (n.kind === "verification_approved") return `You're verified — your profile now carries the badge`;
+  if (n.kind === "verification_rejected") return `Update on your verification application`;
   return "New activity";
 }
 
@@ -99,6 +102,7 @@ function notifHref(n: Notification): string | null {
   if (n.kind === "contract_received" && n.contract_id) return `/contract/${encodeURIComponent(n.contract_id)}`;
   if (n.kind === "help_reply" && n.help_thread_id) return `/help/${encodeURIComponent(n.help_thread_id)}`;
   if (n.kind === "review_received" && n.contract_id) return `/contract/${encodeURIComponent(n.contract_id)}`;
+  if (n.kind.startsWith("verification_")) return R.verify;
   return null;
 }
 

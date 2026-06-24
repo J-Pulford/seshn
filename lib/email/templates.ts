@@ -44,6 +44,10 @@ function build(kind: string, c: EmailContext): Built | null {
       return { subject: `Update on your application`, heading: "Not this time", body: `${esc(c.actorName)} passed on your application to <strong>${esc(c.gigTitle)}</strong>. Plenty more briefs where that came from.`, ctaLabel: "Find more gigs" };
     case "message_received":
       return { subject: `${c.actorName} sent you a message`, heading: "New message", body: `${esc(c.actorName)} sent you a message on Seshn.`, ctaLabel: "Open your inbox" };
+    case "verification_approved":
+      return { subject: `You're verified on Seshn ✓`, heading: "You're verified", body: `Your verification has been approved — your profile now carries the Verified badge. It tells collaborators you've been deeply vetted by Seshn: real person, real work, real track record.`, ctaLabel: "See your status" };
+    case "verification_rejected":
+      return { subject: `Update on your verification`, heading: "Not approved this time", body: `We weren't able to verify your application this time. You're welcome to reapply with more detail or clearer links to your work.`, ctaLabel: "Reapply" };
     default:
       if (kind.startsWith("meeting_")) {
         return { subject: `Meeting update from ${c.actorName}`, heading: "Meeting update", body: `${esc(c.actorName)} updated a meeting with you.`, ctaLabel: "View in your inbox" };
