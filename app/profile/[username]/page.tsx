@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useParams } from "next/navigation";
 import Nav from "@/components/Nav";
-import { getProfile, getProfileStats, getUser, updateProfile, uploadAvatar, uploadCover, uploadGalleryImage, normalizeUrl, emitProfileUpdated } from "@/lib/seshn/profiles";
+import { getProfile, getProfileStats, getUser, updateProfile, uploadAvatar, uploadCover, uploadGalleryImage, uploadPortfolioAudio, normalizeUrl, emitProfileUpdated } from "@/lib/seshn/profiles";
 import { listGigs } from "@/lib/seshn/gigs";
 import { getOrCreateConversation } from "@/lib/seshn/messaging";
 import { blockUser, isUserBlocked, reportUser, unblockUser } from "@/lib/seshn/trust-safety";
@@ -13,7 +13,7 @@ import { listProfileReviews } from "@/lib/seshn/reviews";
 import DirectContractModal from "@/components/DirectContractModal";
 import { Stars } from "@/components/reviews/Stars";
 import { SOCIAL_PLATFORMS, AVAILABILITY_OPTIONS } from "@/lib/seshn/constants";
-import { embedFor } from "@/lib/seshn/embeds";
+import { embedFor, isAudioUrl } from "@/lib/seshn/embeds";
 import { toast } from "@/lib/seshn/toast";
 import { confirm } from "@/lib/seshn/confirm";
 import { ProducerBadge } from "@/components/ProducerBadge";
@@ -285,8 +285,26 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+  const [audioBusy, setAudioBusy] = useState(false);
 
   const setLink = (key: string, val: string) => setSocial((prev) => ({ ...prev, [key]: val }));
+  async function onPickAudio(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (audioInputRef.current) audioInputRef.current.value = "";
+    if (!file) return;
+    if (featured.length >= 6) { setErr("Portfolio is full (6 items max)."); return; }
+    setErr("");
+    setAudioBusy(true);
+    try {
+      const { url, title } = await uploadPortfolioAudio(file);
+      if (url) setFeatured((prev) => (prev.length >= 6 ? prev : prev.concat([{ url, title }])));
+    } catch (e2) {
+      setErr((e2 as Error)?.message || "Couldn't upload that track.");
+    } finally {
+      setAudioBusy(false);
+    }
+  }
   async function onPickGallery(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
     if (galleryInputRef.current) galleryInputRef.current.value = "";
@@ -520,13 +538,14 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
 
           <div className="field">
             <span className="field-label">Featured work ({featured.length}/6)</span>
-            <span className="field-hint" style={{ marginBottom: 4 }}>Paste a Spotify, SoundCloud, or YouTube link and it plays inline on your profile.</span>
+            <span className="field-hint" style={{ marginBottom: 4 }}>Paste a Spotify, SoundCloud, or YouTube link, or upload your own audio. It plays inline on your profile.</span>
             <div className="credits-edit">
               {featured.map((f, i) => {
-                const kind = f.url.trim() ? embedFor(f.url).kind : null;
+                const audio = isAudioUrl(f.url);
+                const kind = audio ? "audio" : f.url.trim() ? embedFor(f.url).kind : null;
                 return (
                   <div key={i} className="featured-edit-row">
-                    <input className="input sm" type="url" placeholder="https://open.spotify.com/track/…" value={f.url} onChange={(e) => setFeaturedField(i, "url", e.target.value)} />
+                    <input className="input sm" type="url" placeholder="https://open.spotify.com/track/…" value={f.url} readOnly={audio} onChange={(e) => setFeaturedField(i, "url", e.target.value)} />
                     <input className="input sm" placeholder="Label (optional)" value={f.title || ""} maxLength={80} onChange={(e) => setFeaturedField(i, "title", e.target.value)} />
                     <span className={"featured-kind " + (kind && kind !== "link" ? "ok" : "bad")}>{!f.url.trim() ? "" : kind === "link" ? "not embeddable" : kind}</span>
                     <button type="button" className="gallery-remove credit-remove" aria-label="Remove" onClick={() => removeFeatured(i)}>×</button>
@@ -534,7 +553,13 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
                 );
               })}
             </div>
-            {featured.length < 6 && <div style={{ marginTop: featured.length ? 8 : 0 }}><button type="button" className="btn sm" onClick={addFeatured}>+ Add featured track</button></div>}
+            <input ref={audioInputRef} type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg" onChange={onPickAudio} style={{ display: "none" }} />
+            {featured.length < 6 && (
+              <div style={{ marginTop: featured.length ? 8 : 0, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button type="button" className="btn sm" onClick={addFeatured}>+ Add a link</button>
+                <button type="button" className="btn sm" disabled={audioBusy} onClick={() => audioInputRef.current?.click()}>{audioBusy ? "Uploading…" : "↑ Upload audio"}</button>
+              </div>
+            )}
           </div>
 
           <div className="field">
@@ -750,7 +775,9 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
                   return (
                     <div key={i} className="featured-item">
                       {f.title && <div className="featured-title">{f.title}</div>}
-                      {e.kind === "youtube" ? (
+                      {isAudioUrl(f.url) ? (
+                        <audio controls preload="none" src={f.url} style={{ width: "100%" }} />
+                      ) : e.kind === "youtube" ? (
                         <div className="embed-16x9"><iframe src={e.src} title={f.title || "Featured video"} loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen /></div>
                       ) : e.kind === "link" ? (
                         <a href={e.url} target="_blank" rel="noopener noreferrer" className="social-link">Open link ↗</a>

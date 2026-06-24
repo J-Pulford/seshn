@@ -42,3 +42,9 @@ export function embedFor(rawUrl: string): Embed {
 export function isEmbeddable(url: string): boolean {
   return embedFor(url).kind !== "link";
 }
+
+// True for a directly-playable audio file (an uploaded portfolio track, or any
+// link to a raw audio file) — rendered with a native <audio> player.
+export function isAudioUrl(url: string): boolean {
+  return /\.(mp3|wav|m4a|aac|ogg|flac)(\?|#|$)/i.test(url) || /\/portfolio-audio\//.test(url);
+}

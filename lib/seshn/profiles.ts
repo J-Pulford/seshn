@@ -230,6 +230,26 @@ export async function uploadGalleryImage(file: File) {
   return uploadImage(file, "gallery", 8 * 1024 * 1024);
 }
 
+// Upload an audio file to the portfolio-audio bucket and return its public URL
+// plus a title derived from the filename. Used by the profile portfolio editor
+// so members can host their own tracks alongside streaming embeds.
+export async function uploadPortfolioAudio(file: File): Promise<{ url: string; title: string }> {
+  const sb = getBrowserClient();
+  const u = await getUser();
+  if (!u) throw new Error("Not signed in");
+  if (!file) throw new Error("No file");
+  const mime = file.type || "";
+  if (mime.indexOf("audio/") !== 0) throw new Error("Please choose an audio file (mp3, wav, m4a, …).");
+  const MAX = 30 * 1024 * 1024;
+  if (file.size > MAX) throw new Error("Audio is too large (max 30 MB).");
+  const safe = (file.name || "track").replace(/[^a-zA-Z0-9._-]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 100) || "track";
+  const path = `${u.id}/${Date.now()}-${safe}`;
+  const up = await sb.storage.from("portfolio-audio").upload(path, file, { cacheControl: "31536000", upsert: false, contentType: mime });
+  if (up.error) throw up.error;
+  const pub = sb.storage.from("portfolio-audio").getPublicUrl(path);
+  return { url: pub.data?.publicUrl || "", title: (file.name || "Track").replace(/\.[^.]+$/, "") };
+}
+
 // Loosely normalise a pasted showcase URL: trim, prepend https:// when the
 // scheme is missing. Returns "" for blank input. Does not hard-validate.
 export function normalizeUrl(raw: string): string {
