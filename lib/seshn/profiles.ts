@@ -62,15 +62,20 @@ export async function getProfile(opts: GetProfileOpts = {}): Promise<Profile | n
   const res = await q.maybeSingle();
   if (res.error) console.error("[seshn] getProfile error", res.error);
   const profile = (res.data as Profile) ?? null;
-  // is_staff drives a cosmetic badge and is read separately, on request only, so
-  // that a missing column grant (e.g. before 0038 is applied) can NEVER break the
-  // core profile read. Any error here is swallowed; the badge simply won't show.
-  if (profile && opts.withStaff) {
+  // Badge flags (is_staff/is_verified) drive cosmetic badges and are read
+  // separately, on request only, so a missing column grant (e.g. before 0038/0039
+  // is applied) can NEVER break the core profile read. Any error here is
+  // swallowed; the badges simply won't show.
+  if (profile && opts.withBadges) {
     try {
-      const s = await sb.from("profiles").select("is_staff").eq("id", profile.id).maybeSingle();
-      if (!s.error && s.data) profile.is_staff = (s.data as { is_staff?: boolean }).is_staff ?? false;
+      const s = await sb.from("profiles").select("is_staff, is_verified").eq("id", profile.id).maybeSingle();
+      if (!s.error && s.data) {
+        const d = s.data as { is_staff?: boolean; is_verified?: boolean };
+        profile.is_staff = d.is_staff ?? false;
+        profile.is_verified = d.is_verified ?? false;
+      }
     } catch {
-      /* badge is non-critical */
+      /* badges are non-critical */
     }
   }
   return profile;

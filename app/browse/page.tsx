@@ -183,14 +183,6 @@ export default function BrowsePage() {
                   ))}
                 </div>
               </div>
-              <div style={{ height: 1, background: "var(--line-soft)" }} />
-              <div className="col" style={{ gap: 8 }}>
-                <span className="t-eyebrow">Status</span>
-                <label className="row" style={{ gap: 8, cursor: "pointer", padding: "5px 0" }} onClick={() => setProOnly((p) => !p)}>
-                  <span className={"check-box" + (proOnly ? " checked" : "")}>{proOnly && <Icon kind="check" size={9} color="var(--frame)" />}</span>
-                  <span style={{ fontSize: 12.5, color: proOnly ? "var(--ink)" : "var(--ink-2)" }}>Pro members only</span>
-                </label>
-              </div>
               <button className="btn" style={{ width: "100%", marginTop: 4, opacity: activeFilters === 0 ? 0.5 : 1 }} onClick={clearAll} disabled={activeFilters === 0}>
                 Clear all filters {activeFilters > 0 && `(${activeFilters})`}
               </button>

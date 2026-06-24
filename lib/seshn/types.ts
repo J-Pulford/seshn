@@ -106,6 +106,7 @@ export interface Profile {
   is_pro: boolean;
   has_producer_badge?: boolean;
   is_staff?: boolean;
+  is_verified?: boolean;
   avatar_url: string;
   cover_url?: string;
   notification_prefs?: Record<string, boolean>;
@@ -133,7 +134,7 @@ export interface Profile {
 export interface GetProfileOpts {
   id?: string;
   username?: string;
-  withStaff?: boolean; // also fetch is_staff (for the "Seshn team" badge)
+  withBadges?: boolean; // also fetch is_staff + is_verified (for profile badges)
 }
 
 /** Trimmed profile as embedded on a gig's owner join. */

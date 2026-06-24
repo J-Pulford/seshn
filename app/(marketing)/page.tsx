@@ -190,17 +190,17 @@ export default function LandingPage() {
               <a href="/auth" className="btn" style={{ width: "100%", justifyContent: "center" }}>Start free</a>
             </div>
             <div className="price-card pro">
-              <div className="label" style={{ color: "var(--accent)", background: "transparent", border: "none", padding: 0 }}>PRO · $5/MO FLAT</div>
-              <div className="amt">$5<span style={{ fontSize: 16, color: "var(--ink-3)" }}>/mo</span></div>
-              <div style={{ color: "var(--ink-3)", fontSize: 13 }}>Pro is flat. Never a slice of your fee.</div>
+              <div className="label" style={{ color: "var(--accent)", background: "transparent", border: "none", padding: 0 }}>VERIFIED · $49 ONE-TIME</div>
+              <div className="amt">$49<span style={{ fontSize: 16, color: "var(--ink-3)" }}> once</span></div>
+              <div style={{ color: "var(--ink-3)", fontSize: 13 }}>A deeply-vetted trust badge. Not a subscription.</div>
               <ul>
                 <li>Everything in Free</li>
-                <li>Verified ✓ badge</li>
-                <li>Message anyone first</li>
-                <li>Profile analytics</li>
-                <li>1 boost credit / month</li>
+                <li>The Verified ✓ badge on your profile</li>
+                <li>Deep identity &amp; work vetting</li>
+                <li>A trust signal that wins bookings</li>
+                <li>More perks coming soon</li>
               </ul>
-              <a href="/auth" className="btn primary" style={{ width: "100%", justifyContent: "center" }}>Go Pro</a>
+              <a href="/auth" className="btn primary" style={{ width: "100%", justifyContent: "center" }}>Get verified</a>
             </div>
           </Reveal>
         </div>

@@ -18,6 +18,7 @@ import { toast } from "@/lib/seshn/toast";
 import { confirm } from "@/lib/seshn/confirm";
 import { ProducerBadge } from "@/components/ProducerBadge";
 import { StaffBadge } from "@/components/StaffBadge";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import type { ConnectedAccount, Credit, FeaturedItem, GalleryItem, Gig, Profile, ProfileStats, Review, Service, SocialLinks } from "@/lib/seshn/types";
 import "./profile.css";
 
@@ -644,7 +645,7 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
           </div>
         </div>
         <div className="profile-actions">
-          {profile.is_pro && <span style={{ display: "inline-block", transform: "rotate(-4deg)", padding: "5px 11px", borderRadius: 4, background: "var(--ink)", color: "var(--frame)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 11, letterSpacing: "0.04em", textTransform: "uppercase", boxShadow: "0 4px 12px rgba(0,0,0,0.18)" }}>✓ Pro · Verified</span>}
+          {profile.is_verified && <VerifiedBadge style={{ fontSize: 12, padding: "5px 12px 5px 8px" }} />}
           {isOwner ? (
             <>
               <a className="btn" style={{ backdropFilter: "blur(8px)", background: "rgba(255,255,255,0.9)", color: "#141414", borderColor: "rgba(0,0,0,0.18)" }} href={R.dashboard}>Finances</a>
@@ -965,7 +966,7 @@ export default function ProfilePage() {
     (async () => {
       try {
         const me = await getUser();
-        const profile = username ? await getProfile({ username, withStaff: true }) : null;
+        const profile = username ? await getProfile({ username, withBadges: true }) : null;
         if (!profile) {
           setState({ status: "notfound", profile: null, isOwner: false, gigs: null });
           return;

@@ -346,8 +346,8 @@ export default function FeedPage() {
             </div>
             <div style={{ height: 1, background: "var(--line-soft)" }} />
             <div className="card" style={{ background: "var(--accent-bg)", borderColor: "transparent", padding: 16 }}>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 10, fontWeight: 500, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent-d)", marginBottom: 6 }}>Go Pro</div>
-              <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14, color: "var(--accent-d)", lineHeight: 1.3, marginBottom: 10 }}>Message anyone first, unlock analytics, get the verified badge.</div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 10, fontWeight: 500, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent-d)", marginBottom: 6 }}>Get Verified</div>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14, color: "var(--accent-d)", lineHeight: 1.3, marginBottom: 10 }}>Get the Verified badge, a one-time, deeply-vetted trust mark on your profile.</div>
               <a href={R.pro} className="btn dark sm" style={{ textDecoration: "none" }}>Learn more</a>
             </div>
             <div style={{ height: 1, background: "var(--line-soft)" }} />

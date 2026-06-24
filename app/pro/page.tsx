@@ -1,37 +1,38 @@
 "use client";
 
-import { AlbumArt } from "@/components/visual/AlbumArt";
-import { Vinyl } from "@/components/visual/Vinyl";
 import { Grain } from "@/components/visual/Grain";
+import { Vinyl } from "@/components/visual/Vinyl";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import "./pro.css";
 
-const FREE_FEATURES = [
-  "Unlimited gig posts",
-  "Apply to any post",
-  "Up to 3 portfolio embeds",
-  "Reply to messages you receive",
-  "Basic search & filters",
-];
-const PRO_FEATURES = [
-  "Verified ✓ badge on your profile",
-  "Message anyone first",
-  "Profile view analytics",
-  "Unlimited portfolio slots",
-  "Priority in search results",
-  "1 boost credit per month",
-];
-const FAQ: [string, string][] = [
-  ["Can I cancel anytime?", "Yes, cancel from your account settings. You'll keep Pro until the end of your billing period."],
-  ["Is there a free trial?", "The Free plan is free forever, so you can try everything before upgrading."],
-  ["What counts as a 'boost credit'?", "Each credit pins your gig to the top of the feed and sends push notifications to matched artists for 7 days."],
-  ["Do I need Pro to apply to gigs?", "No. Applying is always free. Pro helps you get found and message first."],
+// What the verification review actually checks.
+const CHECKS: [string, string][] = [
+  ["Real identity", "We confirm you're a real person behind a real account, no impersonation."],
+  ["Real work", "We review your releases, credits and portfolio to confirm the work is yours."],
+  ["Track record", "We look for a genuine history of collaboration or professional output."],
+  ["Good standing", "No unresolved disputes, reports, or policy issues on the platform."],
 ];
 
-const CheckIcon = ({ color = "var(--ink-2)" }: { color?: string }) => (
+// Perks that came with the old Pro tier — parked until we flesh them out.
+const COMING_SOON = [
+  "Profile view analytics",
+  "Priority placement in search",
+  "Boost credits for your gigs",
+  "Message anyone first",
+];
+
+const FAQ: [string, string][] = [
+  ["Is it really one-time?", "Yes. Verification is a single $49 payment, not a subscription. The badge stays on your profile."],
+  ["What does it get me?", "The Verified badge on your profile, the trust signal that tells collaborators you've been deeply vetted by Seshn."],
+  ["Do I need it to use Seshn?", "No. Posting, applying, messaging, contracts and escrow are all free. Verification is an optional trust badge."],
+  ["When does payment go live?", "Soon. Right now you can apply for free while we finalise the review process, we'll only charge once it fully launches."],
+];
+
+const CheckIcon = ({ color = "var(--accent)" }: { color?: string }) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" style={{ flexShrink: 0 }}><path d="M5 12l5 5L20 7" /></svg>
 );
 
-export default function ProPage() {
+export default function VerificationPage() {
   return (
     <div className="pro-page" style={{ background: "var(--bg)", minHeight: "100vh" }}>
       <nav className="top-nav">
@@ -40,61 +41,70 @@ export default function ProPage() {
       </nav>
 
       <div style={{ position: "relative", overflow: "hidden" }}>
-        <div className="float-deco" style={{ top: 60, left: 80, transform: "rotate(-6deg)", opacity: 0.88 }}><AlbumArt seed="pro-deco-1" size={84} radius={6} /></div>
-        <div className="float-deco" style={{ top: 120, right: 100, transform: "rotate(8deg)", opacity: 0.88 }}><AlbumArt seed="pro-deco-2" size={70} radius={6} /></div>
-        <div className="float-deco" style={{ top: 200, left: 60, opacity: 0.5 }}><AlbumArt seed="pro-deco-3" size={48} radius={4} /></div>
-        <div className="float-deco" style={{ top: 32, right: 280, opacity: 0.6 }}><AlbumArt seed="pro-deco-4" size={44} radius={4} /></div>
         <div className="hero">
-          <span className="pill accent" style={{ fontSize: 12 }}>✴ Seshn Pro</span>
-          <h1>Move first,<br />get <span className="highlight"><span>heard</span></span> first.</h1>
-          <p className="sub">Pro gives you the tools serious artists use to find collaborators faster, and look like one.</p>
+          <span className="pill accent" style={{ fontSize: 12 }}>✓ Seshn Verification</span>
+          <h1>Verified means<br /><span className="highlight"><span>vetted</span></span>.</h1>
+          <p className="sub">A one-time, deeply-vetted badge that tells collaborators you&apos;re the real thing, real person, real work, real track record.</p>
         </div>
       </div>
 
-      <div className="pricing-grid">
-        <div className="free-card">
-          <div className="card-eyebrow" style={{ color: "var(--ink-3)" }}>Free</div>
-          <div className="price" style={{ color: "var(--ink)" }}>$0</div>
-          <div className="price-sub" style={{ color: "var(--ink-3)" }}>Everything to start.</div>
-          <div className="feature-list">
-            {FREE_FEATURES.map((f) => <div key={f} className="feature-item" style={{ color: "var(--ink-2)" }}><CheckIcon color="var(--ink-3)" />{f}</div>)}
-          </div>
-          <button className="btn block" style={{ padding: "13px 20px", fontSize: 14 }}>You&apos;re on Free</button>
-        </div>
-
-        <div className="pro-card">
+      <div style={{ maxWidth: 560, margin: "0 auto 56px", padding: "0 24px" }}>
+        <div className="pro-card" style={{ width: "100%" }}>
           <Grain opacity={0.18} />
           <div style={{ position: "absolute", top: -30, right: -30, opacity: 0.4 }}>
-            <Vinyl size={160} color="rgba(255,255,255,0.05)" label="var(--accent)" style={{ animation: "seshn-spin 14s linear infinite" }} />
+            <Vinyl size={160} color="rgba(255,255,255,0.05)" label="var(--bus, #5b8def)" style={{ animation: "seshn-spin 14s linear infinite" }} />
           </div>
           <div style={{ position: "relative", zIndex: 1 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-              <div className="card-eyebrow" style={{ color: "var(--accent)", marginBottom: 0 }}>Pro</div>
-              <span className="pill solid" style={{ fontSize: 9, padding: "3px 9px" }}>Most popular</span>
+              <div className="card-eyebrow" style={{ color: "var(--bus, #5b8def)", marginBottom: 0 }}>Verification</div>
+              <VerifiedBadge style={{ fontSize: 10, padding: "3px 9px 3px 6px" }} />
             </div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 4 }}>
-              <div className="price" style={{ color: "#f4f3ef" }}>$5</div>
-              <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>/ month</span>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
+              <div className="price" style={{ color: "#f4f3ef" }}>$49</div>
+              <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>one-time</span>
             </div>
-            <div className="price-sub" style={{ color: "rgba(255,255,255,0.55)" }}>or $48/year, save 20%</div>
+            <div className="price-sub" style={{ color: "rgba(255,255,255,0.55)" }}>No subscription. Awarded after review.</div>
             <div className="feature-list">
-              {PRO_FEATURES.map((f) => <div key={f} className="feature-item" style={{ color: "rgba(255,255,255,0.85)" }}><CheckIcon color="var(--accent)" />{f}</div>)}
+              {["The Verified badge on your profile", "Deep identity & work vetting", "A trust signal that wins bookings", "Stands out in search and DMs"].map((f) => (
+                <div key={f} className="feature-item" style={{ color: "rgba(255,255,255,0.85)" }}><CheckIcon color="var(--bus, #5b8def)" />{f}</div>
+              ))}
             </div>
-            <button className="btn primary lg block" style={{ marginBottom: 12 }}>Upgrade to Pro →</button>
-            <div style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.5)" }}>Cancel anytime · Powered by Stripe</div>
+            <a className="btn primary lg block" href="/verify" style={{ marginBottom: 12, textDecoration: "none", textAlign: "center" }}>Apply for verification →</a>
+            <div style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.5)" }}>Free to apply · $49 payment coming soon</div>
           </div>
         </div>
       </div>
 
-      <div className="stats-row">
-        {([["3.2×", "more applications on boosted posts"], ["~4h", "average response time for Pro users"], ["94%", "of Pro users say they'd recommend it"]] as [string, string][]).map(([num, label]) => (
-          <div key={num} className="stat"><div className="stat-num">{num}</div><div className="stat-label">{label}</div></div>
-        ))}
+      <div style={{ maxWidth: 760, margin: "0 auto 60px", padding: "0 24px" }}>
+        <div style={{ fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--ink-3)", marginBottom: 20 }}>What we check</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 18 }}>
+          {CHECKS.map(([h, p]) => (
+            <div key={h} style={{ border: "1px solid var(--line)", borderRadius: 14, padding: 18, background: "var(--surface)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}><CheckIcon color="var(--bus, #5b8def)" /><span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: "var(--ink)" }}>{h}</span></div>
+              <p style={{ fontSize: 13, color: "var(--ink-3)", lineHeight: 1.55, margin: 0 }}>{p}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div style={{ maxWidth: 900, margin: "0 auto 60px", padding: "0 40px" }}>
+      <div style={{ maxWidth: 760, margin: "0 auto 60px", padding: "0 24px" }}>
+        <div style={{ border: "1px dashed var(--line-2, var(--line))", borderRadius: 16, padding: "22px 24px", background: "var(--surface-2, var(--surface))" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: "var(--ink)" }}>More for verified members</span>
+            <span className="pill" style={{ fontSize: 9, padding: "2px 8px", background: "var(--accent-bg)", borderColor: "transparent", color: "var(--accent-d)" }}>Coming soon</span>
+          </div>
+          <p style={{ fontSize: 13, color: "var(--ink-3)", lineHeight: 1.55, margin: "0 0 14px" }}>We&apos;re building these on top of verification. They&apos;re not live yet, we&apos;d rather ship them properly.</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {COMING_SOON.map((f) => (
+              <span key={f} style={{ fontSize: 12.5, color: "var(--ink-2)", border: "1px solid var(--line)", borderRadius: 999, padding: "6px 12px" }}>{f}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: 900, margin: "0 auto 60px", padding: "0 24px" }}>
         <div style={{ fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--ink-3)", marginBottom: 20 }}>Frequently asked</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
           {FAQ.map(([q, a]) => (
             <div key={q} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14, color: "var(--ink)" }}>{q}</div>
