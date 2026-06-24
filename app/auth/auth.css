@@ -43,6 +43,7 @@
 .pagination-dots { display: flex; gap: 6px; }
 .footer-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: rgba(255,255,255,0.45); position: relative; z-index: 2; }
 .float-art { position: absolute; z-index: 1; }
+@keyframes seshn-fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 @media (max-width: 768px) {
   .auth-grid { grid-template-columns: 1fr; }

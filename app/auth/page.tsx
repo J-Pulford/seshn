@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AlbumArt } from "@/components/visual/AlbumArt";
-import { Vinyl } from "@/components/visual/Vinyl";
 import { Grain } from "@/components/visual/Grain";
+import HowItWorks from "@/components/auth/HowItWorks";
 import { getBrowserClient } from "@/lib/seshn/client";
 import {
   getUser,
@@ -478,33 +477,9 @@ export default function AuthPage() {
         </div>
 
         <div className="auth-right">
-          <Grain opacity={0.22} />
-          <div className="float-art" style={{ top: 64, right: 44, transform: "rotate(9deg)" }}><AlbumArt seed="coast-demo" size={130} radius={8} /></div>
-          <div className="float-art" style={{ top: 148, right: 158, transform: "rotate(-7deg)" }}><AlbumArt seed="morning-light" size={96} radius={6} /></div>
-          <div className="float-art" style={{ top: 230, right: 52, transform: "rotate(4deg)" }}>
-            <span style={{ display: "inline-block", transform: "rotate(4deg)", padding: "6px 12px", borderRadius: 4, background: "#f0e8d6", color: "#0d0d0d", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 11, letterSpacing: "0.04em", textTransform: "uppercase", boxShadow: "0 6px 14px rgba(0,0,0,0.25)" }}>✶ artist · vol.1</span>
-          </div>
-          <div className="float-art" style={{ bottom: 148, right: 210 }}>
-            <Vinyl size={60} color="rgba(255,255,255,0.07)" label="var(--accent)" style={{ animation: "seshn-spin 12s linear infinite" }} />
-          </div>
-
-          <div className="featured-pill"><span style={{ color: "var(--accent)", fontSize: 8 }}>●</span> Featured artist · this week</div>
-          <div className="quote-section">
-            <p className="quote-text">&quot;I found my whole band on Seshn in three weeks. Two of them ended up on the record.&quot;</p>
-            <div className="attribution">
-              <div className="attr-avatar">NK</div>
-              <div>
-                <div className="attr-name">Nia Kassim</div>
-                <div className="attr-sub">Vocalist · London</div>
-              </div>
-            </div>
-            <div className="pagination-dots">
-              {[0, 1, 2, 3].map((i) => (
-                <span key={i} style={{ width: 18, height: 3, borderRadius: 2, background: i === 0 ? "var(--accent)" : "rgba(255,255,255,0.2)" }} />
-              ))}
-            </div>
-          </div>
-          <div className="footer-row"><span>seshn.fm</span><span>01 / 04</span></div>
+          <Grain opacity={0.18} />
+          <HowItWorks />
+          <div className="footer-row"><span>seshn.fm</span><span>collaboration, handled.</span></div>
         </div>
       </div>
     </div>
