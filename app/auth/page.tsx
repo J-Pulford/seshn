@@ -35,9 +35,12 @@ export default function AuthPage() {
   const [ready, setReady] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<"magic" | "password">("magic");
+  // Sign-up defaults to password (Artist name + email + password); sign-in keeps
+  // the magic-link default. switchMode() resets this per tab.
+  const [mode, setMode] = useState<"magic" | "password">("password");
   // Intent: are we creating an account (→ onboarding) or returning (→ sign in)?
   const [authMode, setAuthMode] = useState<"signup" | "signin">("signup");
+  const [artistName, setArtistName] = useState("");
   const [status, setStatus] = useState<Status>("checking");
   const [errMsg, setErrMsg] = useState("");
   const [recoverMode, setRecoverMode] = useState(false);
@@ -58,7 +61,7 @@ export default function AuthPage() {
     const presetEmail = params.get("email") || "";
     setRecoverMode(recover);
     setVerifyMode(verify);
-    if (params.get("mode") === "signin") setAuthMode("signin");
+    if (params.get("mode") === "signin") { setAuthMode("signin"); setMode("magic"); }
     if (presetEmail) setEmail(presetEmail);
     setReady(true);
 
@@ -128,6 +131,11 @@ export default function AuthPage() {
       setStatus("error");
       return;
     }
+    if (authMode === "signup" && !artistName.trim()) {
+      setErrMsg("Enter your artist name.");
+      setStatus("error");
+      return;
+    }
     if (needCaptcha) {
       setErrMsg("Please complete the verification below.");
       setStatus("error");
@@ -138,7 +146,7 @@ export default function AuthPage() {
     const next = new URLSearchParams(window.location.search).get("next");
     if (next) sessionStorage.setItem("seshn_auth_next", next);
     try {
-      const { error } = await sendMagicLink(email, undefined, captchaToken ?? undefined);
+      const { error } = await sendMagicLink(email, undefined, captchaToken ?? undefined, authMode === "signup" ? artistName : undefined);
       if (error) throw error;
       setStatus("sent");
     } catch (err) {
@@ -155,6 +163,8 @@ export default function AuthPage() {
     setErrMsg("");
     setStatus("idle");
     setPassword("");
+    // Sign-up leads with password (Artist name/email/password); sign-in with magic.
+    setMode(m === "signup" ? "password" : "magic");
     const url = new URL(window.location.href);
     url.searchParams.set("mode", m);
     window.history.replaceState({}, "", url.toString());
@@ -164,6 +174,11 @@ export default function AuthPage() {
     e?.preventDefault();
     if (!email || !email.includes("@")) {
       setErrMsg("Please enter a valid email.");
+      setStatus("error");
+      return;
+    }
+    if (!artistName.trim()) {
+      setErrMsg("Enter your artist name.");
       setStatus("error");
       return;
     }
@@ -182,7 +197,7 @@ export default function AuthPage() {
     const next = new URLSearchParams(window.location.search).get("next");
     if (next) sessionStorage.setItem("seshn_auth_next", next);
     try {
-      const { data, error } = await signUpWithPassword(email, password, undefined, captchaToken ?? undefined);
+      const { data, error } = await signUpWithPassword(email, password, undefined, captchaToken ?? undefined, artistName);
       if (error) throw error;
       // If email confirmations are off, Supabase returns a session — go straight
       // through (routeAfterAuth sends a profile-less new user to onboarding).
@@ -408,6 +423,11 @@ export default function AuthPage() {
                 </div>
               ) : (
                 <>
+                  {authMode === "signup" && (
+                    <input type="text" className="input-field" placeholder="Artist name" value={artistName}
+                      onChange={(e) => { setArtistName(e.target.value); if (status === "error") setStatus("idle"); }}
+                      disabled={status === "sending" || status === "checking"} autoComplete="nickname" maxLength={60} />
+                  )}
                   <input type="email" className="input-field" placeholder="you@artist.fm" value={email}
                     onChange={(e) => { setEmail(e.target.value); if (status === "error") setStatus("idle"); }}
                     disabled={status === "sending" || status === "checking"} autoComplete="email" />
@@ -417,7 +437,7 @@ export default function AuthPage() {
                       disabled={status === "sending" || status === "checking"} autoComplete={authMode === "signup" ? "new-password" : "current-password"} />
                   )}
                   <Captcha ref={captchaRef} onToken={setCaptchaToken} />
-                  <button type="submit" className="btn-primary" disabled={status === "sending" || status === "checking" || !email || (mode === "password" && !password) || needCaptcha}>
+                  <button type="submit" className="btn-primary" disabled={status === "sending" || status === "checking" || !email || (authMode === "signup" && !artistName.trim()) || (mode === "password" && !password) || needCaptcha}>
                     {status === "checking"
                       ? "Loading…"
                       : status === "sending"

@@ -126,6 +126,10 @@ export default function OnboardingPage() {
         window.location.href = "/auth";
         return;
       }
+      // Pre-fill the artist name captured at sign-up (stored in user metadata).
+      const meta = (u.user_metadata as Record<string, unknown> | undefined) ?? undefined;
+      const dn = meta?.display_name;
+      if (typeof dn === "string" && dn.trim()) setDisplayName(dn.trim());
       try {
         const p = await getProfile({ id: u.id });
         if (p && p.username) {

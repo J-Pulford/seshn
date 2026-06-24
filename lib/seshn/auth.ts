@@ -25,13 +25,14 @@ export async function signOut() {
   return getBrowserClient().auth.signOut();
 }
 
-export async function sendMagicLink(email: string, redirectTo?: string, captchaToken?: string) {
+export async function sendMagicLink(email: string, redirectTo?: string, captchaToken?: string, displayName?: string) {
   return getBrowserClient().auth.signInWithOtp({
     email,
     options: {
       emailRedirectTo: redirectTo || origin() + "/auth",
       shouldCreateUser: true,
       captchaToken,
+      data: displayName?.trim() ? { display_name: displayName.trim() } : undefined,
     },
   });
 }
@@ -44,13 +45,17 @@ export async function signInWithPassword(email: string, password: string, captch
   return getBrowserClient().auth.signInWithPassword({ email: email.trim(), password, options: { captchaToken } });
 }
 
-export async function signUpWithPassword(email: string, password: string, redirectTo?: string, captchaToken?: string) {
+export async function signUpWithPassword(email: string, password: string, redirectTo?: string, captchaToken?: string, displayName?: string) {
   if (!email || !password) throw new Error("Email and password required");
   if (password.length < 8) throw new Error("Password must be at least 8 characters");
   return getBrowserClient().auth.signUp({
     email: email.trim(),
     password,
-    options: { emailRedirectTo: redirectTo || origin() + "/auth", captchaToken },
+    options: {
+      emailRedirectTo: redirectTo || origin() + "/auth",
+      captchaToken,
+      data: displayName?.trim() ? { display_name: displayName.trim() } : undefined,
+    },
   });
 }
 
