@@ -111,7 +111,7 @@ export default function GetStartedPage() {
           <section className="start-cta-card">
             <div>
               <h2>Create your account to begin</h2>
-              <span>It&apos;s free, post briefs, find collaborators, and get paid. Pro is $5/mo, never a slice of your fee.</span>
+              <span>It&apos;s free to join, post briefs, find collaborators, and get paid. One flat 10% on paid bookings, never a subscription.</span>
             </div>
             <a className="btn primary lg" href="/auth">Start your session</a>
           </section>
