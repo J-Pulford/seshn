@@ -694,7 +694,7 @@ function ProfileView({ profile, isOwner, gigs, onProfileUpdate }: { profile: Pro
           {profile.location && <span className="dot" />}
           <span className="t-meta">{memberSince(profile.created_at)}</span>
         </div>
-        <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
+        <div className="row profile-tags" style={{ gap: 8, flexWrap: "wrap" }}>
           {(profile.roles || []).map((r) => <span key={r} className="pill accent">{r}</span>)}
           {(profile.genres || []).map((g) => <span key={g} className="pill">{g}</span>)}
         </div>
